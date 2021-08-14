@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<AssemblyName>JunimoStudio.Core</AssemblyName>
+		<RootNamespace>JunimoStudio.Core</RootNamespace>
+		<TargetFramework>net45</TargetFramework>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="NAudio" Version="1.10.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>JunimoStudio.Tests</_Parameter1>
+		</AssemblyAttribute>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>JunimoStudio.Test.Console</_Parameter1>
+		</AssemblyAttribute>
+
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Plugins\Effects\" />
+	</ItemGroup>
+
+	<Import Project="$(SolutionDir)\common.targets" />
+</Project>

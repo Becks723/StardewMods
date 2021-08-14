@@ -1,0 +1,21 @@
+{
+  "Name": "Junimo Studio",
+  "Author": "Becks723",
+  "Version": "2.1.0",
+  "Description": "Adds several blocks like Flute Block which play sounds when players walk by.",
+  "UniqueID": "Becks723.JunimoStudio",
+  "EntryDll": "JunimoStudio.dll",
+  "MinimumApiVersion": "3.11.0",
+  "UpdateKeys": [ "Nexus:6971" ],
+  "Dependencies":
+  [
+    {
+      "UniqueID": "spacechase0.SpaceCore",
+      "MinimumVersion": "1.5.9"
+    },
+    {
+      "UniqueID": "Becks723.CustomUserInterface",
+      "IsRequired": "false"
+    }
+  ]
+}
