@@ -7,7 +7,7 @@ using NAudio.Midi;
 
 namespace JunimoStudio
 {
-    /// <summary>Provides function to process and pass on the incoming midi messages.</summary>
+    /// <summary>用于处理流入的midi信号。</summary>
     public interface IMidiProcessor
     {
         void Process(IList<MidiMessage> messages);

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using JunimoStudio.Menus;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using System;
@@ -16,10 +17,10 @@ namespace JunimoStudio
 
         private static IList<TrackInfo> _tracks;
 
-        public static void Init(IMonitor monitor, SaveConfig saveConfig)
+        public static void Init(IMonitor monitor, TracksConfig tracksConfig)
         {
             _monitor = monitor;
-            _tracks = saveConfig.Tracks;
+            _tracks = tracksConfig.Tracks;
         }
 
         public static void Register(TrackInfo track)

@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JunimoStudio.Core;
-using JunimoStudio.Core.Plugins;
 using Netcode;
 
-namespace JunimoStudio
+namespace JunimoStudio.NetObjects
 {
     public class NetPlugin : AbstractNetObjectWrapper<IPlugin>
     {

@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace JunimoStudio.Core
 {
-    /// <summary>Represents an object affected by certain time factors.</summary>
+    /// <summary>表示一个受若干时间因素影响的对象。</summary>
     public interface ITimeBasedObject : INotifyPropertyChanged
     {
-        /// <summary>Gets or sets the number of ticks per quarter note.</summary>
+        /// <summary>一个四分音符内走过的单位刻（ticks）数。</summary>
         int TicksPerQuarterNote { get; set; }
 
-        /// <summary>Gets or sets the number of beats played in one minute.</summary>
+        /// <summary>一分钟内走过的节拍数。</summary>
         int Bpm { get; set; }
 
-        /// <summary>Gets or sets the time signature.</summary>
+        /// <summary>拍号。</summary>
         ITimeSignature TimeSignature { get; }
     }
 }

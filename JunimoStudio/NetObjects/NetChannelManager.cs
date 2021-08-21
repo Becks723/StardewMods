@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
 using JunimoStudio.Core;
-using JunimoStudio.Core.Plugins.Instruments;
 using Microsoft.Xna.Framework;
 using Netcode;
 
-namespace JunimoStudio
+namespace JunimoStudio.NetObjects
 {
     public class NetChannelManager : AbstractNetObjectWrapper<IChannelManager>
     {
         private IChannelManager _channelManager;
 
-        [XmlIgnore]
         public override IChannelManager Core => this._channelManager;
 
         public readonly NetCollection<NetChannel> channels = new NetCollection<NetChannel>();

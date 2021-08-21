@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using JunimoStudio.Core.ComponentModel;
 
 namespace JunimoStudio.Core.Framework
 {
@@ -14,103 +10,105 @@ namespace JunimoStudio.Core.Framework
         private class _TimeSignature : ITimeSignature
         {
             private readonly int[] _numeratorRange = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+
             private readonly int[] _denominatorRange = new int[] { 2, 4, 8, 16 };
+
             private int _numerator;
+
             private int _demominator;
+
             private readonly TimeBasedObject _tbo;
 
             public int Numerator
             {
-                get => _numerator;
+                get => this._numerator;
                 set
                 {
-                    if (_numerator != value)
+                    if (this._numerator != value)
                     {
-                        if (_numeratorRange.All(v => value != v))
+                        if (this._numeratorRange.All(v => value != v))
                             throw new ArgumentOutOfRangeException(nameof(value));
 
-                        _numerator = value;
-                        _tbo.RaisePropertyChanged();
+                        this._numerator = value;
+                        this._tbo.RaisePropertyChanged();
                     }
                 }
             }
 
             public int Denominator
             {
-                get => _demominator;
+                get => this._demominator;
                 set
                 {
-                    if (_demominator != value)
+                    if (this._demominator != value)
                     {
-                        if (_denominatorRange.All(v => value != v))
+                        if (this._denominatorRange.All(v => value != v))
                             throw new ArgumentOutOfRangeException(nameof(value));
 
-                        _demominator = value;
-                        _tbo.RaisePropertyChanged();
+                        this._demominator = value;
+                        this._tbo.RaisePropertyChanged();
                     }
                 }
             }
 
             public _TimeSignature(TimeBasedObject tbo)
             {
-                _tbo = tbo;
-                _numerator = _demominator = 4;
+                this._tbo = tbo;
+                this._numerator = Constants.DEFAULT_TIMESIGNATURE_NUMERATOR;
+                this._demominator = Constants.DEFAULT_TIMESIGNATURE_DENOMERATOR;
             }
         }
 
         private int _tpq;
+
         private int _bpm;
+
         private readonly _TimeSignature _timeSignature;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public int TicksPerQuarterNote
         {
-            get => _tpq;
+            get => this._tpq;
             set
             {
-                if (_tpq != value)
+                if (this._tpq != value)
                 {
                     if (value <= 0)
                         throw new ArgumentOutOfRangeException(nameof(value));
 
-                    _tpq = value;
-                    RaisePropertyChanged();
+                    this._tpq = value;
+                    this.RaisePropertyChanged();
                 }
             }
         }
 
         public int Bpm
         {
-            get => _bpm;
+            get => this._bpm;
             set
             {
-                if (_bpm != value)
+                if (this._bpm != value)
                     if (value <= 0)
                         throw new ArgumentOutOfRangeException(nameof(value));
 
-                _bpm = value;
-                RaisePropertyChanged();
+                this._bpm = value;
+                this.RaisePropertyChanged();
             }
         }
 
-        public ITimeSignature TimeSignature
-        {
-            get => _timeSignature;
-        }
+        public ITimeSignature TimeSignature => this._timeSignature;
 
         public TimeBasedObject()
         {
-            _bpm = 100;
-            _tpq = 120;
-            _timeSignature = new _TimeSignature(this);
+            this._bpm = Constants.DEFAULT_BPM;
+            this._tpq = Constants.DEFAULT_TICKSPERQUARTERNOTE;
+            this._timeSignature = new _TimeSignature(this);
         }
 
         protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
-            var handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new(propertyName));
+            PropertyChanged?.Invoke(this, new(propertyName));
         }
     }
 }

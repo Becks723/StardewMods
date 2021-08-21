@@ -9,9 +9,8 @@ namespace JunimoStudio
     /// <summary>每个存档都有一个这样的配置文件。</summary>
     internal class SaveConfig
     {
-        public TimeSettings Time { get; set; } = new TimeSettings();
+        public TimeSettings Time { get; } = new();
 
-        public List<TrackInfo> Tracks { get; set; } = new List<TrackInfo>();
-
+        public TracksConfig Tracks { get; } = new();
     }
 }

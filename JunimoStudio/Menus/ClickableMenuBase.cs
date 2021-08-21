@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JunimoStudio.Menus.Controls;
-using JunimoStudio.Menus.Framework;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewValley.Menus;
 
 namespace JunimoStudio.Menus

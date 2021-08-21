@@ -11,7 +11,6 @@ namespace JunimoStudio.Menus
     internal class EmptyMenu : IClickableMenu
     {
         public EmptyMenu()
-            : base(0, 0, 100, 100)
         {
 
         }

@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JunimoStudio.Core;
 using Microsoft.Xna.Framework;
 using Netcode;
 
-namespace JunimoStudio
+namespace JunimoStudio.NetObjects
 {
     public class NetChannel : AbstractNetObjectWrapper<IChannel>
     {
         private IChannel _channel;
 
-        [XmlIgnore]
         public override IChannel Core => this._channel;
 
         [XmlElement("name")]

@@ -5,39 +5,24 @@
 		<Version>2.1.0</Version>
 		<AssemblyName>JunimoStudio</AssemblyName>
 		<RootNamespace>JunimoStudio</RootNamespace>
-		<TargetFramework>net452</TargetFramework>
+		<TargetFramework>net5.0</TargetFramework>
 		<EnableHarmony>true</EnableHarmony>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.3.0" />
-		<PackageReference Include="System.ValueTuple" Version="4.5.0" />
+		<PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.4.0-beta.20210813" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\JunimoStudio.Core\JunimoStudio.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="GuiLabs.Undo">
-		  <HintPath>..\..\..\C#\Undo\src\UndoFramework\bin\Debug\net45\GuiLabs.Undo.dll</HintPath>
+			<HintPath>..\..\..\..\C#\Undo\src\UndoFramework\bin\Debug\net45\GuiLabs.Undo.dll</HintPath>
 		</Reference>
-		<!--<Reference Include="CustomUserInterface">
-			<HintPath>$(GamePath)\Mods\CustomUserInterface\CustomUserInterface.dll</HintPath>
-			<Private>false</Private>
-			<SpecificVersion>false</SpecificVersion>
-		</Reference>-->
 	</ItemGroup>
 
-	<ItemGroup>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-			<_Parameter1>JunimoStudio.Tests</_Parameter1>
-		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-			<_Parameter1>JunimoStudio.AutoSplitter</_Parameter1>
-		</AssemblyAttribute>
-
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\JunimoStudio.Core\JunimoStudio.Core.csproj" />
-	</ItemGroup>
 	<Import Project="$(SolutionDir)\common.targets" />
 </Project>

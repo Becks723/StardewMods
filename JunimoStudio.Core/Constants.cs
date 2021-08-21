@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace JunimoStudio.Core
+﻿namespace JunimoStudio.Core
 {
     public static class Constants
     {
@@ -12,5 +6,12 @@ namespace JunimoStudio.Core
 
         public const int MaxNoteNumber = 127;
 
+        public const int DEFAULT_TIMESIGNATURE_NUMERATOR = 4;
+
+        public const int DEFAULT_TIMESIGNATURE_DENOMERATOR = 4;
+
+        public const int DEFAULT_BPM = 100;
+
+        public const int DEFAULT_TICKSPERQUARTERNOTE = 120;
     }
 }

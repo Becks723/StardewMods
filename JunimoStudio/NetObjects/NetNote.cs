@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JunimoStudio.Core;
 using Microsoft.Xna.Framework;
 using Netcode;
 
-namespace JunimoStudio
+namespace JunimoStudio.NetObjects
 {
     public class NetNote : AbstractNetObjectWrapper<INote>
     {
         private INote _note;
 
-        [XmlIgnore]
         public override INote Core => this._note;
 
         [XmlElement("pitch")]

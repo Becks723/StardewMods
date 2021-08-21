@@ -4,25 +4,19 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 using StardewValley.Objects;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
-using System.IO;
 using System;
 using Microsoft.Xna.Framework;
-using StardewValley.Locations;
 using JunimoStudio.Patches;
-using System.Threading;
-using System.Globalization;
-using JunimoStudio.Menus;
 using JunimoStudio.Core;
 using JunimoStudio.Core.Plugins.Instruments;
 using GuiLabs.Undo;
 using HarmonyLib;
 using JunimoStudio.ModIntegrations.SaveAnywhere;
 using JunimoStudio.ModIntegrations.SpaceCore;
-using JunimoStudio.ModIntegrations.GenericModConfigMenu;
-using StardewModdingAPI.Utilities;
+using JunimoStudio.Menus;
+using System.Collections.Generic;
+using JConstants = JunimoStudio.Core.Constants;
 
 namespace JunimoStudio
 {
@@ -48,10 +42,14 @@ namespace JunimoStudio
 
         public override void Entry(IModHelper helper)
         {
+            this.Monitor.Log($"{StardewModdingAPI.Constants.GameFramework}", LogLevel.Debug);
             this._config = helper.ReadConfig<ModConfig>();
             I18n.Init(helper.Translation);
             Textures.LoadAll(helper.Content);
             NoteBlock.Init(this.Monitor, this._config, this._actionManager);
+
+            Harmony harmony = new Harmony(this.ModManifest.UniqueID);
+            GameLocationPatcher.Patch(harmony, this.Monitor, () => this._config.EnableTracks);
 
             this._testChannelManager = Factory.ChannelManager();
             this._testChannelManager.AddChannel("1", new MidiOutPlugin());
@@ -61,23 +59,20 @@ namespace JunimoStudio
             {
             };
 
-            Harmony harmony = new Harmony(this.ModManifest.UniqueID);
-            GameLocationPatcher.Patch(harmony, this.Monitor, () => this._config.EnableTracks);
-
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
-            helper.Events.Display.MenuChanged += this.OnMenuChanged;
-            helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
             helper.Events.GameLoop.SaveCreated += this.OnSaveCreated;
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+            helper.Events.Input.ButtonPressed += this.OnButtonPressed;
+            helper.Events.Display.MenuChanged += this.OnMenuChanged;
             //helper.Events.Display.Rendered += (s, e) => OnRendered(Config, Game1.currentLocation, Game1.spriteBatch);
         }
 
         private void OnSaveCreated(object sender, SaveCreatedEventArgs e)
         {
             this._saveConfig = new SaveConfig();
-            TrackManager.Init(this.Monitor, this._saveConfig);
+            TrackManager.Init(this.Monitor, this._saveConfig.Tracks);
             TrackManager.Register(new TrackInfo(Game1.getFarm(), new Rectangle(0, 0, 80, 65), true));
             NoteBlock.saveConfig = this._saveConfig;
         }
@@ -85,7 +80,7 @@ namespace JunimoStudio
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
             this._saveConfig = this.Helper.Data.ReadSaveData<SaveConfig>(this.SaveConfigKey) ?? new SaveConfig();
-            TrackManager.Init(this.Monitor, this._saveConfig);
+            TrackManager.Init(this.Monitor, this._saveConfig.Tracks);
             NoteBlock.saveConfig = this._saveConfig;
 
             foreach (GameLocation location in Utilities.GetLocations())
@@ -154,83 +149,19 @@ namespace JunimoStudio
         {
             //if (!Context.IsPlayerFree || Game1.currentMinigame != null)
             //    return;
-            //IChannelManager cm = Factory.ChannelManager();
-            //cm.AddChannel("1", new MidiOutPlugin());
-            //cm.AddChannel("2", new MidiOutPlugin());
+            if (e.Button == SButton.Back)
+            {
+                IList<TrackInfo> dummyTracks = new List<TrackInfo>();
+                var allLocationNames = Utilities.GetLocations().Select(l => l.NameOrUniqueName).ToList();
+                int r = new Random().Next(allLocationNames.Count - 1);
+                string randomLoc = allLocationNames[r];
 
-            //if (e.Button == SButton.NumPad0)
-            //{
-            //    _testChannelManager = Factory.ChannelManager();
-            //    _testChannelManager.AddChannel("1", new MidiOutPlugin());
-            //    _testChannelManager.AddChannel("2", new MidiOutPlugin());
-            //    Game1.soundBank.PlayCue("bigSelect");
-            //}
-            //else if (e.Button == SButton.NumPad1)
-            //{
-            //    Game1.activeClickableMenu = new PianoRollMenu(Monitor, "2", cm, _config,TimeSettings, _actionManager);
-            //}
-            //else if (e.Button == SButton.NumPad2)
-            //{
-            //    Game1.activeClickableMenu = new ChannelRackMenu(Monitor, _testChannelManager, _config, TimeSettings, _actionManager);
-            //}
-            //else if (e.Button == SButton.NumPad4)
-            //{
-            //}
-            //else if (e.Button == SButton.NumPad5)
-            //{
-            //}
-            //else if (e.Button == SButton.NumPad6)
-            //{
-            //}
-            //else if (e.Button == SButton.NumPad7)
-            //{
-            //}
-            //else if (e.Button == SButton.Left)
-            //{
-            //    if (_config.TicksPerQuarterNote >= 48)
-            //        _config.TicksPerQuarterNote -= 24;
-            //}
-            //else if (e.Button == SButton.Right)
-            //{
-            //    if (_config.TicksPerQuarterNote <= 120)
-            //        _config.TicksPerQuarterNote += 24;
-            //}
-            //else if (e.Button == SButton.Up)
-            //{
-            //    if (_config.TimeSignature.Denominator < 16)
-            //        _config.TimeSignature.Denominator *= 2;
-            //}
-            //else if (e.Button == SButton.Down)
-            //{
-            //    if (_config.TimeSignature.Denominator > 2)
-            //        _config.TimeSignature.Denominator /= 2;
-            //}
-
-            //else if (e.Button == SButton.OemMinus)
-            //{
-            //    INoteCollection notes = _testChannelManager.Channels["1"].Notes;
-            //    int r = new Random().Next(0, notes.Count() - 1);
-            //    _testChannelManager.Channels["1"].Notes.Remove(notes.ToArray()[r]);
-            //    Game1.soundBank.PlayCue("coin");
-            //}
-            //else if (e.Button == SButton.OemPlus)
-            //{
-            //    _testChannelManager.Channels["1"].Notes.Add(pitch: new Random().Next(0, 131),
-            //      start: new Random().Next(0, 1000),
-            //       duration: new Random().Next(50, 480));
-            //    Game1.soundBank.PlayCue("bigDeSelect");
-            //}
-            //else if (e.Button == SButton.H)
-            //{
-            //    foreach (IAction action in _actionManager.EnumUndoableActions())
-            //    {
-            //        if (action is INamedAction named)
-            //            Monitor.Log($"{named.Name}", LogLevel.Debug);
-            //        else
-            //            Monitor.Log($"{action.GetType().Name}", LogLevel.Debug);
-            //    }
-            //    Monitor.Log("------------------------------------------------------", LogLevel.Debug);
-            //}
+                Game1.activeClickableMenu = new TracksMenu2(dummyTracks, randomLoc);
+            }
+            else if (e.Button == SButton.Delete)
+            {
+                Game1.activeClickableMenu = new CarpenterMenu();
+            }
         }
 
         private bool IsFurnitureCatalogue(ShopMenu shop)

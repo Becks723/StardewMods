@@ -12,57 +12,57 @@ namespace JunimoStudio
 {
     public static class Extensions
     {
-        public static string GetName(this IAudioEngine audioEngine)
-        {
-            if (audioEngine is IdentifiableAudioEngine iae)
-            {
-                return iae.GetName();
-            }
-            else
-            {
-                return null;
-            }
-        }
+        //public static string GetName(this IAudioEngine audioEngine)
+        //{
+        //    if (audioEngine is IdentifiableAudioEngine iae)
+        //    {
+        //        return iae.GetName();
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
 
-        public static string GetName(this ISoundBank soundBank)
-        {
-            if (soundBank is IdentifiableSoundBank isb)
-            {
-                return isb.GetName();
-            }
-            else
-            {
-                return null;
-            }
-        }
+        //public static string GetName(this ISoundBank soundBank)
+        //{
+        //    if (soundBank is IdentifiableSoundBank isb)
+        //    {
+        //        return isb.GetName();
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
 
-        public static IAudioEngine GetParent(this ISoundBank soundBank)
-        {
-            if (soundBank is IdentifiableSoundBank isb)
-            {
-                return isb.GetParent();
-            }
-            else
-            {
-                return null;
-            }
-        }
+        //public static IAudioEngine GetParent(this ISoundBank soundBank)
+        //{
+        //    if (soundBank is IdentifiableSoundBank isb)
+        //    {
+        //        return isb.GetParent();
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+        //}
 
-        public static bool TryFindObject(this GameLocation location, Vector2 key, out SObject result)
-        {
-            var all = location.objects;
+        //public static bool TryFindObject(this GameLocation location, Vector2 key, out SObject result)
+        //{
+        //    var all = location.objects;
 
-            if (all.ContainsKey(key))
-            {
-                result = all[key];
-                return true;
-            }
-            else
-            {
-                result = null;
-                return false;
-            }
-        }
+        //    if (all.ContainsKey(key))
+        //    {
+        //        result = all[key];
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        result = null;
+        //        return false;
+        //    }
+        //}
 
         //public static byte ToByte(this NotePitch pitch)
         //{

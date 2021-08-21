@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace JunimoStudio.Core
+﻿namespace JunimoStudio.Core
 {
-    /// <summary>Represents a time signature interface.</summary>
+    /// <summary>拍号。</summary>
     public interface ITimeSignature
     {
-        /// <summary>Gets or sets the numerator of current time signature, which indicates the number of beats per bar (measure).</summary>
+        /// <summary>拍号的分子，表示一小节内的节拍数。</summary>
         int Numerator { get; set; }
 
-        /// <summary>Gets or sets the denominator of current time signature, which indicates the length of each beat.</summary>
+        /// <summary>拍号的分母，表示一拍的相对长度。</summary>
+        /// <remarks>比如，4表示以四分音符为一拍。</remarks>
         int Denominator { get; set; }
     }
 }

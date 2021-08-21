@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using GuiLabs.Undo;
 using JunimoStudio.Core;
 using JunimoStudio.Core.Plugins.Instruments;
 using JunimoStudio.Menus;
 using JunimoStudio.Menus.Framework;
+using JunimoStudio.NetObjects;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Netcode;
-using Newtonsoft.Json;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Tools;
@@ -22,64 +18,6 @@ using SObject = StardewValley.Object;
 
 namespace JunimoStudio
 {
-    //internal class NoteBlock : SObject
-    //{
-    //    private readonly INoteBlock _noteBlockImpl;
-    //    private readonly Func<NoteBlock> _creator;
-
-    //    public NoteBlock(INoteBlock noteBlockImpl, Func<NoteBlock> creator)
-    //    {
-    //        _noteBlockImpl = noteBlockImpl ?? throw new ArgumentNullException(nameof(noteBlockImpl));
-    //        _creator = creator ?? throw new ArgumentNullException(nameof(creator));
-    //    }
-
-    //    public override void farmerAdjacentAction(GameLocation location)
-    //    {
-    //        _noteBlockImpl.ChannelManager.StartPlayback();
-    //    }
-
-    //    public override Item getOne()
-    //    {
-    //        return _creator.Invoke();
-    //    }
-    //}
-
-    //internal class NoteBlock : SObject
-    //{
-    //    public const string NameForSaving = "JunimoStudio.NoteBlock";
-
-    //    private readonly IChannelManager _channelManager;
-
-    //    public NoteBlock(IChannelManager channelManager)
-    //    {
-    //        _channelManager = channelManager;
-    //        //GetModData = () =>
-    //        //{
-    //        //    return new ModDataDictionary
-    //        //    {
-    //        //        { "Becks723.JunimoStudio" , JsonConvert.SerializeObject(_channelManager) }
-    //        //    };
-    //        //};
-    //    }
-
-    //    public override string DisplayName
-    //    {
-    //        get => I18n.NoteBlockDisplayName;
-    //    }
-
-    //    public override string getDescription()
-    //    {
-    //        return "";
-    //    }
-
-    //    public void CleanForSaving()
-    //    {
-    //        JsonConvert.SerializeObject(_channelManager);
-    //    }
-
-    //    public Func<Dictionary<string, string>> GetModData { get; private set; }
-    //}
-
     [XmlType("Mods_JunimoStudio.NoteBlock")]
     public class NoteBlock : SObject
     {
