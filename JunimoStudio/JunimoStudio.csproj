@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Authors>Becks723</Authors>
 		<Version>2.1.0</Version>
 		<AssemblyName>JunimoStudio</AssemblyName>
 		<RootNamespace>JunimoStudio</RootNamespace>
 		<TargetFramework>net5.0</TargetFramework>
 		<EnableHarmony>true</EnableHarmony>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
@@ -20,9 +20,9 @@
 
 	<ItemGroup>
 		<Reference Include="GuiLabs.Undo">
-			<HintPath>..\..\..\..\C#\Undo\src\UndoFramework\bin\Debug\net45\GuiLabs.Undo.dll</HintPath>
+			<HintPath>libs\GuiLabs.Undo.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
-	<Import Project="$(SolutionDir)\common.targets" />
+	<Import Project="..\common.targets" />
 </Project>

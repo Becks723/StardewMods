@@ -14,5 +14,5 @@
 		<PackageReference Include="NAudio.Midi" Version="2.0.1" />
 	</ItemGroup>
 
-	<Import Project="$(SolutionDir)\common.targets" />
+	<Import Project="..\common.targets" />
 </Project>
