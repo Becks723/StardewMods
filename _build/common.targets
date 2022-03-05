@@ -1,10 +1,13 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
 		<Authors>Becks723</Authors>
+		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
+
+	
 	
 	<PropertyGroup>
-		<LangVersion>preview</LangVersion>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<ModRootDir>$(GameModsPath)\$(ModFolderName)</ModRootDir>
 	</PropertyGroup>
 </Project>

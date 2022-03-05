@@ -1,0 +1,20 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<TargetFramework>net5</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.0.0" />
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<EnableModZip>false</EnableModZip>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<EnableHarmony>true</EnableHarmony>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<ModRootDir>$(GameModsPath)\$(ModFolderName)</ModRootDir>
+		<ModZipPath>$(SolutionDir)\_releases</ModZipPath>
+	</PropertyGroup>
+</Project>

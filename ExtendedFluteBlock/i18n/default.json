@@ -1,0 +1,15 @@
+{
+  "fix-menu.labels.title": "Found a flute block with mismatched pitch",
+  "fix-menu.labels.title.tooltip": "You may have tuned this flute block without loading the mod, causing pitch mismatch after reinstalling the mod. This screen will help you fix.",
+  "fix-menu.labels.remember-my-choice": "Remember my choice",
+  "fix-menu.labels.apply-extra-pitch": "Apply extra pitch",
+  "fix-menu.labels.apply-original-game": "Apply game pitch",
+  "fix-menu.labels.flute-block-coord": "Coordinate: ({{tileX}}, {{tileY}})",
+  "fix-menu.labels.flute-block-location": "Location: {{location}}",
+
+  "config.enable-mod": "Enable Mod",
+  "config.min-pitch": "Min Accessible Pitch",
+  "config.min-pitch.tooltip": "Minimum pitch accessible when tuning, must not larger than the following 'Max Accessible Pitch'. (Middle C is 60. Every 1 is a semitone, every 12 is an ocatave.)",
+  "config.max-pitch": "Max Accessible Pitch",
+  "config.max-pitch.tooltip": "Maximum pitch accessible when tuning, must not less than 'Min Accessible Pitch' above. (Middle C is 60. Every 1 is a semitone, every 12 is an ocatave.)"
+}

@@ -1,0 +1,15 @@
+﻿{
+  "fix-menu.labels.title": "发现一个音高不正确的长笛块",
+  "fix-menu.labels.title.tooltip": "可能您在未加载mod的状态下，修改过这个长笛块的音高，导致重新安装mod后出现音高不匹配的问题。现在这个界面将帮助您完成修复。",
+  "fix-menu.labels.remember-my-choice": "记住我的选择",
+  "fix-menu.labels.apply-extra-pitch": "使用mod保存的音高",
+  "fix-menu.labels.apply-original-game": "使用原游戏的音高",
+  "fix-menu.labels.flute-block-coord": "坐标: ({{tileX}}, {{tileY}})",
+  "fix-menu.labels.flute-block-location": "地点: {{location}}",
+
+  "config.enable-mod": "启用功能",
+  "config.min-pitch": "最低音",
+  "config.min-pitch.tooltip": "调音时可达到的最低音，不能超过下面的最高音。60为中央C，每加一表示增加一个半音，每加十二表示增加一个八度。",
+  "config.max-pitch": "最高音",
+  "config.max-pitch.tooltip": "调音时可达到的最高音，不能超过上面的最低音。60为中央C，每加一表示增加一个半音，每加十二表示增加一个八度。"
+}

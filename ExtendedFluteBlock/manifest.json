@@ -1,0 +1,17 @@
+{
+  "Name": "Extended Flute Block",
+  "Author": "Becks723",
+  "Version": "0.1.0",
+  "Description": "Unlock the pitch limit of a flute block.",
+  "UniqueID": "Becks723.ExtendedFluteBlock",
+  "EntryDll": "ExtendedFluteBlock.dll",
+  "MinimumApiVersion": "3.13.0",
+  "UpdateKeys": [ "Nexus:11169" ],
+  "Dependencies": [
+    {
+      "UniqueID": "spacechase0.GenericModConfigMenu",
+      "IsRequired": "false",
+      "MinimumVersion": "1.8.1"
+    }
+  ]
+}
