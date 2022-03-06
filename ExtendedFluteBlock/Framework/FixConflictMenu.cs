@@ -138,7 +138,7 @@ namespace FluteBlockExtension.Framework
         private void OnApplyCurrentButtonClicked()
         {
             this.exitThisMenu();
-            this.RaiseOptionSelected(FixOption.ApplyCurrentPreservedParentSheetIndex);
+            this.RaiseOptionSelected(FixOption.ApplyGamePitch);
         }
 
         private void RaiseOptionSelected(FixOption option)

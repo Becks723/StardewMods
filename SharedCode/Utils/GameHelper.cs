@@ -8,9 +8,7 @@ namespace CodeShared.Utils
 {
     internal static class GameHelper
     {
-        // <summary>
-        // Get all game locations.
-        // </summary>
+        // <summary>Get all game locations. </summary>
         public static IEnumerable<GameLocation> GetLocations()
         {
             return Game1.locations
@@ -147,40 +145,40 @@ namespace CodeShared.Utils
         //    float y = Convert.ToSingle(str.Substring(str.IndexOf(" ") + 3, str.IndexOf("}") - 3 - str.IndexOf(" ")));
         //    return new Vector2(x, y);
         //}
-        private static int GetCharCount(string input, char which)
-        {
-            int n = 0;
-            foreach (var letter in input.ToCharArray())
-                if (letter == which)
-                    n++;
-            return n;
-        }
-        public static double CheckDoubleForamt(string input)
-        {
-            foreach (var letter in input.ToCharArray())
-                if (letter != '0' && letter != '1' && letter != '2' && letter != '3' && letter != '4' && letter != '5' && letter != '6' && letter != '7' && letter != '8' && letter != '9' && letter != '0' && letter != '.' && letter != '/')
-                    return 0;
-            if (GetCharCount(input, '.') > 1)
-                return 0;
-            if (input.Contains("/"))
-                if (GetCharCount(input, '/') == 1 && input.IndexOf('/') > 0)
-                {
-                    string numerator = input.Substring(0, input.IndexOf('/'));
-                    string denominator = input.Split('/')[1];
-                    double d = Convert.ToDouble(numerator) / Convert.ToDouble(denominator);
-                    if (d > 2)
-                        d = 2;
-                    return d;
-                }
-                else
-                    return 0;
-            else
-            {
-                double d = Convert.ToDouble(input);
-                if (d > 2)
-                    d = 2;
-                return d;
-            }
-        }
+        //private static int GetCharCount(string input, char which)
+        //{
+        //    int n = 0;
+        //    foreach (var letter in input.ToCharArray())
+        //        if (letter == which)
+        //            n++;
+        //    return n;
+        //}
+        //public static double CheckDoubleForamt(string input)
+        //{
+        //    foreach (var letter in input.ToCharArray())
+        //        if (letter != '0' && letter != '1' && letter != '2' && letter != '3' && letter != '4' && letter != '5' && letter != '6' && letter != '7' && letter != '8' && letter != '9' && letter != '0' && letter != '.' && letter != '/')
+        //            return 0;
+        //    if (GetCharCount(input, '.') > 1)
+        //        return 0;
+        //    if (input.Contains("/"))
+        //        if (GetCharCount(input, '/') == 1 && input.IndexOf('/') > 0)
+        //        {
+        //            string numerator = input.Substring(0, input.IndexOf('/'));
+        //            string denominator = input.Split('/')[1];
+        //            double d = Convert.ToDouble(numerator) / Convert.ToDouble(denominator);
+        //            if (d > 2)
+        //                d = 2;
+        //            return d;
+        //        }
+        //        else
+        //            return 0;
+        //    else
+        //    {
+        //        double d = Convert.ToDouble(input);
+        //        if (d > 2)
+        //            d = 2;
+        //        return d;
+        //    }
+        //}
     }
 }

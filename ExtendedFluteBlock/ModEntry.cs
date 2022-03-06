@@ -11,8 +11,8 @@ using SObject = StardewValley.Object;
 
 namespace FluteBlockExtension
 {
-    internal record ProblemFluteBlock(SObject Core, Vector2 TilePosition, GameLocation Location);
-
+    /// <summary></summary>
+    /// <remarks>All notes referred to in this project have same middle C: C5</remarks>
     internal class ModEntry : Mod
     {
         private ModConfig _config;
@@ -23,9 +23,16 @@ namespace FluteBlockExtension
 
         public override void Entry(IModHelper helper)
         {
+            // init translation.
             I18n.Init(helper.Translation);
+
+            // init custom data key.
             FluteBlockModData_ExtraPitch = string.Format("{0}/extraPitch", this.ModManifest.UniqueID);
+
+            // init patcher.
             MainPatcher.Prepare(new HarmonyLib.Harmony(this.ModManifest.UniqueID), this.Monitor);
+
+            // read mod config.
             this._config = helper.ReadConfig<ModConfig>();
             this._config.UpdatePitches();
 
@@ -65,15 +72,17 @@ namespace FluteBlockExtension
             foreach (var block in fluteBlocks)
             {
                 SObject obj = block.FluteBlock;
-                if (!obj.modData.TryGetValue(FluteBlockModData_ExtraPitch, out string exPitchStr))
+                if (!obj.modData.TryGetValue(FluteBlockModData_ExtraPitch, out string extraPitchStr))
                 {
                     obj.SetExtraPitch(0);
                     this.Monitor.Log($"Detected flute block missing 'extraPitch' key. Added.");
                 }
                 else
                 {
-                    int exPitch = int.Parse(exPitchStr);
-                    if (exPitch != 0 &&
+                    int extraPitch = int.Parse(extraPitchStr);
+
+                    // check if problem, add problem ones to to-fix list.
+                    if (extraPitch != 0 &&
                         obj.preservedParentSheetIndex.Value != 0 && obj.preservedParentSheetIndex.Value != 2300)
                     {
                         this._problemFluteBlocks.Add(new ProblemFluteBlock(obj, block.Tile, block.Location));
@@ -92,6 +101,44 @@ namespace FluteBlockExtension
                 Game1.playSound("bigSelect");
                 Game1.activeClickableMenu = fixMenu;
             }
+        }
+
+        private void World_ObjectListChanged(object sender, ObjectListChangedEventArgs e)
+        {
+            foreach (var pair in e.Added)
+            {
+                SObject obj = pair.Value;
+                if (obj.IsFluteBlock())
+                {
+                    obj.SetPitch(this._config.MinAccessiblePitch);
+
+                    this.Monitor.Log($"A flute block is placed. Set its {nameof(obj.preservedParentSheetIndex)} to {obj.preservedParentSheetIndex}; extraPitch to {obj.GetExtraPitchStr()};");
+                }
+            }
+
+            foreach (var pair in e.Removed)
+            {
+                SObject obj = pair.Value;
+                if (obj.IsFluteBlock())
+                {
+                    obj.modData.Remove(FluteBlockModData_ExtraPitch);
+
+                    this.Monitor.Log($"A flute block is removed. Delete its 'extraPitch' field.");
+                }
+            }
+        }
+
+        private void ResetConfig()
+        {
+            this._config = new ModConfig() { EnableMod = true };  // init property to run setter logic.
+            this._config.UpdatePitches();
+            this.SaveConfig();
+        }
+
+        private void SaveConfig()
+        {
+            this._config.UpdatePitches();
+            this.Helper.WriteConfig(this._config);
         }
 
         private void FixMenu_OptionSelected(object sender, FixOptionSelectedEventArgs e)
@@ -123,79 +170,17 @@ namespace FluteBlockExtension
             }
         }
 
-        private void World_ObjectListChanged(object sender, ObjectListChangedEventArgs e)
-        {
-            foreach (var pair in e.Added)
-            {
-                SObject obj = pair.Value;
-                if (obj.name == FluteBlockName)
-                {
-                    int defaultPitch = this._config.MinAccessiblePitch;
-                    switch (defaultPitch)
-                    {
-                        case > 2300:
-                            obj.preservedParentSheetIndex.Value = 2300;
-                            obj.SetExtraPitch(defaultPitch - 2300);
-                            break;
-
-                        case < 0:
-                            obj.preservedParentSheetIndex.Value = 0;
-                            obj.SetExtraPitch(defaultPitch);
-                            break;
-
-                        default:
-                            obj.preservedParentSheetIndex.Value = defaultPitch;
-                            obj.SetExtraPitch(0);
-                            break;
-                    }
-
-                    this.Monitor.Log($"A flute block is placed. Set its {nameof(obj.preservedParentSheetIndex)} to {obj.preservedParentSheetIndex}; extraPitch to {obj.modData[FluteBlockModData_ExtraPitch]};");
-                }
-            }
-
-            foreach (var pair in e.Removed)
-            {
-                SObject obj = pair.Value;
-                if (obj.name == FluteBlockName)
-                {
-                    obj.modData.Remove(FluteBlockModData_ExtraPitch);
-
-                    this.Monitor.Log($"A flute block is removed. Delete its 'extraPitch' field.");
-                }
-            }
-        }
-
-        private void ResetConfig()
-        {
-            this._config = new ModConfig() { EnableMod = true };  // init property to run setter logic.
-            this._config.UpdatePitches();
-            this.SaveConfig();
-        }
-
-        private void SaveConfig()
-        {
-            this._config.UpdatePitches();
-            this.Helper.WriteConfig(this._config);
-        }
-
         private void FixConflict(SObject fluteBlock, FixOption option)
         {
             switch (option)
             {
-                case FixOption.ApplyCurrentPreservedParentSheetIndex:
+                case FixOption.ApplyGamePitch:
                     fluteBlock.SetExtraPitch(0);
                     break;
 
                 case FixOption.ApplyExtraPitch:
                     int extraPitch = fluteBlock.GetExtraPitch();
-                    if (extraPitch > 0)
-                    {
-                        fluteBlock.preservedParentSheetIndex.Value = 2300;
-                    }
-                    else   // < 0, impossible 0
-                    {
-                        fluteBlock.preservedParentSheetIndex.Value = 0;
-                    }
+                    fluteBlock.preservedParentSheetIndex.Value = extraPitch > 0 ? 2300 : 0;
                     break;
             }
         }

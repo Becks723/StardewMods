@@ -9,16 +9,20 @@ namespace CodeShared.Integrations.GenericModConfigMenu
     {
         private readonly IGenericModConfigMenuApi _api;
         private readonly IManifest _manifest;
+        private readonly Action _reset;
+        private readonly Action _save;
 
-        public GenericModConfigMenuFluentHelper(IGenericModConfigMenuApi api, IManifest manifest)
+        public GenericModConfigMenuFluentHelper(IGenericModConfigMenuApi api, IManifest manifest, Action reset, Action save)
         {
             this._api = api ?? throw new ArgumentNullException(nameof(api));
             this._manifest = manifest;
+            this._reset = reset;
+            this._save = save;
         }
 
-        public GenericModConfigMenuFluentHelper Register(Action reset, Action save, bool titleScreenOnly = false)
+        public GenericModConfigMenuFluentHelper Register(bool titleScreenOnly = false)
         {
-            this._api.Register(this._manifest, reset, save, titleScreenOnly);
+            this._api.Register(this._manifest, this._reset, this._save, titleScreenOnly);
             return this;
         }
 

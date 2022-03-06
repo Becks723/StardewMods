@@ -7,55 +7,61 @@ using System.Runtime.CompilerServices;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Audio;
 using StardewModdingAPI;
-using SObject = StardewValley.Object;
-using static FluteBlockExtension.Framework.Constants;
 using StardewValley;
 using StardewValley.Locations;
+using static FluteBlockExtension.Framework.Constants;
+using SObject = StardewValley.Object;
 
 namespace FluteBlockExtension.Framework
 {
     internal static class MainPatcher
     {
+        /// <summary>对应<see cref="ModConfig.MinAccessiblePitch"/></summary>
         public static int MinPitch = MIN_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE;
 
+        /// <summary>对应<see cref="ModConfig.MaxAccessiblePitch"/></summary>
         public static int MaxPitch = MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE;
 
         private static IMonitor _monitor;
 
         private static Harmony _harmony;
 
-        private static bool _enablePatch;
+        private static bool _patched;
 
         private static readonly Solution2 _corePatcher = new();
 
+        /// <summary>Call this before call patch.</summary>
         public static void Prepare(Harmony harmony, IMonitor monitor)
         {
             _harmony = harmony;
             _monitor = monitor;
         }
 
+        /// <summary>Toggle patch on.</summary>
         public static void Patch()
         {
-            if (_enablePatch) return;
+            if (_patched) return;
 
             if (_harmony != null)
             {
                 _corePatcher.Patch(_harmony);
-                _enablePatch = true;
+                _patched = true;
             }
         }
 
+        /// <summary>Toggle patch off.</summary>
         public static void Unpatch()
         {
-            if (!_enablePatch) return;
+            if (!_patched) return;
 
             if (_harmony != null)
             {
                 _corePatcher.Unpatch(_harmony);
-                _enablePatch = false;
+                _patched = false;
             }
         }
 
+        /// <summary>Core patch solution.</summary>
         private class Solution2
         {
             public void Patch(Harmony harmony)
@@ -66,18 +72,22 @@ namespace FluteBlockExtension.Framework
                     prefix: new HarmonyMethod(typeof(Solution2), nameof(SObject_checkForAction_Prefix_Always))
                 );
 
+                // change flute block play logic when player walks by.
                 harmony.Patch(
                     original: AccessTools.Method(typeof(SObject), nameof(SObject.farmerAdjacentAction)),
                     prefix: new HarmonyMethod(typeof(Solution2), nameof(SObject_farmerAdjacentAction_Prefix))
                 );
+                // change flute block play and pitching logic when player right clicks.
                 harmony.Patch(
                     original: AccessTools.Method(typeof(SObject), nameof(SObject.checkForAction)),
                     prefix: new HarmonyMethod(typeof(Solution2), nameof(SObject_checkForAction_Prefix))
                 );
+                // bypass throw exception when assigning Pitch with value out of range.
                 harmony.Patch(
                     original: AccessTools.Method(typeof(SoundEffectInstance), "set_Pitch"),
                     transpiler: new HarmonyMethod(typeof(Solution2), nameof(SoundEffectInstance_Pitch_Transpiler))
                 );
+                // unlock the FAudio max frequency limited by game.
                 harmony.Patch(
                     original: AccessTools.Method(typeof(SoundEffectInstance), "PlatformPlay"),
                     transpiler: new HarmonyMethod(typeof(Solution2), nameof(SoundEffectInstance_PlatformPlay_Transpiler))
@@ -116,7 +126,11 @@ namespace FluteBlockExtension.Framework
                         if (justCheckingForActivity)
                             return;
 
-                        if (!_enablePatch)
+                        // 如果在扩展音域功能关闭的前提下，玩家又右键调音了。那么有可能的情况是：
+                        // 如果音高比原版音域低，如-1000，此时extraPitch是-1000，preservedParentSheetIndex是0，
+                        // 按照原版计算公式（x = (x + 100) % 2400）可得，新preservedParentSheetIndex为100。
+                        // 但是逻辑上此时下一个音应是0，因此就有了下面的检查代码。
+                        if (!_patched)
                         {
                             int extraPitch = __instance.GetExtraPitch();
                             if (extraPitch < 0)
@@ -145,7 +159,7 @@ namespace FluteBlockExtension.Framework
                         return false;
                     }
 
-                    if (__instance.name is FluteBlockName)
+                    if (__instance.IsFluteBlock())
                     {
                         if (justCheckingForActivity)
                         {
@@ -156,7 +170,6 @@ namespace FluteBlockExtension.Framework
                         _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: {SuffixSObjectInfo(__instance, who?.currentLocation)}");
                         _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: Before tuning, {nameof(__instance.preservedParentSheetIndex)}: {__instance.preservedParentSheetIndex.Value}; extraPitch: {__instance.modData[FluteBlockModData_ExtraPitch]}.");
 
-                        int extraPitch = 0;
                         int newPitch = 1200;
                         if (who?.currentLocation is IslandSouthEast)  // extra pitch is not available at island SE
                         {
@@ -165,32 +178,18 @@ namespace FluteBlockExtension.Framework
                         }
                         else
                         {
-                            newPitch = CalculateNewPitch(
+                            newPitch = CalculateNextPitch(
                                 __instance.preservedParentSheetIndex.Value + __instance.GetExtraPitch()
                             );
-                            if (newPitch > 2300)
-                            {
-                                __instance.preservedParentSheetIndex.Value = 2300;
-                                extraPitch = newPitch - 2300;
-                            }
-                            else if (newPitch < 0)
-                            {
-                                __instance.preservedParentSheetIndex.Value = 0;
-                                extraPitch = newPitch;
-                            }
-                            else
-                            {
-                                __instance.preservedParentSheetIndex.Value = newPitch;
-                            }
                         }
-                        __instance.SetExtraPitch(extraPitch);
+                        __instance.SetPitch(newPitch);
 
                         _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: After tuning, {nameof(__instance.preservedParentSheetIndex)}: {__instance.preservedParentSheetIndex.Value}; extraPitch: {__instance.modData[FluteBlockModData_ExtraPitch]}.");
 
-                        int realShakeTimer =
-                            CalculateShakeTimer((newPitch - 1200) / 100
+                        int shakeTimer = CalculateShakeTimer(
+                            (newPitch - 1200) / 100
                         );
-                        __instance.shakeTimer = realShakeTimer;
+                        __instance.shakeTimer = shakeTimer;
                         if (Game1.soundBank != null)
                         {
                             if (__instance.internalSound != null)
@@ -203,11 +202,11 @@ namespace FluteBlockExtension.Framework
                                 __instance.internalSound = Game1.soundBank.GetCue("flute");
                             }
                             __instance.internalSound.SetVariable("Pitch", __instance.preservedParentSheetIndex.Value);
-                            __instance.internalSound.Pitch = extraPitch / 1200f;
+                            __instance.internalSound.Pitch = __instance.GetExtraPitch() / 1200f;
                             __instance.internalSound.Play();
                         }
                         __instance.scale.Y = 1.3f;
-                        __instance.shakeTimer = realShakeTimer;
+                        __instance.shakeTimer = shakeTimer;
 
                         __result = true;
                         return false;
@@ -231,39 +230,21 @@ namespace FluteBlockExtension.Framework
 
                     if (__instance.name == FluteBlockName && (__instance.internalSound == null || ((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying)) && !Game1.dialogueUp)
                     {
-                        int realShakeTimer = 200;
-                        int preservedParentSheetIndex = __instance.preservedParentSheetIndex.Value;
-                        int extraPitch = 0;
-
                         if (Game1.soundBank != null)
                         {
-                            int realPitch;
-                            if (preservedParentSheetIndex > 0 && preservedParentSheetIndex < 2300)      // 正常
-                            {
-                                __instance.SetExtraPitch(0);
-                                realPitch = preservedParentSheetIndex;
-                            }
-                            else        //  0 or 2300
-                            {
-                                extraPitch = __instance.GetExtraPitch();
-                                realPitch = preservedParentSheetIndex + extraPitch;
-                            }
-
-                            realShakeTimer = CalculateShakeTimer(
-                                (realPitch - 1200) / 100
-                            );
-
                             __instance.internalSound = Game1.soundBank.GetCue("flute");
-                            __instance.internalSound.SetVariable("Pitch", preservedParentSheetIndex);
-                            __instance.internalSound.Pitch = extraPitch / 1200f;
+                            __instance.internalSound.SetVariable("Pitch", __instance.preservedParentSheetIndex.Value);
+                            __instance.internalSound.Pitch = __instance.GetExtraPitch() / 1200f;
                             __instance.internalSound.Play();
                         }
                         __instance.scale.Y = 1.3f;
-                        __instance.shakeTimer = realShakeTimer;
+                        __instance.shakeTimer = CalculateShakeTimer(
+                            (__instance.GetPitch() - 1200) / 100
+                        );
                         __instance.lastNoteBlockSoundTime = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
 
                         if (location is IslandSouthEast ise)
-                            ise.OnFlutePlayed(preservedParentSheetIndex);
+                            ise.OnFlutePlayed(__instance.preservedParentSheetIndex.Value);
 
                         return false;
                     }
@@ -336,25 +317,29 @@ namespace FluteBlockExtension.Framework
                 }
             }
 
-            private static int CalculateNewPitch(int currentPitch)
+            /// <summary>Get the next pitch when player right clicks on a flute block.</summary>
+            private static int CalculateNextPitch(int currentPitch)
             {
                 int max = MaxPitch;
                 int min = MinPitch;
 
-                //// 超出边界，通常是用户修改了音高范围后又对某个在边界之外的笛块调音。
-                //if (currentPitch < min || currentPitch > max)
-                //    return min;
-
+                // a 100 is a semitone.
                 currentPitch += 100;
+
+                // clamp.
                 if (currentPitch > max || currentPitch < min)
                     currentPitch = min;
+
                 //_monitor.Log($"Tuning to {currentPitch}.");
+
                 return currentPitch;
             }
 
+            /// <summary>Get the vibration duration (in milliseconds) of flute block after it plays a sound.</summary>
+            /// <param name="deltaSemitone">Delta semitone. (Base pitch: C6)</param>
             private static int CalculateShakeTimer(int deltaSemitone)
             {
-                SoundEffect flute = Game1.waveBank.GetSoundEffect(FluteBlockTrackIndex);
+                SoundEffect flute = Game1.waveBank.GetSoundEffect(FluteTrackIndex);
                 double baseDuration = flute.Duration.TotalMilliseconds;
                 double octaves = deltaSemitone / 12.0;
                 return (int)(baseDuration * Math.Pow(2, -octaves));

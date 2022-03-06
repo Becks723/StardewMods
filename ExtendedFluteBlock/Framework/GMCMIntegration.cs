@@ -1,31 +1,23 @@
 ﻿using System;
-using CodeShared.Integrations;
 using CodeShared.Integrations.GenericModConfigMenu;
 using StardewModdingAPI;
 using static FluteBlockExtension.Framework.Constants;
 
 namespace FluteBlockExtension.Framework
 {
-    internal class GMCMIntegration : ModIntegration<IGenericModConfigMenuApi>
+    internal class GMCMIntegration : GenericModConfigMenuIntegrationBase
     {
         private readonly ModConfig _config;
-        private readonly Action _reset;
-        private readonly Action _save;
-        private readonly IManifest _manifest;
 
         public GMCMIntegration(ModConfig config, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
-            : base(modID: "spacechase0.GenericModConfigMenu", modRegistry: modRegistry, monitor: monitor)
+            : base(reset, save, modRegistry, monitor, manifest)
         {
             this._config = config;
-            this._reset = reset;
-            this._save = save;
-            this._manifest = manifest;
         }
 
-        protected override void IntegrateOverride(IGenericModConfigMenuApi api)
+        protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)
         {
-            new GenericModConfigMenuFluentHelper(api, this._manifest)
-                .Register(this._reset, this._save)
+            helper.Register()
 
                 .AddCheckbox(
                     name: I18n.Config_EnableMod,

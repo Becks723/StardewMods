@@ -6,14 +6,17 @@
     <SharedGUID>ab84ff3c-f7c6-4d02-8988-e46c64d35c7d</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>SharedCode</Import_RootNamespace>
+    <Import_RootNamespace>CodeShared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\GenericModConfigMenuFluentHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\GenericModConfigMenuIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\IGenericModConfigMenuApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SaveAnywhere\ISaveAnywhereApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Integrations\SaveAnywhere\SaveAnywhereIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SpaceCore\ISpaceCoreApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\ModIntegration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Integrations\SpaceCore\SpaceCoreIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\GameHelper.cs" />
   </ItemGroup>
 </Project>

@@ -2,7 +2,8 @@
 {
     internal enum FixOption
     {
-        ApplyCurrentPreservedParentSheetIndex,
+        ApplyGamePitch,
+
         ApplyExtraPitch
     }
 }
