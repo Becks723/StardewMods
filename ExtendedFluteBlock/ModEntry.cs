@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using CodeShared.Utils;
 using FluteBlockExtension.Framework;
+using FluteBlockExtension.Framework.Integrations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using StardewModdingAPI;
@@ -58,6 +59,12 @@ namespace FluteBlockExtension
                 monitor: this.Monitor,
                 manifest: this.ModManifest
             ).Integrate();
+
+            new SaveAnywhereIntegration(
+                beforeSave: this.OnSaving,
+                modRegistry: this.Helper.ModRegistry,
+                monitor: this.Monitor
+            ).Integrate();
         }
 
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
@@ -100,6 +107,11 @@ namespace FluteBlockExtension
         }
 
         private void OnSaving(object sender, SavingEventArgs e)
+        {
+            this.OnSaving();
+        }
+
+        private void OnSaving()
         {
             var fluteBlocks = from loc in GameHelper.GetLocations()
                               from obj in loc.objects.Values

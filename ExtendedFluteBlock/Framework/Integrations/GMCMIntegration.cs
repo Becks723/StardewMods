@@ -3,7 +3,7 @@ using CodeShared.Integrations.GenericModConfigMenu;
 using StardewModdingAPI;
 using static FluteBlockExtension.Framework.Constants;
 
-namespace FluteBlockExtension.Framework
+namespace FluteBlockExtension.Framework.Integrations
 {
     internal class GMCMIntegration : GenericModConfigMenuIntegrationBase
     {
