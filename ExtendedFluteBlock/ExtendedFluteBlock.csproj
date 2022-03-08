@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\_build\common.targets" />
 	<Import Project="..\_build\smapi.targets" />
-	<Import Project="..\_build\translation-builder.targets"/>
+	<Import Project="..\_build\translation-builder.targets" />
 	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
 
 	<PropertyGroup>

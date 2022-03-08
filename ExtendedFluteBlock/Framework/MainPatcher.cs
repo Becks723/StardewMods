@@ -127,17 +127,15 @@ namespace FluteBlockExtension.Framework
                             return;
 
                         // 如果在扩展音域功能关闭的前提下，玩家又右键调音了。那么有可能的情况是：
-                        // 如果音高比原版音域低，如-1000，此时extraPitch是-1000，preservedParentSheetIndex是0，
-                        // 按照原版计算公式（x = (x + 100) % 2400）可得，新preservedParentSheetIndex为100。
-                        // 但是逻辑上此时下一个音应是0，因此就有了下面的检查代码。
+                        // 如果音高比原版音域低，如-1000，此时preservedParentSheetIndex是-1000，
+                        // 按照原版计算公式（x = (x + 100) % 2400）可得，新preservedParentSheetIndex为-900，甚至不在范围内。
+                        // 我们要让新值为0，因此就有了下面的检查代码。
                         if (!_patched)
                         {
-                            int extraPitch = __instance.GetExtraPitch();
-                            if (extraPitch < 0)
+                            // 检查旧值，让它不小于-100，这样调音后就变成0。
+                            if (__instance.preservedParentSheetIndex.Value < -100)
                             {
-                                __instance.SetExtraPitch(0);
                                 __instance.preservedParentSheetIndex.Value = -100;
-
                                 _monitor.Log($"{nameof(SObject_checkForAction_Prefix_Always)}: Fixed a pitch mismatch when mod off. {SuffixSObjectInfo(__instance, who.currentLocation)}");
                             }
                         }
@@ -167,46 +165,42 @@ namespace FluteBlockExtension.Framework
                             return false;
                         }
 
-                        _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: {SuffixSObjectInfo(__instance, who?.currentLocation)}");
-                        _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: Before tuning, {nameof(__instance.preservedParentSheetIndex)}: {__instance.preservedParentSheetIndex.Value}; extraPitch: {__instance.modData[FluteBlockModData_ExtraPitch]}.");
+                        int oldPitch = __instance.preservedParentSheetIndex.Value;
+                        _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: {SuffixSObjectInfo(__instance, who.currentLocation)}");
+                        _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: Before tuning, {nameof(__instance.preservedParentSheetIndex)}: {oldPitch}.");
 
-                        int newPitch = 1200;
-                        if (who?.currentLocation is IslandSouthEast)  // extra pitch is not available at island SE
+                        if (who.currentLocation is IslandSouthEast)  // extra pitch is not available at island South-east
                         {
                             _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: Detected farmer at {nameof(IslandSouthEast)}.");
-                            newPitch = __instance.preservedParentSheetIndex.Value = (__instance.preservedParentSheetIndex.Value + 100) % 2400;
+                            __instance.preservedParentSheetIndex.Value = (oldPitch + 100) % 2400;
                         }
                         else
                         {
-                            newPitch = CalculateNextPitch(
-                                __instance.preservedParentSheetIndex.Value + __instance.GetExtraPitch()
-                            );
+                            __instance.preservedParentSheetIndex.Value = CalculateNextPitch(oldPitch);
                         }
-                        __instance.SetPitch(newPitch);
 
-                        _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: After tuning, {nameof(__instance.preservedParentSheetIndex)}: {__instance.preservedParentSheetIndex.Value}; extraPitch: {__instance.modData[FluteBlockModData_ExtraPitch]}.");
+                        int newPitch = __instance.preservedParentSheetIndex.Value;
+                        _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: After tuning, {nameof(__instance.preservedParentSheetIndex)}: {newPitch}.");
 
-                        int shakeTimer = CalculateShakeTimer(
+                        if (__instance.internalSound != null)
+                        {
+                            __instance.internalSound.Stop(AudioStopOptions.Immediate);
+                            __instance.internalSound = Game1.soundBank.GetCue("flute");
+                        }
+                        else
+                        {
+                            __instance.internalSound = Game1.soundBank.GetCue("flute");
+                        }
+
+                        var (gamePitch, extraPitch) = __instance.SeperatePitch();
+                        __instance.internalSound.SetVariable("Pitch", gamePitch);
+                        __instance.internalSound.Pitch = extraPitch / 1200f;
+
+                        __instance.internalSound.Play();
+                        __instance.scale.Y = 1.3f;
+                        __instance.shakeTimer = CalculateShakeTimer(
                             (newPitch - 1200) / 100
                         );
-                        __instance.shakeTimer = shakeTimer;
-                        if (Game1.soundBank != null)
-                        {
-                            if (__instance.internalSound != null)
-                            {
-                                __instance.internalSound.Stop(AudioStopOptions.Immediate);
-                                __instance.internalSound = Game1.soundBank.GetCue("flute");
-                            }
-                            else
-                            {
-                                __instance.internalSound = Game1.soundBank.GetCue("flute");
-                            }
-                            __instance.internalSound.SetVariable("Pitch", __instance.preservedParentSheetIndex.Value);
-                            __instance.internalSound.Pitch = __instance.GetExtraPitch() / 1200f;
-                            __instance.internalSound.Play();
-                        }
-                        __instance.scale.Y = 1.3f;
-                        __instance.shakeTimer = shakeTimer;
 
                         __result = true;
                         return false;
@@ -228,23 +222,23 @@ namespace FluteBlockExtension.Framework
                     if (__instance.isTemporarilyInvisible)
                         return false;
 
-                    if (__instance.name == FluteBlockName && (__instance.internalSound == null || ((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying)) && !Game1.dialogueUp)
+                    if (__instance.IsFluteBlock() && (__instance.internalSound == null || ((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying)) && !Game1.dialogueUp)
                     {
-                        if (Game1.soundBank != null)
-                        {
-                            __instance.internalSound = Game1.soundBank.GetCue("flute");
-                            __instance.internalSound.SetVariable("Pitch", __instance.preservedParentSheetIndex.Value);
-                            __instance.internalSound.Pitch = __instance.GetExtraPitch() / 1200f;
-                            __instance.internalSound.Play();
-                        }
+                        __instance.internalSound = Game1.soundBank.GetCue("flute");
+
+                        var (gamePitch, extraPitch) = __instance.SeperatePitch();
+                        __instance.internalSound.SetVariable("Pitch", gamePitch);
+                        __instance.internalSound.Pitch = extraPitch / 1200f;
+
+                        __instance.internalSound.Play();
                         __instance.scale.Y = 1.3f;
                         __instance.shakeTimer = CalculateShakeTimer(
-                            (__instance.GetPitch() - 1200) / 100
+                            (__instance.preservedParentSheetIndex.Value - 1200) / 100
                         );
                         __instance.lastNoteBlockSoundTime = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
 
                         if (location is IslandSouthEast ise)
-                            ise.OnFlutePlayed(__instance.preservedParentSheetIndex.Value);
+                            ise.OnFlutePlayed(gamePitch);
 
                         return false;
                     }

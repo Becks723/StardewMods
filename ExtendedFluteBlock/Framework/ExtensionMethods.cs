@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SObject = StardewValley.Object;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using static FluteBlockExtension.Framework.Constants;
+using SObject = StardewValley.Object;
 
 namespace FluteBlockExtension.Framework
 {
@@ -18,9 +15,9 @@ namespace FluteBlockExtension.Framework
         }
 
         /// <summary>Gets string form of flute block's custom 'extraPitch' field.</summary>
-        public static string GetExtraPitchStr(this SObject obj)
+        public static string GetExtraPitchStr(this SObject fluteBlock)
         {
-            if (obj.modData.TryGetValue(FluteBlockModData_ExtraPitch, out string extraPitchStr))
+            if (fluteBlock.modData.TryGetValue(FluteBlockModData_ExtraPitch, out string extraPitchStr))
             {
                 return extraPitchStr;
             }
@@ -31,44 +28,69 @@ namespace FluteBlockExtension.Framework
         }
 
         /// <summary>Gets the value of flute block's custom 'extraPitch' field.</summary>
-        public static int GetExtraPitch(this SObject obj)
+        public static int GetExtraPitch(this SObject fluteBlock)
         {
-            return int.Parse(GetExtraPitchStr(obj));
+            return int.Parse(GetExtraPitchStr(fluteBlock));
         }
 
         /// <summary>Sets flute block's custom 'extraPitch' field.</summary>
-        public static void SetExtraPitch(this SObject obj, int value)
+        public static void SetExtraPitch(this SObject fluteBlock, int value)
         {
-            obj.modData[FluteBlockModData_ExtraPitch] = value.ToString();
+            fluteBlock.modData[FluteBlockModData_ExtraPitch] = value.ToString();
         }
 
         /// <summary>Gets the flute block's pitch.</summary>
-        public static int GetPitch(this SObject obj)
+        public static int GetPitch(this SObject fluteBlock)
         {
-            return obj.preservedParentSheetIndex.Value + GetExtraPitch(obj);
+            return fluteBlock.preservedParentSheetIndex.Value;
         }
 
         /// <summary>Sets the flute block's pitch.</summary>
         /// <param name="value">The new pitch.</param>
-        public static void SetPitch(this SObject obj, int value)
+        public static void SetPitch(this SObject fluteBlock, int value)
         {
-            switch (value)
+            fluteBlock.preservedParentSheetIndex.Value = value;
+        }
+
+        /// <summary>Seperate the two pitch parts, game pitch & extra pitch.</summary>
+        public static (int gamePitch, int extraPitch) SeperatePitch(this SObject fluteBlock)
+        {
+            int pitch = GetPitch(fluteBlock);
+            return pitch switch
             {
-                case > 2300:
-                    obj.preservedParentSheetIndex.Value = 2300;
-                    obj.SetExtraPitch(value - 2300);
-                    break;
+                > 2300 => (2300, pitch - 2300),
+                < 0 => (0, pitch),
+                _ => (pitch, 0),
+            };
+        }
 
-                case < 0:
-                    obj.preservedParentSheetIndex.Value = 0;
-                    obj.SetExtraPitch(value);
-                    break;
+        /// <summary>When saving, seperate two pitch parts.</summary>
+        public static void VerifyPitchForSave(this SObject fluteBlock)
+        {
+            var (gamePitch, extraPitch) = SeperatePitch(fluteBlock);
 
-                default:
-                    obj.preservedParentSheetIndex.Value = value;
-                    obj.SetExtraPitch(0);
-                    break;
+            fluteBlock.preservedParentSheetIndex.Value = gamePitch;
+            fluteBlock.SetExtraPitch(extraPitch);
+        }
+
+        /// <summary>When loading a save, merge two pitch parts.</summary>
+        /// <returns>Whether successfully merged.</returns>
+        public static bool TryMergePitch(this SObject fluteBlock,
+            [NotNullWhen(false)] out int? gamePitch,
+            [NotNullWhen(false)] out int? extraPitch)
+        {
+            gamePitch = fluteBlock.preservedParentSheetIndex.Value;
+            extraPitch = GetExtraPitch(fluteBlock);
+
+            if (extraPitch != 0 &&
+                gamePitch != 0 && gamePitch != 2300)
+            {
+                return false;
             }
+
+            fluteBlock.preservedParentSheetIndex.Value = gamePitch.Value + extraPitch.Value;
+            gamePitch = extraPitch = null;
+            return true;
         }
     }
 }
