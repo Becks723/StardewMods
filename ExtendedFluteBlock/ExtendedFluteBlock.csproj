@@ -11,12 +11,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Framework\ILCode.cs" />
 		<Compile Remove="Framework\PatchSolution1.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="Framework\ILCode.cs" />
 		<None Include="Framework\PatchSolution1.cs" />
 	</ItemGroup>
 

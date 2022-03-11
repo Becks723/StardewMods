@@ -11,5 +11,8 @@
   "config.min-pitch": "Min Accessible Pitch",
   "config.min-pitch.tooltip": "Minimum pitch accessible when tuning, must not larger than the following 'Max Accessible Pitch'. (Middle C is 60. Every 1 is a semitone, every 12 is an ocatave.)",
   "config.max-pitch": "Max Accessible Pitch",
-  "config.max-pitch.tooltip": "Maximum pitch accessible when tuning, must not less than 'Min Accessible Pitch' above. (Middle C is 60. Every 1 is a semitone, every 12 is an ocatave.)"
+  "config.max-pitch.tooltip": "Maximum pitch accessible when tuning, must not less than 'Min Accessible Pitch' above. (Middle C is 60. Every 1 is a semitone, every 12 is an ocatave.)",
+  "config.section-title.sounds": "Sounds",
+  "config.sounds.folder-path": "Sounds Folder",
+  "config.sounds.folder-path.tooltip": "The absolute path to sounds folder."
 }

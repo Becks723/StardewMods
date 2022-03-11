@@ -8,7 +8,8 @@
 	- 兼容GMCM。
 
 0.2.0
-	- 兼容SaveAnywhere。
+	- 新增玩法：长笛块放在不同的地板上会发出不同的音色。
 
 	细节：
 	- 统一读档时合并两个音高（将extraPitch加至preservedParentSheetIndex），存档时二者分离。这样游戏中查询、修改音高更方便。（之前版本的机制是存档、游戏中都分离）
+	- 兼容SaveAnywhere。

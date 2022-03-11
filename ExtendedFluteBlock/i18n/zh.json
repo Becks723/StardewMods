@@ -11,5 +11,8 @@
   "config.min-pitch": "最低音",
   "config.min-pitch.tooltip": "调音时可达到的最低音，不能超过下面的最高音。60为中央C，每加一表示增加一个半音，每加十二表示增加一个八度。",
   "config.max-pitch": "最高音",
-  "config.max-pitch.tooltip": "调音时可达到的最高音，不能超过上面的最低音。60为中央C，每加一表示增加一个半音，每加十二表示增加一个八度。"
+  "config.max-pitch.tooltip": "调音时可达到的最高音，不能超过上面的最低音。60为中央C，每加一表示增加一个半音，每加十二表示增加一个八度。",
+  "config.section-title.sounds": "音色",
+  "config.sounds.folder-path": "音色库",
+  "config.sounds.folder-path.tooltip": "音色库（文件夹）路径"
 }
