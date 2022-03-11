@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CodeShared.Utils;
 using FluteBlockExtension.Framework;
 using FluteBlockExtension.Framework.Integrations;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -21,9 +18,17 @@ namespace FluteBlockExtension
     {
         private ModConfig _config;
 
+        private SoundsConfig _soundsConfig;
+
+        private readonly string _soundsKey = "sounds";
+
+        private readonly SoundManager _soundManager = new SoundManager();
+
         private readonly List<ProblemFluteBlock> _problemFluteBlocks = new();
 
         private List<ProblemFluteBlock>.Enumerator _problemFluteBlocksIterator;
+
+        public static string ModID { get; private set; }
 
         public override void Entry(IModHelper helper)
         {
@@ -31,17 +36,36 @@ namespace FluteBlockExtension
             I18n.Init(helper.Translation);
 
             // init custom data key.
-            FluteBlockModData_ExtraPitch = string.Format("{0}/extraPitch", this.ModManifest.UniqueID);
+            ModID = this.ModManifest.UniqueID;
+            FluteBlockModData_ExtraPitch = $"{ModID}/extraPitch";
+
+            // init Harmony. (Must be called before read config because a patch may be done when reading config)
+            MainPatcher.EarlyPrepare(
+                new HarmonyLib.Harmony(ModID)
+            );
 
             // read mod config.
             this._config = helper.ReadConfig<ModConfig>();
             this._config.UpdatePitches();
 
-            // init patcher.
+            // read sounds config.
+            this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
+            if (this._soundsConfig is null)
+            {
+                this._soundsConfig = new SoundsConfig();
+                helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
+            }
+            Directory.CreateDirectory(this._soundsConfig.SoundsFolderPath);
+
+            // init other stuff in patcher.
             MainPatcher.Prepare(
-                new HarmonyLib.Harmony(this.ModManifest.UniqueID),
-                this.Monitor
+                this.Monitor,
+                new SoundFloorMapper(this._soundsConfig.SoundFloorPairs, this._soundManager),
+                this._soundManager
             );
+
+            // load sounds.
+            this._soundManager.LoadSounds(this._soundsConfig);
 
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
@@ -53,6 +77,7 @@ namespace FluteBlockExtension
         {
             new GMCMIntegration(
                 config: this._config,
+                soundsConfig: this._soundsConfig,
                 reset: this.ResetConfig,
                 save: this.SaveConfig,
                 modRegistry: this.Helper.ModRegistry,
@@ -131,7 +156,7 @@ namespace FluteBlockExtension
                 if (obj.IsFluteBlock())
                 {
                     obj.SetPitch(this._config.MinAccessiblePitch);
-                    this.Monitor.Log($"A flute block is placed. Set its {nameof(obj.preservedParentSheetIndex)} to {obj.preservedParentSheetIndex}; extraPitch to {obj.GetExtraPitchStr()};");
+                    this.Monitor.Log($"A flute block is placed. Set its pitch to {obj.GetPitch()}.");
                 }
             }
 
@@ -150,6 +175,7 @@ namespace FluteBlockExtension
         {
             this._config = new ModConfig();
             this._config.UpdatePitches();
+            this._soundsConfig = new SoundsConfig();
             this.SaveConfig();
         }
 
@@ -157,6 +183,7 @@ namespace FluteBlockExtension
         {
             this._config.UpdatePitches();
             this.Helper.WriteConfig(this._config);
+            this.Helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
         }
 
         private void FixMenu_OptionSelected(object sender, FixOptionSelectedEventArgs e)

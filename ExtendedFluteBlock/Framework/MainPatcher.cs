@@ -4,11 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using FluteBlockExtension.Framework.Sounds;
 using HarmonyLib;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
+using StardewValley.TerrainFeatures;
 using static FluteBlockExtension.Framework.Constants;
 using SObject = StardewValley.Object;
 
@@ -26,15 +29,25 @@ namespace FluteBlockExtension.Framework
 
         private static Harmony _harmony;
 
+        private static SoundFloorMapper _mapper;
+
+        private static SoundManager _soundManager;
+
         private static bool _patched;
 
         private static readonly Solution2 _corePatcher = new();
 
         /// <summary>Call this before call patch.</summary>
-        public static void Prepare(Harmony harmony, IMonitor monitor)
+        public static void EarlyPrepare(Harmony harmony)
         {
             _harmony = harmony;
+        }
+
+        public static void Prepare(IMonitor monitor, SoundFloorMapper mapper, SoundManager soundManager)
+        {
             _monitor = monitor;
+            _mapper = mapper;
+            _soundManager = soundManager;
         }
 
         /// <summary>Toggle patch on.</summary>
@@ -185,22 +198,13 @@ namespace FluteBlockExtension.Framework
                         if (__instance.internalSound != null)
                         {
                             __instance.internalSound.Stop(AudioStopOptions.Immediate);
-                            __instance.internalSound = Game1.soundBank.GetCue("flute");
                         }
-                        else
-                        {
-                            __instance.internalSound = Game1.soundBank.GetCue("flute");
-                        }
-
-                        var (gamePitch, extraPitch) = __instance.SeperatePitch();
-                        __instance.internalSound.SetVariable("Pitch", gamePitch);
-                        __instance.internalSound.Pitch = extraPitch / 1200f;
-
+                        var (cue, duration, rawPitch) = Map(_mapper, who.currentLocation, __instance.TileLocation);
+                        __instance.internalSound = cue;
+                        __instance.internalSound.Pitch = newPitch / 1200f - rawPitch / 12f;
                         __instance.internalSound.Play();
                         __instance.scale.Y = 1.3f;
-                        __instance.shakeTimer = CalculateShakeTimer(
-                            (newPitch - 1200) / 100
-                        );
+                        __instance.shakeTimer = CalculateShakeTimer(duration, rawPitch, newPitch / 100);
 
                         __result = true;
                         return false;
@@ -224,17 +228,15 @@ namespace FluteBlockExtension.Framework
 
                     if (__instance.IsFluteBlock() && (__instance.internalSound == null || ((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying)) && !Game1.dialogueUp)
                     {
-                        __instance.internalSound = Game1.soundBank.GetCue("flute");
+                        var (cue, duration, rawPitch) = Map(_mapper, location, __instance.TileLocation);
+                        __instance.internalSound = cue;
 
-                        var (gamePitch, extraPitch) = __instance.SeperatePitch();
-                        __instance.internalSound.SetVariable("Pitch", gamePitch);
-                        __instance.internalSound.Pitch = extraPitch / 1200f;
-
+                        int pitch = __instance.GetPitch();
+                        var (gamePitch, _) = __instance.SeperatePitch();
+                        __instance.internalSound.Pitch = pitch / 1200f - rawPitch / 12f;
                         __instance.internalSound.Play();
                         __instance.scale.Y = 1.3f;
-                        __instance.shakeTimer = CalculateShakeTimer(
-                            (__instance.preservedParentSheetIndex.Value - 1200) / 100
-                        );
+                        __instance.shakeTimer = CalculateShakeTimer(duration, rawPitch, pitch / 100);
                         __instance.lastNoteBlockSoundTime = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
 
                         if (location is IslandSouthEast ise)
@@ -330,13 +332,17 @@ namespace FluteBlockExtension.Framework
             }
 
             /// <summary>Get the vibration duration (in milliseconds) of flute block after it plays a sound.</summary>
-            /// <param name="deltaSemitone">Delta semitone. (Base pitch: C6)</param>
-            private static int CalculateShakeTimer(int deltaSemitone)
+            /// <param name="baseDuration">Duration at <paramref name="basePitch"/>.</param>
+            /// <param name="basePitch">Original pitch. 0 for middle C, 1 for C#, 2 for D...</param>
+            /// <param name="pitch">Actual pitch. 0 for middle C, 1 for C#, 2 for D...</param>
+            private static int CalculateShakeTimer(double baseDuration, int basePitch, int pitch)
             {
-                SoundEffect flute = Game1.waveBank.GetSoundEffect(FluteTrackIndex);
-                double baseDuration = flute.Duration.TotalMilliseconds;
+                int deltaSemitone = pitch - basePitch;
                 double octaves = deltaSemitone / 12.0;
-                return (int)(baseDuration * Math.Pow(2, -octaves));
+                int shakeTimer = (int)(baseDuration * Math.Pow(2, -octaves));
+                if (shakeTimer == 0)    // if not shake,
+                    shakeTimer = 200;   // make it shake for 2ms.
+                return shakeTimer;
             }
 
             private static readonly Dictionary<string, Type> _runtimeTypes = new();
@@ -355,6 +361,16 @@ namespace FluteBlockExtension.Framework
             private static string SuffixSObjectInfo(SObject obj, GameLocation? location)
             {
                 return $"(At {obj.TileLocation}, {location?.Name ?? "Unknown location"})";
+            }
+
+            /// <summary>Local map function. See <see cref="SoundFloorMapper.Map(Flooring?)"/>.</summary>
+            private static (ICue cue, double duration, int rawPitch) Map(SoundFloorMapper mapper, GameLocation location, Vector2 tilePos)
+            {
+                if (location.terrainFeatures.TryGetValue(tilePos, out TerrainFeature terrain))
+                    if (terrain is Flooring floor)
+                        return mapper.Map(floor);
+
+                return mapper.Map(null);
             }
 
             private static void AssertPatchFailure(Exception ex, [CallerMemberName] string methodName = "")

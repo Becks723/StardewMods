@@ -24,21 +24,19 @@ namespace FluteBlockExtension.Framework
             }
         }
 
+        /// <summary>Different sounds on different floors.</summary>
         [JsonProperty("Enable More Sounds")]
         public bool EnableSounds { get; set; } = true;
 
         /// <summary>Min pitch when tuning a flute block.</summary>
         /// <remarks>Differ from <see cref="MIN_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE"/>.</remarks>
-        [JsonProperty("Min Pitch when Right-clicking Flute Block")]
+        [JsonProperty("MinPitch")]
         public int MinAccessiblePitch { get; set; } = MIN_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE;
 
         /// <summary>Max pitch when tuning a flute block.</summary>
         /// <remarks>Differ from <see cref="MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE"/>.</remarks>
-        [JsonProperty("Max Pitch when Right-clicking Flute Block")]
+        [JsonProperty("MaxPitch")]
         public int MaxAccessiblePitch { get; set; } = MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE;
-
-        //[JsonProperty("Sound-Floor Pairs")]
-        //public SoundFloorMap SoundFloorMap { get; set; } = new();
 
         public ModConfig()
         {

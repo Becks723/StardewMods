@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Linq;
+using CodeShared.Integrations.GenericModConfigMenu.Options;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 
@@ -274,6 +277,49 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 fieldId: null
             );
             return this;
+        }
+
+        public GenericModConfigMenuFluentHelper AddCustom(Func<string> name, Action<SpriteBatch, Vector2> draw, Func<string> tooltip = null, Action beforeMenuOpened = null, Action beforeSave = null, Action afterSave = null, Action beforeReset = null, Action afterReset = null, Action beforeMenuClosed = null, Func<int> height = null, string fieldId = null)
+        {
+            this._api.AddComplexOption(
+                mod: this._manifest,
+                name: name,
+                draw: draw,
+                tooltip: tooltip,
+                beforeMenuOpened: beforeMenuOpened,
+                beforeSave: beforeSave,
+                afterSave: afterSave,
+                beforeReset: beforeReset,
+                afterReset: afterReset,
+                beforeMenuClosed: beforeMenuClosed,
+                height: height,
+                fieldId: fieldId
+            );
+            return this;
+        }
+
+        public GenericModConfigMenuFluentHelper AddCustom(Func<string> name, Func<string> tooltip, BaseCustomOption option)
+        {
+            return this.AddCustom(
+                name: name,
+                tooltip: tooltip,
+                draw: option.Draw,
+                beforeMenuOpened: option.OnMenuOpening,
+                beforeMenuClosed: option.OnMenuClosing,
+                beforeSave: option.OnSaving,
+                afterSave: option.OnSaved,
+                beforeReset: option.OnReseting,
+                afterReset: option.OnReset,
+                height: option.Height);
+        }
+
+        public GenericModConfigMenuFluentHelper AddFilePathPicker(Func<string> name, Func<string> tooltip)
+        {
+            return this.AddCustom(
+                name: name,
+                tooltip: tooltip,
+                option: new FilePathPicker()
+            );
         }
     }
 }
