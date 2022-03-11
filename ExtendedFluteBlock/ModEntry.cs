@@ -39,10 +39,13 @@ namespace FluteBlockExtension
             ModID = this.ModManifest.UniqueID;
             FluteBlockModData_ExtraPitch = $"{ModID}/extraPitch";
 
+            var harmony = new HarmonyLib.Harmony(ModID);
+
+            // fix soundeffect duration error.
+            new SoundEffectZeroDurationFix(harmony, this.Monitor).ApplyFix();
+
             // init Harmony. (Must be called before read config because a patch may be done when reading config)
-            MainPatcher.EarlyPrepare(
-                new HarmonyLib.Harmony(ModID)
-            );
+            MainPatcher.EarlyPrepare(harmony);
 
             // read mod config.
             this._config = helper.ReadConfig<ModConfig>();

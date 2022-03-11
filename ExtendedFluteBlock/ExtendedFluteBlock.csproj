@@ -19,6 +19,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Reference Include="FAudio-CS">
+			<HintPath>$(GamePath)\FAudio-CS.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Update="release-notes.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
