@@ -52,10 +52,12 @@ namespace FluteBlockExtension
             this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
             if (this._soundsConfig is null)
             {
-                this._soundsConfig = new SoundsConfig();
+                this._soundsConfig = new SoundsConfig()
+                {
+                    SoundsFolderPath = Path.Combine(helper.DirectoryPath, "assets", "sounds")
+                };
                 helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
             }
-            Directory.CreateDirectory(this._soundsConfig.SoundsFolderPath);
 
             // init other stuff in patcher.
             MainPatcher.Prepare(

@@ -7,7 +7,7 @@ namespace FluteBlockExtension.Framework
     internal class SoundsConfig
     {
         /// <summary>Absolute path to sounds folder.</summary>
-        public string SoundsFolderPath { get; set; } = Path.Combine(DataPath, ".smapi", "mod-data", ModEntry.ModID, "sounds");
+        public string SoundsFolderPath { get; set; } /*= Path.Combine(DataPath, ".smapi", "mod-data", ModEntry.ModID, "sounds");*/
 
         /// <summary>Sound-Floor pairs.</summary>
         public SoundFloorMap SoundFloorPairs { get; set; } = new()
