@@ -43,9 +43,6 @@ namespace FluteBlockExtension
             this._config = helper.ReadConfig<ModConfig>();
             this._config.UpdatePitches();
 
-            // init Harmony.
-            var harmony = new HarmonyLib.Harmony(ModID);
-
             // read sounds config.
             this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
             if (this._soundsConfig is null)
