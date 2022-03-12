@@ -54,6 +54,9 @@ namespace FluteBlockExtension
                 helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
             }
 
+            // init Harmony.
+            var harmony = new HarmonyLib.Harmony(ModID);
+
             // fix soundeffect duration error.
             new SoundEffectZeroDurationFix(harmony, this.Monitor).ApplyFix();
 
