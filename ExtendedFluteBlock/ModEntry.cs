@@ -39,17 +39,25 @@ namespace FluteBlockExtension
             ModID = this.ModManifest.UniqueID;
             FluteBlockModData_ExtraPitch = $"{ModID}/extraPitch";
 
+            // read mod config.
+            this._config = helper.ReadConfig<ModConfig>();
+            this._config.UpdatePitches();
+
+            // init Harmony.
             var harmony = new HarmonyLib.Harmony(ModID);
 
             // fix soundeffect duration error.
             new SoundEffectZeroDurationFix(harmony, this.Monitor).ApplyFix();
 
-            // init Harmony. (Must be called before read config because a patch may be done when reading config)
-            MainPatcher.EarlyPrepare(harmony);
-
-            // read mod config.
-            this._config = helper.ReadConfig<ModConfig>();
-            this._config.UpdatePitches();
+            // patch.
+            MainPatcher.Prepare(
+                harmony,
+                this._config,
+                this.Monitor,
+                new SoundFloorMapper(this._soundsConfig.SoundFloorPairs, this._soundManager),
+                this._soundManager
+            );
+            MainPatcher.Patch();
 
             // read sounds config.
             this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
@@ -61,13 +69,6 @@ namespace FluteBlockExtension
                 };
                 helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
             }
-
-            // init other stuff in patcher.
-            MainPatcher.Prepare(
-                this.Monitor,
-                new SoundFloorMapper(this._soundsConfig.SoundFloorPairs, this._soundManager),
-                this._soundManager
-            );
 
             // load sounds.
             this._soundManager.LoadSounds(this._soundsConfig);

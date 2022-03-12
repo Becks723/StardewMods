@@ -23,8 +23,8 @@ namespace FluteBlockExtension.Framework.Integrations
 
                 .AddCheckbox(
                     name: I18n.Config_EnableMod,
-                    get: () => this._config.EnableMod,
-                    set: val => this._config.EnableMod = val
+                    get: () => this._config.EnableExtraPitch,
+                    set: val => this._config.EnableExtraPitch = val
                 )
                 .AddSlider(
                     name: I18n.Config_MinPitch,

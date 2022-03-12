@@ -29,6 +29,8 @@ namespace FluteBlockExtension.Framework
 
         private static Harmony _harmony;
 
+        private static ModConfig _config;
+
         private static SoundFloorMapper _mapper;
 
         private static SoundManager _soundManager;
@@ -38,13 +40,10 @@ namespace FluteBlockExtension.Framework
         private static readonly Solution2 _corePatcher = new();
 
         /// <summary>Call this before call patch.</summary>
-        public static void EarlyPrepare(Harmony harmony)
+        public static void Prepare(Harmony harmony, ModConfig config,IMonitor monitor, SoundFloorMapper mapper, SoundManager soundManager)
         {
             _harmony = harmony;
-        }
-
-        public static void Prepare(IMonitor monitor, SoundFloorMapper mapper, SoundManager soundManager)
-        {
+            _config = config;
             _monitor = monitor;
             _mapper = mapper;
             _soundManager = soundManager;
@@ -59,18 +58,6 @@ namespace FluteBlockExtension.Framework
             {
                 _corePatcher.Patch(_harmony);
                 _patched = true;
-            }
-        }
-
-        /// <summary>Toggle patch off.</summary>
-        public static void Unpatch()
-        {
-            if (!_patched) return;
-
-            if (_harmony != null)
-            {
-                _corePatcher.Unpatch(_harmony);
-                _patched = false;
             }
         }
 
@@ -98,32 +85,12 @@ namespace FluteBlockExtension.Framework
                 // bypass throw exception when assigning Pitch with value out of range.
                 harmony.Patch(
                     original: AccessTools.Method(typeof(SoundEffectInstance), "set_Pitch"),
-                    transpiler: new HarmonyMethod(typeof(Solution2), nameof(SoundEffectInstance_Pitch_Transpiler))
+                    finalizer: new HarmonyMethod(typeof(Solution2), nameof(SoundEffectInstance_Pitch_Finalizer))
                 );
                 // unlock the FAudio max frequency limited by game.
                 harmony.Patch(
                     original: AccessTools.Method(typeof(SoundEffectInstance), "PlatformPlay"),
                     transpiler: new HarmonyMethod(typeof(Solution2), nameof(SoundEffectInstance_PlatformPlay_Transpiler))
-                );
-            }
-
-            public void Unpatch(Harmony harmony)
-            {
-                harmony.Unpatch(
-                    original: AccessTools.Method(typeof(SObject), nameof(SObject.farmerAdjacentAction)),
-                    patch: AccessTools.Method(typeof(Solution2), nameof(SObject_farmerAdjacentAction_Prefix))
-                );
-                harmony.Unpatch(
-                    original: AccessTools.Method(typeof(SObject), nameof(SObject.checkForAction)),
-                    patch: AccessTools.Method(typeof(Solution2), nameof(SObject_checkForAction_Prefix))
-                );
-                harmony.Unpatch(
-                    original: AccessTools.Method(typeof(SoundEffectInstance), "set_Pitch"),
-                    patch: AccessTools.Method(typeof(Solution2), nameof(SoundEffectInstance_Pitch_Transpiler))
-                );
-                harmony.Unpatch(
-                    original: AccessTools.Method(typeof(SoundEffectInstance), "PlatformPlay"),
-                    patch: AccessTools.Method(typeof(Solution2), nameof(SoundEffectInstance_PlatformPlay_Transpiler))
                 );
             }
 
@@ -199,9 +166,12 @@ namespace FluteBlockExtension.Framework
                         {
                             __instance.internalSound.Stop(AudioStopOptions.Immediate);
                         }
-                        var (cue, duration, rawPitch) = Map(_mapper, who.currentLocation, __instance.TileLocation);
+                        var (cue, duration, rawPitch) = Map(who.currentLocation, __instance.TileLocation);
                         __instance.internalSound = cue;
-                        __instance.internalSound.Pitch = newPitch / 1200f - rawPitch / 12f;
+                        float cuePitch = newPitch / 1200f - rawPitch / 12f;
+                        __instance.internalSound.Pitch = _config.EnableExtraPitch
+                            ? cuePitch
+                            : Math.Clamp(cuePitch, -1, 1);
                         __instance.internalSound.Play();
                         __instance.scale.Y = 1.3f;
                         __instance.shakeTimer = CalculateShakeTimer(duration, rawPitch, newPitch / 100);
@@ -228,12 +198,15 @@ namespace FluteBlockExtension.Framework
 
                     if (__instance.IsFluteBlock() && (__instance.internalSound == null || ((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying)) && !Game1.dialogueUp)
                     {
-                        var (cue, duration, rawPitch) = Map(_mapper, location, __instance.TileLocation);
+                        var (cue, duration, rawPitch) = Map(location, __instance.TileLocation);
                         __instance.internalSound = cue;
 
                         int pitch = __instance.GetPitch();
                         var (gamePitch, _) = __instance.SeperatePitch();
-                        __instance.internalSound.Pitch = pitch / 1200f - rawPitch / 12f;
+                        float cuePitch = pitch / 1200f - rawPitch / 12f;
+                        __instance.internalSound.Pitch = _config.EnableExtraPitch
+                            ? cuePitch
+                            : Math.Clamp(cuePitch, -1, 1);
                         __instance.internalSound.Play();
                         __instance.scale.Y = 1.3f;
                         __instance.shakeTimer = CalculateShakeTimer(duration, rawPitch, pitch / 100);
@@ -295,6 +268,16 @@ namespace FluteBlockExtension.Framework
                 }
 
                 return result;
+            }
+
+            private static Exception SoundEffectInstance_Pitch_Finalizer(Exception __exception, float value)
+            {
+                if (__exception is ArgumentOutOfRangeException)
+                {
+                    _monitor.Log($"Attempting to set soundeffectinstance's pitch to {value}.");
+                }
+
+                return null;  // suppress exception.
             }
 
             private static IEnumerable<CodeInstruction> SoundEffectInstance_PlatformPlay_Transpiler(IEnumerable<CodeInstruction> oldInstructions)
@@ -364,8 +347,15 @@ namespace FluteBlockExtension.Framework
             }
 
             /// <summary>Local map function. See <see cref="SoundFloorMapper.Map(Flooring?)"/>.</summary>
-            private static (ICue cue, double duration, int rawPitch) Map(SoundFloorMapper mapper, GameLocation location, Vector2 tilePos)
+            private static (ICue cue, double duration, int rawPitch) Map(GameLocation location, Vector2 tilePos)
             {
+                var mapper = _mapper;
+
+                if (!_config.EnableSounds)
+                {
+                    return mapper.MapForFlute();
+                }
+
                 if (location.terrainFeatures.TryGetValue(tilePos, out TerrainFeature terrain))
                     if (terrain is Flooring floor)
                         return mapper.Map(floor);
