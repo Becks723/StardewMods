@@ -66,5 +66,14 @@ namespace FluteBlockExtension.Framework
 
             return sound;
         }
+
+        public (ICue cue, double duration, int rawPitch) MapForFlute()
+        {
+            ICue flute = Game1.soundBank.GetCue("flute");
+            flute.SetVariable("Pitch", 1200);
+            double duration = Game1.waveBank.GetSoundEffect(Constants.FluteTrackIndex).Duration.TotalMilliseconds;
+
+            return (flute, duration, 12);
+        }
     }
 }

@@ -6,23 +6,9 @@ namespace FluteBlockExtension.Framework
 {
     internal class ModConfig
     {
-        private bool _enableMod;
-
         /// <summary>Whether to extend pitch.</summary>
         [JsonProperty("Enable Extended Pitch")]
-        public bool EnableMod
-        {
-            get => this._enableMod;
-            set
-            {
-                this._enableMod = value;
-
-                if (this._enableMod)
-                    MainPatcher.Patch();
-                else
-                    MainPatcher.Unpatch();
-            }
-        }
+        public bool EnableExtraPitch { get; set; } = true;
 
         /// <summary>Different sounds on different floors.</summary>
         [JsonProperty("Enable More Sounds")]
@@ -37,11 +23,6 @@ namespace FluteBlockExtension.Framework
         /// <remarks>Differ from <see cref="MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE"/>.</remarks>
         [JsonProperty("MaxPitch")]
         public int MaxAccessiblePitch { get; set; } = MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE;
-
-        public ModConfig()
-        {
-            this.EnableMod = true;  // init property to run setter logic.
-        }
 
         /// <summary>Verify new pitches value, then update the ones in patcher.</summary>
         /// <remarks>Call this when either <see cref="MinAccessiblePitch"/> or <see cref="MaxAccessiblePitch"/> is changed.</remarks>
