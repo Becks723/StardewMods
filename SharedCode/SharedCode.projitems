@@ -9,11 +9,14 @@
     <Import_RootNamespace>CodeShared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\GenericModConfigMenuFluentHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\GenericModConfigMenuIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\IGenericModConfigMenuApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\Options\BaseCustomOption.cs" />
+    <Compile Include="..\SharedCode\Integrations\GenericModConfigMenu\Options\Button.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\Options\FilePathPicker.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Integrations\GenericModConfigMenu\Options\Textbox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SaveAnywhere\ISaveAnywhereApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SaveAnywhere\SaveAnywhereIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SpaceCore\ISpaceCoreApi.cs" />

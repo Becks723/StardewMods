@@ -8,7 +8,7 @@ namespace CodeShared.Integrations.GenericModConfigMenu.Options
 {
     internal abstract class BaseCustomOption
     {
-        public abstract int Height();
+        public abstract int Height { get; }
 
         public abstract void Draw(SpriteBatch b, Vector2 drawOrigin);
 

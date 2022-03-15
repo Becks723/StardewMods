@@ -4,6 +4,7 @@ using System.Linq;
 using CodeShared.Utils;
 using FluteBlockExtension.Framework;
 using FluteBlockExtension.Framework.Integrations;
+using FluteBlockExtension.Framework.Patchers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -35,9 +36,10 @@ namespace FluteBlockExtension
             // init translation.
             I18n.Init(helper.Translation);
 
-            // init custom data key.
+            // init misc data.
             ModID = this.ModManifest.UniqueID;
             FluteBlockModData_ExtraPitch = $"{ModID}/extraPitch";
+            SoundsConfig.DefaultSoundsFolderPath = Path.Combine(helper.DirectoryPath, "assets", "sounds");
 
             // read mod config.
             this._config = helper.ReadConfig<ModConfig>();
@@ -47,10 +49,7 @@ namespace FluteBlockExtension
             this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
             if (this._soundsConfig is null)
             {
-                this._soundsConfig = new SoundsConfig()
-                {
-                    SoundsFolderPath = Path.Combine(helper.DirectoryPath, "assets", "sounds")
-                };
+                this._soundsConfig = new SoundsConfig();
                 helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
             }
 
@@ -59,6 +58,10 @@ namespace FluteBlockExtension
 
             // fix soundeffect duration error.
             new SoundEffectZeroDurationFix(harmony, this.Monitor).ApplyFix();
+
+            // customize keyboardDispatcher.
+            Game1.keyboardDispatcher.Cleanup();
+            Game1.keyboardDispatcher = new KeyboardDispatcherPlus(Game1.game1.Window);
 
             // patch.
             MainPatcher.Prepare(
@@ -83,8 +86,8 @@ namespace FluteBlockExtension
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             new GMCMIntegration(
-                config: this._config,
-                soundsConfig: this._soundsConfig,
+                config: () => this._config,
+                soundsConfig: () => this._soundsConfig,
                 reset: this.ResetConfig,
                 save: this.SaveConfig,
                 modRegistry: this.Helper.ModRegistry,
@@ -183,7 +186,6 @@ namespace FluteBlockExtension
             this._config = new ModConfig();
             this._config.UpdatePitches();
             this._soundsConfig = new SoundsConfig();
-            this.SaveConfig();
         }
 
         private void SaveConfig()

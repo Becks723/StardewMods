@@ -1,4 +1,5 @@
 ﻿using System;
+using FluteBlockExtension.Framework.Patchers;
 using Newtonsoft.Json;
 using static FluteBlockExtension.Framework.Constants;
 
@@ -7,7 +8,7 @@ namespace FluteBlockExtension.Framework
     internal class ModConfig
     {
         /// <summary>Whether to extend pitch.</summary>
-        [JsonProperty("Enable Extended Pitch")]
+        [JsonProperty("Enable More Pitch")]
         public bool EnableExtraPitch { get; set; } = true;
 
         /// <summary>Different sounds on different floors.</summary>

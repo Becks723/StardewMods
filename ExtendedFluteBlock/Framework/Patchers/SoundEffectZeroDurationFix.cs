@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Audio;
 using StardewModdingAPI;
 using static FAudio;
 
-namespace FluteBlockExtension.Framework
+namespace FluteBlockExtension.Framework.Patchers
 {
     /// <summary>Fix an error that a SoundEffect's Duration property is always 0. This error is specific in SDV's custom Monogame impl.</summary>
     internal class SoundEffectZeroDurationFix
@@ -33,7 +33,7 @@ namespace FluteBlockExtension.Framework
             FAudioWaveFormatEx fAudioWaveFormatEx = Marshal.PtrToStructure<FAudioWaveFormatEx>(___formatPtr);
 
             // add '1.0 *' make ulong calculation to double calculation.
-            duration = TimeSpan.FromSeconds((double)(1.0 * (ulong)___handle.AudioBytes / (ulong)((long)((int)fAudioWaveFormatEx.nChannels * Math.Max((int)(fAudioWaveFormatEx.wBitsPerSample / 8), 1))) / (ulong)fAudioWaveFormatEx.nSamplesPerSec));
+            duration = TimeSpan.FromSeconds((double)(1.0 * ___handle.AudioBytes / (ulong)(long)(fAudioWaveFormatEx.nChannels * Math.Max(fAudioWaveFormatEx.wBitsPerSample / 8, 1)) / fAudioWaveFormatEx.nSamplesPerSec));
         }
     }
 }

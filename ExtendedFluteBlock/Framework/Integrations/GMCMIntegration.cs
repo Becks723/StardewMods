@@ -7,14 +7,19 @@ namespace FluteBlockExtension.Framework.Integrations
 {
     internal class GMCMIntegration : GenericModConfigMenuIntegrationBase
     {
-        private readonly ModConfig _config;
-        private readonly SoundsConfig _soundsConfig;
+        private readonly Func<ModConfig> _getConfig;
 
-        public GMCMIntegration(ModConfig config, SoundsConfig soundsConfig, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
+        private readonly Func<SoundsConfig> _getSoundsConfig;
+
+        private ModConfig _config => _getConfig();
+
+        private SoundsConfig _soundsConfig => _getSoundsConfig();
+
+        public GMCMIntegration(Func<ModConfig> config!!, Func<SoundsConfig> soundsConfig!!, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
             : base(reset, save, modRegistry, monitor, manifest)
         {
-            this._config = config;
-            this._soundsConfig = soundsConfig;
+            this._getConfig = config;
+            this._getSoundsConfig = soundsConfig;
         }
 
         protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)
@@ -22,9 +27,14 @@ namespace FluteBlockExtension.Framework.Integrations
             helper.Register()
 
                 .AddCheckbox(
-                    name: I18n.Config_EnableMod,
+                    name: I18n.Config_EnableMorePitch,
                     get: () => this._config.EnableExtraPitch,
                     set: val => this._config.EnableExtraPitch = val
+                )
+                .AddCheckbox(
+                    name: I18n.Config_EnableMoreSounds,
+                    get: () => this._config.EnableSounds,
+                    set: val => this._config.EnableSounds = val
                 )
                 .AddSlider(
                     name: I18n.Config_MinPitch,
@@ -52,7 +62,9 @@ namespace FluteBlockExtension.Framework.Integrations
                 //)
                 .AddFilePathPicker(
                     name: I18n.Config_Sounds_FolderPath,
-                    tooltip: I18n.Config_Sounds_FolderPath_Tooltip
+                    tooltip: I18n.Config_Sounds_FolderPath_Tooltip,
+                    getPath: () => this._soundsConfig.SoundsFolderPath,
+                    setPath: val => this._soundsConfig.SoundsFolderPath = val
                 );
         }
     }

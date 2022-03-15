@@ -15,7 +15,7 @@ using StardewValley.TerrainFeatures;
 using static FluteBlockExtension.Framework.Constants;
 using SObject = StardewValley.Object;
 
-namespace FluteBlockExtension.Framework
+namespace FluteBlockExtension.Framework.Patchers
 {
     internal static class MainPatcher
     {
@@ -40,7 +40,7 @@ namespace FluteBlockExtension.Framework
         private static readonly Solution2 _corePatcher = new();
 
         /// <summary>Call this before call patch.</summary>
-        public static void Prepare(Harmony harmony, ModConfig config,IMonitor monitor, SoundFloorMapper mapper, SoundManager soundManager)
+        public static void Prepare(Harmony harmony, ModConfig config, IMonitor monitor, SoundFloorMapper mapper, SoundManager soundManager)
         {
             _harmony = harmony;
             _config = config;
@@ -111,14 +111,12 @@ namespace FluteBlockExtension.Framework
                         // 按照原版计算公式（x = (x + 100) % 2400）可得，新preservedParentSheetIndex为-900，甚至不在范围内。
                         // 我们要让新值为0，因此就有了下面的检查代码。
                         if (!_patched)
-                        {
                             // 检查旧值，让它不小于-100，这样调音后就变成0。
                             if (__instance.preservedParentSheetIndex.Value < -100)
                             {
                                 __instance.preservedParentSheetIndex.Value = -100;
                                 _monitor.Log($"{nameof(SObject_checkForAction_Prefix_Always)}: Fixed a pitch mismatch when mod off. {SuffixSObjectInfo(__instance, who.currentLocation)}");
                             }
-                        }
                     }
                 }
                 catch (Exception ex)
@@ -155,17 +153,13 @@ namespace FluteBlockExtension.Framework
                             __instance.preservedParentSheetIndex.Value = (oldPitch + 100) % 2400;
                         }
                         else
-                        {
                             __instance.preservedParentSheetIndex.Value = CalculateNextPitch(oldPitch);
-                        }
 
                         int newPitch = __instance.preservedParentSheetIndex.Value;
                         _monitor.Log($"{nameof(SObject_checkForAction_Prefix)}: After tuning, {nameof(__instance.preservedParentSheetIndex)}: {newPitch}.");
 
                         if (__instance.internalSound != null)
-                        {
                             __instance.internalSound.Stop(AudioStopOptions.Immediate);
-                        }
                         var (cue, duration, rawPitch) = Map(who.currentLocation, __instance.TileLocation);
                         __instance.internalSound = cue;
                         float cuePitch = newPitch / 1200f - rawPitch / 12f;
@@ -196,7 +190,7 @@ namespace FluteBlockExtension.Framework
                     if (__instance.isTemporarilyInvisible)
                         return false;
 
-                    if (__instance.IsFluteBlock() && (__instance.internalSound == null || ((int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying)) && !Game1.dialogueUp)
+                    if (__instance.IsFluteBlock() && (__instance.internalSound == null || (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying) && !Game1.dialogueUp)
                     {
                         var (cue, duration, rawPitch) = Map(location, __instance.TileLocation);
                         __instance.internalSound = cue;
@@ -273,9 +267,7 @@ namespace FluteBlockExtension.Framework
             private static Exception SoundEffectInstance_Pitch_Finalizer(Exception __exception, float value)
             {
                 if (__exception is ArgumentOutOfRangeException)
-                {
                     _monitor.Log($"Attempting to set soundeffectinstance's pitch to {value}.");
-                }
 
                 return null;  // suppress exception.
             }
@@ -287,10 +279,7 @@ namespace FluteBlockExtension.Framework
                 {
                     if (i >= 2 &&
                         instructions[i - 2].operand is FieldInfo { Name: "formatPtr" })
-                    {
                         instructions[i].operand = 8f;       // C6 ~ C9  3 octaves  2^3
-                                                            // now SoundEffectInstance::Pitch ranges from [-10, 3], no exception thrown if outofrange
-                    }
 
                     yield return instructions[i];
                 }
@@ -341,20 +330,18 @@ namespace FluteBlockExtension.Framework
                 return type;
             }
 
-            private static string SuffixSObjectInfo(SObject obj, GameLocation? location)
+            private static string SuffixSObjectInfo(SObject obj, GameLocation location)
             {
                 return $"(At {obj.TileLocation}, {location?.Name ?? "Unknown location"})";
             }
 
-            /// <summary>Local map function. See <see cref="SoundFloorMapper.Map(Flooring?)"/>.</summary>
+            /// <summary>Local map function. See <see cref="SoundFloorMapper.Map(Flooring)"/>.</summary>
             private static (ICue cue, double duration, int rawPitch) Map(GameLocation location, Vector2 tilePos)
             {
                 var mapper = _mapper;
 
                 if (!_config.EnableSounds)
-                {
                     return mapper.MapForFlute();
-                }
 
                 if (location.terrainFeatures.TryGetValue(tilePos, out TerrainFeature terrain))
                     if (terrain is Flooring floor)

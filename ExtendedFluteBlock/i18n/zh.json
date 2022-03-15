@@ -7,7 +7,8 @@
   "fix-menu.labels.flute-block-coord": "坐标: ({{tileX}}, {{tileY}})",
   "fix-menu.labels.flute-block-location": "地点: {{location}}",
 
-  "config.enable-mod": "启用功能",
+  "config.enable-more-pitch": "扩展音域",
+  "config.enable-more-sounds": "扩展音色",
   "config.min-pitch": "最低音",
   "config.min-pitch.tooltip": "调音时可达到的最低音，不能超过下面的最高音。60为中央C，每加一表示增加一个半音，每加十二表示增加一个八度。",
   "config.max-pitch": "最高音",

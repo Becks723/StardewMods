@@ -86,11 +86,10 @@ namespace CodeShared.Integrations.GenericModConfigMenu
             return this;
         }
 
-        public GenericModConfigMenuFluentHelper AddDropDown(Func<string> name, Func<string> get, Action<string> set, string[] choices, Func<string, string> formattedChoices = null, Func<string> tooltip = null, Action<object> fieldChanged = null)
+        public GenericModConfigMenuFluentHelper AddDropDown(Func<string> name, Func<string> get, Action<string> set, string[] choices, Func<string, string> formattedChoices = null, Func<string> tooltip = null, Action<string> fieldChanged = null)
         {
-            string fieldId = null;
-            if (fieldChanged != null)
-                fieldId = Guid.NewGuid().ToString();
+            string fieldID = this.WhenChange(fieldChanged);
+
             this._api.AddTextOption(
                 mod: this._manifest,
                 getValue: get,
@@ -99,37 +98,9 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 tooltip: tooltip,
                 allowedValues: choices,
                 formatAllowedValue: formattedChoices,
-                fieldId: fieldId
+                fieldId: fieldID
             );
-            if (fieldChanged != null)
-                this._api.OnFieldChanged(this._manifest, (id, val) =>
-                {
-                    if (id == fieldId)
-                        fieldChanged(val);
-                });
-            return this;
-        }
 
-        /// <summary>
-        /// Add a drop down, 
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="getIndex">Gets the index of value from mod config.</param>
-        /// <param name="setIndex">Sets the index of a new value in mod config.</param>
-        /// <param name="choices"></param>
-        /// <param name="tooltip"></param>
-        /// <param name="fieldChanged"></param>
-        /// <returns></returns>
-        public GenericModConfigMenuFluentHelper AddDropDown(Func<string> name, Func<int> getIndex, Action<int> setIndex, string[] choices, Func<string> tooltip = null, Action<int> fieldChanged = null)
-        {
-            this.AddDropDown(
-                name: name,
-                get: () => choices[getIndex()],
-                set: val => setIndex(Array.IndexOf(choices, val)),
-                choices: choices,
-                tooltip: tooltip,
-                fieldChanged: val => fieldChanged?.Invoke(Array.IndexOf(choices, val))
-            );
             return this;
         }
 
@@ -137,13 +108,13 @@ namespace CodeShared.Integrations.GenericModConfigMenu
         /// Add a drop down for a set of integer choices.
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="get">Gets the integer value from mod config.</param>
-        /// <param name="set">Sets a new integer value in mod config.</param>
+        /// <param name="get">Gets the integer value.</param>
+        /// <param name="set">Sets a new integer value.</param>
         /// <param name="choices"></param>
         /// <param name="tooltip"></param>
         /// <param name="fieldChanged"></param>
         /// <returns></returns>
-        public GenericModConfigMenuFluentHelper AddDropDown(Func<string> name, Func<int> get, Action<int> set, int[] choices, Func<string> tooltip = null)
+        public GenericModConfigMenuFluentHelper AddDropDown(Func<string> name, Func<int> get, Action<int> set, int[] choices, Func<string> tooltip = null, Action<int> fieldChanged = null)
         {
             this.AddDropDown(
                 name: name,
@@ -151,17 +122,19 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 set: val => set(int.Parse(val)),
                 choices: choices.Select(i => i.ToString()).ToArray(),
                 tooltip: tooltip,
-                fieldChanged: null
+                fieldChanged: val => fieldChanged?.Invoke(int.Parse(val))
             );
             return this;
         }
 
+        /// <summary>Add a drop down for an Enum type.</summary>
         public GenericModConfigMenuFluentHelper AddDropDown<TEnum>(Func<string> name, Func<TEnum> get, Action<TEnum> set, Func<TEnum, string> displayText = null, Func<string> tooltip = null, Action<TEnum> fieldChanged = null)
             where TEnum : struct, Enum
         {
             Func<string, string> formattedChoices = displayText is null
                 ? null
                 : str => displayText(Enum.Parse<TEnum>(str));
+
             this.AddDropDown(
                 name: name,
                 get: () => Enum.GetName(get()),
@@ -169,30 +142,24 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 choices: Enum.GetNames<TEnum>(),
                 tooltip: tooltip,
                 formattedChoices: formattedChoices,
-                fieldChanged: val => fieldChanged?.Invoke((TEnum)val)
+                fieldChanged: val => fieldChanged?.Invoke(Enum.Parse<TEnum>(val))
             );
             return this;
         }
 
         public GenericModConfigMenuFluentHelper AddCheckbox(Func<string> name, Func<bool> get, Action<bool> set, Func<string> tooltip = null, Action<bool> fieldChanged = null)
         {
-            string fieldId = null;
-            if (fieldChanged != null)
-                fieldId = Guid.NewGuid().ToString();
+            string fieldID = this.WhenChange(fieldChanged);
+
             this._api.AddBoolOption(
                 mod: this._manifest,
                 getValue: get,
                 setValue: set,
                 name: name,
                 tooltip: tooltip,
-                fieldId: fieldId
+                fieldId: fieldID
             );
-            if (fieldChanged != null)
-                this._api.OnFieldChanged(this._manifest, (id, val) =>
-                {
-                    if (id == fieldId)
-                        fieldChanged((bool)val);
-                });
+
             return this;
         }
 
@@ -310,16 +277,36 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 afterSave: option.OnSaved,
                 beforeReset: option.OnReseting,
                 afterReset: option.OnReset,
-                height: option.Height);
+                height: () => option.Height
+            );
         }
 
-        public GenericModConfigMenuFluentHelper AddFilePathPicker(Func<string> name, Func<string> tooltip)
+        public GenericModConfigMenuFluentHelper AddFilePathPicker(Func<string> name, Func<string> tooltip, Func<string> getPath, Action<string> setPath)
         {
             return this.AddCustom(
                 name: name,
                 tooltip: tooltip,
-                option: new FilePathPicker()
+                option: new FilePathPicker(getPath, setPath)
             );
+        }
+
+        /// <summary>Subscribe to field change event.</summary>
+        /// <returns>The unique field ID.</returns>
+        private string WhenChange<TField>(Action<TField> fieldChange)
+        {
+            string fieldID = null;
+            if (fieldChange != null)
+            {
+                fieldID = Guid.NewGuid().ToString("N");
+
+                this._api.OnFieldChanged(this._manifest, (id, val) =>
+                {
+                    if (id == fieldID)
+                        fieldChange((TField)val);
+                });
+            }
+
+            return fieldID;
         }
     }
 }
