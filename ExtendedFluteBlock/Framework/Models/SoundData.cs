@@ -9,8 +9,10 @@ using StardewModdingAPI.Utilities;
 namespace FluteBlockExtension.Framework.Models
 {
     /// <summary>Model for a sound.</summary>
-    internal class SoundData
+    internal class SoundData : IEquatable<SoundData>
     {
+        public static readonly SoundData Empty = new SoundData();
+
         public static SoundData GameSound(
             string name,
             string cueName,
@@ -65,6 +67,24 @@ namespace FluteBlockExtension.Framework.Models
                 return SoundType.GameCue;
             else
                 return SoundType.CustomCue;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null) return false;
+            if (obj is not SoundData other) return false;
+
+            return this.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.CueName.GetHashCode();
+        }
+
+        public bool Equals(SoundData other)
+        {
+            return this.CueName == other?.CueName;
         }
     }
 }

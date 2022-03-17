@@ -4,6 +4,7 @@ using System.Linq;
 using CodeShared.Utils;
 using FluteBlockExtension.Framework;
 using FluteBlockExtension.Framework.Integrations;
+using FluteBlockExtension.Framework.Models;
 using FluteBlockExtension.Framework.Patchers;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -46,12 +47,7 @@ namespace FluteBlockExtension
             this._config.UpdatePitches();
 
             // read sounds config.
-            this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
-            if (this._soundsConfig is null)
-            {
-                this._soundsConfig = new SoundsConfig();
-                helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
-            }
+            this.ReadSoundsConfig();
 
             // init Harmony.
             var harmony = new HarmonyLib.Harmony(ModID);
@@ -193,6 +189,32 @@ namespace FluteBlockExtension
             this._config.UpdatePitches();
             this.Helper.WriteConfig(this._config);
             this.Helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
+        }
+
+        private void ReadSoundsConfig()
+        {
+            var helper = this.Helper;
+            this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
+
+            // if sounds file not exists, create a new.
+            if (this._soundsConfig is null)
+            {
+                this._soundsConfig = new SoundsConfig();
+                helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
+            }
+
+            // recover built-in sounds if lost.
+            var pairs = this._soundsConfig.SoundFloorPairs;
+            var builtInSounds = SoundsConfig.BuiltInSoundFloorPairs.Select(p => p.Sound).ToArray();
+            var currentSounds = pairs.Select(p => p.Sound).ToArray();
+
+            foreach (var sound in builtInSounds)
+            {
+                if (!currentSounds.Contains(sound))
+                {
+                    pairs.Add(new SoundFloorMapItem() { Sound = sound, Floor = FloorData.Empty });
+                }
+            }
         }
 
         private void FixMenu_OptionSelected(object sender, FixOptionSelectedEventArgs e)

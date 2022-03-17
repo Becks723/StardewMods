@@ -13,17 +13,21 @@ namespace FluteBlockExtension.Framework
         /// <summary>Absolute path to sounds folder.</summary>
         public string SoundsFolderPath { get; set; } = DefaultSoundsFolderPath; /*= Path.Combine(DataPath, ".smapi", "mod-data", ModEntry.ModID, "sounds");*/
 
-        /// <summary>Sound-Floor pairs.</summary>
-        public SoundFloorMap SoundFloorPairs { get; set; } = new()
+        internal static readonly SoundFloorMap BuiltInSoundFloorPairs = new()
         {
 #pragma warning disable format
-            InGame(floor: NonFloor,         name: "flute",              cue: "flute",               rawPitch: 12),
-            InGame(floor: StoneFloor,       name: "crystal",            cue: "crystal",             rawPitch: 36),
+            InGame(floor: NonFloor,         name: "flute",              cue: "flute",               rawPitch: 12),  // C6
+            InGame(floor: CrystalFloor,     name: "crystal",            cue: "crystal",             rawPitch: 36),  // C8
+            InGame(floor: StoneFloor,       name: "clam",               cue: "clam_tone",           rawPitch: 11),  // B5
+            InGame(floor: StrawFloor,       name: "toy piano",          cue: "toyPiano",            rawPitch: 24),  // C7
 
-            Custom(floor: WoodFloor,        name: "piano",              cue: "piano",               paths: "piano.wav"),
-            Custom(floor: WeatheredFloor,   name: "acoustic guitar",    cue: "acoustic_guitar",     paths: "acoustic guitar.wav")
+            Custom(floor: WoodFloor,        name: "piano",              cue: "piano",               rawPitch: 0,    paths: "piano.wav"),
+            Custom(floor: WeatheredFloor,   name: "acoustic guitar",    cue: "acoustic_guitar",     rawPitch: 0,    paths: "acoustic guitar.wav")
 #pragma warning restore format
         };
+
+        /// <summary>Sound-Floor pairs.</summary>
+        public SoundFloorMap SoundFloorPairs { get; set; } = BuiltInSoundFloorPairs;
 
         private static SoundFloorMapItem InGame(FloorData floor, string name, string cue, int rawPitch, string notes = null)
         {

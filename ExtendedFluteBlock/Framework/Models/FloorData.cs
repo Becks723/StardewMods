@@ -6,6 +6,8 @@ namespace FluteBlockExtension.Framework.Models
     /// <remarks>Note this's a record.</remarks>
     internal record FloorData
     {
+        public static readonly FloorData Empty = new FloorData() { WhichFloor = int.MaxValue };
+
         public static readonly FloorData NonFloor = new FloorData() { WhichFloor = null };
 
         /// <summary>sheetindex = 328 <see href="https://stardewvalleywiki.com/Wood_Floor"/></summary>
@@ -67,6 +69,11 @@ namespace FluteBlockExtension.Framework.Models
                 12 => StoneWalkwayFloor,
                 _ => throw new NotSupportedException($"Unknown floor number: {whichFloor}.")
             };
+        }
+
+        public static bool IsEmpty(FloorData floor)
+        {
+            return floor == Empty;
         }
 
         /// <summary>Floor number.</summary>
