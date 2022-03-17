@@ -1,6 +1,8 @@
 ﻿using System.IO;
+using System.Linq;
 using FluteBlockExtension.Framework.Models;
 using static StardewModdingAPI.Constants;
+using static FluteBlockExtension.Framework.Models.FloorData;
 
 namespace FluteBlockExtension.Framework
 {
@@ -14,9 +16,31 @@ namespace FluteBlockExtension.Framework
         /// <summary>Sound-Floor pairs.</summary>
         public SoundFloorMap SoundFloorPairs { get; set; } = new()
         {
-            new() { Sound = SoundData.GameSound(name: "flute", cueName: "flute", rawPitch: 12), Floor = FloorData.NonFloor },
-            new() { Sound = SoundData.CustomSound(name: "piano", cueName: "piano", paths: FilePath.With("piano.wav")), Floor = FloorData.WoodFloor },
-            new() { Sound = SoundData.GameSound(name: "crystal", cueName: "crystal", rawPitch: 36), Floor = FloorData.StoneFloor },
+#pragma warning disable format
+            InGame(floor: NonFloor,         name: "flute",              cue: "flute",               rawPitch: 12),
+            InGame(floor: StoneFloor,       name: "crystal",            cue: "crystal",             rawPitch: 36),
+
+            Custom(floor: WoodFloor,        name: "piano",              cue: "piano",               paths: "piano.wav"),
+            Custom(floor: WeatheredFloor,   name: "acoustic guitar",    cue: "acoustic_guitar",     paths: "acoustic guitar.wav")
+#pragma warning restore format
         };
+
+        private static SoundFloorMapItem InGame(FloorData floor, string name, string cue, int rawPitch, string notes = null)
+        {
+            return new SoundFloorMapItem
+            {
+                Sound = SoundData.GameSound(name, cue, rawPitch, notes),
+                Floor = floor
+            };
+        }
+
+        private static SoundFloorMapItem Custom(FloorData floor, string name, string cue, int rawPitch = 0, string notes = null, params string[] paths)  // relative paths
+        {
+            return new SoundFloorMapItem
+            {
+                Sound = SoundData.CustomSound(name, cue, rawPitch, notes, paths.Select(p => FilePath.With(p)).ToArray()),
+                Floor = floor
+            };
+        }
     }
 }
