@@ -10,20 +10,27 @@ namespace CodeShared.Integrations.GenericModConfigMenu.Options
 {
     public class Button
     {
-        private readonly Texture2D _texture = Game1.mouseCursors;
-
-        private readonly Rectangle _sourceRect = new Rectangle(432, 439, 9, 9);
-
         /// <summary>The extra color to render based on original texture, to highlight a hover or clicked state.</summary>
         private Color _render;
 
-        public EventHandler Callback { get; set; }
+        public event EventHandler Callback;
 
         public Vector2 LocalPosition { get; set; }
 
         public Vector2 Position => this.LocalPosition;
 
         public Vector2 Size { get; set; }
+
+        /// <summary>Gets or sets the content to display on this button.</summary>
+        /// <remarks>Current supports: <see cref="string"/>, <see cref="Texture2D"/>. Other type would be converted to string.</remarks>
+        public object Content { get; set; }
+
+        /// <summary>Gets or sets a source rectangle when <see cref="Content"/> is a <see cref="Texture2D"/>.</summary>
+        public Rectangle? SourceRectangle { get; set; }
+
+        public SpriteFont Font { get; set; } = Game1.dialogueFont;
+
+        public float Scale { get; set; } = 1f;
 
         public int Width => (int)this.Size.X;
 
@@ -84,7 +91,41 @@ namespace CodeShared.Integrations.GenericModConfigMenu.Options
 
         public void Draw(SpriteBatch b)
         {
-            IClickableMenu.drawTextureBox(b, this._texture, this._sourceRect, (int)this.Position.X, (int)this.Position.Y, this.Width, this.Height, this._render, 4f, false);
+            Color color = this._render;
+            IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(432, 439, 9, 9), (int)this.Position.X, (int)this.Position.Y, this.Width, this.Height, color, 4f, false);
+
+            float scale = this.Scale;
+            var font = this.Font;
+            string text = string.Empty;
+            Vector2 drawOrigin;
+            bool isText;
+            switch (this.Content)
+            {
+                case Texture2D tex:
+                    isText = false;
+                    Rectangle srcRect = this.SourceRectangle ?? tex.Bounds;
+                    drawOrigin = new Vector2(this.Bounds.Center.X - srcRect.Width / 2 * scale, this.Bounds.Center.Y - srcRect.Height / 2 * scale);
+                    b.Draw(tex, drawOrigin, srcRect, color, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+                    break;
+
+                case string @string:
+                    isText = true;
+                    text = @string;
+                    break;
+
+                default:
+                    isText = true;
+                    text = this.Content?.ToString() ?? string.Empty;
+                    break;
+            }
+
+            if (isText)
+            {
+                var strSize = font.MeasureString(text) * scale;
+                drawOrigin = new Vector2(this.Bounds.Center.X - strSize.X / 2, this.Bounds.Center.Y - strSize.Y / 2);
+                b.DrawString(font, text, drawOrigin, Game1.textColor, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+                //Utility.drawTextWithShadow(b, text, font, drawOrigin, Game1.textColor, scale); // 中文乱码
+            }
         }
 
         protected virtual void RaiseCallback(EventArgs e)

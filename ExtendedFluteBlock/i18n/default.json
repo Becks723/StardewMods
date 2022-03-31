@@ -14,6 +14,35 @@
   "config.max-pitch": "Max Accessible Pitch",
   "config.max-pitch.tooltip": "Maximum pitch accessible when tuning, must not less than 'Min Accessible Pitch' above. (Middle C is 60. Every 1 is a semitone, every 12 is an ocatave.)",
   "config.section-title.sounds": "Sounds",
-  "config.sounds.folder-path": "Sounds Folder",
-  "config.sounds.folder-path.tooltip": "The absolute path to sounds folder."
+  "config.sound-folder-path": "Sounds Folder",
+  "config.sound-folder-path.tooltip": "The absolute path to sounds folder.",
+  "config.sound-floor": "Sound & Floor",
+  "config.sound-floor.tooltip": "Edit sound-floor matchup.",
+  "config.sound-floor.editor.sound-title": "Sounds",
+  "config.sound-floor.editor.floor-title": "Floors",
+  "config.sound.editor-options.name": "Name",
+  "config.sound.editor-options.cue-name": "Cue Name",
+  "config.sound.editor-options.raw-pitch": "Raw Pitch",
+  "config.sound.editor-options.file-paths": "File Path(s)",
+  "config.sound.editor-options.desc": "Notes",
+  "config.floor.editor-options.select": "Select a Floor",
+
+  "floor.non-floor.name": "Non-Floor",
+  "floor.unknown-floor.name": "Unknown Floor ({{whichFloor}})",
+  "floor.empty": "Empty",
+
+  "sound.empty": "Empty",
+  "sound.flute.name": "Flute",
+  "sound.flute.desc": "Vanilla flute block's sound.",
+  "sound.crystal.name": "Crystal",
+  "sound.crystal.desc": "Vanilla singing stone's sound.",
+  "sound.clam.name": "Clam",
+  "sound.clam.desc": "Sound of a clam shell in Mermaid Boat at Night Market.",
+  "sound.toy-piano.name": "Elliott's Piano",
+  "sound.toy-piano.desc": "Piano in Elliott house.",
+  "sound.piano.name": "Piano",
+  "sound.piano.desc": "",
+  "sound.acoustic-guitar.name": "Acoustic Guitar",
+  "sound.acoustic-guitar.desc": ""
+
 }

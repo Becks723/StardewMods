@@ -11,32 +11,50 @@ namespace FluteBlockExtension.Framework.Models
     /// <summary>Model for a sound.</summary>
     internal class SoundData : IEquatable<SoundData>
     {
-        public static readonly SoundData Empty = new SoundData();
+        private string _name;
+
+        private string _description;
+
+        public static readonly SoundData Empty = new SoundData() { IsEmpty = true };
 
         public static SoundData GameSound(
-            string name,
+            Func<string> name,
             string cueName,
             int rawPitch = 0,
-            string notes = null)
+            Func<string> description = null)
         {
-            SoundData sound = new SoundData { Name = name, CueName = cueName, RawPitch = rawPitch, Notes = notes };
+            SoundData sound = new SoundData { NameFunc = name, CueName = cueName, RawPitch = rawPitch, DescriptionFunc = description };
             return sound;
         }
 
         public static SoundData CustomSound(
-            string name,
+            Func<string> name,
             string cueName,
             int rawPitch = 0,
-            string notes = null,
+            Func<string> description = null,
             params FilePath[] paths)
         {
-            SoundData sound = new SoundData { Name = name, CueName = cueName, RawPitch = rawPitch, Notes = notes };
+            SoundData sound = new SoundData { NameFunc = name, CueName = cueName, RawPitch = rawPitch, DescriptionFunc = description };
             sound.FilePaths.AddRange(paths);
             return sound;
         }
 
+        public static bool IsEmptySound(SoundData sound)
+        {
+            return sound.IsEmptySound();
+        }
+
         /// <summary>The display sound name.</summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                var func = this.NameFunc;
+                if (func != null) return func();
+                return this._name;
+            }
+            set { this._name = value; }
+        }
 
         /// <summary>The unique cue name in game.</summary>
         public string CueName { get; set; }
@@ -50,7 +68,22 @@ namespace FluteBlockExtension.Framework.Models
         public int RawPitch { get; set; }
 
         /// <summary>Remarks for this sound.</summary>
-        public string Notes { get; set; }
+        public string Description
+        {
+            get
+            {
+                var func = this.DescriptionFunc;
+                if (func != null) return func();
+                return this._description;
+            }
+            set { this._description = value; }
+        }
+
+        public bool IsEmpty { get; set; }
+
+        internal Func<string> NameFunc { get; set; }
+
+        internal Func<string> DescriptionFunc { get; set; }
 
         /// <summary>Helper method, loads sound effects base on FilePaths.</summary>
         /// <param name="basePath">A path to base on when relative.</param>
@@ -85,6 +118,11 @@ namespace FluteBlockExtension.Framework.Models
         public bool Equals(SoundData other)
         {
             return this.CueName == other?.CueName;
+        }
+
+        public bool IsEmptySound()
+        {
+            return this.IsEmpty;
         }
     }
 }

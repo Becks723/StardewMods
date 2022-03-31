@@ -11,9 +11,9 @@ namespace FluteBlockExtension.Framework.Integrations
 
         private readonly Func<SoundsConfig> _getSoundsConfig;
 
-        private ModConfig _config => _getConfig();
+        private ModConfig _config => this._getConfig();
 
-        private SoundsConfig _soundsConfig => _getSoundsConfig();
+        private SoundsConfig _soundsConfig => this._getSoundsConfig();
 
         public GMCMIntegration(Func<ModConfig> config!!, Func<SoundsConfig> soundsConfig!!, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
             : base(reset, save, modRegistry, monitor, manifest)
@@ -54,17 +54,16 @@ namespace FluteBlockExtension.Framework.Integrations
                 )
 
                 .AddSectionTitle(I18n.Config_SectionTitle_Sounds)
-                //.AddTextBox(
-                //    name: I18n.Config_Sounds_FolderPath,
-                //    get: () => this._soundsConfig.SoundsFolderPath,
-                //    set: val => this._soundsConfig.SoundsFolderPath = val,
-                //    tooltip: I18n.Config_Sounds_FolderPath_Tooltip
-                //)
                 .AddFilePathPicker(
-                    name: I18n.Config_Sounds_FolderPath,
-                    tooltip: I18n.Config_Sounds_FolderPath_Tooltip,
+                    name: I18n.Config_SoundFolderPath,
+                    tooltip: I18n.Config_SoundFolderPath_Tooltip,
                     getPath: () => this._soundsConfig.SoundsFolderPath,
                     setPath: val => this._soundsConfig.SoundsFolderPath = val
+                )
+                .AddCustom(
+                    name: I18n.Config_SoundFloor,
+                    tooltip: I18n.Config_SoundFloor_Tooltip,
+                    option: new SoundFloorOption(() => this._soundsConfig.SoundFloorPairs)
                 );
         }
     }

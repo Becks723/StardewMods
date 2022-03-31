@@ -9,10 +9,10 @@ namespace FluteBlockExtension.Framework
 {
     internal class SoundFloorMapper
     {
-        private readonly SoundFloorMap _map;
+        private readonly Func<SoundFloorMap> _map;
         private readonly SoundManager _soundManager;
 
-        public SoundFloorMapper(SoundFloorMap map, SoundManager soundManager)
+        public SoundFloorMapper(Func<SoundFloorMap> map, SoundManager soundManager)
         {
             this._map = map;
             this._soundManager = soundManager;
@@ -57,7 +57,7 @@ namespace FluteBlockExtension.Framework
         public SoundData MapForSound(Flooring? floor)
         {
             FloorData floorData = FloorData.From(floor?.whichFloor?.Value);
-            SoundData? sound = this._map.FindSound(floorData);
+            SoundData? sound = this._map().FindSound(floorData);
             if (sound is null)
                 return this.MapForSound(null);
 

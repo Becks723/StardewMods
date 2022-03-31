@@ -5,7 +5,7 @@ using StardewValley;
 using StardewValley.Menus;
 using SObject = StardewValley.Object;
 
-namespace FluteBlockExtension.Framework
+namespace FluteBlockExtension.Framework.Menus
 {
     internal class FixOptionSelectedEventArgs : EventArgs
     {
@@ -83,13 +83,9 @@ namespace FluteBlockExtension.Framework
         public override void performHoverAction(int x, int y)
         {
             if (this._titleLabel.bounds.Contains(x, y))
-            {
                 this._showTitleTooltip = true;
-            }
             else
-            {
                 this._showTitleTooltip = false;
-            }
         }
 
         public override bool isWithinBounds(int x, int y)
@@ -100,9 +96,7 @@ namespace FluteBlockExtension.Framework
         public override void draw(SpriteBatch b)
         {
             if (!Game1.options.showMenuBackground)
-            {
                 b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
-            }
 
             drawTextureBox(b, this.xPositionOnScreen, this.yPositionOnScreen, this.width, this.height, Color.White);
 
@@ -117,9 +111,7 @@ namespace FluteBlockExtension.Framework
             this._fixOption_UseCurrent_Button.draw(b, 0, 0, this);
 
             if (this._showTitleTooltip)
-            {
                 drawToolTip(b, I18n.FixMenu_Labels_Title_Tooltip(), "", null);
-            }
 
             this.drawMouse(b);
         }

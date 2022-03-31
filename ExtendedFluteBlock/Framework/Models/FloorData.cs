@@ -1,4 +1,5 @@
 ﻿using System;
+using StardewValley;
 
 namespace FluteBlockExtension.Framework.Models
 {
@@ -6,7 +7,7 @@ namespace FluteBlockExtension.Framework.Models
     /// <remarks>Note this's a record.</remarks>
     internal record FloorData
     {
-        public static readonly FloorData Empty = new FloorData() { WhichFloor = int.MaxValue };
+        public static readonly FloorData Empty = new FloorData() { IsEmpty = true };
 
         public static readonly FloorData NonFloor = new FloorData() { WhichFloor = null };
 
@@ -71,13 +72,20 @@ namespace FluteBlockExtension.Framework.Models
             };
         }
 
-        public static bool IsEmpty(FloorData floor)
+        public static bool IsEmptyFloor(FloorData floor)
         {
-            return floor == Empty;
+            return floor.IsEmptyFloor();
+        }
+
+        public bool IsEmptyFloor()
+        {
+            return this.IsEmpty;
         }
 
         /// <summary>Floor number.</summary>
         /// <remarks>See <see cref="StardewValley.TerrainFeatures.Flooring.whichFloor"/>.</remarks>
         public int? WhichFloor { get; set; }
+
+        public bool IsEmpty { get; set; }
     }
 }

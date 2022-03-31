@@ -11,6 +11,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\StardewUserInterface\StardewUserInterface.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Reference Include="FAudio-CS">
 			<HintPath>$(GamePath)\FAudio-CS.dll</HintPath>
 			<Private>false</Private>

@@ -4,8 +4,10 @@ using System.Linq;
 using CodeShared.Utils;
 using FluteBlockExtension.Framework;
 using FluteBlockExtension.Framework.Integrations;
+using FluteBlockExtension.Framework.Menus;
 using FluteBlockExtension.Framework.Models;
 using FluteBlockExtension.Framework.Patchers;
+using HarmonyLib;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -32,6 +34,8 @@ namespace FluteBlockExtension
 
         public static string ModID { get; private set; }
 
+        public static Harmony Harmony { get; private set; }
+
         public override void Entry(IModHelper helper)
         {
             // init translation.
@@ -50,7 +54,7 @@ namespace FluteBlockExtension
             this.ReadSoundsConfig();
 
             // init Harmony.
-            var harmony = new HarmonyLib.Harmony(ModID);
+            var harmony = Harmony = new Harmony(ModID);
 
             // fix soundeffect duration error.
             new SoundEffectZeroDurationFix(harmony, this.Monitor).ApplyFix();
@@ -64,11 +68,10 @@ namespace FluteBlockExtension
                 harmony,
                 this._config,
                 this.Monitor,
-                new SoundFloorMapper(this._soundsConfig.SoundFloorPairs, this._soundManager),
+                new SoundFloorMapper(() => this._soundsConfig.SoundFloorPairs, this._soundManager),
                 this._soundManager
             );
             MainPatcher.Patch();
-
 
             // load sounds.
             this._soundManager.LoadSounds(this._soundsConfig);
@@ -201,6 +204,7 @@ namespace FluteBlockExtension
             {
                 this._soundsConfig = new SoundsConfig();
                 helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
+                return;
             }
 
             // recover built-in sounds if lost.
@@ -208,13 +212,23 @@ namespace FluteBlockExtension
             var builtInSounds = SoundsConfig.BuiltInSoundFloorPairs.Select(p => p.Sound).ToArray();
             var currentSounds = pairs.Select(p => p.Sound).ToArray();
 
-            foreach (var sound in builtInSounds)
+            foreach (SoundData builtIn in builtInSounds)
             {
-                if (!currentSounds.Contains(sound))
+                if (!currentSounds.Contains(builtIn))
                 {
-                    pairs.Add(new SoundFloorMapItem() { Sound = sound, Floor = FloorData.Empty });
+                    pairs.Add(new SoundFloorMapItem() { Sound = builtIn, Floor = FloorData.Empty });
+                }
+                else
+                {
+                    SoundData soundData = currentSounds.Where(s => s.CueName == builtIn.CueName).FirstOrDefault();
+                    soundData.NameFunc = builtIn.NameFunc;
+                    soundData.DescriptionFunc = builtIn.DescriptionFunc;
                 }
             }
+            helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
+
+            // every time lang changes, update strings in sounds config.
+            LocalizedContentManager.OnLanguageChange += _ => helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
         }
 
         private void FixMenu_OptionSelected(object sender, FixOptionSelectedEventArgs e)
