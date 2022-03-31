@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewValley;
-using StardewValley.Menus;
+using StardewValley.Controls;
 
 namespace CodeShared.Integrations.GenericModConfigMenu.Options
 {
@@ -12,20 +9,23 @@ namespace CodeShared.Integrations.GenericModConfigMenu.Options
     {
         private readonly Textbox _textbox = new Textbox();
 
-        private readonly Button _browseButton = new Button();
+        private readonly Button2 _browseButton = new Button2();
 
         private readonly Func<string> _getPath;
+
         private readonly Action<string> _setPath;
+
         private readonly Func<string> _getDefaultPath;
 
         public FilePathPicker(Func<string> getPath!!, Action<string> setPath!!, Func<string> getDefaultPath = null)
         {
-            this._textbox.Width = 192 * 2;
-            this._browseButton.Size = new Vector2(100, this._textbox.Height + 8);
+            this._textbox.SettableWidth = 192 * 2;
+            this._browseButton.SettableWidth = 100;
+            this._browseButton.SettableHeight = this._textbox.Height + 8;
             this._getPath = getPath;
             this._setPath = setPath;
             this._getDefaultPath = getDefaultPath;
-            this._browseButton.Callback += this.BrowseFolder;
+            this._browseButton.Click += this.BrowseFolder;
         }
 
         public override int Height
