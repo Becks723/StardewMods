@@ -258,8 +258,11 @@ namespace FluteBlockExtension.Framework.Menus
 
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
         {
-            base.gameWindowSizeChanged(oldBounds, newBounds);
+            this.xPositionOnScreen = Game1.uiViewport.Width / 2 - this.width / 2;
+            this.yPositionOnScreen = Game1.uiViewport.Height / 2 - this.height / 2;
             this._root.LocalPosition = new Vector2(this.xPositionOnScreen, this.yPositionOnScreen);
+
+            this.ConfigMenu?.gameWindowSizeChanged(oldBounds, newBounds);
         }
 
         public override void update(GameTime time)
@@ -287,6 +290,7 @@ namespace FluteBlockExtension.Framework.Menus
         {
             if (TitleMenu.subMenu is SoundFloorEditor editor && TitleMenu.subMenu.readyToClose())
             {
+                Game1.playSound("bigDeSelect");
                 TitleMenu.subMenu = editor.ConfigMenu;
                 return false;  // skip original.
             }
@@ -635,7 +639,7 @@ namespace FluteBlockExtension.Framework.Menus
 
         private class SoundTable : OptionTable
         {
-            private readonly Label2 _nameLabel, _cueNameLabel, _pitchLabel, _pathLabel, _notesLabel;
+            private readonly Label2 _nameLabel, _cueNameLabel, _pitchLabel, _pathsLabel, _notesLabel;
 
             private readonly ClickableTextureComponent _okButton;
 
@@ -663,11 +667,11 @@ namespace FluteBlockExtension.Framework.Menus
 
             public SoundTable()
             {
-                this.AddOption(this._nameLabel = new Label2() { Text = I18n.Config_Sound_EditorOptions_Name() }, this.NameBox = new Textbox());
-                this.AddOption(this._cueNameLabel = new Label2() { Text = I18n.Config_Sound_EditorOptions_CueName() }, this.CueNameBox = new Textbox());
-                this.AddOption(this._pitchLabel = new Label2() { Text = I18n.Config_Sound_EditorOptions_RawPitch() }, this.PitchBox = new Textbox());
-                this.AddOption(this._pathLabel = new Label2() { Text = I18n.Config_Sound_EditorOptions_FilePaths() }, this.PathsBox = new Textbox());
-                this.AddOption(this._notesLabel = new Label2() { Text = I18n.Config_Sound_EditorOptions_Desc() }, this.NotesBox = new Textbox());
+                this.AddOption(this._nameLabel = new Label2(), this.NameBox = new Textbox());
+                this.AddOption(this._cueNameLabel = new Label2(), this.CueNameBox = new Textbox());
+                this.AddOption(this._pitchLabel = new Label2(), this.PitchBox = new Textbox());
+                this.AddOption(this._pathsLabel = new Label2(), this.PathsBox = new Textbox());
+                this.AddOption(this._notesLabel = new Label2(), this.NotesBox = new Textbox());
 
                 // init ok button.
                 this._okButton = new ClickableTextureComponent("OK", new Rectangle(0, 0, 64, 64), null, null, Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46), 1f);
@@ -731,6 +735,13 @@ namespace FluteBlockExtension.Framework.Menus
 
                 // update cue name label color.
                 this._cueNameLabel.IdleTextColor = string.IsNullOrEmpty(this.CueName) ? Color.Red : Game1.textColor;
+
+                // update label text.
+                this._nameLabel.Text = I18n.Config_Sound_EditorOptions_Name();
+                this._cueNameLabel.Text = I18n.Config_Sound_EditorOptions_CueName();
+                this._pitchLabel.Text = I18n.Config_Sound_EditorOptions_RawPitch();
+                this._pathsLabel.Text = I18n.Config_Sound_EditorOptions_FilePaths();
+                this._notesLabel.Text = I18n.Config_Sound_EditorOptions_Desc();
             }
 
             public override void Draw(SpriteBatch b)
@@ -790,6 +801,8 @@ namespace FluteBlockExtension.Framework.Menus
 
         private class FloorTable : OptionTable
         {
+            private readonly Label2 _selectFloorLabel;
+
             private readonly ComboBox _floorSelector;
 
             private readonly Func<FloorData[]> _existingFloors;
@@ -834,14 +847,13 @@ namespace FluteBlockExtension.Framework.Menus
             {
                 this._existingFloors = existingFloors;
 
-                this.AddOption(new Label2() { Text = I18n.Config_Floor_EditorOptions_Select() },
+                this.AddOption(this._selectFloorLabel = new Label2(),
                     this._floorSelector = new ComboBox()
                     {
                         Choices = this.LoadFloors(),
                         DisplayTextReslover = (_, floor) => this.GetDisplayText((FloorData)floor),
                         MaxDisplayRows = 5
                     });
-                //FloorChanged += this.OnSelectorChanged;
             }
 
             public void LoadData(FloorData data)
@@ -849,6 +861,14 @@ namespace FluteBlockExtension.Framework.Menus
                 this._floorSelector.SelectedIndex = 0;
                 this._floorSelector.Choices = this.LoadFloors(data);
                 this._floorSelector.SelectedItem = data;
+            }
+
+            public override void Update(GameTime gameTime)
+            {
+                base.Update(gameTime);
+
+                // update label text.
+                this._selectFloorLabel.Text = I18n.Config_Floor_EditorOptions_Select();
             }
 
             private void OnSelectorChanged(object sender, EventArgs e)
@@ -872,13 +892,6 @@ namespace FluteBlockExtension.Framework.Menus
                 }
 
                 return result.ToArray();
-                //FloorData[] selected = selectedFloor != null
-                //    ? new[] { selectedFloor }
-                //    : Array.Empty<FloorData>();
-                //return selected.Concat(
-                //    this._floorDatabase
-                //    .SkipWhile(floor => existingFloors.Any(f => f == floor)))
-                //    .ToArray();
             }
 
             private string GetDisplayText(FloorData floor)

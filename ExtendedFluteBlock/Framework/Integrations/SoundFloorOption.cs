@@ -15,7 +15,7 @@ namespace FluteBlockExtension.Framework.Integrations
     /// <summary>A custom GMCM option for editing sound-floor mapping.</summary>
     internal class SoundFloorOption : BaseCustomOption
     {
-        private readonly SoundFloorEditor _soundFloorEditor;
+        private SoundFloorEditor _soundFloorEditor;
 
         private readonly Lazy<Texture2D> _spannerIcon = new(LoadSpannerTexture);
 
@@ -35,8 +35,6 @@ namespace FluteBlockExtension.Framework.Integrations
         {
             this._map = map;
 
-            this._soundFloorEditor = new Menus.SoundFloorEditor(this._map);
-
             this._button = new()
             {
                 SettableWidth = 80,
@@ -52,6 +50,13 @@ namespace FluteBlockExtension.Framework.Integrations
             this._button.LocalPosition = drawOrigin;
             this._button.Update(default);
             this._button.Draw(b);
+        }
+
+        public override void OnMenuOpening()
+        {
+            // 每次打开重新初始化，不能仅在构造函数中初始化。
+            // 这是由于该GMCM选项仅在游戏打开时注册（GameLaunched），那时本地化还没加载，导致SpriteFont还都是英文，其他语言会乱码。
+            this._soundFloorEditor = new SoundFloorEditor(this._map);
         }
 
         public override void OnSaving()
