@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using FluteBlockExtension.Framework.Models;
-using FluteBlockExtension.Framework.Sounds;
 using StardewValley;
 using StardewValley.TerrainFeatures;
 

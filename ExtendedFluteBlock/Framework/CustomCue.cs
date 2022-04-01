@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework.Audio;
 using StardewValley;
 
-namespace FluteBlockExtension.Framework.Sounds
+namespace FluteBlockExtension.Framework
 {
-    /// <summary>ICue implementation for <see cref="SoundType.CustomCue"/>.</summary>
+    /// <summary><see cref="ICue"/> implementation for <see cref="SoundType.CustomCue"/>.</summary>
     internal class CustomCue : ICue
     {
         private readonly ICue _cue;
@@ -30,9 +30,7 @@ namespace FluteBlockExtension.Framework.Sounds
             {
                 CueDefinition cue = Game1.soundBank.GetCueDefinition(this.Name);
                 foreach (XactSoundBankSound sound in cue.sounds)
-                {
                     sound.pitch = value;
-                }
             }
         }
 
