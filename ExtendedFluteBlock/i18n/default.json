@@ -41,8 +41,7 @@
   "sound.toy-piano.name": "Elliott's Piano",
   "sound.toy-piano.desc": "Piano in Elliott house.",
   "sound.piano.name": "Piano",
-  "sound.piano.desc": "",
+  "sound.piano.desc": "Piano",
   "sound.acoustic-guitar.name": "Acoustic Guitar",
-  "sound.acoustic-guitar.desc": ""
-
+  "sound.acoustic-guitar.desc": "Acoustic Guitar"
 }

@@ -41,8 +41,7 @@
   "sound.toy-piano.name": "艾利欧特的钢琴",
   "sound.toy-piano.desc": "艾利欧特家钢琴的音色。",
   "sound.piano.name": "钢琴",
-  "sound.piano.desc": "",
+  "sound.piano.desc": "钢琴",
   "sound.acoustic-guitar.name": "原声吉他",
-  "sound.acoustic-guitar.desc": ""
-
+  "sound.acoustic-guitar.desc": "原声吉他"
 }
