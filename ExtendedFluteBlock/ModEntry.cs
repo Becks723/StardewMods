@@ -199,6 +199,9 @@ namespace FluteBlockExtension
             var helper = this.Helper;
             this._soundsConfig = helper.Data.ReadGlobalData<SoundsConfig>(this._soundsKey);
 
+            // every time lang changes, update strings in sounds config.
+            LocalizedContentManager.OnLanguageChange += _ => helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
+
             // if sounds file not exists, create a new.
             if (this._soundsConfig is null)
             {
@@ -226,9 +229,6 @@ namespace FluteBlockExtension
                 }
             }
             helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
-
-            // every time lang changes, update strings in sounds config.
-            LocalizedContentManager.OnLanguageChange += _ => helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
         }
 
         private void FixMenu_OptionSelected(object sender, FixOptionSelectedEventArgs e)
