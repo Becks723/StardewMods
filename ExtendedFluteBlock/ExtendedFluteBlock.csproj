@@ -2,6 +2,7 @@
 	<Import Project="..\_build\common.targets" />
 	<Import Project="..\_build\smapi.targets" />
 	<Import Project="..\_build\translation-builder.targets" />
+	<Import Project="..\_build\stardewvalleyui.targets"/>
 	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
 
 	<PropertyGroup>
@@ -9,10 +10,6 @@
 		<RootNamespace>FluteBlockExtension</RootNamespace>
 		<AssemblyName>ExtendedFluteBlock</AssemblyName>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\StardewUserInterface\StardewUserInterface.csproj" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="FAudio-CS">

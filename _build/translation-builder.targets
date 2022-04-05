@@ -2,4 +2,12 @@
 	<ItemGroup>
 		<PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.0" />
 	</ItemGroup>
+
+	<PropertyGroup>
+		<TranslationClassBuilder_AddGetByKey>false</TranslationClassBuilder_AddGetByKey>
+		<TranslationClassBuilder_AddKeyMap>false</TranslationClassBuilder_AddKeyMap>
+		<TranslationClassBuilder_ClassName>I18n</TranslationClassBuilder_ClassName>
+		<TranslationClassBuilder_ClassModifiers>internal static</TranslationClassBuilder_ClassModifiers>
+		<TranslationClassBuilder_CreateBackup>false</TranslationClassBuilder_CreateBackup>
+	</PropertyGroup>
 </Project>
