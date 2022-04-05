@@ -15,7 +15,7 @@ using StardewValley.Menus;
 namespace FluteBlockExtension.Framework.Menus
 {
     /// <summary>A menu for editing sound-floor mapping.</summary>
-    internal class SoundFloorEditor : IClickableMenu
+    internal class SoundFloorEditor : IClickableMenu, IDisposable
     {
         private readonly RootElement _root;
 
@@ -274,6 +274,8 @@ namespace FluteBlockExtension.Framework.Menus
 
         public override void draw(SpriteBatch b)
         {
+            if (!Game1.options.showMenuBackground)
+                b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
             base.draw(b);
             this._root.Draw(b);
             this.drawMouse(b);
@@ -312,6 +314,11 @@ namespace FluteBlockExtension.Framework.Menus
                         : background;
             texture.SetData(data);
             return texture;
+        }
+
+        public void Dispose()
+        {
+            this._root.Dispose();
         }
 
         private class SoundFloorDataGrid : Element

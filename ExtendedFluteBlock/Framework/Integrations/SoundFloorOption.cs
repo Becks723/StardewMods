@@ -56,6 +56,7 @@ namespace FluteBlockExtension.Framework.Integrations
         {
             // 每次打开重新初始化，不能仅在构造函数中初始化。
             // 这是由于该GMCM选项仅在游戏打开时注册（GameLaunched），那时本地化还没加载，导致SpriteFont还都是英文，其他语言会乱码。
+            this._soundFloorEditor?.Dispose();
             this._soundFloorEditor = new SoundFloorEditor(this._map);
         }
 
