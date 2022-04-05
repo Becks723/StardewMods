@@ -10,6 +10,7 @@ using FluteBlockExtension.Framework.Patchers;
 using HarmonyLib;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using static FluteBlockExtension.Framework.Constants;
 using SObject = StardewValley.Object;
@@ -42,7 +43,9 @@ namespace FluteBlockExtension
             // init misc data.
             ModID = this.ModManifest.UniqueID;
             FluteBlockModData_ExtraPitch = $"{ModID}/extraPitch";
-            SoundsConfig.DefaultSoundsFolderPath = Path.Combine(helper.DirectoryPath, "assets", "sounds");
+            SoundsConfig.DefaultSoundsFolderPath = PathUtilities.NormalizePath(
+                Path.Combine(helper.DirectoryPath, "assets", "sounds")
+            );
 
             // read mod config.
             this._config = helper.ReadConfig<ModConfig>();
