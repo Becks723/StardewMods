@@ -9,12 +9,10 @@ namespace FluteBlockExtension.Framework
     internal class SoundFloorMapper
     {
         private readonly Func<SoundFloorMap> _map;
-        private readonly SoundManager _soundManager;
 
-        public SoundFloorMapper(Func<SoundFloorMap> map, SoundManager soundManager)
+        public SoundFloorMapper(Func<SoundFloorMap> map)
         {
             this._map = map;
-            this._soundManager = soundManager;
         }
 
         /// <summary>Map direct data required by client.</summary>
@@ -34,7 +32,7 @@ namespace FluteBlockExtension.Framework
             {
                 case SoundType.GameCue:
                     cue = Game1.soundBank.GetCue(sound.CueName);
-                    if (this._soundManager.IsAffectedByPitchVariable(sound.CueName))
+                    if (SoundManager.IsAffectedByPitchVariable(sound.CueName))
                         cue.SetVariable("Pitch", 1200);
                     break;
 
@@ -46,7 +44,7 @@ namespace FluteBlockExtension.Framework
                     throw new NotSupportedException();
             }
 
-            var effects = this._soundManager.GetSoundEffects(sound.CueName);
+            var effects = SoundManager.GetSoundEffects(sound.CueName);
             double averageDuration = effects.Average(effect => effect.Duration.TotalMilliseconds);
             return (cue, averageDuration, sound.RawPitch);
         }

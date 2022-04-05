@@ -32,20 +32,17 @@ namespace FluteBlockExtension.Framework.Patchers
 
         private static SoundFloorMapper _mapper;
 
-        private static SoundManager _soundManager;
-
         private static bool _patched;
 
         private static readonly Solution2 _corePatcher = new();
 
         /// <summary>Call this before call patch.</summary>
-        public static void Prepare(Harmony harmony, ModConfig config, IMonitor monitor, SoundFloorMapper mapper, SoundManager soundManager)
+        public static void Prepare(Harmony harmony, ModConfig config, IMonitor monitor, SoundFloorMapper mapper)
         {
             _harmony = harmony;
             _config = config;
             _monitor = monitor;
             _mapper = mapper;
-            _soundManager = soundManager;
         }
 
         /// <summary>Toggle patch on.</summary>

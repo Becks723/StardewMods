@@ -26,8 +26,6 @@ namespace FluteBlockExtension
 
         private readonly string _soundsKey = "sounds";
 
-        private readonly SoundManager _soundManager = new SoundManager();
-
         private readonly List<ProblemFluteBlock> _problemFluteBlocks = new();
 
         private List<ProblemFluteBlock>.Enumerator _problemFluteBlocksIterator;
@@ -68,13 +66,12 @@ namespace FluteBlockExtension
                 harmony,
                 this._config,
                 this.Monitor,
-                new SoundFloorMapper(() => this._soundsConfig.SoundFloorPairs, this._soundManager),
-                this._soundManager
+                new SoundFloorMapper(() => this._soundsConfig.SoundFloorPairs)
             );
             MainPatcher.Patch();
 
             // load sounds.
-            this._soundManager.LoadSounds(this._soundsConfig);
+            SoundManager.LoadSounds(this._soundsConfig);
 
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;

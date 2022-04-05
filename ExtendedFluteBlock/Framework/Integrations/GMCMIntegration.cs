@@ -63,7 +63,7 @@ namespace FluteBlockExtension.Framework.Integrations
                 .AddCustom(
                     name: I18n.Config_SoundFloor,
                     tooltip: I18n.Config_SoundFloor_Tooltip,
-                    option: new SoundFloorOption(() => this._soundsConfig.SoundFloorPairs)
+                    option: new SoundFloorOption(() => this._soundsConfig)
                 );
         }
     }

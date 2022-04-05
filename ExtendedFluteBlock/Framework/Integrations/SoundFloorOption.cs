@@ -23,6 +23,8 @@ namespace FluteBlockExtension.Framework.Integrations
 
         private readonly Func<SoundFloorMap> _map;
 
+        private readonly Func<SoundsConfig> _config;
+
         /// <summary>Gets the GMCM config menu.</summary>
         private IClickableMenu ConfigMenu
         {
@@ -31,9 +33,10 @@ namespace FluteBlockExtension.Framework.Integrations
 
         public override int Height => 50;
 
-        public SoundFloorOption(Func<SoundFloorMap> map)
+        public SoundFloorOption(Func<SoundsConfig> config)
         {
-            this._map = map;
+            this._config = config;
+            this._map = () => config().SoundFloorPairs;
 
             this._button = new()
             {
@@ -63,6 +66,9 @@ namespace FluteBlockExtension.Framework.Integrations
         public override void OnSaving()
         {
             this._soundFloorEditor.OnSaving();
+
+            // load new sounds.
+            SoundManager.LoadSounds(this._config());
         }
 
         private void ButtonClicked(object sender, EventArgs e)

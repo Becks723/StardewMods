@@ -8,17 +8,17 @@ using StardewValley;
 namespace FluteBlockExtension.Framework
 {
     /// <summary>Manages runtime sound resources.</summary>
-    internal class SoundManager
+    internal static class SoundManager
     {
-        private readonly Dictionary<string, SoundEffect[]> _sounds = new();
+        private static readonly Dictionary<string, SoundEffect[]> _sounds = new();
 
         /// <summary>Gets one or more soundEffects by a cue name.</summary>
-        public SoundEffect[] GetSoundEffects(string cueName)
+        public static SoundEffect[] GetSoundEffects(string cueName)
         {
-            if (!this._sounds.TryGetValue(cueName, out var effect))
+            if (!_sounds.TryGetValue(cueName, out var effect))
             {
                 List<SoundEffect> soundEffects = new();
-                foreach ((int waveBankIndex, int trackIndex) in this.GetIndexes(cueName))
+                foreach ((int waveBankIndex, int trackIndex) in GetIndexes(cueName))
                 {
                     WaveBank waveBank = waveBankIndex switch
                     {
@@ -29,14 +29,14 @@ namespace FluteBlockExtension.Framework
                     soundEffects.Add(waveBank.GetSoundEffect(trackIndex));
                 }
                 effect = soundEffects.ToArray();
-                this._sounds[cueName] = effect;
+                _sounds[cueName] = effect;
             }
 
             return effect;
         }
 
         /// <summary>Gets whether a given cue is controlled by the cue variable named "Pitch".</summary>
-        public bool IsAffectedByPitchVariable(string cueName)
+        public static bool IsAffectedByPitchVariable(string cueName)
         {
             // only game cue can have cue variables.
             CueDefinition cue = Game1.soundBank.GetCueDefinition(cueName);
@@ -51,32 +51,48 @@ namespace FluteBlockExtension.Framework
             return false;
         }
 
-        public void LoadSounds(SoundsConfig config)
+        public static void LoadSounds(SoundsConfig config)
         {
             string soundsFolder = config.SoundsFolderPath;
             var soundFloorPairs = config.SoundFloorPairs;
             foreach (var pair in soundFloorPairs)
             {
                 SoundData sound = pair.Sound;
-                this.AssertMissingFields(sound);
+                AssertMissingFields(sound);
                 switch (sound.SoundType)
                 {
                     case SoundType.CustomCue:
                         string cueName = sound.CueName;
-                        SoundEffect[] effects = sound.LoadSoundEffects(soundsFolder);
-                        this._sounds[cueName] = effects;
-                        CueDefinition cue = new CueDefinition(
-                            cueName,
-                            effects,
-                            3
-                        );
-                        Game1.soundBank.AddCue(cue);
+                        if (!IsCueLoaded(cueName))
+                        {
+                            SoundEffect[] effects = sound.LoadSoundEffects(soundsFolder);
+                            _sounds[cueName] = effects;
+                            CueDefinition cue = new(
+                                cueName,
+                                effects,
+                                3
+                            );
+                            Game1.soundBank.AddCue(cue);
+                        }
                         break;
                 }
             }
         }
 
-        private IEnumerable<(int waveBankIndex, int trackIndex)> GetIndexes(string cueName)
+        private static bool IsCueLoaded(string cueName)
+        {
+            try
+            {
+                Game1.soundBank.GetCue(cueName);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static IEnumerable<(int waveBankIndex, int trackIndex)> GetIndexes(string cueName)
         {
             // cueName here always refers to an original game cue.
             // Because custom cues don't need to call this method, and custom ones don't use these two fields.
@@ -117,10 +133,10 @@ namespace FluteBlockExtension.Framework
             }
         }
 
-        private void AssertMissingFields(SoundData sound)
+        private static void AssertMissingFields(SoundData sound)
         {
-            this.AssertNull(nameof(sound.Name), sound.Name);
-            this.AssertNull(nameof(sound.CueName), sound.CueName);
+            AssertNull(nameof(sound.Name), sound.Name);
+            AssertNull(nameof(sound.CueName), sound.CueName);
 
             switch (sound.SoundType)
             {
@@ -128,19 +144,19 @@ namespace FluteBlockExtension.Framework
                     break;
 
                 case SoundType.CustomCue:
-                    this.AssertEmpty(nameof(sound.FilePaths), sound.FilePaths);
+                    AssertEmpty(nameof(sound.FilePaths), sound.FilePaths);
                     break;
             }
         }
 
-        private void AssertNull<T>(string name, T field)
+        private static void AssertNull<T>(string name, T field)
             where T : class
         {
             if (field is null)
                 throw new ArgumentNullException(name);
         }
 
-        private void AssertEmpty<TList>(string name, TList list)
+        private static void AssertEmpty<TList>(string name, TList list)
             where TList : System.Collections.IList
         {
             if (list.Count == 0)
