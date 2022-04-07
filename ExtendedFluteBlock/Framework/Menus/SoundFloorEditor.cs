@@ -140,9 +140,10 @@ namespace FluteBlockExtension.Framework.Menus
             this._floorTable = new FloorTable(() => this._floorList.ToArray())
             {
                 SettableWidth = this._propertyView.Width - 32,
-                ComboBoxWidth = (this._propertyView.Width - 32) / 2
+                SettableHeight = this._propertyView.Height - 32,
+                ComboBoxWidth = (this._propertyView.Width - 32) / 3
             };
-            this._floorTable.FloorChanged += this.FloorTable_FloorChanged;
+            this._floorTable.OkButtonClick += this.FloorTable_OkButtonClick;
 
             // register "after exit" event.
             this.exitFunction = this.OnExited;
@@ -164,9 +165,9 @@ namespace FluteBlockExtension.Framework.Menus
         {
             base.receiveLeftClick(x, y, playSound);
 
-            if (this._propertyView.Content is SoundTable soundTable)
+            if (this._propertyView.Content is OptionTable table)
             {
-                soundTable.ReceiveLeftClick(x, y, playSound);
+                table.ReceiveLeftClick(x, y, playSound);
             }
         }
 
@@ -174,9 +175,9 @@ namespace FluteBlockExtension.Framework.Menus
         {
             base.performHoverAction(x, y);
 
-            if (this._propertyView.Content is SoundTable soundTable)
+            if (this._propertyView.Content is OptionTable table)
             {
-                soundTable.PerformHoverAction(x, y);
+                table.PerformHoverAction(x, y);
             }
         }
 
@@ -199,7 +200,7 @@ namespace FluteBlockExtension.Framework.Menus
             }
         }
 
-        private void FloorTable_FloorChanged(object sender, EventArgs e)
+        private void FloorTable_OkButtonClick(object sender, EventArgs e)
         {
             if (this._dataGrid.SelectedItem is FloorDataGridItem floorGridItem)
             {
@@ -648,9 +649,7 @@ namespace FluteBlockExtension.Framework.Menus
         {
             private readonly Label2 _nameLabel, _cueNameLabel, _pitchLabel, _pathsLabel, _notesLabel;
 
-            private readonly ClickableTextureComponent _okButton;
-
-            public event EventHandler OkButtonClick;
+            private string _savedName, _savedCueName, _savedRawPitch, _savedPaths, _savedNotes;
 
             public Textbox NameBox { get; }
 
@@ -674,71 +673,73 @@ namespace FluteBlockExtension.Framework.Menus
 
             public SoundTable()
             {
-                this.AddOption(this._nameLabel = new Label2(), this.NameBox = new Textbox());
-                this.AddOption(this._cueNameLabel = new Label2(), this.CueNameBox = new Textbox());
-                this.AddOption(this._pitchLabel = new Label2(), this.PitchBox = new Textbox());
-                this.AddOption(this._pathsLabel = new Label2(), this.PathsBox = new Textbox());
-                this.AddOption(this._notesLabel = new Label2(), this.NotesBox = new Textbox());
+                this.NameBox = new Textbox();
+                this.CueNameBox = new Textbox();
+                this.PitchBox = new Textbox();
+                this.PathsBox = new Textbox();
+                this.NotesBox = new Textbox();
 
-                // init ok button.
-                this._okButton = new ClickableTextureComponent("OK", new Rectangle(0, 0, 64, 64), null, null, Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46), 1f);
+                bool isEdited(Textbox textbox)
+                {
+                    if (object.ReferenceEquals(textbox, this.NameBox))
+                    {
+                        return this._savedName != this.NameBox.String;
+                    }
+                    else if (object.ReferenceEquals(textbox, this.CueNameBox))
+                    {
+                        return this._savedCueName != this.CueNameBox.String;
+                    }
+                    else if (object.ReferenceEquals(textbox, this.PitchBox))
+                    {
+                        return this._savedRawPitch != this.PitchBox.String;
+                    }
+                    else if (object.ReferenceEquals(textbox, this.PathsBox))
+                    {
+                        return this._savedPaths != this.PathsBox.String;
+                    }
+                    else if (object.ReferenceEquals(textbox, this.NotesBox))
+                    {
+                        return this._savedNotes != this.NotesBox.String;
+                    }
+
+                    return false;
+                }
+                this._nameLabel = new AsteriskLabel<Textbox>(this.NameBox) { IsEditedObserver = isEdited };
+                this._cueNameLabel = new AsteriskLabel<Textbox>(this.CueNameBox) { IsEditedObserver = isEdited };
+                this._pitchLabel = new AsteriskLabel<Textbox>(this.PitchBox) { IsEditedObserver = isEdited };
+                this._pathsLabel = new AsteriskLabel<Textbox>(this.PathsBox) { IsEditedObserver = isEdited };
+                this._notesLabel = new AsteriskLabel<Textbox>(this.NotesBox) { IsEditedObserver = isEdited };
+
+                this.AddOption(this._nameLabel, this.NameBox);
+                this.AddOption(this._cueNameLabel, this.CueNameBox);
+                this.AddOption(this._pitchLabel, this.PitchBox);
+                this.AddOption(this._pathsLabel, this.PathsBox);
+                this.AddOption(this._notesLabel, this.NotesBox);
             }
 
             public void LoadData(SoundData data)
             {
                 bool readOnly = SoundsConfig.BuiltInSoundFloorPairs.Select(p => p.Sound).Contains(data);
 
-                this.NameBox.String = data.Name;
+                this.NameBox.String = this._savedName = data.Name;
                 this.NameBox.IsReadOnly = readOnly;
 
-                this.CueNameBox.String = data.CueName;
+                this.CueNameBox.String = this._savedCueName = data.CueName;
                 this.CueNameBox.IsReadOnly = readOnly;
 
-                this.PitchBox.String = data.RawPitch.ToString();
+                this.PitchBox.String = this._savedRawPitch = data.RawPitch.ToString();
                 this.PitchBox.IsReadOnly = readOnly;
 
-                this.PathsBox.String = string.Join(' ', data.FilePaths.Select(p => "\"" + p.Path + "\""));
+                this.PathsBox.String = this._savedPaths = string.Join(' ', data.FilePaths.Select(p => "\"" + p.Path + "\""));
                 this.PathsBox.IsReadOnly = readOnly;
 
-                this.NotesBox.String = data.Description;
+                this.NotesBox.String = this._savedNotes = data.Description;
                 this.NotesBox.IsReadOnly = readOnly;
-            }
-
-            protected override void OnPositionChanged(Vector2 oldPosition, Vector2 newPosition)
-            {
-                base.OnPositionChanged(oldPosition, newPosition);
-            }
-
-            public void ReceiveLeftClick(int x, int y, bool playSound = true)
-            {
-                // ok button.
-                if (this._okButton.containsPoint(x, y) && this.CanOk())
-                {
-                    OkButtonClick?.Invoke(this, EventArgs.Empty);
-                    this._okButton.scale -= 0.25f;
-                    this._okButton.scale = Math.Max(0.75f, this._okButton.scale);
-                }
-            }
-
-            public void PerformHoverAction(int x, int y)
-            {
-                // ok button.
-                if (this._okButton.containsPoint(x, y) && this.CanOk())
-                {
-                    this._okButton.scale = Math.Min(this._okButton.scale + 0.02f, this._okButton.baseScale + 0.1f);
-                }
-                else
-                {
-                    this._okButton.scale = Math.Max(this._okButton.scale - 0.02f, this._okButton.baseScale);
-                }
             }
 
             public override void Update(GameTime gameTime)
             {
                 base.Update(gameTime);
-
-                // update ok button pos.
-                this._okButton.setPosition((int)this.Position.X + this.Width - spaceToClearSideBorder - 64, (int)this.Position.Y + this.Height - spaceToClearSideBorder - 64);
 
                 // update cue name label color.
                 this._cueNameLabel.IdleTextColor = string.IsNullOrEmpty(this.CueName) ? Color.Red : Game1.textColor;
@@ -751,25 +752,20 @@ namespace FluteBlockExtension.Framework.Menus
                 this._notesLabel.Text = I18n.Config_Sound_EditorOptions_Desc();
             }
 
-            public override void Draw(SpriteBatch b)
-            {
-                base.Draw(b);
-
-                // ok button.
-                if (this.CanOk())
-                {
-                    this._okButton.draw(b);
-                }
-                else
-                {
-                    this._okButton.draw(b, Color.White, 0.75f);
-                    this._okButton.draw(b, Color.Black * 0.5f, 0.751f);
-                }
-            }
-
-            private bool CanOk()
+            protected override bool CanOk()
             {
                 return !string.IsNullOrEmpty(this.CueName);
+            }
+
+            protected override void RaiseOkButtonClicked()
+            {
+                this._savedName = this.NameBox.String;
+                this._savedCueName = this.CueNameBox.String;
+                this._savedRawPitch = this.PitchBox.String;
+                this._savedPaths = this.PathsBox.String;
+                this._savedNotes = this.NotesBox.String;
+
+                base.RaiseOkButtonClicked();
             }
 
             private FilePath[] ResolvePaths(string str)
@@ -787,7 +783,11 @@ namespace FluteBlockExtension.Framework.Menus
                 {
                     c = (char)i;
                     if (c is '"')
+                    {
                         quote = !quote;
+                        if (quote)
+                            continue;
+                    }
 
                     if (quote)
                     {
@@ -812,6 +812,8 @@ namespace FluteBlockExtension.Framework.Menus
 
             private readonly ComboBox _floorSelector;
 
+            private object _savedSelectedFloor;
+
             private readonly Func<FloorData[]> _existingFloors;
 
             private readonly FloorData[] _floorDatabase = new FloorData[]
@@ -832,13 +834,6 @@ namespace FluteBlockExtension.Framework.Menus
                 FloorData.StoneWalkwayFloor,
             };
 
-            /// <summary>Raised when inner combobox's selected floor changed.</summary>
-            public event EventHandler FloorChanged
-            {
-                add { this._floorSelector.SelectionChanged += value; }
-                remove { this._floorSelector.SelectionChanged -= value; }
-            }
-
             public FloorData SelectedFloor
             {
                 get { return (FloorData)this._floorSelector.SelectedItem; }
@@ -854,20 +849,35 @@ namespace FluteBlockExtension.Framework.Menus
             {
                 this._existingFloors = existingFloors;
 
-                this.AddOption(this._selectFloorLabel = new Label2(),
-                    this._floorSelector = new ComboBox()
+                this._floorSelector = new ComboBox()
+                {
+                    Choices = this.LoadFloors(),
+                    DisplayTextReslover = (_, floor) => this.GetDisplayText((FloorData)floor),
+                    MaxDisplayRows = 5
+                };
+
+                bool IsEdited(ComboBox comboBox)
+                {
+                    if (object.ReferenceEquals(comboBox, this._floorSelector))
                     {
-                        Choices = this.LoadFloors(),
-                        DisplayTextReslover = (_, floor) => this.GetDisplayText((FloorData)floor),
-                        MaxDisplayRows = 5
-                    });
+                        return this._savedSelectedFloor != this._floorSelector.SelectedItem;
+                    }
+
+                    return false;
+                }
+                this._selectFloorLabel = new AsteriskLabel<ComboBox>(this._floorSelector) { IsEditedObserver = IsEdited };
+
+                this.AddOption(this._selectFloorLabel, this._floorSelector);
             }
 
             public void LoadData(FloorData data)
             {
+                // reset combobox's state.
                 this._floorSelector.SelectedIndex = 0;
                 this._floorSelector.Choices = this.LoadFloors(data);
-                this._floorSelector.SelectedItem = data;
+
+                // load selected item.
+                this._floorSelector.SelectedItem = _savedSelectedFloor = data;
             }
 
             public override void Update(GameTime gameTime)
@@ -878,11 +888,7 @@ namespace FluteBlockExtension.Framework.Menus
                 this._selectFloorLabel.Text = I18n.Config_Floor_EditorOptions_Select();
             }
 
-            private void OnSelectorChanged(object sender, EventArgs e)
-            {
-                this._floorSelector.Choices = this.LoadFloors(this.SelectedFloor);
-            }
-
+            /// <summary>Update available floors in the combobox.</summary>
             private FloorData[] LoadFloors(FloorData selectedFloor = null)
             {
                 FloorData[] existingFloors = this._existingFloors();
@@ -901,6 +907,13 @@ namespace FluteBlockExtension.Framework.Menus
                 return result.ToArray();
             }
 
+            protected override void RaiseOkButtonClicked()
+            {
+                _savedSelectedFloor = _floorSelector.SelectedItem;
+
+                base.RaiseOkButtonClicked();
+            }
+
             private string GetDisplayText(FloorData floor)
             {
                 return FloorInfo.GetDisplayName(floor);
@@ -910,6 +923,16 @@ namespace FluteBlockExtension.Framework.Menus
         private class OptionTable : Container
         {
             protected readonly List<Row> _rows = new();
+
+            private readonly ClickableTextureComponent _okButton;
+
+            public event EventHandler OkButtonClick;
+
+            protected OptionTable()
+            {
+                // init ok button.
+                this._okButton = new ClickableTextureComponent("OK", new Rectangle(0, 0, 64, 64), null, null, Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46), 1f);
+            }
 
             public void AddOption(Label2 label!!, Element optionElement!!, Element[] otherElements = null)
             {
@@ -924,10 +947,36 @@ namespace FluteBlockExtension.Framework.Menus
                     this.Add(otherElements);
             }
 
+            public void ReceiveLeftClick(int x, int y, bool playSound = true)
+            {
+                // ok button.
+                if (this._okButton.containsPoint(x, y) && this.CanOk())
+                {
+                    Game1.playSound("yoba");
+                    this.RaiseOkButtonClicked();
+                    this._okButton.scale -= 0.25f;
+                    this._okButton.scale = Math.Max(0.75f, this._okButton.scale);
+                }
+            }
+
+            public void PerformHoverAction(int x, int y)
+            {
+                // ok button.
+                if (this._okButton.containsPoint(x, y) && this.CanOk())
+                {
+                    this._okButton.scale = Math.Min(this._okButton.scale + 0.02f, this._okButton.baseScale + 0.1f);
+                }
+                else
+                {
+                    this._okButton.scale = Math.Max(this._okButton.scale - 0.02f, this._okButton.baseScale);
+                }
+            }
+
             public override void Update(GameTime gameTime)
             {
                 base.Update(gameTime);
 
+                // update options position.
                 int borderWidth = IClickableMenu.borderWidth / 2;
                 int y = borderWidth;
                 foreach (Row row in this._rows)
@@ -937,6 +986,35 @@ namespace FluteBlockExtension.Framework.Menus
 
                     y += Math.Max(row.Label.Height, row.OptionElement.Height) + borderWidth;
                 }
+
+                // update ok button position.
+                this._okButton.setPosition((int)this.Position.X + this.Width - spaceToClearSideBorder - 64, (int)this.Position.Y + this.Height - spaceToClearSideBorder - 64);
+            }
+
+            public override void Draw(SpriteBatch b)
+            {
+                base.Draw(b);
+
+                // ok button.
+                if (this.CanOk())
+                {
+                    this._okButton.draw(b);
+                }
+                else
+                {
+                    this._okButton.draw(b, Color.White, 0.75f);
+                    this._okButton.draw(b, Color.Black * 0.5f, 0.751f);
+                }
+            }
+
+            protected virtual bool CanOk()
+            {
+                return true;
+            }
+
+            protected virtual void RaiseOkButtonClicked()
+            {
+                OkButtonClick?.Invoke(this, EventArgs.Empty);
             }
 
             protected class Row
