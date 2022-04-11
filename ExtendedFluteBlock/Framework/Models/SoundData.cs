@@ -90,7 +90,7 @@ namespace FluteBlockExtension.Framework.Models
         public SoundEffect[] LoadSoundEffects(string basePath)
         {
             return this.FilePaths
-                .Select(p => SoundEffect.FromFile(p.GetPath(basePath)))
+                .Select(p => SoundEffect.FromFile(p.GetFullPath(basePath)))
                 .ToArray();
         }
 

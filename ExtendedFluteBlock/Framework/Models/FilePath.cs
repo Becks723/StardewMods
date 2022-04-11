@@ -15,7 +15,7 @@
 
         /// <summary>Helper method. Gets the absolute path indicated by this instace.</summary>
         /// <param name="relativeTo">The base path if <see cref="Relative"/> is true.</param>
-        public string GetPath(string relativeTo)
+        public string GetFullPath(string relativeTo)
         {
             return this.Relative
                 ? System.IO.Path.Combine(relativeTo, this.Path)

@@ -46,6 +46,7 @@ namespace FluteBlockExtension
             SoundsConfig.DefaultSoundsFolderPath = PathUtilities.NormalizePath(
                 Path.Combine(helper.DirectoryPath, "assets", "sounds")
             );
+            SoundManager.Monitor = this.Monitor;
 
             // read mod config.
             this._config = helper.ReadConfig<ModConfig>();

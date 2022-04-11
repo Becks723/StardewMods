@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using FluteBlockExtension.Framework.Models;
 using Microsoft.Xna.Framework.Audio;
+using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 
 namespace FluteBlockExtension.Framework
@@ -10,12 +12,16 @@ namespace FluteBlockExtension.Framework
     /// <summary>Manages runtime sound resources.</summary>
     internal static class SoundManager
     {
-        private static readonly Dictionary<string, SoundEffect[]> _sounds = new();
+        /// <summary>Stored cueName-sounds pairs.</summary>
+        private static readonly Dictionary<string, List<RuntimeSound>> _sounds = new();
+
+        public static IMonitor Monitor;
 
         /// <summary>Gets one or more soundEffects by a cue name.</summary>
         public static SoundEffect[] GetSoundEffects(string cueName)
         {
-            if (!_sounds.TryGetValue(cueName, out var effect))
+            // 由于自定义音色在加载时便保存了，所以可以直接拿到。这里TryGetValue拿不到的都是原版音色。
+            if (!_sounds.TryGetValue(cueName, out var sounds))
             {
                 List<SoundEffect> soundEffects = new();
                 foreach ((int waveBankIndex, int trackIndex) in GetIndexes(cueName))
@@ -26,13 +32,18 @@ namespace FluteBlockExtension.Framework
                         1 => Game1.waveBank1_4,
                         _ => throw new ArgumentException($"Unknown waveBank index: {waveBankIndex}.")
                     };
+
                     soundEffects.Add(waveBank.GetSoundEffect(trackIndex));
                 }
-                effect = soundEffects.ToArray();
-                _sounds[cueName] = effect;
+
+                // 保存。
+                sounds = new(soundEffects.Count);
+                foreach (SoundEffect effect in soundEffects)
+                    sounds.Add(new(null, effect));
+                _sounds[cueName] = sounds;
             }
 
-            return effect;
+            return sounds.Select(s => s.Effect).ToArray();
         }
 
         /// <summary>Gets whether a given cue is controlled by the cue variable named "Pitch".</summary>
@@ -51,6 +62,7 @@ namespace FluteBlockExtension.Framework
             return false;
         }
 
+        /// <summary>Load or update sounds according to data in the config.</summary>
         public static void LoadSounds(SoundsConfig config)
         {
             string soundsFolder = config.SoundsFolderPath;
@@ -63,15 +75,52 @@ namespace FluteBlockExtension.Framework
                 {
                     case SoundType.CustomCue:
                         string cueName = sound.CueName;
-                        if (!IsCueLoaded(cueName))
+                        bool edit = _sounds.TryGetValue(cueName, out var oldSounds);
+                        List<RuntimeSound> newSounds = new(sound.FilePaths.Count);
+                        foreach (FilePath path in sound.FilePaths)
                         {
-                            SoundEffect[] effects = sound.LoadSoundEffects(soundsFolder);
-                            _sounds[cueName] = effects;
-                            CueDefinition cue = new(
-                                cueName,
-                                effects,
-                                3
+                            string fullPath = PathUtilities.NormalizePath(path.GetFullPath(soundsFolder));
+                            if (edit)
+                            {
+                                var exist = oldSounds.Find(s => s.FullPath == fullPath);
+                                if (exist != null)
+                                {
+                                    oldSounds.Remove(exist);
+                                    if (exist.Effect != null)
+                                    {
+                                        newSounds.Add(exist);
+                                        continue;
+                                    }
+                                }
+                            }
+                            newSounds.Add(
+                                new(fullPath, LoadSoundEffect(fullPath, cueName))
                             );
+                        }
+
+                        // remove old sounds.
+                        if (edit)
+                        {
+                            foreach (var s in oldSounds)
+                            {
+                                s.Effect?.Dispose();
+                            }
+                        }
+
+                        _sounds[cueName] = newSounds;
+
+                        // set cue.
+                        SoundEffect[] effects = newSounds.Select(s => s.Effect).Where(e => e != null).ToArray();
+                        try
+                        {
+                            // existing cue.
+                            var cueDef = Game1.soundBank.GetCueDefinition(cueName);
+                            cueDef.SetSound(effects, 3);
+                        }
+                        catch
+                        {
+                            // new cue.
+                            CueDefinition cue = new(cueName, effects, 3);
                             Game1.soundBank.AddCue(cue);
                         }
                         break;
@@ -79,19 +128,26 @@ namespace FluteBlockExtension.Framework
             }
         }
 
-        private static bool IsCueLoaded(string cueName)
+        private static SoundEffect? LoadSoundEffect(string path, string cueName)
         {
             try
             {
-                Game1.soundBank.GetCue(cueName);
-                return true;
+                return SoundEffect.FromFile(
+                    path = PathUtilities.NormalizePath(path)
+                );
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                Monitor.Log($"Failed when attempting to load sound file in a cue.\n"
+                          + $"Cue name: {cueName}\n"
+                          + $"Sound file: {path}\n"
+                          + $"Message: {ex.Message}\n" 
+                          + $"Stack Trace:\n{ex.StackTrace}", LogLevel.Error);
+                return null;
             }
         }
 
+        /// <summary>Queries raw data of a cue. Must be an original game cue.</summary>
         private static IEnumerable<(int waveBankIndex, int trackIndex)> GetIndexes(string cueName)
         {
             // cueName here always refers to an original game cue.
@@ -174,5 +230,18 @@ namespace FluteBlockExtension.Framework
         //    CueDefinition definition = Game1.soundBank.GetCueDefinition(name);
         //    definition.sounds[0].pitch = octaves;
         //}
+
+        private class RuntimeSound
+        {
+            public string? FullPath { get; }
+
+            public SoundEffect? Effect { get; }
+
+            public RuntimeSound(string? fullPath, SoundEffect? effect)
+            {
+                this.FullPath = fullPath;
+                this.Effect = effect;
+            }
+        }
     }
 }
