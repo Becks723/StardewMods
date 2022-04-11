@@ -55,8 +55,9 @@ namespace FluteBlockExtension.Framework.Integrations
 
                 .AddSectionTitle(I18n.Config_SectionTitle_Sounds)
                 .AddFilePathPicker(
-                    name: I18n.Config_SoundFolderPath,
-                    tooltip: I18n.Config_SoundFolderPath_Tooltip,
+                    name: I18n.Config_SoundFolder,
+                    tooltip: I18n.Config_SoundFolder_Tooltip,
+                    browseButtonText: I18n.Config_SoundFolder_BrowseButton,
                     getPath: () => this._soundsConfig.SoundsFolderPath,
                     setPath: val => this._soundsConfig.SoundsFolderPath = val
                 )

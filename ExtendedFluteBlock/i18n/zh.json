@@ -14,8 +14,9 @@
   "config.max-pitch": "最高音",
   "config.max-pitch.tooltip": "调音时可达到的最高音，不能超过上面的最低音。60为中央C，每加一表示增加一个半音，每加十二表示增加一个八度。",
   "config.section-title.sounds": "声音",
-  "config.sound-folder-path": "音色库",
-  "config.sound-folder-path.tooltip": "音色库（文件夹）路径",
+  "config.sound-folder": "音色库",
+  "config.sound-folder.tooltip": "音色库（文件夹）路径",
+  "config.sound-folder.browse-button": "浏览",
   "config.sound-floor": "音色和地板",
   "config.sound-floor.tooltip": "编辑音色和地板的对应关系。",
   "config.sound-floor.editor.sound-title": "音色",
@@ -43,5 +44,7 @@
   "sound.piano.name": "钢琴",
   "sound.piano.desc": "钢琴",
   "sound.acoustic-guitar.name": "原声吉他",
-  "sound.acoustic-guitar.desc": "原声吉他"
+  "sound.acoustic-guitar.desc": "原声吉他",
+
+  "not-implemented-feature": "还未实现的功能 o((>ω< ))o"
 }

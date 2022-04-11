@@ -55,6 +55,7 @@ artifacts/
 *.obj
 *.pch
 *.pdb
+!/_libs/**/*.pdb
 *.pgc
 *.pgd
 *.rsp
