@@ -61,10 +61,6 @@ namespace FluteBlockExtension
             // fix soundeffect duration error.
             new SoundEffectZeroDurationFix(harmony, this.Monitor).ApplyFix();
 
-            // customize keyboardDispatcher.
-            Game1.keyboardDispatcher.Cleanup();
-            Game1.keyboardDispatcher = new KeyboardDispatcherPlus(Game1.game1.Window);
-
             // patch.
             MainPatcher.Prepare(
                 harmony,
