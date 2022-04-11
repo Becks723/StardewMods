@@ -721,10 +721,10 @@ namespace FluteBlockExtension.Framework.Menus
             {
                 bool readOnly = SoundsConfig.BuiltInSoundFloorPairs.Select(p => p.Sound).Contains(data);
 
-                this.NameBox.String = this._savedName = data.Name;
+                this.NameBox.String = this._savedName = data.Name ?? string.Empty;
                 this.NameBox.IsReadOnly = readOnly;
 
-                this.CueNameBox.String = this._savedCueName = data.CueName;
+                this.CueNameBox.String = this._savedCueName = data.CueName ?? string.Empty;
                 this.CueNameBox.IsReadOnly = readOnly;
 
                 this.PitchBox.String = this._savedRawPitch = data.RawPitch.ToString();
@@ -733,7 +733,7 @@ namespace FluteBlockExtension.Framework.Menus
                 this.PathsBox.String = this._savedPaths = string.Join(' ', data.FilePaths.Select(p => "\"" + p.Path + "\""));
                 this.PathsBox.IsReadOnly = readOnly;
 
-                this.NotesBox.String = this._savedNotes = data.Description;
+                this.NotesBox.String = this._savedNotes = data.Description ?? string.Empty;
                 this.NotesBox.IsReadOnly = readOnly;
             }
 
