@@ -477,6 +477,8 @@ namespace FluteBlockExtension.Framework.Menus
                             this._topIndex -= delta;
                             break;
                     }
+
+                    this._topIndex = Math.Clamp(this._topIndex, 0, this._soundColumn.Rows.Count - this.MaxDisplayRows);
                 }
 
                 this._lastState = mouseState;
@@ -877,7 +879,7 @@ namespace FluteBlockExtension.Framework.Menus
                 this._floorSelector.Choices = this.LoadFloors(data);
 
                 // load selected item.
-                this._floorSelector.SelectedItem = _savedSelectedFloor = data;
+                this._floorSelector.SelectedItem = this._savedSelectedFloor = data;
             }
 
             public override void Update(GameTime gameTime)
@@ -909,7 +911,7 @@ namespace FluteBlockExtension.Framework.Menus
 
             protected override void RaiseOkButtonClicked()
             {
-                _savedSelectedFloor = _floorSelector.SelectedItem;
+                this._savedSelectedFloor = this._floorSelector.SelectedItem;
 
                 base.RaiseOkButtonClicked();
             }
