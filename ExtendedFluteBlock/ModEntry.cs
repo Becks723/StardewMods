@@ -70,6 +70,7 @@ namespace FluteBlockExtension
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
             helper.Events.GameLoop.Saving += this.OnSaving;
             helper.Events.World.ObjectListChanged += this.OnObjectListChanged;
+            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -166,6 +167,20 @@ namespace FluteBlockExtension
                 {
                     obj.modData.Remove(FluteBlockModData_ExtraPitch);
                     this.Monitor.Log($"A flute block is removed. Delete its 'extraPitch' field.");
+                }
+            }
+        }
+
+        private void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)
+        {
+            if (this._config.OpenSoundFloorEditor.JustPressed())
+            {
+                if (SoundFloorEditor.ActiveInstance is null)
+                {
+                    Game1.activeClickableMenu = new SoundFloorEditor(
+                        () => this._soundsConfig.SoundFloorPairs,
+                        () => this.Helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig)
+                    );
                 }
             }
         }

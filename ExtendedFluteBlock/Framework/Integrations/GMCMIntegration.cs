@@ -25,7 +25,6 @@ namespace FluteBlockExtension.Framework.Integrations
         protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)
         {
             helper.Register()
-
                 .AddCheckbox(
                     name: I18n.Config_EnableMorePitch,
                     get: () => this._config.EnableExtraPitch,
@@ -56,6 +55,12 @@ namespace FluteBlockExtension.Framework.Integrations
                     name: I18n.Config_SoundFloor,
                     tooltip: I18n.Config_SoundFloor_Tooltip,
                     option: new SoundFloorOption(() => this._soundsConfig)
+                )
+                .AddKeyBindList(
+                    name: I18n.Config_SoundFloorKeybind,
+                    tooltip: I18n.Config_SoundFloorKeybind_Tooltip,
+                    get: () => this._config.OpenSoundFloorEditor,
+                    set: val => this._config.OpenSoundFloorEditor = val
                 );
         }
     }

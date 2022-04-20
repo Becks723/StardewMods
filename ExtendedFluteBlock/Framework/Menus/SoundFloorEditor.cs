@@ -17,10 +17,12 @@ namespace FluteBlockExtension.Framework.Menus
     /// <summary>A menu for editing sound-floor mapping.</summary>
     internal class SoundFloorEditor : IClickableMenu, IDisposable
     {
+        public static SoundFloorEditor ActiveInstance { get; private set; }
+
         private readonly RootElement _root;
 
         private readonly Func<SoundFloorMap> _map;
-
+        private readonly Action _saveOnExit;
         private readonly Lazy<Texture> _addIcon = new(LoadAddIcon);
 
         private readonly List<SoundData> _soundList = new();
@@ -52,7 +54,7 @@ namespace FluteBlockExtension.Framework.Menus
         };
 
         /// <summary>GMCM config menu, to which <see cref="Game1.activeClickableMenu"/> will be set after this <see cref="SoundFloorEditor"/> exits.</summary>
-        public IClickableMenu ConfigMenu;
+        public IClickableMenu PreviousConfigMenu;
 
         static SoundFloorEditor()
         {
@@ -62,9 +64,12 @@ namespace FluteBlockExtension.Framework.Menus
             );
         }
 
-        public SoundFloorEditor(Func<SoundFloorMap> map)
+        public SoundFloorEditor(Func<SoundFloorMap> map, Action? saveOnExit = null)
         {
+            ActiveInstance = this;
+
             this._map = map;
+            this._saveOnExit = saveOnExit;
 
             this._root = new RootElement();
 
@@ -253,7 +258,7 @@ namespace FluteBlockExtension.Framework.Menus
             this.yPositionOnScreen = Game1.uiViewport.Height / 2 - this.height / 2;
             this._root.LocalPosition = new Vector2(this.xPositionOnScreen, this.yPositionOnScreen);
 
-            this.ConfigMenu?.gameWindowSizeChanged(oldBounds, newBounds);
+            this.PreviousConfigMenu?.gameWindowSizeChanged(oldBounds, newBounds);
         }
 
         public override void update(GameTime time)
@@ -275,10 +280,22 @@ namespace FluteBlockExtension.Framework.Menus
         {
             // Title menu exit is not available here.
             // The title menu uses a back button to exit its submenu, so must edit TitleMenu.backButtonPressed logic.
-            Game1.activeClickableMenu = this.ConfigMenu;
+            if (this.PreviousConfigMenu != null)
+            {
+                Game1.activeClickableMenu = this.PreviousConfigMenu;
 
-            // reattach.
-            this.exitFunction = this.OnExited;
+                // reattach.
+                this.exitFunction = this.OnExited;
+            }
+
+            // for individual case, do save when exiting.
+            if (this._saveOnExit != null)
+            {
+                this.OnSaving();
+                this._saveOnExit();
+            }
+
+            ActiveInstance = null;
         }
 
         private static bool TitleMenu_backButtonPressed_Prefix()
@@ -286,7 +303,7 @@ namespace FluteBlockExtension.Framework.Menus
             if (TitleMenu.subMenu is SoundFloorEditor editor && TitleMenu.subMenu.readyToClose())
             {
                 Game1.playSound("bigDeSelect");
-                TitleMenu.subMenu = editor.ConfigMenu;
+                TitleMenu.subMenu = editor.PreviousConfigMenu;
                 return false;  // skip original.
             }
 

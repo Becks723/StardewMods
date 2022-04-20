@@ -55,14 +55,6 @@ namespace FluteBlockExtension.Framework.Integrations
             this._button.Draw(b);
         }
 
-        public override void OnMenuOpening()
-        {
-            // 每次打开重新初始化，不能仅在构造函数中初始化。
-            // 这是由于该GMCM选项仅在游戏打开时注册（GameLaunched），那时本地化还没加载，导致SpriteFont还都是英文，其他语言会乱码。
-            this._soundFloorEditor?.Dispose();
-            this._soundFloorEditor = new SoundFloorEditor(this._map);
-        }
-
         public override void OnSaving()
         {
             this._soundFloorEditor.OnSaving();
@@ -70,7 +62,11 @@ namespace FluteBlockExtension.Framework.Integrations
 
         private void ButtonClicked(object sender, EventArgs e)
         {
-            this._soundFloorEditor.ConfigMenu = this.ConfigMenu;
+            // 每次打开重新初始化，不能仅在构造函数中初始化。
+            // 这是由于该GMCM选项仅在游戏打开时注册（GameLaunched），那时本地化还没加载，导致SpriteFont还都是英文，其他语言会乱码。
+            this._soundFloorEditor?.Dispose();
+            this._soundFloorEditor = new SoundFloorEditor(this._map);
+            this._soundFloorEditor.PreviousConfigMenu = this.ConfigMenu;
 
             if (Game1.activeClickableMenu is TitleMenu)
                 TitleMenu.subMenu = this._soundFloorEditor;

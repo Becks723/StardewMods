@@ -1,6 +1,8 @@
 ﻿using System;
 using FluteBlockExtension.Framework.Patchers;
 using Newtonsoft.Json;
+using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using static FluteBlockExtension.Framework.Constants;
 
 namespace FluteBlockExtension.Framework
@@ -24,6 +26,9 @@ namespace FluteBlockExtension.Framework
         /// <remarks>Differ from <see cref="MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE"/>.</remarks>
         [JsonProperty("MaxPitch")]
         public int MaxAccessiblePitch { get; set; } = MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE;
+
+        /// <summary>Key to open sound-floor editor. Default is <see cref="SButton.None"/>.</summary>
+        public KeybindList OpenSoundFloorEditor { get; set; } = new(SButton.None);
 
         /// <summary>Verify new pitches value, then update the ones in patcher.</summary>
         /// <remarks>Call this when either <see cref="MinAccessiblePitch"/> or <see cref="MaxAccessiblePitch"/> is changed.</remarks>
