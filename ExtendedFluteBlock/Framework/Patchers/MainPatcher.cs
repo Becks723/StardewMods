@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using FluteBlockExtension.Framework.Models;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -156,15 +157,15 @@ namespace FluteBlockExtension.Framework.Patchers
 
                         if (__instance.internalSound != null)
                             __instance.internalSound.Stop(AudioStopOptions.Immediate);
-                        var (cue, duration, rawPitch) = Map(who.currentLocation, __instance.TileLocation);
-                        __instance.internalSound = cue;
-                        float cuePitch = newPitch / 1200f - rawPitch / 12f;
+                        MappedSound sound = Map(who.currentLocation, __instance.TileLocation);
+                        __instance.internalSound = sound.Cue;
+                        float cuePitch = newPitch / 1200f - sound.RawPitch / 12f;
                         __instance.internalSound.Pitch = _config.EnableExtraPitch
                             ? cuePitch
                             : Math.Clamp(cuePitch, -1, 1);
                         __instance.internalSound.Play();
                         __instance.scale.Y = 1.3f;
-                        __instance.shakeTimer = CalculateShakeTimer(duration, rawPitch, newPitch / 100);
+                        __instance.shakeTimer = CalculateShakeTimer(sound.Duration, sound.RawPitch, newPitch / 100);
 
                         __result = true;
                         return false;
@@ -188,18 +189,18 @@ namespace FluteBlockExtension.Framework.Patchers
 
                     if (__instance.IsFluteBlock() && (__instance.internalSound == null || (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds - __instance.lastNoteBlockSoundTime >= 1000 && !__instance.internalSound.IsPlaying) && !Game1.dialogueUp)
                     {
-                        var (cue, duration, rawPitch) = Map(location, __instance.TileLocation);
-                        __instance.internalSound = cue;
+                        MappedSound sound = Map(location, __instance.TileLocation);
+                        __instance.internalSound = sound.Cue;
 
                         int pitch = __instance.GetPitch();
                         var (gamePitch, _) = __instance.SeperatePitch();
-                        float cuePitch = pitch / 1200f - rawPitch / 12f;
+                        float cuePitch = pitch / 1200f - sound.RawPitch / 12f;
                         __instance.internalSound.Pitch = _config.EnableExtraPitch
                             ? cuePitch
                             : Math.Clamp(cuePitch, -1, 1);
                         __instance.internalSound.Play();
                         __instance.scale.Y = 1.3f;
-                        __instance.shakeTimer = CalculateShakeTimer(duration, rawPitch, pitch / 100);
+                        __instance.shakeTimer = CalculateShakeTimer(sound.Duration, sound.RawPitch, pitch / 100);
                         __instance.lastNoteBlockSoundTime = (int)Game1.currentGameTime.TotalGameTime.TotalMilliseconds;
 
                         if (location is IslandSouthEast ise)
@@ -331,24 +332,27 @@ namespace FluteBlockExtension.Framework.Patchers
                 return $"(At {obj.TileLocation}, {location?.Name ?? "Unknown location"})";
             }
 
-            /// <summary>Local map function. See <see cref="SoundFloorMapper.Map(Flooring)"/>.</summary>
-            private static (ICue cue, double duration, int rawPitch) Map(GameLocation location, Vector2 tilePos)
+            /// <summary>Map sound from floor data.</summary>
+            private static MappedSound Map(GameLocation location, Vector2 tilePos)
             {
                 var mapper = _mapper;
 
+                // when more sounds is diabled, return vanilla flute sound.
                 if (!_config.EnableSounds)
-                    return mapper.MapForFlute();
+                    return MappedSound.Flute;
 
+                // when this tile is flooring.
                 if (location.terrainFeatures.TryGetValue(tilePos, out TerrainFeature terrain))
                     if (terrain is Flooring floor)
-                        return mapper.Map(floor);
+                        return mapper.Map(FloorData.From(floor?.whichFloor?.Value));
 
-                return mapper.Map(null);
+                // otherwise, regard as non-floor.
+                return mapper.Map(FloorData.NonFloor);
             }
 
             private static void AssertPatchFailure(Exception ex, [CallerMemberName] string methodName = "")
             {
-                _monitor.Log($"Failed to patch {nameof(MainPatcher)}.{methodName}: {ex.Message}.\nStack trace: {ex.StackTrace}", LogLevel.Error);
+                _monitor.Log($"Failed to patch {nameof(MainPatcher)}.{methodName}: {ex.Message}\n{ex.StackTrace}", LogLevel.Error);
             }
         }
     }

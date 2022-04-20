@@ -52,15 +52,6 @@ namespace FluteBlockExtension.Framework.Integrations
                     max: ToMidiNote(MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE),
                     tooltip: I18n.Config_MaxPitch_Tooltip
                 )
-
-                .AddSectionTitle(I18n.Config_SectionTitle_Sounds)
-                .AddFilePathPicker(
-                    name: I18n.Config_SoundFolder,
-                    tooltip: I18n.Config_SoundFolder_Tooltip,
-                    browseButtonText: I18n.Config_SoundFolder_BrowseButton,
-                    getPath: () => this._soundsConfig.SoundsFolderPath,
-                    setPath: val => this._soundsConfig.SoundsFolderPath = val
-                )
                 .AddCustom(
                     name: I18n.Config_SoundFloor,
                     tooltip: I18n.Config_SoundFloor_Tooltip,

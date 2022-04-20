@@ -26,6 +26,7 @@
   "config.sound.editor-options.raw-pitch": "原始音高",
   "config.sound.editor-options.file-paths": "文件路径",
   "config.sound.editor-options.desc": "备注",
+  "config.sound.editor-options.enable": "启用",
   "config.floor.editor-options.select": "选择其中一个",
 
   "floor.non-floor.name": "无地板",
@@ -34,17 +35,5 @@
 
   "sound.empty": "（空）",
   "sound.flute.name": "长笛",
-  "sound.flute.desc": "原版长笛块的音色。",
-  "sound.crystal.name": "水晶",
-  "sound.crystal.desc": "唱歌的石头的音色。",
-  "sound.clam.name": "蛤蜊",
-  "sound.clam.desc": "夜市美人鱼表演屋贝壳的音色。",
-  "sound.toy-piano.name": "艾利欧特的钢琴",
-  "sound.toy-piano.desc": "艾利欧特家钢琴的音色。",
-  "sound.piano.name": "钢琴",
-  "sound.piano.desc": "钢琴",
-  "sound.acoustic-guitar.name": "原声吉他",
-  "sound.acoustic-guitar.desc": "原声吉他",
-
-  "not-implemented-feature": "还未实现的功能 o((>ω< ))o"
+  "sound.flute.desc": "原版长笛块的音色。"
 }

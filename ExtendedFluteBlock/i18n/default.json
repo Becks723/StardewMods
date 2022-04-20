@@ -26,6 +26,7 @@
   "config.sound.editor-options.raw-pitch": "Raw Pitch",
   "config.sound.editor-options.file-paths": "File Path(s)",
   "config.sound.editor-options.desc": "Notes",
+  "config.sound.editor-options.enable": "Enable",
   "config.floor.editor-options.select": "Select a Floor",
 
   "floor.non-floor.name": "Non-Floor",
@@ -34,17 +35,5 @@
 
   "sound.empty": "Empty",
   "sound.flute.name": "Flute",
-  "sound.flute.desc": "Vanilla flute block's sound.",
-  "sound.crystal.name": "Crystal",
-  "sound.crystal.desc": "Vanilla singing stone's sound.",
-  "sound.clam.name": "Clam",
-  "sound.clam.desc": "Sound of a clam shell in Mermaid Boat at Night Market.",
-  "sound.toy-piano.name": "Elliott's Piano",
-  "sound.toy-piano.desc": "Piano in Elliott house.",
-  "sound.piano.name": "Piano",
-  "sound.piano.desc": "Piano",
-  "sound.acoustic-guitar.name": "Acoustic Guitar",
-  "sound.acoustic-guitar.desc": "Acoustic Guitar",
-
-  "not-implemented-feature": "New feature coming soon..."
+  "sound.flute.desc": "Vanilla flute block's sound."
 }

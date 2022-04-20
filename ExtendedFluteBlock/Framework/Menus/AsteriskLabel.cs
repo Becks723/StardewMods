@@ -10,7 +10,7 @@ using StardewValley.Controls;
 
 namespace FluteBlockExtension.Framework.Menus
 {
-    /// <summary>A label with an element option. When option data is moditfied, an asterisk will show up beside the label.</summary>
+    /// <summary>A label with an element option. When option data is moditfied, a "*" will show up beside the label.</summary>
     internal class AsteriskLabel<TElement> : Label2
         where TElement : Element
     {

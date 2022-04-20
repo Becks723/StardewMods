@@ -43,10 +43,6 @@ namespace FluteBlockExtension
             // init misc data.
             ModID = this.ModManifest.UniqueID;
             FluteBlockModData_ExtraPitch = $"{ModID}/extraPitch";
-            SoundsConfig.DefaultSoundsFolderPath = PathUtilities.NormalizePath(
-                Path.Combine(helper.DirectoryPath, "assets", "sounds")
-            );
-            SoundManager.Monitor = this.Monitor;
 
             // read mod config.
             this._config = helper.ReadConfig<ModConfig>();
@@ -66,12 +62,9 @@ namespace FluteBlockExtension
                 harmony,
                 this._config,
                 this.Monitor,
-                new SoundFloorMapper(() => this._soundsConfig.SoundFloorPairs)
+                new SoundFloorMapper(() => this._soundsConfig.SoundFloorPairs, this.Monitor)
             );
             MainPatcher.Patch();
-
-            // load sounds.
-            SoundManager.LoadSounds(this._soundsConfig);
 
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
@@ -206,26 +199,6 @@ namespace FluteBlockExtension
                 helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
                 return;
             }
-
-            // recover built-in sounds if lost.
-            var pairs = this._soundsConfig.SoundFloorPairs;
-            var builtInSounds = SoundsConfig.BuiltInSoundFloorPairs.Select(p => p.Sound).ToArray();
-            var currentSounds = pairs.Select(p => p.Sound).ToArray();
-
-            foreach (SoundData builtIn in builtInSounds)
-            {
-                if (!currentSounds.Contains(builtIn))
-                {
-                    pairs.Add(new SoundFloorMapItem() { Sound = builtIn, Floor = FloorData.Empty });
-                }
-                else
-                {
-                    SoundData soundData = currentSounds.Where(s => s.CueName == builtIn.CueName).FirstOrDefault();
-                    soundData.NameFunc = builtIn.NameFunc;
-                    soundData.DescriptionFunc = builtIn.DescriptionFunc;
-                }
-            }
-            helper.Data.WriteGlobalData(this._soundsKey, this._soundsConfig);
         }
 
         private void FixMenu_OptionSelected(object sender, FixOptionSelectedEventArgs e)

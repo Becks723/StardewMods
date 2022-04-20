@@ -17,7 +17,7 @@ namespace CodeShared.Integrations
             {
                 this._loaded = false;
                 failMessage ??= $"The mod \"{modID}\" is not loaded, thus its API wouldn't be used!";
-                monitor.Log(failMessage, LogLevel.Warn);
+                monitor.Log(failMessage);
             }
         }
 

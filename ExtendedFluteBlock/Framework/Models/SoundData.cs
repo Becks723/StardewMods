@@ -17,6 +17,15 @@ namespace FluteBlockExtension.Framework.Models
 
         public static readonly SoundData Empty = new SoundData() { IsEmpty = true };
 
+        public static SoundData Flute = new SoundData
+        {
+            NameFunc = I18n.Sound_Flute_Name,
+            DescriptionFunc = I18n.Sound_Flute_Desc,
+            CueName = "flute",
+            RawPitch = 12,
+            IsEmpty = false
+        };
+
         public static SoundData GameSound(
             Func<string> name,
             string cueName,
@@ -24,18 +33,6 @@ namespace FluteBlockExtension.Framework.Models
             Func<string> description = null)
         {
             SoundData sound = new SoundData { NameFunc = name, CueName = cueName, RawPitch = rawPitch, DescriptionFunc = description };
-            return sound;
-        }
-
-        public static SoundData CustomSound(
-            Func<string> name,
-            string cueName,
-            int rawPitch = 0,
-            Func<string> description = null,
-            params FilePath[] paths)
-        {
-            SoundData sound = new SoundData { NameFunc = name, CueName = cueName, RawPitch = rawPitch, DescriptionFunc = description };
-            sound.FilePaths.AddRange(paths);
             return sound;
         }
 
@@ -59,11 +56,6 @@ namespace FluteBlockExtension.Framework.Models
         /// <summary>The unique cue name in game.</summary>
         public string CueName { get; set; }
 
-        internal SoundType SoundType => this.InferSoundType();
-
-        /// <summary>A list of file paths. If relative, it's relative to the Sounds folder (See <see cref="SoundsConfig.SoundsFolderPath"/>).</summary>
-        public List<FilePath> FilePaths { get; set; } = new();
-
         /// <summary>The original pitch in the sound file.</summary>
         public int RawPitch { get; set; }
 
@@ -79,28 +71,13 @@ namespace FluteBlockExtension.Framework.Models
             set { this._description = value; }
         }
 
+        public bool IsEnabled { get; set; } = true;
+
         public bool IsEmpty { get; set; }
 
         internal Func<string> NameFunc { get; set; }
 
         internal Func<string> DescriptionFunc { get; set; }
-
-        /// <summary>Helper method, loads sound effects base on FilePaths.</summary>
-        /// <param name="basePath">A path to base on when relative.</param>
-        public SoundEffect[] LoadSoundEffects(string basePath)
-        {
-            return this.FilePaths
-                .Select(p => SoundEffect.FromFile(p.GetFullPath(basePath)))
-                .ToArray();
-        }
-
-        private SoundType InferSoundType()
-        {
-            if (this.FilePaths.Count == 0)
-                return SoundType.GameCue;
-            else
-                return SoundType.CustomCue;
-        }
 
         public override bool Equals(object obj)
         {

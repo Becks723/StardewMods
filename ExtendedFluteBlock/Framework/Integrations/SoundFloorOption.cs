@@ -66,9 +66,6 @@ namespace FluteBlockExtension.Framework.Integrations
         public override void OnSaving()
         {
             this._soundFloorEditor.OnSaving();
-
-            // load new sounds.
-            SoundManager.LoadSounds(this._config());
         }
 
         private void ButtonClicked(object sender, EventArgs e)
