@@ -281,15 +281,6 @@ namespace CodeShared.Integrations.GenericModConfigMenu
             );
         }
 
-        public GenericModConfigMenuFluentHelper AddFilePathPicker(Func<string> name, Func<string> tooltip, Func<string> getPath, Action<string> setPath, Func<string> browseButtonText = null)
-        {
-            return this.AddCustom(
-                name: name,
-                tooltip: tooltip,
-                option: new FilePathPicker(getPath, setPath) { BrowseButtonText = browseButtonText }
-            );
-        }
-
         /// <summary>Subscribe to field change event.</summary>
         /// <returns>The unique field ID.</returns>
         private string WhenChange<TField>(Action<TField> fieldChange)
