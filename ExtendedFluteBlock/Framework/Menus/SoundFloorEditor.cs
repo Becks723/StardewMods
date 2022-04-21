@@ -11,6 +11,7 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Controls;
 using StardewValley.Menus;
+using static FluteBlockExtension.Framework.Constants;
 
 namespace FluteBlockExtension.Framework.Menus
 {
@@ -719,13 +720,19 @@ namespace FluteBlockExtension.Framework.Menus
         {
             private readonly Label2 _nameLabel, _cueNameLabel, _pitchLabel, _notesLabel, _enableLabel;
 
-            private readonly Textbox _nameBox, _cueNameBox, _pitchBox, _notesBox;
+            private readonly Label2 _pitchValueLabel;
+
+            private readonly Textbox _nameBox, _cueNameBox, _notesBox;
+
+            private readonly Slider<int> _rawPitchSlider;
 
             private readonly Checkbox _enableCheckbox;
 
-            private ClickableTextureComponent _playButton;
+            private readonly ClickableTextureComponent _playButton;
 
-            private string _savedName, _savedCueName, _savedRawPitch, _savedNotes;
+            private string _savedName, _savedCueName, _savedNotes;
+
+            private int _savedRawPitch;
 
             private bool _savedEnabled;
 
@@ -739,22 +746,28 @@ namespace FluteBlockExtension.Framework.Menus
 
             public string CueName => this._cueNameBox.String;
 
-            public int RawPitch => int.TryParse(this._pitchBox.String, out int rawPitch) ? rawPitch : 0;
+            public int RawPitch => this._rawPitchSlider.Value - 60;
 
             public string Description => this._notesBox.String;
 
             public bool IsEnabled => this._enableCheckbox.IsChecked;
 
-            public bool AnyTextboxFocused => this._nameBox.Focused || this._cueNameBox.Focused || this._pitchBox.Focused || this._notesBox.Focused;
+            public bool AnyTextboxFocused => this._nameBox.Focused || this._cueNameBox.Focused || this._notesBox.Focused;
 
             public SoundTable()
             {
-                this._nameBox = new Textbox();
-                this._cueNameBox = new Textbox();
+                this._nameBox = new();
+                this._cueNameBox = new();
                 this._cueNameBox.TextChanged += this.CueNameBox_TextChanged;
-                this._pitchBox = new Textbox();
-                this._notesBox = new Textbox();
-                this._enableCheckbox = new Checkbox();
+                this._rawPitchSlider = new()
+                {
+                    Minimum = ToMidiNote(MIN_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE),
+                    Maximum = ToMidiNote(MAX_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE),
+                    Interval = 1,
+                    Value = 60
+                };
+                this._notesBox = new();
+                this._enableCheckbox = new();
 
                 this._playButton = new(new Rectangle(0, 0, this._cueNameBox.Height, this._cueNameBox.Height), Game1.mouseCursors, new(175, 379, 16, 16), this._cueNameBox.Height / 16);
 
@@ -767,10 +780,13 @@ namespace FluteBlockExtension.Framework.Menus
                                 return this._savedName != this._nameBox.String;
                             else if (textbox == this._cueNameBox)
                                 return this._savedCueName != this._cueNameBox.String && this._isCueValid;
-                            else if (textbox == this._pitchBox)
-                                return this._savedRawPitch != this._pitchBox.String;
                             else if (textbox == this._notesBox)
                                 return this._savedNotes != this._notesBox.String;
+                            break;
+
+                        case Slider slider:
+                            if (slider == this._rawPitchSlider)
+                                return this._savedRawPitch != this._rawPitchSlider.Value;
                             break;
 
                         case Checkbox checkbox:
@@ -783,13 +799,13 @@ namespace FluteBlockExtension.Framework.Menus
                 }
                 this._nameLabel = new AsteriskLabel<Textbox>(this._nameBox) { IsEditedObserver = isEdited };
                 this._cueNameLabel = new AsteriskLabel<Textbox>(this._cueNameBox) { IsEditedObserver = isEdited };
-                this._pitchLabel = new AsteriskLabel<Textbox>(this._pitchBox) { IsEditedObserver = isEdited };
+                this._pitchLabel = new AsteriskLabel<Slider<int>>(this._rawPitchSlider) { IsEditedObserver = isEdited };
                 this._notesLabel = new AsteriskLabel<Textbox>(this._notesBox) { IsEditedObserver = isEdited };
                 this._enableLabel = new AsteriskLabel<Checkbox>(this._enableCheckbox) { IsEditedObserver = isEdited };
 
                 this.AddOption(this._nameLabel, this._nameBox);
                 this.AddOption(this._cueNameLabel, this._cueNameBox, new ClickableTextureAdapter(this._playButton));
-                this.AddOption(this._pitchLabel, this._pitchBox);
+                this.AddOption(this._pitchLabel, this._rawPitchSlider, this._pitchValueLabel = new Label2());
                 this.AddOption(this._notesLabel, this._notesBox);
                 this.AddOption(this._enableLabel, this._enableCheckbox);
             }
@@ -798,7 +814,7 @@ namespace FluteBlockExtension.Framework.Menus
             {
                 this._nameBox.String = this._savedName = data.Name ?? string.Empty;
                 this._cueNameBox.String = this._savedCueName = data.CueName ?? string.Empty;
-                this._pitchBox.String = this._savedRawPitch = data.RawPitch.ToString();
+                this._rawPitchSlider.Value = this._savedRawPitch = data.RawPitch + 60;
                 this._notesBox.String = this._savedNotes = data.Description ?? string.Empty;
                 this._enableCheckbox.IsChecked = this._savedEnabled = data.IsEnabled;
 
@@ -818,6 +834,12 @@ namespace FluteBlockExtension.Framework.Menus
                 this._pitchLabel.Text = I18n.Config_Sound_EditorOptions_RawPitch();
                 this._notesLabel.Text = I18n.Config_Sound_EditorOptions_Desc();
                 this._enableLabel.Text = I18n.Config_Sound_EditorOptions_Enable();
+
+                // update raw pitch slider width.
+                this._rawPitchSlider.RequestWidth = this.Width / 3;
+
+                // update raw pitch value label text.
+                this._pitchValueLabel.Text = this._rawPitchSlider.Value.ToString();
             }
 
             public override void ReceiveLeftClick(int x, int y, bool playSound = true)
@@ -853,7 +875,7 @@ namespace FluteBlockExtension.Framework.Menus
             {
                 this._savedName = this._nameBox.String;
                 this._savedCueName = this._cueNameBox.String;
-                this._savedRawPitch = this._pitchBox.String;
+                this._savedRawPitch = this._rawPitchSlider.Value;
                 this._savedNotes = this._notesBox.String;
                 this._savedEnabled = this._enableCheckbox.IsChecked;
 
