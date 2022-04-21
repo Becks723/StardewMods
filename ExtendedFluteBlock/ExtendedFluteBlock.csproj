@@ -6,7 +6,7 @@
 	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
 
 	<PropertyGroup>
-		<Version>0.1.0</Version>
+		<Version>0.2.0</Version>
 		<RootNamespace>FluteBlockExtension</RootNamespace>
 		<AssemblyName>ExtendedFluteBlock</AssemblyName>
 	</PropertyGroup>
