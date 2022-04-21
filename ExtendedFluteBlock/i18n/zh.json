@@ -21,7 +21,7 @@
   "config.sound-floor.editor.floor-title": "地板",
   "config.sound.editor-options.name": "名称",
   "config.sound.editor-options.cue-name": "Cue名称",
-  "config.sound.editor-options.raw-pitch": "原始音高",
+  "config.sound.editor-options.raw-pitch": "基准音高",
   "config.sound.editor-options.file-paths": "文件路径",
   "config.sound.editor-options.desc": "备注",
   "config.sound.editor-options.enable": "启用",
