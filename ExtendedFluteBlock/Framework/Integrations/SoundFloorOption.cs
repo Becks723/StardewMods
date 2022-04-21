@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Menus;
-using Button = StardewValley.Controls.Button2;
+using Button = StardewValleyUI.Controls.Button2;
 
 namespace FluteBlockExtension.Framework.Integrations
 {

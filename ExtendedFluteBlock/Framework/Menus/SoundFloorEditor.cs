@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.Controls;
+using StardewValleyUI.Controls;
 using StardewValley.Menus;
 using static FluteBlockExtension.Framework.Constants;
 

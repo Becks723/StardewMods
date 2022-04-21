@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewValley.Controls;
+using StardewValleyUI.Controls;
 using StardewValley.Menus;
 
 namespace FluteBlockExtension.Framework.Menus
