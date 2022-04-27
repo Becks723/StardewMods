@@ -9,8 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValleyUI.Controls;
 using StardewValley.Menus;
+using StardewValleyUI.Controls;
 using static FluteBlockExtension.Framework.Constants;
 
 namespace FluteBlockExtension.Framework.Menus
@@ -20,11 +20,13 @@ namespace FluteBlockExtension.Framework.Menus
     {
         public static SoundFloorEditor ActiveInstance { get; private set; }
 
+        private static readonly Lazy<Texture> _refresh = new(LoadRefreshTexture);
+
         private readonly RootElement _root;
 
         private readonly Func<SoundFloorMap> _map;
+
         private readonly Action _saveOnExit;
-        private readonly Lazy<Texture> _addIcon = new(LoadAddIcon);
 
         private readonly List<SoundData> _soundList = new();
 
@@ -105,8 +107,8 @@ namespace FluteBlockExtension.Framework.Menus
                 this.width += this._dataGrid.Width + borderWidth;
             }
 
-            // middle: 2 buttons: up, down.
-            Button2 upButton, downButton;
+            // middle: 3 buttons: up, down, refresh.
+            Button2 upButton, downButton, refreshButton;
             int buttonX = this._dataGrid.Width + borderWidth;
             {
                 int buttonY = 0;
@@ -134,6 +136,17 @@ namespace FluteBlockExtension.Framework.Menus
                 downButton.Click += this.DownButton_Click;
                 buttonY += downButton.Height + borderWidth;
 
+                refreshButton = new Button2
+                {
+                    LocalPosition = new Vector2(buttonX, buttonY),
+                    SettableWidth = 80,
+                    SettableHeight = 50,
+                    Content = _refresh.Value,
+                    Scale = 1.5f
+                };
+                refreshButton.Click += this.RefreshButton_Click;
+                buttonY += refreshButton.Height + borderWidth;
+
                 this.width += upButton.Width + borderWidth;
             }
 
@@ -150,7 +163,7 @@ namespace FluteBlockExtension.Framework.Menus
                 this.width += this._propertyView.Width;
             }
 
-            this._root.Add(this._dataGrid, upButton, downButton, this._propertyView);
+            this._root.Add(this._dataGrid, upButton, downButton, refreshButton, this._propertyView);
 
             // update overall bounds.
             this.height = this._dataGrid.Height;
@@ -219,16 +232,7 @@ namespace FluteBlockExtension.Framework.Menus
             {
                 int index = this._dataGrid.SoundColumn.Rows.IndexOf(soundGridItem);
 
-                SoundData editedSound = new SoundData
-                {
-                    Name = this._soundTable.Name,
-                    CueName = this._soundTable.CueName,
-                    RawPitch = this._soundTable.RawPitch,
-                    Description = this._soundTable.Description,
-                    IsEnabled = this._soundTable.IsEnabled,
-                };
-
-                this._soundList[index] = soundGridItem.Sound = editedSound;
+                this._soundList[index] = soundGridItem.Sound = this._soundTable.BuildData();
             }
         }
 
@@ -251,6 +255,11 @@ namespace FluteBlockExtension.Framework.Menus
         private void UpButton_Click(object sender, EventArgs e)
         {
             this._dataGrid.MoveUp();
+        }
+
+        private void RefreshButton_Click(object sender, EventArgs e)
+        {
+            SoundTable.AllCues = CueUtilites.GetAllCues().ToArray();
         }
 
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
@@ -311,20 +320,48 @@ namespace FluteBlockExtension.Framework.Menus
             return true;
         }
 
-        private static Texture2D LoadAddIcon()
+        private static Texture2D LoadRefreshTexture()
         {
-            Texture2D texture = new Texture2D(Game1.graphics.GraphicsDevice, 30, 30);
-            Color foreground = new Color(255, 254, 128);
-            Color background = Color.Transparent;
+            int width = 16;
+            int height = 16;
+            Texture2D result = new Texture2D(Game1.graphics.GraphicsDevice, width, height);
+            Dictionary<Color, (int x, int y)[]> colors = new()
+            {
+#pragma warning disable format
+                { new Color(91, 43, 42, 255), new[] { (5, 0), (6, 0), (7, 0), (8, 0), (9, 0), (10, 0), (11, 0), (1, 1), (2, 1), (4, 1), (13, 1), (1, 2), (14, 2), (1, 3), (8, 3), (9, 3), (10, 3), (11, 3), (14, 3), (1, 4), (12, 4), (15, 4), (1, 5), (13, 5), (15, 5), (1, 6), (13, 6), (15, 6), (1, 7), (3, 7), (4, 7), (6, 7), (14, 7), (1, 8), (8, 8), (9, 8), (10, 8), (11, 8), (12, 8), (13, 8), (14, 8), (0, 9), (2, 9), (8, 9), (14, 9), (0, 10), (2, 10), (9, 10), (14, 10), (0, 11), (3, 11), (8, 11), (14, 11), (1, 12), (4, 12), (5, 12), (6, 12), (7, 12), (14, 12), (1, 13), (12, 13), (14, 13), (2, 14), (3, 14), (11, 14), (13, 14), (14, 14), (4, 15), (5, 15), (6, 15), (7, 15), (8, 15), (9, 15), (10, 15) } },
+                { new Color(177, 78, 5, 255), new[] { (5, 1), (6, 1), (10, 1), (11, 1), (2, 2), (4, 2), (13, 2), (2, 3), (3, 3), (2, 4), (2, 5), (13, 10), (13, 11), (12, 12), (13, 12), (2, 13), (11, 13), (13, 13), (4, 14), (5, 14), (9, 14), (10, 14) } },
+                { new Color(220, 123, 5, 255), new[] { (7, 1), (8, 1), (9, 1), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 2), (11, 2), (12, 2), (4, 3), (5, 3), (6, 3), (7, 3), (3, 4), (4, 4), (5, 4), (6, 4), (13, 4), (14, 4), (3, 5), (4, 5), (5, 5), (14, 5), (2, 6), (3, 6), (4, 6), (5, 6), (14, 6), (1, 9), (9, 9), (10, 9), (11, 9), (12, 9), (13, 9), (1, 10), (10, 10), (11, 10), (12, 10), (1, 11), (2, 11), (9, 11), (10, 11), (11, 11), (12, 11), (2, 12), (3, 12), (8, 12), (9, 12), (10, 12), (11, 12), (3, 13), (4, 13), (5, 13), (6, 13), (7, 13), (8, 13), (9, 13), (10, 13), (6, 14), (7, 14), (8, 14) } },
+                { new Color(91, 43, 42, 254), new[] { (12, 1) } },
+                { new Color(127, 0, 0, 2), new[] { (14, 1) } },
+                { new Color(90, 42, 39, 252), new[] { (3, 2) } },
+                { new Color(217, 121, 6, 255), new[] { (12, 3), (13, 3) } },
+                { new Color(93, 46, 46, 11), new[] { (15, 3) } },
+                { new Color(93, 44, 42, 255), new[] { (7, 4), (6, 5), (7, 6) } },
+                { new Color(0, 0, 0, 2), new[] { (9, 5) } },
+                { new Color(219, 122, 5, 255), new[] { (6, 6) } },
+                { new Color(64, 64, 64, 4), new[] { (9, 6) } },
+                { new Color(92, 44, 42, 255), new[] { (2, 7) } },
+                { new Color(91, 44, 42, 255), new[] { (5, 7) } },
+                { new Color(91, 42, 41, 253), new[] { (7, 7) } },
+                { new Color(0, 0, 0, 1), new[] { (9, 7) } }
+#pragma warning restore format
+            };
 
-            Color[] data = new Color[30 * 30];
-            for (int j = 0; j < 30; j++)
-                for (int i = 0; i < 30; i++)
-                    data[i + j * 30] = (i >= 9 && i <= 19) || (j >= 9 && j <= 19)
-                        ? foreground
-                        : background;
-            texture.SetData(data);
-            return texture;
+            Color[] data = new Color[width * height];
+            for (int j = 0; j < height; j++)
+            {
+                for (int i = 0; i < width; i++)
+                {
+                    Color c = Color.Transparent;
+                    foreach (var kvp in colors)
+                        if (kvp.Value.Any(xy => xy.x == width - 1 - i && xy.y == j))
+                            c = kvp.Key;
+
+                    data[i + j * width] = c;
+                }
+            }
+            result.SetData(data);
+            return result;
         }
 
         public void Dispose()
@@ -722,13 +759,16 @@ namespace FluteBlockExtension.Framework.Menus
 
             private readonly Label2 _pitchValueLabel;
 
-            private readonly Textbox _nameBox, _cueNameBox, _notesBox;
+            private readonly Textbox _nameBox, _notesBox;
 
             private readonly Slider<int> _rawPitchSlider;
 
+            private readonly SortedComboBox _cueNameComboBox;
+
             private readonly Checkbox _enableCheckbox;
 
-            private readonly ClickableTextureComponent _playButton;
+            /// <summary>An icon beside the cue name comboBox. When <see cref="_isCueValid"/>, shows as a clickable play button, otherwise an unclickable red cross.</summary>
+            private readonly ClickableTextureComponent _stateIcon;
 
             private string _savedName, _savedCueName, _savedNotes;
 
@@ -740,25 +780,15 @@ namespace FluteBlockExtension.Framework.Menus
 
             private bool _isCheckingCue;
 
+            private string CueName => this._cueNameComboBox.Text;
+
             public static string[] AllCues = CueUtilites.GetAllCues().ToArray();
 
-            public string Name => this._nameBox.String;
-
-            public string CueName => this._cueNameBox.String;
-
-            public int RawPitch => this._rawPitchSlider.Value - 60;
-
-            public string Description => this._notesBox.String;
-
-            public bool IsEnabled => this._enableCheckbox.IsChecked;
-
-            public bool AnyTextboxFocused => this._nameBox.Focused || this._cueNameBox.Focused || this._notesBox.Focused;
+            public bool AnyTextboxFocused => this._nameBox.Focused || this._notesBox.Focused;
 
             public SoundTable()
             {
                 this._nameBox = new();
-                this._cueNameBox = new();
-                this._cueNameBox.TextChanged += this.CueNameBox_TextChanged;
                 this._rawPitchSlider = new()
                 {
                     Minimum = ToMidiNote(MIN_PATCHED_PRESERVEDPARENTSHEETINDEX_VALUE),
@@ -768,8 +798,14 @@ namespace FluteBlockExtension.Framework.Menus
                 };
                 this._notesBox = new();
                 this._enableCheckbox = new();
+                this._cueNameComboBox = new()
+                {
+                    MaxDisplayRows = 13,
+                };
+                this._cueNameComboBox.UpdateChoices(AllCues);
+                this._cueNameComboBox.SelectionChanged += this.CueNameBox_SelectionChanged;
 
-                this._playButton = new(new Rectangle(0, 0, this._cueNameBox.Height, this._cueNameBox.Height), Game1.mouseCursors, new(175, 379, 16, 16), this._cueNameBox.Height / 16);
+                this._stateIcon = new(Rectangle.Empty, Game1.mouseCursors, Rectangle.Empty, 0f);
 
                 bool isEdited(Element elem)
                 {
@@ -778,8 +814,6 @@ namespace FluteBlockExtension.Framework.Menus
                         case Textbox textbox:
                             if (textbox == this._nameBox)
                                 return this._savedName != this._nameBox.String;
-                            else if (textbox == this._cueNameBox)
-                                return this._savedCueName != this._cueNameBox.String && this._isCueValid;
                             else if (textbox == this._notesBox)
                                 return this._savedNotes != this._notesBox.String;
                             break;
@@ -793,18 +827,23 @@ namespace FluteBlockExtension.Framework.Menus
                             if (checkbox == this._enableCheckbox)
                                 return this._savedEnabled != checkbox.IsChecked;
                             break;
+
+                        case ComboBox comboBox:
+                            if (comboBox == this._cueNameComboBox)
+                                return this._savedCueName != comboBox.Text && this._isCueValid;
+                            break;
                     }
 
                     return false;
                 }
                 this._nameLabel = new AsteriskLabel<Textbox>(this._nameBox) { IsEditedObserver = isEdited };
-                this._cueNameLabel = new AsteriskLabel<Textbox>(this._cueNameBox) { IsEditedObserver = isEdited };
+                this._cueNameLabel = new AsteriskLabel<SortedComboBox>(this._cueNameComboBox) { IsEditedObserver = isEdited };
                 this._pitchLabel = new AsteriskLabel<Slider<int>>(this._rawPitchSlider) { IsEditedObserver = isEdited };
                 this._notesLabel = new AsteriskLabel<Textbox>(this._notesBox) { IsEditedObserver = isEdited };
                 this._enableLabel = new AsteriskLabel<Checkbox>(this._enableCheckbox) { IsEditedObserver = isEdited };
 
                 this.AddOption(this._nameLabel, this._nameBox);
-                this.AddOption(this._cueNameLabel, this._cueNameBox, new ClickableTextureAdapter(this._playButton));
+                this.AddOption(this._cueNameLabel, this._cueNameComboBox, new ClickableTextureAdapter(this._stateIcon));
                 this.AddOption(this._pitchLabel, this._rawPitchSlider, this._pitchValueLabel = new Label2());
                 this.AddOption(this._notesLabel, this._notesBox);
                 this.AddOption(this._enableLabel, this._enableCheckbox);
@@ -813,7 +852,11 @@ namespace FluteBlockExtension.Framework.Menus
             public void LoadData(SoundData data)
             {
                 this._nameBox.String = this._savedName = data.Name ?? string.Empty;
-                this._cueNameBox.String = this._savedCueName = data.CueName ?? string.Empty;
+                this._cueNameComboBox.SelectedItem = this._savedCueName = data.CueName;
+                if (this._cueNameComboBox.SelectedIndex is -1)
+                {
+                    this._cueNameComboBox.Text = data.CueName;
+                }
                 this._rawPitchSlider.Value = this._savedRawPitch = data.RawPitch + 60;
                 this._notesBox.String = this._savedNotes = data.Description ?? string.Empty;
                 this._enableCheckbox.IsChecked = this._savedEnabled = data.IsEnabled;
@@ -821,12 +864,24 @@ namespace FluteBlockExtension.Framework.Menus
                 this.CheckCue(this.CueName);
             }
 
+            public SoundData BuildData()
+            {
+                return new SoundData
+                {
+                    Name = this._nameBox.String,
+                    CueName = this._cueNameComboBox.Text,
+                    RawPitch = this._rawPitchSlider.Value - 60,
+                    Description = this._notesBox.String,
+                    IsEnabled = this._enableCheckbox.IsChecked
+                };
+            }
+
             public override void Update(GameTime gameTime)
             {
                 base.Update(gameTime);
 
                 // update cue name label color.
-                this._cueNameLabel.IdleTextColor = this._isCueValid ? Game1.textColor : Color.Red;
+                this._cueNameLabel.IdleTextColor = !string.IsNullOrWhiteSpace(this._cueNameComboBox.Text) ? Game1.textColor : Color.Red;
 
                 // update label text.
                 this._nameLabel.Text = I18n.Config_Sound_EditorOptions_Name();
@@ -840,41 +895,47 @@ namespace FluteBlockExtension.Framework.Menus
 
                 // update raw pitch value label text.
                 this._pitchValueLabel.Text = this._rawPitchSlider.Value.ToString();
+
+                // update cue name comboBox width.
+                this._cueNameComboBox.SettableWidth = this.Width / 3;
             }
 
             public override void ReceiveLeftClick(int x, int y, bool playSound = true)
             {
                 base.ReceiveLeftClick(x, y, playSound);
 
-                // state button.
-                if (this._playButton.containsPoint(x, y) && this._playButton.visible)
+                // play button.
+                if (this._isCueValid && this._stateIcon.containsPoint(x, y))
                 {
                     Game1.soundBank.PlayCue(this.CueName);
-                    this._playButton.scale -= 0.25f;
-                    this._playButton.scale = Math.Max(0.75f, this._playButton.scale);
+                    this._stateIcon.scale -= 0.25f;
+                    this._stateIcon.scale = Math.Max(0.75f, this._stateIcon.scale);
                 }
+
+                // cueName combobox.
+                this._cueNameComboBox.ReceiveLeftClick(x, y, playSound);
             }
 
             public override void PerformHoverAction(int x, int y)
             {
                 base.PerformHoverAction(x, y);
 
-                // state button.
-                if (this._playButton.visible)
+                // play button.
+                if (this._isCueValid)
                 {
-                    this._playButton.tryHover(x, y);
+                    this._stateIcon.tryHover(x, y);
                 }
             }
 
             protected override bool CanOk()
             {
-                return this._isCueValid;
+                return !string.IsNullOrWhiteSpace(this._cueNameComboBox.Text);
             }
 
             protected override void RaiseOkButtonClicked()
             {
                 this._savedName = this._nameBox.String;
-                this._savedCueName = this._cueNameBox.String;
+                this._savedCueName = this._cueNameComboBox.Text;
                 this._savedRawPitch = this._rawPitchSlider.Value;
                 this._savedNotes = this._notesBox.String;
                 this._savedEnabled = this._enableCheckbox.IsChecked;
@@ -882,12 +943,12 @@ namespace FluteBlockExtension.Framework.Menus
                 base.RaiseOkButtonClicked();
             }
 
-            private void CueNameBox_TextChanged(object sender, EventArgs e)
+            private void CueNameBox_SelectionChanged(object sender, EventArgs e)
             {
                 this.CheckCue(this.CueName);
             }
 
-            private void CheckCue(string cueName)
+            private void CheckCue(string cueName)  // TODO: 异步
             {
                 if (this._isCheckingCue) return;
 
@@ -897,13 +958,16 @@ namespace FluteBlockExtension.Framework.Menus
                 if (!allCues.Contains(cueName))
                 {
                     this._isCueValid = false;
-                    this._playButton.visible = false;
+                    this._stateIcon.sourceRect = new(269, 471, 14, 15);
+                    this._stateIcon.bounds.Size = new(this._cueNameComboBox.RowHeight);
                 }
                 else
                 {
                     this._isCueValid = true;
-                    this._playButton.visible = true;
+                    this._stateIcon.sourceRect = new(175, 379, 16, 16);
+                    this._stateIcon.bounds.Size = new(this._cueNameComboBox.RowHeight);
                 }
+                this._stateIcon.scale = this._stateIcon.baseScale = (float)this._stateIcon.bounds.Height / this._stateIcon.sourceRect.Height;
 
                 this._isCheckingCue = false;
             }
