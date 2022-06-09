@@ -1,0 +1,92 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewValley;
+using StardewValley.BellsAndWhistles;
+
+namespace FontSettings.Framework.Menus
+{
+    internal class OptionsFontSelector : OptionsSelector<GameFontType>
+    {
+        public GameFontType CurrentFont => this.SelectedChoice;
+
+        public OptionsFontSelector(GameFontType defaultSelectedChoice = GameFontType.SmallFont)
+            : base(GetPrev, GetNext, defaultSelectedChoice)
+        {
+            this.Choices = Enum.GetValues<GameFontType>();
+            this.DisplayChoiceParser = font => this.ParseFontName(font);
+        }
+
+        private string ParseFontName(GameFontType fontType)
+        {
+            return fontType switch
+            {
+                GameFontType.SmallFont => GameFontType.SmallFont.LocalizedName(),
+                GameFontType.DialogueFont => GameFontType.DialogueFont.LocalizedName(),
+                GameFontType.SpriteText => GameFontType.SpriteText.LocalizedName(),
+            };
+        }
+
+        private static GameFontType GetPrev(GameFontType current)
+        {
+            return current switch
+            {
+                GameFontType.SpriteText => GameFontType.DialogueFont,
+                GameFontType.DialogueFont => GameFontType.SmallFont,
+                GameFontType.SmallFont => GameFontType.SpriteText
+            };
+        }
+
+        private static GameFontType GetNext(GameFontType current)
+        {
+            return current switch
+            {
+                GameFontType.SpriteText => GameFontType.SmallFont,
+                GameFontType.DialogueFont => GameFontType.SpriteText,
+                GameFontType.SmallFont => GameFontType.DialogueFont
+            };
+        }
+
+        protected override Vector2 MeasureString(string text)
+        {
+            switch (this.CurrentFont)
+            {
+                case GameFontType.SmallFont:
+                    return Game1.smallFont.MeasureString(text);
+
+                case GameFontType.DialogueFont:
+                    return Game1.dialogueFont.MeasureString(text);
+
+                case GameFontType.SpriteText:
+                    int width = SpriteText.getWidthOfString(text);
+                    int height = SpriteText.getHeightOfString(text);
+                    return new Vector2(width, height);
+
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        protected override void DrawString(SpriteBatch b, string text, Vector2 position, Color color)
+        {
+            switch (this.CurrentFont)
+            {
+                case GameFontType.SmallFont:
+                    b.DrawString(Game1.smallFont, text, position, color);
+                    break;
+
+                case GameFontType.DialogueFont:
+                    b.DrawString(Game1.dialogueFont, text, position, color);
+                    break;
+
+                case GameFontType.SpriteText:
+                    SpriteText.drawString(b, text, (int)position.X, (int)position.Y);
+                    break;
+            }
+        }
+    }
+}

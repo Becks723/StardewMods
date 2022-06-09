@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
+	<Import Project="..\_externals\Typography.OpenFont\Typography.OpenFont.projitems" Label="Shared" />
+	<Import Project="..\_tools\bmfontcs\bmfontcs.projitems" Label="Shared" />
+	<Import Project="..\_build\smapi.targets" />
+	<Import Project="..\_build\translation-builder.targets" />
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AssemblyName>FontSettings</AssemblyName>
+		<BundleExtraAssemblies>ThirdParty</BundleExtraAssemblies>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
+		<PackageReference Include="StbTrueTypeSharp" Version="1.26.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ContentWithTargetPath Include="dependencies\fontbm\0.5.0\win\*.*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>fontbm\win\%(FileName)%(Extension)</TargetPath>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="dependencies\fontbm\0.5.0\linux\*.*">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>fontbm\linux\%(FileName)%(Extension)</TargetPath>
+		</ContentWithTargetPath>
+	</ItemGroup>
+
+	<!--reference BmFont.dll in game folder.-->
+	<ItemGroup>
+		<Reference Include="BmFont">
+			<HintPath>$(GamePath)\BmFont.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+
+</Project>

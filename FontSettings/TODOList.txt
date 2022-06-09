@@ -1,0 +1,19 @@
+﻿	- 保持原版字体时能够调节字体大小。
+	- √ 解决调节行间距值不能立刻反馈在示例上。
+	- √ i18n。
+	- √ 修改完字体保存至config。
+	- SpriteFont生成的图片太大（指宽高）怎么办？
+	- √ 整理项目文件、改mod信息。
+	- √ BmFont的示例字体（目前用SpriteFont代替，因为BmFont需要生成文件，太繁琐）
+		- 是否可以不用fontbm或bmfont，而直接用stbtruetype，即目前SpriteFont的生成方案，来生成BmFont，这样可以直接加载到内存中，无需文件。
+	- √ BmFont的字符文件中特殊字符（如\n）的识别。
+	- 删除Temp里的文件。
+	- 字体的生成方案：
+		- SpriteFont：stbtrutype（当前）
+		- BmFont：fontbm（当前）、bmfont、stbtrutype（？）
+	- BmFont的Kerning？
+	- 下拉框条目用各自的字体显示。
+	- 三种字体介绍（SmallFont、DialogueFont、SpriteText）在选择字体的箭头上加一个问号，鼠标移上去显示提示框。
+	- 刷新（重新扫描）字体的功能。
+	- SpriteFont的文件保存，方便下次加载。
+	- √ 异常处理。
