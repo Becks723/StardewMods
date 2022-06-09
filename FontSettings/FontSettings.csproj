@@ -15,6 +15,7 @@
 	<ItemGroup>
 		<PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
 		<PackageReference Include="StbTrueTypeSharp" Version="1.26.9" />
+		<Reference Include="BmFont" HintPath="$(GamePath)\BmFont.dll" Private="false" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -26,14 +27,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>fontbm\linux\%(FileName)%(Extension)</TargetPath>
 		</ContentWithTargetPath>
-	</ItemGroup>
-
-	<!--reference BmFont.dll in game folder.-->
-	<ItemGroup>
-		<Reference Include="BmFont">
-			<HintPath>$(GamePath)\BmFont.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
+		<None Update="说明.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 </Project>
