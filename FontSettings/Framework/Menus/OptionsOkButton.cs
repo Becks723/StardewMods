@@ -35,6 +35,8 @@ namespace FontSettings.Framework.Menus
 
         public void SetStateProcessing()
         {
+            if (this.IsProcessing) return;
+
             this.IsProcessing = true;
             this._lastGreyedOut = this.greyedOut;
             this.greyedOut = true;  // 禁用ok键。
@@ -42,6 +44,8 @@ namespace FontSettings.Framework.Menus
 
         public void SetStateCompleted(bool success, string message)
         {
+            if (!this.IsProcessing) return;
+
             this.IsProcessing = false;
             this.greyedOut = this._lastGreyedOut;
             if (success)
@@ -65,7 +69,7 @@ namespace FontSettings.Framework.Menus
 
                 if (!this.greyedOut)
                 {
-                    RaiseClicked(EventArgs.Empty);
+                    this.RaiseClicked(EventArgs.Empty);
                     Game1.playSound("coin");
                 }
             }

@@ -8,6 +8,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Menus;
 
 namespace FontSettings.Framework.Patchers
 {
@@ -31,6 +32,10 @@ namespace FontSettings.Framework.Patchers
             harmony.Patch(
                 original: AccessTools.Method(typeof(Game1), nameof(Game1.TranslateFields)),
                 postfix: new HarmonyMethod(typeof(Game1Patcher), nameof(Game1_TranslateFields_Postfix))
+            );
+            harmony.Patch(
+                original: AccessTools.Method(typeof(Game1), "set_activeClickableMenu"),
+                prefix: new HarmonyMethod(typeof(Game1Patcher), nameof(Game1_set_activeClickableMenu_Prefix))
             );
         }
 
@@ -65,6 +70,18 @@ namespace FontSettings.Framework.Patchers
             finally
             {
                 GC.Collect();
+            }
+        }
+
+        private static void Game1_set_activeClickableMenu_Prefix(IClickableMenu ____activeClickableMenu)
+        {
+            if (____activeClickableMenu is GameMenu gameMenu && !gameMenu.HasDependencies())
+            {
+                foreach (IClickableMenu subMenu in gameMenu.pages)
+                {
+                    if (subMenu is IDisposable dis && !subMenu.HasDependencies())
+                        dis.Dispose();
+                }
             }
         }
     }

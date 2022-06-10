@@ -12,7 +12,7 @@ using StardewValley.Menus;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class OptionsPageWithFont : OptionsPage
+    internal class OptionsPageWithFont : OptionsPage,IDisposable
     {
         private readonly OptionsPage _optionsPage;
 
@@ -44,7 +44,7 @@ namespace FontSettings.Framework.Menus
             { GameFontType.SpriteText, new OptionsOkButton() }
         });
 
-        private OptionsOkButton CurrentOkButton => _okButtons.Value[_fontSelector.CurrentFont];
+        private OptionsOkButton CurrentOkButton => _okButtons.Value[this._fontSelector.CurrentFont];
 
         private bool _lastEnabled;
         private string _lastFontFilePath;
@@ -157,11 +157,9 @@ namespace FontSettings.Framework.Menus
             };
             this._lineSpacingSlider.ValueChanged += this.LineSpacingSlider_ValueChanged;
 
+            // 订阅OK键事件。
             foreach (OptionsOkButton okButton in _okButtons.Value.Values)
-            {
-                okButton.Clicked -= this.OkPressed;
                 okButton.Clicked += this.OkPressed;
-            }
 
             //OptionsElement lastGameOption = Game1.game1.CanBrowseScreenshots()
             //    ? optionsPage.options.FirstOrDefault(elem => elem is OptionsButton btn && btn.label == Game1.content.LoadString("Strings\\UI:OptionsPage_OpenFolder"))
@@ -184,6 +182,13 @@ namespace FontSettings.Framework.Menus
 
             // 手动调一次用于初始化。
             this.FontTypeChanged(this._fontSelector, EventArgs.Empty);
+        }
+
+        public void Dispose()
+        {
+            // 取消订阅按下OK键的回调函数。
+            foreach (OptionsOkButton okButton in _okButtons.Value.Values)
+                okButton.Clicked -= this.OkPressed;
         }
 
         private async void OkPressed(object sender, EventArgs e)
@@ -220,9 +225,10 @@ namespace FontSettings.Framework.Menus
             if (fontFilePathChanged || fontSizeChanged || spacingChanged || lineSpacingChanged)
                 tmpCfg.ExistingFontPath = null;
 
-            this.CurrentOkButton.SetStateProcessing();
+            var okButton = this.CurrentOkButton;
+            okButton.SetStateProcessing();
             bool success = await _fontChanger.ReplaceOriginalOrRemainAsync(tmpCfg);
-            this.CurrentOkButton.SetStateCompleted(success,
+            okButton.SetStateCompleted(success,
                 success
                 ? I18n.HudMessage_SuccessSetFont(tmpCfg.InGameType.LocalizedName())
                 : I18n.HudMessage_FailedSetFont(tmpCfg.InGameType.LocalizedName()));
