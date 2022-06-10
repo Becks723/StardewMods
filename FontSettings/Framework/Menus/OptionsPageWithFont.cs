@@ -274,7 +274,7 @@ namespace FontSettings.Framework.Menus
 
             // 更新两个示例。
             this.UpdateGameExample();
-            this.UpdateCustomExample(false);
+            this.UpdateCustomExample(true);
         }
 
         private void EnableCheckbox_ValueChanged(object sender, EventArgs e)
