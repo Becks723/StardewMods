@@ -235,6 +235,8 @@ namespace FontSettings.Framework
                     font.ExistingFontPath = Path.Combine(outputDir, outputName);
                 }
 
+                fontFile.Common.LineHeight = font.LineSpacing;
+
                 // 记录。
                 this._fontManager.RecordBmFont(new GameBitmapSpriteFont()
                 {
