@@ -121,8 +121,25 @@ namespace FontSettings.Framework
 
         private ISpriteFont InternalCreateBmFont(bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, string text)
         {
-            if (!enabled)
+            if (StardewValley.LocalizedContentManager.CurrentLanguageLatin || !enabled)
                 return this._fontManager.GetBuiltInBmFont();
+            else if (fontFilePath is null)
+            {
+                GameBitmapSpriteFont builtIn = this._fontManager.GetBuiltInBmFont();
+
+                FontFile fontFile = builtIn.FontFile.DeepClone();
+                fontFile.Common.LineHeight = lineSpacing;
+                // TODO: 搞懂其他属性，如Base，Spacing，Padding与SpriteFont的关系。
+
+                return new GameBitmapSpriteFont
+                {
+                    FontFile = fontFile,
+                    Pages = new List<Texture2D>(builtIn.Pages),
+                    CharacterMap = builtIn.CharacterMap,
+                    LanguageCode = builtIn.LanguageCode,
+                    FontPixelZoom = builtIn.FontPixelZoom,
+                };
+            }
             else
                 try
                 {

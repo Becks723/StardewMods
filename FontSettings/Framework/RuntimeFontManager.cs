@@ -126,8 +126,21 @@ namespace FontSettings.Framework
 
         public bool IsBuiltInBmFont(ISpriteFont font)
         {
-            return font is GameBitmapSpriteFont bmFont
-                && this._builtInBmFonts.Values.Contains(bmFont);
+            if (font is GameBitmapSpriteFont bmFont)
+            {
+                return this._builtInBmFonts.Values.Contains(bmFont)
+                    || this._builtInBmFonts.Values.Any(font =>
+                    {
+                        if (font.Pages is null) return false;
+                        foreach (Texture2D page1 in font.Pages)
+                            foreach (Texture2D page2 in bmFont.Pages)
+                                if (object.ReferenceEquals(page1, page2))
+                                    return true;
+                        return false;
+                    });
+            }
+
+            return false;
         }
 
         public void Dispose()

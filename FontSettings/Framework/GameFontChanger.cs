@@ -190,6 +190,10 @@ namespace FontSettings.Framework
                 // TODO: 搞懂其他属性，如Base，Spacing，Padding与SpriteFont的关系。
 
                 SpriteTextFields.FontFile = fontFile;
+                SpriteTextFields._characterMap = builtIn.CharacterMap;
+                SpriteTextFields.fontPages = builtIn.Pages.ToList();
+                SpriteText.fontPixelZoom = builtIn.FontPixelZoom;
+
                 // 这里不用记录，因为是使用内置的。
 
                 return;
