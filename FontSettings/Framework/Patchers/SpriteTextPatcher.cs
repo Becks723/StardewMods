@@ -44,15 +44,37 @@ namespace FontSettings.Framework.Patchers
         private static async void SpriteText_setUpCharacterMap_Postfix(bool __state)
         {
             if (__state)
-                await OnLanguageChanged("SpriteText.setUpCharacterMap");
+                OnLanguageChangedSync("SpriteText.setUpCharacterMap");
+            //await OnLanguageChangedAsync("SpriteText.setUpCharacterMap");
         }
 
         private static async void SpriteText_OnLanguageChange_Postfix()
         {
-            await OnLanguageChanged("SpriteText.OnLanguageChange");
+            OnLanguageChangedSync("SpriteText.setUpCharacterMap");
+            //await OnLanguageChangedAsync("SpriteText.OnLanguageChange");
         }
 
-        private static async Task OnLanguageChanged(string methodName)
+        private static void OnLanguageChangedSync(string methodName)
+        {
+            try
+            {
+                _fontManager.RecordBuiltInBmFont();
+
+                var customFonts = _config.Fonts.Where(f => f.InGameType is GameFontType.SpriteText
+                    && f.Lang == (LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+                foreach (var font in customFonts)
+                {
+                    _fontChanger.ReplaceOriginalOrRamain(font);
+                }
+            }
+            catch (Exception ex)
+            {
+                ILog.Error($"在修改{methodName}时遇到了错误：{ex.Message}\n堆栈信息：\n{ex.StackTrace}");
+                return;
+            }
+        }
+
+        private static async Task OnLanguageChangedAsync(string methodName)
         {
             try
             {

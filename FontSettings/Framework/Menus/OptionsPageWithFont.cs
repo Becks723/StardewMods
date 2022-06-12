@@ -12,7 +12,7 @@ using StardewValley.Menus;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class OptionsPageWithFont : OptionsPage,IDisposable
+    internal class OptionsPageWithFont : OptionsPage, IDisposable
     {
         private readonly OptionsPage _optionsPage;
 
@@ -227,7 +227,7 @@ namespace FontSettings.Framework.Menus
 
             var okButton = this.CurrentOkButton;
             okButton.SetStateProcessing();
-            bool success = await _fontChanger.ReplaceOriginalOrRemainAsync(tmpCfg);
+            bool success = _fontChanger.ReplaceOriginalOrRamain(tmpCfg);
             okButton.SetStateCompleted(success,
                 success
                 ? I18n.HudMessage_SuccessSetFont(tmpCfg.InGameType.LocalizedName())

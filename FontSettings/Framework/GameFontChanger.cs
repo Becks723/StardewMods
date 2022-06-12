@@ -21,6 +21,28 @@ namespace FontSettings.Framework
             this._fontManager = fontManager;
         }
 
+        // 替换当前游戏字体，如果失败，沿用当前字体。
+        public bool ReplaceOriginalOrRamain(FontConfig font)
+        {
+            return this.ReplaceOriginalAndCatchException(font, 
+                ex => $"替换{font.InGameType.LocalizedName()}失败，将沿用当前字体。{ex.Message}\n堆栈信息：\n{ex.StackTrace}");
+        }
+
+        public bool ReplaceOriginalAndCatchException(FontConfig font, Func<Exception, string> errorLog, Action errorCallback = null)
+        {
+            try
+            {
+                this.ReplaceOriginal(font);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ILog.Error(errorLog(ex));
+                errorCallback?.Invoke();
+                return false;
+            }
+        }
+
         public void ReplaceOriginal(FontConfig font)
         {
             if ((int)font.Lang != (int)LocalizedContentManager.CurrentLanguageCode) return;
