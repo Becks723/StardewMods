@@ -43,76 +43,84 @@ namespace FontSettings.Framework
         {
             byte[] ttf = File.ReadAllBytes(ttfPath);
 
-            stbtt_fontinfo fontInfo = new();
-            fixed (byte* ptr = ttf)
-            {
-                int off = stbtt_GetFontOffsetForIndex(ptr, fontIndex);
-                if (off == -1)
-                    throw new IndexOutOfRangeException($"字体索引超出范围。索引值：{fontIndex}");
-                if (stbtt_InitFont(fontInfo, ptr, off) == 0)
-                    throw new Exception("无法初始化字体。");
-            }
-
-            float scale = stbtt_ScaleForPixelHeight(fontInfo, fontPixelHeight);
-
-            int finalTexWidth, finalTexHeight;
-            if (bitmapWidth is null || bitmapHeight is null)
-                EstimateTextureSize(fontInfo, characterRanges, scale, out finalTexWidth, out finalTexHeight);
-            else
-            {
-                finalTexWidth = bitmapWidth.Value;
-                finalTexHeight = bitmapHeight.Value;
-            }
-
-            int ascent, descent, lineGap;
-            stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
-            if (ascent == 0 && descent == 0)
-                stbtt_GetFontVMetricsOS2(fontInfo, &ascent, &descent, &lineGap);
-            int lineHeight = (int)((ascent - descent + lineGap) * scale);
-
-            List<Rectangle> bounds = new();
-            List<Rectangle> cropping = new();
-            List<char> chars = new();
-            List<Vector3> kerning = new();
-
-            byte[] pixels = new byte[finalTexWidth * finalTexHeight];
-            stbtt_pack_context ctx = new();
+            int offset;
             fixed (byte* ttfPtr = ttf)
-            fixed (byte* pxPtr = pixels)
             {
-                stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, 0, null);
+                offset = stbtt_GetFontOffsetForIndex(ttfPtr, fontIndex);
+                if (offset == -1)
+                    throw new IndexOutOfRangeException($"字体索引超出范围。索引值：{fontIndex}");
+            }
 
-                foreach (CharacterRange range in characterRanges)
+            stbtt_fontinfo fontInfo = CreateFont(ttf, offset);
+            if (fontInfo == null)
+                throw new Exception("无法初始化字体。");
+            try
+            {
+                float scale = stbtt_ScaleForPixelHeight(fontInfo, fontPixelHeight);
+
+                int finalTexWidth, finalTexHeight;
+                if (bitmapWidth is null || bitmapHeight is null)
+                    EstimateTextureSize(fontInfo, characterRanges, scale, out finalTexWidth, out finalTexHeight);
+                else
                 {
-                    stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
-                    for (int i = 0; i < arr.Length; i++)
-                        arr[i] = new();
+                    finalTexWidth = bitmapWidth.Value;
+                    finalTexHeight = bitmapHeight.Value;
+                }
 
-                    fixed (stbtt_packedchar* cPtr = arr)
+                int ascent, descent, lineGap;
+                stbtt_GetFontVMetrics(fontInfo, &ascent, &descent, &lineGap);
+                if (ascent == 0 && descent == 0)
+                    stbtt_GetFontVMetricsOS2(fontInfo, &ascent, &descent, &lineGap);
+                int lineHeight = (int)((ascent - descent + lineGap) * scale);
+
+                List<Rectangle> bounds = new();
+                List<Rectangle> cropping = new();
+                List<char> chars = new();
+                List<Vector3> kerning = new();
+
+                byte[] pixels = new byte[finalTexWidth * finalTexHeight];
+                stbtt_pack_context ctx = new();
+                fixed (byte* ttfPtr = ttf)
+                fixed (byte* pxPtr = pixels)
+                {
+                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, 0, null);
+
+                    foreach (CharacterRange range in characterRanges)
                     {
-                        stbtt_PackFontRange(ctx, ttfPtr, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
-                    }
+                        stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
+                        for (int i = 0; i < arr.Length; i++)
+                            arr[i] = new();
 
-                    for (int i = 0; i < arr.Length; i++)
-                    {
-                        var c = arr[i];
-                        int @char = range.Start + i;
+                        fixed (stbtt_packedchar* cPtr = arr)
+                        {
+                            stbtt_PackFontRange(ctx, ttfPtr, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
+                        }
 
-                        float yOff = c.yoff;
-                        yOff += ascent * scale;
+                        for (int i = 0; i < arr.Length; i++)
+                        {
+                            var c = arr[i];
+                            int @char = range.Start + i;
 
-                        int width = c.x1 - c.x0;
-                        int height = c.y1 - c.y0;
-                        chars.Add((char)@char);
-                        bounds.Add(new Rectangle(c.x0, c.y0, width, height));
-                        cropping.Add(new Rectangle((int)Math.Round(c.xoff), (int)Math.Round(yOff), width, height));
-                        kerning.Add(new Vector3(0, width, c.xadvance - width));
+                            float yOff = c.yoff;
+                            yOff += ascent * scale;
+
+                            int width = c.x1 - c.x0;
+                            int height = c.y1 - c.y0;
+                            chars.Add((char)@char);
+                            bounds.Add(new Rectangle(c.x0, c.y0, width, height));
+                            cropping.Add(new Rectangle((int)Math.Round(c.xoff), (int)Math.Round(yOff), width, height));
+                            kerning.Add(new Vector3(0, width, c.xadvance - width));
+                        }
                     }
                 }
-            }
 
-            return new SpriteFont(GenerateTexture(pixels, finalTexWidth, finalTexHeight), bounds, cropping,
-                chars, lineSpacing ?? lineHeight, spacing, kerning, defaultCharacter);
+                return new SpriteFont(GenerateTexture(pixels, finalTexWidth, finalTexHeight), bounds, cropping,
+                    chars, lineSpacing ?? lineHeight, spacing, kerning, defaultCharacter);
+            }
+            finally
+            {
+                fontInfo.Dispose();
+            }
         }
 
         private static Texture2D GenerateTexture(byte[] pixels, int width, int height)

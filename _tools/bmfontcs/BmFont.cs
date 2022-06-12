@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.ExceptionServices;
-using System.Security;
 using System.Text;
 using BmFont;
 using Microsoft.Xna.Framework;
@@ -19,46 +17,51 @@ namespace BmFontCS
         private static float _scale;
         private static float _ascender, _descender, _lineHeight;
 
-        [HandleProcessCorruptedStateExceptions]
-        [SecurityCritical]
         public static void GenerateIntoMemory(string fontFilePath, out FontFile fontFile, out Texture2D[] pages, BmFontSettings settings)
         {
             byte[] ttf = File.ReadAllBytes(fontFilePath);
 
-            _fontInfo = new stbtt_fontinfo();
-
+            int offset;
             fixed (byte* ttfPtr = ttf)
             {
-                int offset = stbtt_GetFontOffsetForIndex(ttfPtr, settings.FontIndex);
+                offset = stbtt_GetFontOffsetForIndex(ttfPtr, settings.FontIndex);
                 if (offset == -1)
                     throw new IndexOutOfRangeException($"字体索引超出范围。索引值：{settings.FontIndex}");
-                if (stbtt_InitFont(_fontInfo, ttfPtr, offset) == 0)
-                    throw new Exception("无法初始化字体。");
             }
 
-            InitFields(settings);
-            var codepoints = GetChars(settings.Chars, settings.CharsFiles);
-            Glyph[] glyphs = CollectGlyphs(codepoints).ToArray();
-            Size[] pageSizes = ArrangeGlyphs(glyphs, settings);
-            Page[] pgs = RenderGlyphsToPages(glyphs, pageSizes, settings);
-
-            fontFile = GetFontInfo(fontFilePath, settings, pgs.Length, glyphs);
-            pages = pgs.Select(pg =>
+            _fontInfo = CreateFont(ttf, offset);
+            if (_fontInfo == null)
+                throw new Exception("无法初始化字体。");
+            try
             {
-                Texture2D texture = new Texture2D(Game1.graphics.GraphicsDevice, pg.Width, pg.Height);
+                InitFields(settings);
+                var codepoints = GetChars(settings.Chars, settings.CharsFiles);
+                Glyph[] glyphs = CollectGlyphs(codepoints).ToArray();
+                Size[] pageSizes = ArrangeGlyphs(glyphs, settings);
+                Page[] pgs = RenderGlyphsToPages(glyphs, pageSizes, settings);
 
-                Color[] data = new Color[pg.Width * pg.Height];
-                for (int i = 0; i < pg.Buffer.Length; i++)
+                fontFile = GetFontInfo(fontFilePath, settings, pgs.Length, glyphs);
+                pages = pgs.Select(pg =>
                 {
-                    byte b = pg.Buffer[i];
-                    data[i].R = b;
-                    data[i].G = b;
-                    data[i].B = b;
-                    data[i].A = b;
-                }
-                texture.SetData(data);
-                return texture;
-            }).ToArray();
+                    Texture2D texture = new Texture2D(Game1.graphics.GraphicsDevice, pg.Width, pg.Height);
+
+                    Color[] data = new Color[pg.Width * pg.Height];
+                    for (int i = 0; i < pg.Buffer.Length; i++)
+                    {
+                        byte b = pg.Buffer[i];
+                        data[i].R = b;
+                        data[i].G = b;
+                        data[i].B = b;
+                        data[i].A = b;
+                    }
+                    texture.SetData(data);
+                    return texture;
+                }).ToArray();
+            }
+            finally
+            {
+                _fontInfo.Dispose();
+            }
         }
 
         public static void Generate(string fontFile, string output, BmFontSettings settings)
