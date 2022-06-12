@@ -44,14 +44,12 @@ namespace FontSettings.Framework.Patchers
         private static async void SpriteText_setUpCharacterMap_Postfix(bool __state)
         {
             if (__state)
-                OnLanguageChangedSync("SpriteText.setUpCharacterMap");
-            //await OnLanguageChangedAsync("SpriteText.setUpCharacterMap");
+                await OnLanguageChangedAsync("SpriteText.setUpCharacterMap");
         }
 
         private static async void SpriteText_OnLanguageChange_Postfix()
         {
-            OnLanguageChangedSync("SpriteText.setUpCharacterMap");
-            //await OnLanguageChangedAsync("SpriteText.OnLanguageChange");
+            await OnLanguageChangedAsync("SpriteText.OnLanguageChange");
         }
 
         private static void OnLanguageChangedSync(string methodName)
