@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Security;
 using System.Text;
 using BmFont;
 using Microsoft.Xna.Framework;
@@ -17,6 +19,8 @@ namespace BmFontCS
         private static float _scale;
         private static float _ascender, _descender, _lineHeight;
 
+        [HandleProcessCorruptedStateExceptions]
+        [SecurityCritical]
         public static void GenerateIntoMemory(string fontFilePath, out FontFile fontFile, out Texture2D[] pages, BmFontSettings settings)
         {
             byte[] ttf = File.ReadAllBytes(fontFilePath);
@@ -142,19 +146,19 @@ namespace BmFontCS
             for (int i = 0; i < pages.Length; i++)
             {
                 byte[] buffer = new byte[pages[i].Width * pages[i].Height];
-                foreach (Glyph glyph in glyphs)
-                {
-                    if (glyph.Page != i)
-                        continue;
+                fixed (byte* bufferPtr = buffer)
+                    foreach (Glyph glyph in glyphs)
+                    {
+                        if (glyph.Page != i)
+                            continue;
 
-                    fixed (byte* bufferPtr = buffer)
                         stbtt_MakeGlyphBitmapSubpixel(_fontInfo,
                             bufferPtr + glyph.X + glyph.Y * pages[i].Width,
                             glyph.Width, glyph.Height, pages[i].Width,
                             _scale, _scale,
                             0, 0,
                             glyph.GlyphIndex);
-                }
+                    }
 
                 result.Add(new Page
                 {
