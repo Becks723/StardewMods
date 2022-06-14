@@ -55,6 +55,8 @@ namespace FontSettings.Framework
             return result;
         }
 
+        public static LanguageCode CurrentLanguageCode => ConvertLanguageCode(LocalizedContentManager.CurrentLanguageCode);
+
         public static LanguageCode ConvertLanguageCode(LocalizedContentManager.LanguageCode code)
         {
             return code switch

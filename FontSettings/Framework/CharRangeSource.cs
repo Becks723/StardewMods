@@ -18,6 +18,11 @@ namespace FontSettings.Framework
             RecordBuiltInCharRange((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
         }
 
+        public static void RecordBuiltInCharRange(SpriteFont spriteFont)
+        {
+            RecordBuiltInCharRange((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, spriteFont);
+        }
+
         public static IEnumerable<CharacterRange> GetBuiltInCharRange()
         {
             LanguageCode code = (LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode;
@@ -32,16 +37,20 @@ namespace FontSettings.Framework
             }
         }
 
+        public static void RecordBuiltInCharRange(LanguageCode code, SpriteFont spriteFont)
+        {
+            if (!_builtInCharRanges.ContainsKey(code))
+            {
+                _builtInCharRanges[code] = InternalGetBuiltInCharRange(spriteFont);
+            }
+        }
+
         public static IEnumerable<CharacterRange> GetBuiltInCharRange(LanguageCode code)
         {
             if (_builtInCharRanges.TryGetValue(code, out IEnumerable<CharacterRange> range))
                 return range;
-            else
-            {
-                range = InternalGetBuiltInCharRange(Game1.smallFont);
-                _builtInCharRanges[code] = range;
-                return range;
-            }
+
+            throw new KeyNotFoundException();
         }
 
         private static IEnumerable<CharacterRange> InternalGetBuiltInCharRange(SpriteFont gameFont)

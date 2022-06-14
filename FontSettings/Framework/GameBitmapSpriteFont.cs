@@ -297,7 +297,7 @@ namespace FontSettings.Framework
                 case LocalizedContentManager.LanguageCode.zh: return 1.5f;
                 case LocalizedContentManager.LanguageCode.th: return 1.5f;
                 case LocalizedContentManager.LanguageCode.ko: return 1.5f;
-                case LocalizedContentManager.LanguageCode.mod: return 3f;  // TODO: 暂定3f
+                case LocalizedContentManager.LanguageCode.mod: return LocalizedContentManager.CurrentModLanguage.FontPixelZoom;
                 default: return 3f;
             }
         }

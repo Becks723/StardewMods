@@ -66,6 +66,16 @@ namespace FontSettings.Framework
             this.RecordBuiltInBmFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
         }
 
+        public void RecordBuiltInBmFont(GameBitmapSpriteFont value)
+        {
+            this.RecordBuiltInBmFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, value);
+        }
+
+        public void RecordBuiltInSpriteFont(GameFontType fontType, SpriteFont value)
+        {
+            this.RecordBuiltInSpriteFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, fontType, value);
+        }
+
         public void RecordBuiltInSpriteFont(LanguageCode code)
         {
             if (!this._builtInSpriteFonts.TryGetValue(code, out var dic))
@@ -74,6 +84,15 @@ namespace FontSettings.Framework
                 dic[GameFontType.SmallFont] = Game1.smallFont;
             if (!dic.ContainsKey(GameFontType.DialogueFont))
                 dic[GameFontType.DialogueFont] = Game1.dialogueFont;
+        }
+
+        public void RecordBuiltInSpriteFont(LanguageCode code, GameFontType fontType, SpriteFont value)
+        {
+            if (!this._builtInSpriteFonts.TryGetValue(code, out var dic))
+                this._builtInSpriteFonts[code] = dic = new();
+
+            if (!dic.ContainsKey(fontType) && fontType != GameFontType.SpriteText)
+                dic[fontType] = value;
         }
 
         public void RecordBuiltInBmFont(LanguageCode code)
@@ -87,6 +106,12 @@ namespace FontSettings.Framework
                     LanguageCode = (LocalizedContentManager.LanguageCode)(int)code,
                     FontPixelZoom = SpriteText.fontPixelZoom
                 };
+        }
+
+        public void RecordBuiltInBmFont(LanguageCode code, GameBitmapSpriteFont value)
+        {
+            if (!this._builtInBmFonts.ContainsKey(code) && !FontHelpers.IsLatinLanguage(code))
+                this._builtInBmFonts[code] = value;
         }
 
         public GameBitmapSpriteFont GetBuiltInBmFont()
