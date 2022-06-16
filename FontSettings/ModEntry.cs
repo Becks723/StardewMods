@@ -36,8 +36,6 @@ namespace FontSettings
             BmFontGenerator.Initialize(helper);
             CharsFileManager.Initialize(System.IO.Path.Combine(helper.DirectoryPath, "Chars"));
 
-            //this.RecordData(LocalizedContentManager.LanguageCode.en);
-
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
                 new Game1Patcher(this._config, this._fontManager, this._fontChanger)
@@ -52,6 +50,8 @@ namespace FontSettings
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
+
+            this.RecordFontData(LocalizedContentManager.LanguageCode.en, null);
         }
 
         private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
@@ -121,7 +121,8 @@ namespace FontSettings
 
         private void RecordFontData(LocalizedContentManager.LanguageCode languageCode, string locale)
         {
-            // 记录字符范围，加载字体要用。
+            this.Monitor.Log($"正在记录{locale ?? "en"}语言下的游戏字体数据……", LogLevel.Debug);
+
             this.Helper.Events.Content.AssetRequested -= this.OnAssetRequested;
 
             SpriteFont smallFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SmallFont");
@@ -130,13 +131,19 @@ namespace FontSettings
 
             this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;  // 这条必须在InvalidateCache之前，我也不知道为什么。TODO
 
+            // 记录内置字体。
             this._fontManager.RecordBuiltInSpriteFont(GameFontType.SmallFont, smallFont);
             this._fontManager.RecordBuiltInSpriteFont(GameFontType.DialogueFont, dialogueFont);
             this._fontManager.RecordBuiltInBmFont(spriteText);
+
+            // 记录字符范围，加载字体要用。
             CharRangeSource.RecordBuiltInCharRange(smallFont);
 
-            this.Helper.GameContent.InvalidateCache($"Fonts/SmallFont.{locale}");
-            this.Helper.GameContent.InvalidateCache($"Fonts/SpriteFont1.{locale}");
+            string LocalizedAssetName(string assetName) => locale != null ? $"{assetName}.{locale}" : assetName;
+            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
+            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
+
+            this.Monitor.Log($"已完成记录{locale ?? "en"}语言下的游戏字体数据！", LogLevel.Debug);
         }
 
         private GameBitmapSpriteFont LoadGameBmFont(IModHelper helper, LocalizedContentManager.LanguageCode languageCode)
