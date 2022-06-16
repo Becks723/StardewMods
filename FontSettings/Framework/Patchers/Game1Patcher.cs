@@ -29,10 +29,10 @@ namespace FontSettings.Framework.Patchers
 
         public void Patch(Harmony harmony, IMonitor monitor)
         {
-            harmony.Patch(
-                original: AccessTools.Method(typeof(Game1), nameof(Game1.TranslateFields)),
-                postfix: new HarmonyMethod(typeof(Game1Patcher), nameof(Game1_TranslateFields_Postfix))
-            );
+            //harmony.Patch(
+            //    original: AccessTools.Method(typeof(Game1), nameof(Game1.TranslateFields)),
+            //    postfix: new HarmonyMethod(typeof(Game1Patcher), nameof(Game1_TranslateFields_Postfix))
+            //);
             harmony.Patch(
                 original: AccessTools.Method(typeof(Game1), "set_activeClickableMenu"),
                 prefix: new HarmonyMethod(typeof(Game1Patcher), nameof(Game1_set_activeClickableMenu_Prefix))

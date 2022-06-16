@@ -227,7 +227,7 @@ namespace FontSettings.Framework.Menus
 
             var okButton = this.CurrentOkButton;
             okButton.SetStateProcessing();
-            bool success = _fontChanger.ReplaceOriginalOrRamain(tmpCfg);
+            bool success = await _fontChanger.ReplaceOriginalOrRemainAsync(tmpCfg);
             okButton.SetStateCompleted(success,
                 success
                 ? I18n.HudMessage_SuccessSetFont(tmpCfg.InGameType.LocalizedName())

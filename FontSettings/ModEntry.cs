@@ -36,7 +36,7 @@ namespace FontSettings
             BmFontGenerator.Initialize(helper);
             CharsFileManager.Initialize(System.IO.Path.Combine(helper.DirectoryPath, "Chars"));
 
-            this.RecordData(LocalizedContentManager.LanguageCode.en);
+            //this.RecordData(LocalizedContentManager.LanguageCode.en);
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
@@ -49,63 +49,68 @@ namespace FontSettings
                 OptionsPageWithFont.Initialize(this._config, this._fontManager, this._fontChanger, (cfg) => helper.WriteConfig(cfg));
                 OptionsPageWithFont.Patch(Harmony, this.Monitor);
             }
-            LocalizedContentManager.OnLanguageChange += this.OnLanguageChanged;
 
-            helper.Events.Content.AssetsInvalidated += this.OnAssetsInvalidated;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
-            helper.Events.Content.AssetReady += this.OnAssetReady;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
         }
 
         private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
         {
-            this.RecordData(e.NewLanguage);
-        }
+            this.RecordFontData(e.NewLanguage, e.NewLocale);
 
-        private void OnAssetReady(object sender, AssetReadyEventArgs e)
-        {
+            // 创建配置项。
+            foreach (GameFontType type in Enum.GetValues<GameFontType>())
+            {
+                if (!this._config.Fonts.Any(f => (int)f.Lang == (int)e.NewLanguage && f.InGameType == type))
+                    this._config.Fonts.Add(new FontConfig()
+                    {
+                        Lang = FontHelpers.ConvertLanguageCode(e.NewLanguage),
+                        InGameType = type,
+                        FontSize = 24,
+                        Spacing = 0,
+                        LineSpacing = 24
+                    });
+            }
+            this.Helper.WriteConfig(this._config);
         }
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
+            void ReplaceSpriteFont(GameFontType fontType)
+            {
+                FontConfig config = this._config.GetFontConfig(FontHelpers.CurrentLanguageCode, fontType);
+
+                if (!config.Enabled)
+                    return;
+                else if (config.FontFilePath is null)
+                    e.Edit(asset =>
+                    {
+                        SpriteFont spriteFont = asset.GetData<SpriteFont>();
+                        spriteFont.Spacing = config.Spacing;
+                        spriteFont.LineSpacing = config.LineSpacing;
+                    });
+                else
+                    e.LoadFrom(() =>
+                    {
+                        return SpriteFontGenerator.FromTtf(
+                            InstalledFonts.GetFullPath(config.FontFilePath),
+                            config.FontIndex,
+                            config.FontSize,
+                            config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.Lang),
+                            spacing: config.Spacing,
+                            lineSpacing: config.LineSpacing
+                        );
+                    }, AssetLoadPriority.High);
+            }
+
             if (e.NameWithoutLocale.IsEquivalentTo("Fonts/SmallFont"))
             {
-                e.LoadFrom(() =>
-                {
-                    FontConfig config = this._config.GetFontConfig(FontHelpers.CurrentLanguageCode, GameFontType.SmallFont);
-                    return this.GetCustomSpriteFont(config);
-                }, AssetLoadPriority.High);
+                ReplaceSpriteFont(GameFontType.SmallFont);
             }
             else if (e.NameWithoutLocale.IsEquivalentTo("Fonts/SpriteFont1"))
             {
-                e.LoadFrom(() =>
-                {
-                    FontConfig config = this._config.GetFontConfig(FontHelpers.CurrentLanguageCode, GameFontType.DialogueFont);
-                    return this.GetCustomSpriteFont(config);
-                }, AssetLoadPriority.High);
+                ReplaceSpriteFont(GameFontType.DialogueFont);
             }
-        }
-
-        private void OnAssetsInvalidated(object sender, AssetsInvalidatedEventArgs e)
-        {
-
-        }
-
-        private void OnLanguageChanged(LocalizedContentManager.LanguageCode code)
-        {
-            foreach (GameFontType type in Enum.GetValues<GameFontType>())
-            {
-                if (!this._config.Fonts.Any(f => (int)f.Lang == (int)code && f.InGameType == type))
-                    this._config.Fonts.Add(new FontConfig()
-                    {
-                        Lang = (LanguageCode)(int)code,
-                        InGameType = type,
-                        FontSize = 12f,
-                        Spacing = 0,
-                        LineSpacing = 12
-                    });
-            }
-            this.Helper.WriteConfig(this._config);
         }
 
         protected override void Dispose(bool disposing)
@@ -114,46 +119,24 @@ namespace FontSettings
             this._fontManager.Dispose();
         }
 
-        private SpriteFont GetCustomSpriteFont(FontConfig font)
+        private void RecordFontData(LocalizedContentManager.LanguageCode languageCode, string locale)
         {
-            SpriteFont? newFont;
+            // 记录字符范围，加载字体要用。
+            this.Helper.Events.Content.AssetRequested -= this.OnAssetRequested;
 
-            if (!font.Enabled)
-                newFont = this._fontManager.GetBuiltInSpriteFont(font.InGameType);
+            SpriteFont smallFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SmallFont");
+            SpriteFont dialogueFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SpriteFont1");
+            GameBitmapSpriteFont spriteText = this.LoadGameBmFont(this.Helper, languageCode);
 
-            else if (font.FontFilePath is null)  // 保持原版字体，但可能改变大小、间距。
-            {
-                SpriteFont builtIn = this._fontManager.GetBuiltInSpriteFont(font.InGameType);
-                newFont = SpriteFontGenerator.FromExisting(
-                    builtIn,
-                    font.FontSize,
-                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Lang),
-                    font.Spacing,
-                    font.LineSpacing
-                );
-            }
+            this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;  // 这条必须在InvalidateCache之前，我也不知道为什么。TODO
 
-            else
-            {
-                newFont = SpriteFontGenerator.FromTtf(
-                    InstalledFonts.GetFullPath(font.FontFilePath),
-                    font.FontIndex,
-                    font.FontSize,
-                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Lang),
-                    spacing: font.Spacing,
-                    lineSpacing: font.LineSpacing
-                );
-            }
+            this._fontManager.RecordBuiltInSpriteFont(GameFontType.SmallFont, smallFont);
+            this._fontManager.RecordBuiltInSpriteFont(GameFontType.DialogueFont, dialogueFont);
+            this._fontManager.RecordBuiltInBmFont(spriteText);
+            CharRangeSource.RecordBuiltInCharRange(smallFont);
 
-            return newFont;
-        }
-
-        private void RecordData(LocalizedContentManager.LanguageCode languageCode)
-        {
-            this._fontManager.RecordBuiltInSpriteFont(FontHelpers.ConvertLanguageCode(languageCode), GameFontType.SmallFont, this.Helper.GameContent.Load<SpriteFont>("Fonts/SmallFont"));
-            this._fontManager.RecordBuiltInSpriteFont(FontHelpers.ConvertLanguageCode(languageCode), GameFontType.DialogueFont, this.Helper.GameContent.Load<SpriteFont>("Fonts/SpriteFont1"));
-            this._fontManager.RecordBuiltInBmFont(this.LoadGameBmFont(this.Helper, languageCode));
-            CharRangeSource.RecordBuiltInCharRange(FontHelpers.ConvertLanguageCode(languageCode), this._fontManager.GetBuiltInSpriteFont(GameFontType.SmallFont));
+            this.Helper.GameContent.InvalidateCache($"Fonts/SmallFont.{locale}");
+            this.Helper.GameContent.InvalidateCache($"Fonts/SpriteFont1.{locale}");
         }
 
         private GameBitmapSpriteFont LoadGameBmFont(IModHelper helper, LocalizedContentManager.LanguageCode languageCode)
@@ -172,10 +155,13 @@ namespace FontSettings
             if (fntPath != null)
             {
                 FontFile fontFile = FontLoader.Parse(helper.GameContent.Load<XmlSource>(fntPath).Source);
+                helper.GameContent.InvalidateCache(fntPath);
                 List<Texture2D> pages = new List<Texture2D>(fontFile.Pages.Count);
                 foreach (FontPage fontPage in fontFile.Pages)
                 {
-                    pages.Add(helper.GameContent.Load<Texture2D>($"Fonts/{fontPage.File}"));
+                    string assetName = $"Fonts/{fontPage.File}";
+                    pages.Add(helper.GameContent.Load<Texture2D>(assetName));
+                    helper.GameContent.InvalidateCache(assetName);
                 }
 
                 return new GameBitmapSpriteFont()
@@ -187,6 +173,13 @@ namespace FontSettings
             }
 
             return null;
+        }
+
+        private T LoadWithoutCache<T>(string key, string locale)
+        {
+            T result = this.Helper.GameContent.Load<T>(key);
+            this.Helper.GameContent.InvalidateCache($"{key}.{locale}");
+            return result;
         }
     }
 }
