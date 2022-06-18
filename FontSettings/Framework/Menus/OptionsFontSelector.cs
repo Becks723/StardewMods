@@ -14,8 +14,11 @@ namespace FontSettings.Framework.Menus
     {
         public GameFontType CurrentFont => this.SelectedChoice;
 
-        public OptionsFontSelector(GameFontType defaultSelectedChoice = GameFontType.SmallFont)
-            : base(GetPrev, GetNext, defaultSelectedChoice)
+        public OptionsFontSelector(bool skipSpriteText, GameFontType defaultSelectedChoice = GameFontType.SmallFont)
+            : base(
+                  type => GetPrev(type, skipSpriteText),
+                  type => GetNext(type, skipSpriteText),
+                  defaultSelectedChoice)
         {
             this.Choices = Enum.GetValues<GameFontType>();
             this.DisplayChoiceParser = font => this.ParseFontName(font);
@@ -28,6 +31,7 @@ namespace FontSettings.Framework.Menus
                 GameFontType.SmallFont => GameFontType.SmallFont.LocalizedName(),
                 GameFontType.DialogueFont => GameFontType.DialogueFont.LocalizedName(),
                 GameFontType.SpriteText => GameFontType.SpriteText.LocalizedName(),
+                _ => throw new NotSupportedException()
             };
         }
 
@@ -37,7 +41,8 @@ namespace FontSettings.Framework.Menus
             {
                 GameFontType.SpriteText => GameFontType.DialogueFont,
                 GameFontType.DialogueFont => GameFontType.SmallFont,
-                GameFontType.SmallFont => GameFontType.SpriteText
+                GameFontType.SmallFont => GameFontType.SpriteText,
+                _ => throw new NotSupportedException()
             };
         }
 
@@ -47,8 +52,37 @@ namespace FontSettings.Framework.Menus
             {
                 GameFontType.SpriteText => GameFontType.SmallFont,
                 GameFontType.DialogueFont => GameFontType.SpriteText,
-                GameFontType.SmallFont => GameFontType.DialogueFont
+                GameFontType.SmallFont => GameFontType.DialogueFont,
+                _ => throw new NotSupportedException()
             };
+        }
+
+        private static GameFontType GetPrev(GameFontType current, bool skipSpriteText)
+        {
+            if (skipSpriteText)
+                return current switch
+                {
+                    GameFontType.DialogueFont => GameFontType.SmallFont,
+                    GameFontType.SmallFont => GameFontType.DialogueFont,
+                    GameFontType.SpriteText => GameFontType.SmallFont,
+                    _ => throw new NotSupportedException()
+                };
+            else
+                return GetPrev(current);
+        }
+
+        private static GameFontType GetNext(GameFontType current, bool skipSpriteText)
+        {
+            if (skipSpriteText)
+                return current switch
+                {
+                    GameFontType.DialogueFont => GameFontType.SmallFont,
+                    GameFontType.SmallFont => GameFontType.DialogueFont,
+                    GameFontType.SpriteText => GameFontType.SmallFont,
+                    _ => throw new NotSupportedException()
+                };
+            else
+                return GetNext(current);
         }
 
         protected override Vector2 MeasureString(string text)

@@ -114,7 +114,7 @@ namespace FontSettings.Framework.Menus
 
             var title = new OptionsElement(I18n.OptionsPage_FontHeader());
 
-            this._fontSelector = new OptionsFontSelector(fontType);
+            this._fontSelector = new OptionsFontSelector(LocalizedContentManager.CurrentLanguageLatin, fontType);
             this._fontSelector.SelectionChanged += this.FontTypeChanged;
 
             this._originalExample = new OptionsFontExample(I18n.OptionsPage_OriginalExample(), this._optionsPage.optionSlots[0].bounds.Width, this._optionsPage.optionSlots[0].bounds.Height);
