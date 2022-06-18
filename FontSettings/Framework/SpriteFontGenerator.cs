@@ -73,44 +73,35 @@ namespace FontSettings.Framework
                     stbtt_GetFontVMetricsOS2(fontInfo, &ascent, &descent, &lineGap);
                 int lineHeight = (int)((ascent - descent + lineGap) * scale);
 
-                List<Rectangle> bounds = new();
-                List<Rectangle> cropping = new();
-                List<char> chars = new();
-                List<Vector3> kerning = new();
+                var bounds = new List<Rectangle>();
+                var cropping = new List<Rectangle>();
+                var chars = new List<char>();
+                var kerning = new List<Vector3>();
 
                 byte[] pixels = new byte[finalTexWidth * finalTexHeight];
-                stbtt_pack_context ctx = new();
-                fixed (byte* ttfPtr = ttf)
+                stbtt_pack_context ctx = new stbtt_pack_context();
                 fixed (byte* pxPtr = pixels)
+                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, 0, null);  // TODO: padding是0时，空格（32）没长度。但padding是1时，空格就正常了。
+
+                foreach (CharacterRange range in characterRanges)
                 {
-                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, 0, null);
+                    stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
+                    fixed (stbtt_packedchar* cPtr = arr)
+                        stbtt_PackFontRange(ctx, fontInfo.data, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
 
-                    foreach (CharacterRange range in characterRanges)
+                    for (int i = 0; i < arr.Length; i++)
                     {
-                        stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
-                        for (int i = 0; i < arr.Length; i++)
-                            arr[i] = new();
+                        var pc = arr[i];
 
-                        fixed (stbtt_packedchar* cPtr = arr)
-                        {
-                            stbtt_PackFontRange(ctx, ttfPtr, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
-                        }
+                        float yOff = pc.yoff;
+                        yOff += ascent * scale;
 
-                        for (int i = 0; i < arr.Length; i++)
-                        {
-                            var c = arr[i];
-                            int @char = range.Start + i;
-
-                            float yOff = c.yoff;
-                            yOff += ascent * scale;
-
-                            int width = c.x1 - c.x0;
-                            int height = c.y1 - c.y0;
-                            chars.Add((char)@char);
-                            bounds.Add(new Rectangle(c.x0, c.y0, width, height));
-                            cropping.Add(new Rectangle((int)Math.Round(c.xoff), (int)Math.Round(yOff), width, height));
-                            kerning.Add(new Vector3(0, width, c.xadvance - width));
-                        }
+                        int width = pc.x1 - pc.x0;
+                        int height = pc.y1 - pc.y0;
+                        chars.Add((char)(range.Start + i));
+                        bounds.Add(new Rectangle(pc.x0, pc.y0, width, height));
+                        cropping.Add(new Rectangle((int)Math.Round(pc.xoff), (int)Math.Round(yOff), width, height));
+                        kerning.Add(new Vector3(0, width, pc.xadvance - width));
                     }
                 }
 
