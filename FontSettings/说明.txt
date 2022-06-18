@@ -16,7 +16,7 @@
     - 最后，点击OK，设置完成。
 
 兼容性：
-    当前版本（0.1.0）兼容Windows、MacOS、Linux，语言兼容中文，字体兼容TrueType（.ttf, .ttc）、OpenType（.otf, .otc, .ttf, .ttc）。
+    当前版本（0.1.0）兼容Smapi 3.14.0，Windows、MacOS、Linux系统，语言兼容中文，字体兼容TrueType（.ttf, .ttc）、OpenType（.otf, .otc, .ttf, .ttc）。
 
 其他问题：
     问：这个模组支持联机吗？一定要所有玩家同时安装吗？
@@ -24,4 +24,4 @@
 
 更新日志：
 【测试版】0.1.0 - 2022-06-09
-    - 初版本，兼容Windows、MacOS、Linux，语言兼容中文，字体格式兼容TrueType（.ttf, .ttc）、OpenType（.otf, .otc, .ttf, .ttc）。
+    - 初版本，兼容Smapi 3.14.0，Windows、MacOS、Linux系统，语言兼容中文，字体格式兼容TrueType（.ttf, .ttc）、OpenType（.otf, .otc, .ttf, .ttc）。

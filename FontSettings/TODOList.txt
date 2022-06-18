@@ -8,9 +8,9 @@
 		- 是否可以不用fontbm或bmfont，而直接用stbtruetype，即目前SpriteFont的生成方案，来生成BmFont，这样可以直接加载到内存中，无需文件。
 	- √ BmFont的字符文件中特殊字符（如\n）的识别。
 	- 删除Temp里的文件。
-	- 字体的生成方案：
+	- 暂时√ 字体的生成方案：
 		- SpriteFont：stbtrutype（当前）
-		- BmFont：fontbm（当前）、bmfont、stbtrutype（？）
+		- BmFont：stbtrutype（当前）、fontbm（备用）、bmfont
 	- BmFont的Kerning？
 	- 下拉框条目用各自的字体显示。
 	- 三种字体介绍（SmallFont、DialogueFont、SpriteText）在选择字体的箭头上加一个问号，鼠标移上去显示提示框。
@@ -18,3 +18,4 @@
 	- SpriteFont的文件保存，方便下次加载。
 	- √ 异常处理。
 	- UI兼容手柄。
+	- 代码里的TODO。
