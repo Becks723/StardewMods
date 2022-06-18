@@ -17,6 +17,9 @@ namespace FontSettings
 {
     internal class ModEntry : Mod
     {
+        /// <summary>记录不同语言下字体信息是否已经缓存了。</summary>
+        private readonly Dictionary<string, bool> _cacheTable = new();
+
         private ModConfig _config;
 
         private RuntimeFontManager _fontManager;
@@ -32,6 +35,14 @@ namespace FontSettings
             this._config = helper.ReadConfig<ModConfig>();
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
+            foreach (LocalizedContentManager.LanguageCode code in Enum.GetValues<LocalizedContentManager.LanguageCode>())
+            {
+                if (code is LocalizedContentManager.LanguageCode.mod)
+                    continue;
+
+                string locale = FontHelpers.GetLocale(code);
+                this._cacheTable[locale] = false;  // TODO: 支持mod语言。
+            }
 
             BmFontGenerator.Initialize(helper);
             CharsFileManager.Initialize(System.IO.Path.Combine(helper.DirectoryPath, "Chars"));
@@ -121,7 +132,21 @@ namespace FontSettings
 
         private void RecordFontData(LocalizedContentManager.LanguageCode languageCode, string locale)
         {
-            this.Monitor.Log($"正在记录{locale ?? "en"}语言下的游戏字体数据……", LogLevel.Debug);
+            if (string.IsNullOrEmpty(locale))
+                locale = "en";
+
+            if (!this._cacheTable.TryGetValue(locale, out bool isCached))
+            {
+                return;
+            }
+
+            if (isCached)
+            {
+                this.Monitor.Log($"无需记录{locale}语言下的游戏字体数据！");
+                return;
+            }
+
+            this.Monitor.Log($"正在记录{locale}语言下的游戏字体数据……", LogLevel.Debug);
 
             this.Helper.Events.Content.AssetRequested -= this.OnAssetRequested;
 
@@ -139,11 +164,15 @@ namespace FontSettings
             // 记录字符范围，加载字体要用。
             CharRangeSource.RecordBuiltInCharRange(smallFont);
 
-            string LocalizedAssetName(string assetName) => locale != null ? $"{assetName}.{locale}" : assetName;
-            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
-            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
+            if (locale != "en")  // 如果是英文原版，InvalidateCache后会自动重新加载，导致this.OnAssetRequested误触发，所以不需要InvalidateCache。
+            {
+                string LocalizedAssetName(string assetName) => locale != "en" ? $"{assetName}.{locale}" : assetName;
+                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
+                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
+            }
 
-            this.Monitor.Log($"已完成记录{locale ?? "en"}语言下的游戏字体数据！", LogLevel.Debug);
+            this.Monitor.Log($"已完成记录{locale}语言下的游戏字体数据！", LogLevel.Debug);
+            this._cacheTable[locale] = true;
         }
 
         private GameBitmapSpriteFont LoadGameBmFont(IModHelper helper, LocalizedContentManager.LanguageCode languageCode)

@@ -118,6 +118,29 @@ namespace FontSettings.Framework
             return IsLatinLanguage(ConvertLanguageCode(code));
         }
 
+        /// <returns>如果是mod语言，那么返回一个空字符串。</returns>
+        public static string GetLocale(LocalizedContentManager.LanguageCode languageCode)
+        {
+            switch (languageCode)
+            {
+                case LocalizedContentManager.LanguageCode.en: return "en";
+                case LocalizedContentManager.LanguageCode.ja: return "ja-JP";
+                case LocalizedContentManager.LanguageCode.ru: return "ru-RU";
+                case LocalizedContentManager.LanguageCode.zh: return "zh-CN";
+                case LocalizedContentManager.LanguageCode.pt: return "pt-BR";
+                case LocalizedContentManager.LanguageCode.es: return "es-ES";
+                case LocalizedContentManager.LanguageCode.de: return "de-DE";
+                case LocalizedContentManager.LanguageCode.th: return "th-TH";
+                case LocalizedContentManager.LanguageCode.fr: return "fr-FR";
+                case LocalizedContentManager.LanguageCode.ko: return "ko-KR";
+                case LocalizedContentManager.LanguageCode.it: return "it-IT";
+                case LocalizedContentManager.LanguageCode.tr: return "tr-TR";
+                case LocalizedContentManager.LanguageCode.hu: return "hu-HU";
+                case LocalizedContentManager.LanguageCode.mod: return string.Empty;
+                default: throw new NotSupportedException();
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
