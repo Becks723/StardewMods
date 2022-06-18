@@ -67,11 +67,8 @@ namespace FontSettings
 
         private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
         {
-            this.RecordFontData(e.NewLanguage, e.NewLocale);
-
             // 创建配置项。
             foreach (GameFontType type in Enum.GetValues<GameFontType>())
-            {
                 if (!this._config.Fonts.Any(f => (int)f.Lang == (int)e.NewLanguage && f.InGameType == type))
                     this._config.Fonts.Add(new FontConfig()
                     {
@@ -81,8 +78,10 @@ namespace FontSettings
                         Spacing = 0,
                         LineSpacing = 24
                     });
-            }
             this.Helper.WriteConfig(this._config);
+
+            // 记录字体数据。
+            this.RecordFontData(e.NewLanguage, e.NewLocale);
         }
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
@@ -164,7 +163,7 @@ namespace FontSettings
             // 记录字符范围，加载字体要用。
             CharRangeSource.RecordBuiltInCharRange(smallFont);
 
-            if (locale != "en")  // 如果是英文原版，InvalidateCache后会自动重新加载，导致this.OnAssetRequested误触发，所以不需要InvalidateCache。
+            if (locale != "en")  // 如果是英文原版，InvalidateCache后会自动重新加载，导致this.OnAssetRequested误触发，所以不需要InvalidateCache。 TODO: 为啥有时候不是英文也会触发this.OnAssetRequested？
             {
                 string LocalizedAssetName(string assetName) => locale != "en" ? $"{assetName}.{locale}" : assetName;
                 this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
