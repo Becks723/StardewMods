@@ -11,7 +11,7 @@ using StardewValley.Menus;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class OptionsDropDown : StardewValley.Menus.OptionsDropDown
+    internal class OptionsDropDown : StardewValley.Menus.OptionsDropDown, IHoverable
     {
         public int MaxDisplayRows { get; set; } = 13;
 
@@ -20,6 +20,10 @@ namespace FontSettings.Framework.Menus
         private int _lastSlotX, _lastSlotY;
 
         private int _topIndex = 0;
+
+        private bool _isScrolling = false;
+
+        private int _hoveredIndex = 0;
 
         private readonly ClickableTextureComponent _upArrow;
 
@@ -30,6 +34,8 @@ namespace FontSettings.Framework.Menus
         private readonly ClickableComponent _scrollBarRunner;
 
         public int OptionsCount => this.dropDownOptions?.Count ?? 0;
+
+        public bool IsExpanded { get; set; }
 
         public event EventHandler SelectionChanged;
 
@@ -47,7 +53,7 @@ namespace FontSettings.Framework.Menus
             Rectangle dropDown = new(this._lastSlotX + this.dropDownBounds.X, this._lastSlotY + this.dropDownBounds.Y, this.dropDownBounds.Width, this.dropDownBounds.Height);
             Rectangle scrollBar = new(this._lastSlotX + this._scrollBarRunner.bounds.X, this._lastSlotY + this._scrollBarRunner.bounds.Y, this._scrollBarRunner.bounds.Width, this._scrollBarRunner.bounds.Height);
 
-            return !this.greyedOut &&
+            return !this.greyedOut && this.IsExpanded &&
                 (dropDown.Contains(mousePos)
                 || scrollBar.Contains(mousePos));
         }
@@ -60,35 +66,105 @@ namespace FontSettings.Framework.Menus
                 this.ScrollDown();
         }
 
+        public override void receiveLeftClick(int x, int y)
+        {
+            if (this.greyedOut) return;
+
+            if (!this.IsExpanded)
+                // expand.
+                if (this.bounds.Contains(x, y))
+                {
+                    Game1.playSound("shwip");
+                    this.IsExpanded = true;
+                    selected = this;
+                    this.PerformHoverAction(x, y);
+                    this.startingSelected = this.selectedOption;
+
+                    this.dropDownBounds.Y = this.bounds.Y + this.recentSlotY;
+                    this.dropDownBounds.Height = Math.Min(this.OptionsCount, this.MaxDisplayRows) * this.bounds.Height;
+                    this.dropDownBounds.Y = Math.Min(this.dropDownBounds.Y, Game1.uiViewport.Height - this.dropDownBounds.Height - this.recentSlotY);
+                    this._scrollBarRunner.bounds.Height = this.dropDownBounds.Height - this._upArrow.bounds.Height - this._downArrow.bounds.Height - 8;
+
+                    this._upArrow.setPosition(this.dropDownBounds.Right + 8, this.dropDownBounds.Y);
+                    this._downArrow.setPosition(this.dropDownBounds.Right + 8, this.dropDownBounds.Bottom - 48);
+                    this._scrollBar.bounds.X = this._upArrow.bounds.X + 12;
+                    this._scrollBarRunner.bounds.X = this._scrollBar.bounds.X;
+                    this._scrollBarRunner.bounds.Y = this._upArrow.bounds.Bottom + 4;
+                    this.UpdateScrollBar();
+                }
+        }
+
+        public void ReceiveGlobalLeftClick(int x, int y)
+        {
+            if (this.greyedOut) return;
+
+            if (this.IsExpanded)
+                // select.
+                if (this.dropDownBounds.Contains(x, y))
+                {
+                    Game1.playSound("drumkit6");
+                    this.selectedOption = this._hoveredIndex;
+                    if (this.startingSelected != this.selectedOption)
+                        this.RaiseSelectionChanged(EventArgs.Empty);
+
+                    // collapse.
+                    selected = null;
+                    this.IsExpanded = false;
+                    this.startingSelected = -1;
+                }
+                else if (this._upArrow.containsPoint(x, y))
+                    this.ScrollUp();
+                else if (this._downArrow.containsPoint(x, y))
+                    this.ScrollDown();
+                else if (this._scrollBarRunner.containsPoint(x, y))
+                {
+                    this._isScrolling = true;
+                    this.leftClickHeld(x, y);
+                }
+                else
+                {
+                    // collapse.
+                    selected = null;
+                    this.IsExpanded = false;
+                    this._hoveredIndex = this.selectedOption;
+                    this.startingSelected = -1;
+                }
+        }
+
+        public void PerformHoverAction(int x, int y)
+        {
+            if (Game1.options.SnappyMenus) return;
+
+            if (this.IsExpanded)
+                if (this.dropDownBounds.Contains(x, y))
+                    this._hoveredIndex = this._topIndex + (y - this.dropDownBounds.Y) / this.RowHeight;
+        }
+
         public override void leftClickHeld(int x, int y)
         {
-            base.leftClickHeld(x, y);
-            if (!this.greyedOut)
-            {
-                this.dropDownBounds.Y = this.bounds.Y + this.recentSlotY;
-                this.dropDownBounds.Height = Math.Min(this.OptionsCount, this.MaxDisplayRows) * this.bounds.Height;
-                this.dropDownBounds.Y = Math.Min(this.dropDownBounds.Y, Game1.uiViewport.Height - this.dropDownBounds.Height - this.recentSlotY);
-                this._scrollBarRunner.bounds.Height = this.dropDownBounds.Height - this._upArrow.bounds.Height - this._downArrow.bounds.Height - 8;
+            if (this.greyedOut || Game1.options.SnappyMenus) return;
 
-                this.UpdateScrollBar();
-
-                if (!Game1.options.SnappyMenus)
+            if (this.IsExpanded)
+                if (this._isScrolling)
                 {
-                    this.selectedOption += this._topIndex;
-                    if (this.selectedOption > this.OptionsCount - 1)
-                        this.selectedOption = this.OptionsCount - 1;
+                    int newTopIndex = (int)((y - this._scrollBarRunner.bounds.Y) / (float)(this._scrollBarRunner.bounds.Height - this._scrollBar.bounds.Height) * this.OptionsCount) - 1;
+                    this.ScrollTo(newTopIndex);
                 }
-            }
         }
 
         public override void leftClickReleased(int x, int y)
         {
-            base.leftClickReleased(x, y);
+            this._isScrolling = false;
+            //base.leftClickReleased(x, y);
 
-            if (!this.greyedOut && this.dropDownOptions.Count > 0)
-                if (this.dropDownBounds.Contains(x, y) || Game1.options.gamepadControls && !Game1.lastCursorMotionWasMouse)
-                    if (this.startingSelected != this.selectedOption)
-                        this.RaiseSelectionChanged(EventArgs.Empty);
+            //if (!this.greyedOut && this.dropDownOptions.Count > 0)
+            //{
+            //    if (this.dropDownBounds.Contains(x, y) || (Game1.options.gamepadControls && !Game1.lastCursorMotionWasMouse))
+            //    {
+            //        if (this.startingSelected != this.selectedOption)
+            //            this.RaiseSelectionChanged(EventArgs.Empty);
+            //    }
+            //}
         }
 
         /// <summary>和base方法相比，仅有下面两处改动。</summary>
@@ -158,28 +234,22 @@ namespace FontSettings.Framework.Menus
 
             this.recentSlotY = slotY;
             float alpha = this.greyedOut ? 0.33f : 1f;
-            if (selected != null)
+            if (this.IsExpanded)
             {
                 IClickableMenu.drawTextureBox(b, Game1.mouseCursors, dropDownBGSource, slotX + this.dropDownBounds.X, slotY + this.dropDownBounds.Y, this.dropDownBounds.Width, this.dropDownBounds.Height, Color.White * alpha, 4f, drawShadow: false, 0.97f);
-                for (int i = this._topIndex; i < this.OptionsCount; i++)
+                for (int i = this._topIndex; i < Math.Min(this._topIndex + this.MaxDisplayRows, this.OptionsCount); i++)
                 {
-                    if (i == this.selectedOption)
+                    if (i == this._hoveredIndex)
                         b.Draw(Game1.staminaRect, new Rectangle(slotX + this.dropDownBounds.X, slotY + this.dropDownBounds.Y + (i - this._topIndex) * this.bounds.Height, this.dropDownBounds.Width, this.bounds.Height), new Rectangle(0, 0, 1, 1), Color.Wheat, 0f, Vector2.Zero, SpriteEffects.None, 0.975f);
                     b.DrawString(Game1.smallFont, this.dropDownDisplayOptions[i], new Vector2(slotX + this.dropDownBounds.X + 4, slotY + this.dropDownBounds.Y + 8 + (i - this._topIndex) * this.bounds.Height), Game1.textColor * alpha, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0.98f);
                 }
 
                 b.Draw(Game1.mouseCursors, new Vector2(slotX + this.bounds.X + this.bounds.Width - 48, slotY + this.bounds.Y), dropDownButtonSource, Color.Wheat * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.981f);
 
-                this._upArrow.setPosition(slotX + this.dropDownBounds.Right + 8, slotY + this.dropDownBounds.Y);
-                this._downArrow.setPosition(slotX + this.dropDownBounds.Right + 8, slotY + this.dropDownBounds.Bottom - 48);
-                this._scrollBar.bounds.X = this._upArrow.bounds.X + 12;
-                this._scrollBarRunner.bounds.X = this._scrollBar.bounds.X;
-                this._scrollBarRunner.bounds.Y = slotY + this.dropDownBounds.Y + this._upArrow.bounds.Height + 4;
-
-                IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(403, 383, 6, 6), this._scrollBarRunner.bounds.X, this._scrollBarRunner.bounds.Y, this._scrollBarRunner.bounds.Width, this._scrollBarRunner.bounds.Height, Color.White, 4f, drawShadow: false, draw_layer: 0.982f);
-                this._upArrow.draw(b, Color.White, 1f);
-                this._downArrow.draw(b, Color.White, 1f);
-                this._scrollBar.draw(b, Color.White, 1f);
+                IClickableMenu.drawTextureBox(b, Game1.mouseCursors, new Rectangle(403, 383, 6, 6), this._scrollBarRunner.bounds.X + slotX, this._scrollBarRunner.bounds.Y + slotY, this._scrollBarRunner.bounds.Width, this._scrollBarRunner.bounds.Height, Color.White, 4f, drawShadow: false, draw_layer: 0.982f);
+                this._upArrow.Draw(b, new Vector2(slotX, slotY), Color.White, 1f);
+                this._downArrow.Draw(b, new Vector2(slotX, slotY), Color.White, 1f);
+                this._scrollBar.Draw(b, new Vector2(slotX, slotY), Color.White, 1f);
 
                 this._lastSlotX = slotX;
                 this._lastSlotY = slotY;
@@ -194,21 +264,33 @@ namespace FontSettings.Framework.Menus
 
         public void ScrollUp()
         {
-            if (this._topIndex > 0)
-            {
-                this._topIndex--;
-                Game1.playSound("shiny4");
-            }
-
-            this.UpdateScrollBar();
+            this.ScrollTo(this._topIndex - 1);
         }
 
         public void ScrollDown()
         {
-            if (this._topIndex + this.MaxDisplayRows < this.OptionsCount)
+            this.ScrollTo(this._topIndex + 1);
+        }
+
+        public void ScrollTo(int newTopIndex)
+        {
+            if (this._topIndex != newTopIndex)
             {
-                this._topIndex++;
-                Game1.playSound("shiny4");
+                bool playSound = true;
+                if (newTopIndex < 0)
+                {
+                    newTopIndex = 0;
+                    playSound = false;
+                }
+                else if (newTopIndex > this.OptionsCount - this.MaxDisplayRows)
+                {
+                    newTopIndex = this.OptionsCount - this.MaxDisplayRows;
+                    playSound = false;
+                }
+
+                this._topIndex = newTopIndex;
+                if (playSound)
+                    Game1.playSound("shiny4");
             }
 
             this.UpdateScrollBar();

@@ -28,7 +28,7 @@ namespace FontSettings.Framework.Menus
 
         private OptionsCheckBox _enableCheckbox;
 
-        private OptionsDropDown2 _fontDropDown;
+        private OptionsDropDown _fontDropDown;
 
         private OptionsSlider<int> _fontSizeSlider;
 
@@ -123,7 +123,7 @@ namespace FontSettings.Framework.Menus
             this._enableCheckbox = new OptionsCheckBox(I18n.OptionsPage_Enable(), cfg.Enabled);
             this._enableCheckbox.ValueChanged += this.EnableCheckbox_ValueChanged;
 
-            this._fontDropDown = new OptionsDropDown2(I18n.OptionsPage_Font())
+            this._fontDropDown = new OptionsDropDown(I18n.OptionsPage_Font())
             {
                 dropDownOptions = this.GetFontDropDownOptions(),
                 dropDownDisplayOptions = this.GetFontDropDownDisplayOptions(),
@@ -402,7 +402,7 @@ namespace FontSettings.Framework.Menus
 
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            var dropDowns = this._optionsPage.options.OfType<OptionsDropDown2>();
+            var dropDowns = this._optionsPage.options.OfType<OptionsDropDown>();
             if (dropDowns.Any() && dropDowns.Any(d => d.IsExpanded))
             {
                 var expanded = dropDowns.FirstOrDefault(d => d.IsExpanded);
@@ -422,7 +422,7 @@ namespace FontSettings.Framework.Menus
 
         public override void leftClickHeld(int x, int y)
         {
-            var dropDowns = this._optionsPage.options.OfType<OptionsDropDown2>();
+            var dropDowns = this._optionsPage.options.OfType<OptionsDropDown>();
             if (dropDowns.Any() && dropDowns.Any(d => d.IsExpanded))
             {
                 var expanded = dropDowns.FirstOrDefault(d => d.IsExpanded);
@@ -442,7 +442,7 @@ namespace FontSettings.Framework.Menus
 
         public override void releaseLeftClick(int x, int y)
         {
-            var dropDowns = this._optionsPage.options.OfType<OptionsDropDown2>();
+            var dropDowns = this._optionsPage.options.OfType<OptionsDropDown>();
             if (dropDowns.Any() && dropDowns.Any(d => d.IsExpanded))
             {
                 var expanded = dropDowns.FirstOrDefault(d => d.IsExpanded);
