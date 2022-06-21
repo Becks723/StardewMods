@@ -23,6 +23,9 @@ namespace FontSettings.Framework.Menus
 
         private bool _isScrolling = false;
 
+        /// <summary>当鼠标按下在滑块上时，鼠标与滑块的偏移量。</summary>
+        private float _mouseThumbOffset;
+
         private int _hoveredIndex = 0;
 
         private readonly ClickableTextureComponent _upArrow;
@@ -90,7 +93,7 @@ namespace FontSettings.Framework.Menus
                     this._scrollBar.bounds.X = this._upArrow.bounds.X + 12;
                     this._scrollBarRunner.bounds.X = this._scrollBar.bounds.X;
                     this._scrollBarRunner.bounds.Y = this._upArrow.bounds.Bottom + 4;
-                    this.UpdateScrollBar();
+                    this.UpdateThumbPosition();
                 }
         }
 
@@ -107,7 +110,7 @@ namespace FontSettings.Framework.Menus
                     if (this.startingSelected != this.selectedOption)
                         this.RaiseSelectionChanged(EventArgs.Empty);
 
-                    // collapse.
+                    // then collapse.
                     selected = null;
                     this.IsExpanded = false;
                     this.startingSelected = -1;
@@ -118,8 +121,19 @@ namespace FontSettings.Framework.Menus
                     this.ScrollDown();
                 else if (this._scrollBarRunner.containsPoint(x, y))
                 {
-                    this._isScrolling = true;
-                    this.leftClickHeld(x, y);
+                    // 如果鼠标不在滑块上，将滑块滑至鼠标位置。
+                    if (!this._scrollBar.containsPoint(x, y))
+                    {
+                        this.ScrollToOffset(y - this._scrollBarRunner.bounds.Y - this._scrollBar.bounds.Height / 2);
+                    }
+
+                    // 如果鼠标在滑块上，开始滑动。
+                    if (this._scrollBar.containsPoint(x, y))
+                    {
+                        this._isScrolling = true;
+                        this._mouseThumbOffset = y - this._scrollBar.bounds.Y;
+                        this.leftClickHeld(x, y);
+                    }
                 }
                 else
                 {
@@ -146,25 +160,12 @@ namespace FontSettings.Framework.Menus
 
             if (this.IsExpanded)
                 if (this._isScrolling)
-                {
-                    int newTopIndex = (int)((y - this._scrollBarRunner.bounds.Y) / (float)(this._scrollBarRunner.bounds.Height - this._scrollBar.bounds.Height) * this.OptionsCount) - 1;
-                    this.ScrollTo(newTopIndex);
-                }
+                    this.ScrollToOffset(y - this._mouseThumbOffset - this._scrollBarRunner.bounds.Y);
         }
 
         public override void leftClickReleased(int x, int y)
         {
             this._isScrolling = false;
-            //base.leftClickReleased(x, y);
-
-            //if (!this.greyedOut && this.dropDownOptions.Count > 0)
-            //{
-            //    if (this.dropDownBounds.Contains(x, y) || (Game1.options.gamepadControls && !Game1.lastCursorMotionWasMouse))
-            //    {
-            //        if (this.startingSelected != this.selectedOption)
-            //            this.RaiseSelectionChanged(EventArgs.Empty);
-            //    }
-            //}
         }
 
         /// <summary>和base方法相比，仅有下面两处改动。</summary>
@@ -193,20 +194,20 @@ namespace FontSettings.Framework.Menus
                     this.RaiseSelectionChanged(EventArgs.Empty);   // 改动
                     selected = null;
                 }
-            else if (Game1.options.doesInputListContain(Game1.options.moveDownButton, key))
-            {
-                Game1.playSound("shiny4");
-                this.selectedOption++;
-                if (this.selectedOption >= this.dropDownOptions.Count)
-                    this.selectedOption = 0;
-            }
-            else if (Game1.options.doesInputListContain(Game1.options.moveUpButton, key))
-            {
-                Game1.playSound("shiny4");
-                this.selectedOption--;
-                if (this.selectedOption < 0)
-                    this.selectedOption = this.dropDownOptions.Count - 1;
-            }
+                else if (Game1.options.doesInputListContain(Game1.options.moveDownButton, key))
+                {
+                    Game1.playSound("shiny4");
+                    this.selectedOption++;
+                    if (this.selectedOption >= this.dropDownOptions.Count)
+                        this.selectedOption = 0;
+                }
+                else if (Game1.options.doesInputListContain(Game1.options.moveUpButton, key))
+                {
+                    Game1.playSound("shiny4");
+                    this.selectedOption--;
+                    if (this.selectedOption < 0)
+                        this.selectedOption = this.dropDownOptions.Count - 1;
+                }
         }
 
         public override void draw(SpriteBatch b, int slotX, int slotY, IClickableMenu context = null)
@@ -264,15 +265,22 @@ namespace FontSettings.Framework.Menus
 
         public void ScrollUp()
         {
-            this.ScrollTo(this._topIndex - 1);
+            this.ScrollToIndex(this._topIndex - 1);
         }
 
         public void ScrollDown()
         {
-            this.ScrollTo(this._topIndex + 1);
+            this.ScrollToIndex(this._topIndex + 1);
         }
 
-        public void ScrollTo(int newTopIndex)
+        /// <param name="newOffset">相对于滑槽顶部的偏移量。</param>
+        public void ScrollToOffset(float newOffset)
+        {
+            int newTopIndex = (int)(newOffset / (this._scrollBarRunner.bounds.Height - this._scrollBar.bounds.Height) * Math.Max(0, this.OptionsCount - this.MaxDisplayRows));
+            this.ScrollToIndex(newTopIndex);
+        }
+
+        public void ScrollToIndex(int newTopIndex)
         {
             if (this._topIndex != newTopIndex)
             {
@@ -293,7 +301,7 @@ namespace FontSettings.Framework.Menus
                     Game1.playSound("shiny4");
             }
 
-            this.UpdateScrollBar();
+            this.UpdateThumbPosition();
         }
 
         protected virtual void RaiseSelectionChanged(EventArgs e)
@@ -301,10 +309,13 @@ namespace FontSettings.Framework.Menus
             SelectionChanged?.Invoke(this, e);
         }
 
-        private void UpdateScrollBar()
+        private void UpdateThumbPosition()
         {
-            this._scrollBar.bounds.Y = this._upArrow.bounds.Bottom + 4 + (int)(this._topIndex * ((double)this._scrollBarRunner.bounds.Height / this.OptionsCount));
-            this._scrollBar.bounds.Y = Math.Min(this._scrollBar.bounds.Y, this._scrollBarRunner.bounds.Bottom);
+            if (this.OptionsCount <= this.MaxDisplayRows)
+                this._scrollBar.bounds.Y = this._upArrow.bounds.Bottom + 4;
+            else
+                this._scrollBar.bounds.Y = this._upArrow.bounds.Bottom + 4
+                    + (int)((double)this._topIndex / (this.OptionsCount - this.MaxDisplayRows) * (this._scrollBarRunner.bounds.Height - this._scrollBar.bounds.Height));
         }
     }
 }
