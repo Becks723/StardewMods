@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using StardewValley;
+using StardewValley.GameData;
 
 namespace FontSettings.Framework
 {
@@ -55,50 +56,16 @@ namespace FontSettings.Framework
             return result;
         }
 
-        public static LanguageCode CurrentLanguageCode => ConvertLanguageCode(LocalizedContentManager.CurrentLanguageCode);
-
-        public static LanguageCode ConvertLanguageCode(LocalizedContentManager.LanguageCode code)
+        public static bool IsLatinLanguage(LanguageInfo language)
         {
-            return code switch
-            {
-                LocalizedContentManager.LanguageCode.en => LanguageCode.en,
-                LocalizedContentManager.LanguageCode.ja => LanguageCode.ja,
-                LocalizedContentManager.LanguageCode.ru => LanguageCode.ru,
-                LocalizedContentManager.LanguageCode.zh => LanguageCode.zh,
-                LocalizedContentManager.LanguageCode.pt => LanguageCode.pt,
-                LocalizedContentManager.LanguageCode.es => LanguageCode.es,
-                LocalizedContentManager.LanguageCode.de => LanguageCode.de,
-                LocalizedContentManager.LanguageCode.th => LanguageCode.th,
-                LocalizedContentManager.LanguageCode.fr => LanguageCode.fr,
-                LocalizedContentManager.LanguageCode.ko => LanguageCode.ko,
-                LocalizedContentManager.LanguageCode.it => LanguageCode.it,
-                LocalizedContentManager.LanguageCode.tr => LanguageCode.tr,
-                LocalizedContentManager.LanguageCode.hu => LanguageCode.hu,
-                LocalizedContentManager.LanguageCode.mod => LanguageCode.mod,
-                _ => throw new NotSupportedException()
-            };
-        }
-
-        public static LocalizedContentManager.LanguageCode ConvertLanguageCode(LanguageCode code)
-        {
-            return code switch
-            {
-                LanguageCode.en => LocalizedContentManager.LanguageCode.en,
-                LanguageCode.ja => LocalizedContentManager.LanguageCode.ja,
-                LanguageCode.ru => LocalizedContentManager.LanguageCode.ru,
-                LanguageCode.zh => LocalizedContentManager.LanguageCode.zh,
-                LanguageCode.pt => LocalizedContentManager.LanguageCode.pt,
-                LanguageCode.es => LocalizedContentManager.LanguageCode.es,
-                LanguageCode.de => LocalizedContentManager.LanguageCode.de,
-                LanguageCode.th => LocalizedContentManager.LanguageCode.th,
-                LanguageCode.fr => LocalizedContentManager.LanguageCode.fr,
-                LanguageCode.ko => LocalizedContentManager.LanguageCode.ko,
-                LanguageCode.it => LocalizedContentManager.LanguageCode.it,
-                LanguageCode.tr => LocalizedContentManager.LanguageCode.tr,
-                LanguageCode.hu => LocalizedContentManager.LanguageCode.hu,
-                LanguageCode.mod => LocalizedContentManager.LanguageCode.mod,
-                _ => throw new NotSupportedException()
-            };
+            return language.Code is LocalizedContentManager.LanguageCode.en
+                or LocalizedContentManager.LanguageCode.pt
+                or LocalizedContentManager.LanguageCode.es
+                or LocalizedContentManager.LanguageCode.de
+                or LocalizedContentManager.LanguageCode.fr
+                or LocalizedContentManager.LanguageCode.it
+                or LocalizedContentManager.LanguageCode.tr
+                or LocalizedContentManager.LanguageCode.hu;
         }
 
         public static bool IsLatinLanguage(LocalizedContentManager.LanguageCode code)
@@ -113,12 +80,20 @@ namespace FontSettings.Framework
                 or LocalizedContentManager.LanguageCode.hu;
         }
 
-        public static bool IsLatinLanguage(LanguageCode code)
+        public static LanguageInfo GetCurrentLanguage()
         {
-            return IsLatinLanguage(ConvertLanguageCode(code));
+            return new LanguageInfo(LocalizedContentManager.CurrentLanguageCode, GetCurrentLocale());
         }
 
-        /// <returns>如果是mod语言，那么返回一个空字符串。</returns>
+        public static string GetCurrentLocale()
+        {
+            if (LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.mod)
+                return FontHelpers.GetLocale(LocalizedContentManager.CurrentLanguageCode);
+            else
+                return FontHelpers.GetModLocale(LocalizedContentManager.CurrentModLanguage);
+        }
+
+        /// <returns>如果是mod语言，报错。</returns>
         public static string GetLocale(LocalizedContentManager.LanguageCode languageCode)
         {
             switch (languageCode)
@@ -136,9 +111,13 @@ namespace FontSettings.Framework
                 case LocalizedContentManager.LanguageCode.it: return "it-IT";
                 case LocalizedContentManager.LanguageCode.tr: return "tr-TR";
                 case LocalizedContentManager.LanguageCode.hu: return "hu-HU";
-                case LocalizedContentManager.LanguageCode.mod: return string.Empty;
                 default: throw new NotSupportedException();
             }
+        }
+
+        public static string GetModLocale(ModLanguage modLanguage)
+        {
+            return modLanguage?.LanguageCode;
         }
 
         /// <summary>

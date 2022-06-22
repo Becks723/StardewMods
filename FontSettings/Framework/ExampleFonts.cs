@@ -148,7 +148,6 @@ namespace FontSettings.Framework
                     try
                     {
                         BmFontGenerator.GenerateIntoMemory(
-                            (LanguageCode)(int)StardewValley.LocalizedContentManager.CurrentLanguageCode,
                             fontFilePath,
                             out fontFile, out pages,
                             fontIndex,
@@ -159,7 +158,6 @@ namespace FontSettings.Framework
                     catch
                     {
                         BmFontGenerator.GenerateFile(
-                            (LanguageCode)(int)StardewValley.LocalizedContentManager.CurrentLanguageCode,
                             fontFilePath,
                             out string outputDir,
                             out string outputName,

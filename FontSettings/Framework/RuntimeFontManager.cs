@@ -14,10 +14,10 @@ namespace FontSettings.Framework
     internal class RuntimeFontManager : IDisposable
     {
         /// <summary>无需手动释放。</summary> 
-        private readonly IDictionary<LanguageCode, Dictionary<GameFontType, SpriteFont>> _builtInSpriteFonts = new Dictionary<LanguageCode, Dictionary<GameFontType, SpriteFont>>();
+        private readonly IDictionary<LanguageInfo, Dictionary<GameFontType, SpriteFont>> _builtInSpriteFonts = new Dictionary<LanguageInfo, Dictionary<GameFontType, SpriteFont>>();
 
         /// <summary>无需手动释放。</summary> 
-        private readonly IDictionary<LanguageCode, GameBitmapSpriteFont> _builtInBmFonts = new Dictionary<LanguageCode, GameBitmapSpriteFont>();
+        private readonly IDictionary<LanguageInfo, GameBitmapSpriteFont> _builtInBmFonts = new Dictionary<LanguageInfo, GameBitmapSpriteFont>();
 
         /// <summary>需要手动释放。</summary> 
         private readonly IDictionary<FontConfig, SpriteFont> _spriteFonts = new Dictionary<FontConfig, SpriteFont>();
@@ -58,80 +58,80 @@ namespace FontSettings.Framework
 
         public void RecordBuiltInSpriteFont()
         {
-            this.RecordBuiltInSpriteFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+            this.RecordBuiltInSpriteFont(FontHelpers.GetCurrentLanguage());
         }
 
         public void RecordBuiltInBmFont()
         {
-            this.RecordBuiltInBmFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+            this.RecordBuiltInBmFont(FontHelpers.GetCurrentLanguage());
         }
 
         public void RecordBuiltInBmFont(GameBitmapSpriteFont value)
         {
-            this.RecordBuiltInBmFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, value);
+            this.RecordBuiltInBmFont(FontHelpers.GetCurrentLanguage(), value);
         }
 
         public void RecordBuiltInSpriteFont(GameFontType fontType, SpriteFont value)
         {
-            this.RecordBuiltInSpriteFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, fontType, value);
+            this.RecordBuiltInSpriteFont(FontHelpers.GetCurrentLanguage(), fontType, value);
         }
 
-        public void RecordBuiltInSpriteFont(LanguageCode code)
+        public void RecordBuiltInSpriteFont(LanguageInfo language)
         {
-            if (!this._builtInSpriteFonts.TryGetValue(code, out var dic))
-                this._builtInSpriteFonts[code] = dic = new();
+            if (!this._builtInSpriteFonts.TryGetValue(language, out var dic))
+                this._builtInSpriteFonts[language] = dic = new();
             if (!dic.ContainsKey(GameFontType.SmallFont))
                 dic[GameFontType.SmallFont] = Game1.smallFont;
             if (!dic.ContainsKey(GameFontType.DialogueFont))
                 dic[GameFontType.DialogueFont] = Game1.dialogueFont;
         }
 
-        public void RecordBuiltInSpriteFont(LanguageCode code, GameFontType fontType, SpriteFont value)
+        public void RecordBuiltInSpriteFont(LanguageInfo language, GameFontType fontType, SpriteFont value)
         {
-            if (!this._builtInSpriteFonts.TryGetValue(code, out var dic))
-                this._builtInSpriteFonts[code] = dic = new();
+            if (!this._builtInSpriteFonts.TryGetValue(language, out var dic))
+                this._builtInSpriteFonts[language] = dic = new();
 
             if (!dic.ContainsKey(fontType) && fontType != GameFontType.SpriteText)
                 dic[fontType] = value;
         }
 
-        public void RecordBuiltInBmFont(LanguageCode code)
+        public void RecordBuiltInBmFont(LanguageInfo language)
         {
-            if (!this._builtInBmFonts.ContainsKey(code) && !FontHelpers.IsLatinLanguage(code))
-                this._builtInBmFonts[code] = new GameBitmapSpriteFont()
+            if (!this._builtInBmFonts.ContainsKey(language) && !FontHelpers.IsLatinLanguage(language))
+                this._builtInBmFonts[language] = new GameBitmapSpriteFont()
                 {
                     FontFile = SpriteTextFields.FontFile,
                     Pages = SpriteTextFields.fontPages.ToList(),
                     CharacterMap = new(SpriteTextFields._characterMap),
-                    LanguageCode = (LocalizedContentManager.LanguageCode)(int)code,
+                    LanguageCode = language.Code,
                     FontPixelZoom = SpriteText.fontPixelZoom
                 };
         }
 
-        public void RecordBuiltInBmFont(LanguageCode code, GameBitmapSpriteFont value)
+        public void RecordBuiltInBmFont(LanguageInfo language, GameBitmapSpriteFont value)
         {
-            if (!this._builtInBmFonts.ContainsKey(code) && !FontHelpers.IsLatinLanguage(code))
-                this._builtInBmFonts[code] = value;
+            if (!this._builtInBmFonts.ContainsKey(language) && !FontHelpers.IsLatinLanguage(language))
+                this._builtInBmFonts[language] = value;
         }
 
         public GameBitmapSpriteFont GetBuiltInBmFont()
         {
-            return this.GetBuiltInBmFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+            return this.GetBuiltInBmFont(FontHelpers.GetCurrentLanguage());
         }
 
         public SpriteFont GetBuiltInSpriteFont(GameFontType inGameType)
         {
-            return this.GetBuiltInSpriteFont((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, inGameType);
+            return this.GetBuiltInSpriteFont(FontHelpers.GetCurrentLanguage(), inGameType);
         }
 
-        public GameBitmapSpriteFont GetBuiltInBmFont(LanguageCode code)
+        public GameBitmapSpriteFont GetBuiltInBmFont(LanguageInfo language)
         {
-            return this._builtInBmFonts[code];
+            return this._builtInBmFonts[language];
         }
 
-        public SpriteFont GetBuiltInSpriteFont(LanguageCode code, GameFontType inGameType)
+        public SpriteFont GetBuiltInSpriteFont(LanguageInfo language, GameFontType inGameType)
         {
-            return this._builtInSpriteFonts[code][inGameType];
+            return this._builtInSpriteFonts[language][inGameType];
         }
 
         /// <summary>Cached font包括_cachedFonts和_builtInSpriteFonts两种。</summary>

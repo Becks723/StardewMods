@@ -48,7 +48,8 @@ namespace FontSettings.Framework.Patchers
 
                 List<Task> tasks = new();
                 var customFonts = _config.Fonts.Where(f => f.InGameType is GameFontType.SmallFont or GameFontType.DialogueFont
-                    && f.Lang == (LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+                    && f.Lang == LocalizedContentManager.CurrentLanguageCode
+                    && f.Locale == FontHelpers.GetCurrentLocale());
                 foreach (var font in customFonts)
                 {
                     Task task = _fontChanger.ReplaceOriginalOrRemainAsync(font);

@@ -46,7 +46,7 @@ namespace FontSettings.Framework
             Directory.CreateDirectory(_tmpDir);
         }
 
-        public static void GenerateIntoMemory(LanguageCode code, string fontFilePath,
+        public static void GenerateIntoMemory(string fontFilePath,
             out FontFile fontFile, out Texture2D[] pages,
             int? fontIndex = null, int? fontSize = null,
             IEnumerable<CharacterRange>? charRanges = null, string[]? charsFiles = null,
@@ -109,13 +109,13 @@ namespace FontSettings.Framework
 
         // outputDir: 输出文件夹的完整路径。
         // outputName: 输出文件的名称（不带扩展名）。
-        public static void GenerateFile(LanguageCode code, string fontFilePath, out string outputDir, out string outputName,
+        public static void GenerateFile(string fontFilePath, out string outputDir, out string outputName,
             int? fontIndex = null, int? fontSize = null,
             IEnumerable<CharacterRange>? charRanges = null, string[]? charsFiles = null,
             int? paddingUp = null, int? paddingLeft = null, int? paddingDown = null, int? paddingRight = null,
             int? spacingHoriz = null, int? spacingVert = null)
         {
-            GenerateFile(code, fontFilePath, _baseDir, Path.GetRelativePath(_baseDir, _tmpDir), null, out string outputPath,
+            GenerateFile(fontFilePath, _baseDir, Path.GetRelativePath(_baseDir, _tmpDir), null, out string outputPath,
                 fontIndex, fontSize, charRanges, charsFiles, paddingUp, paddingLeft, paddingDown, paddingRight, spacingHoriz, spacingVert);
 
             string outputPathWithExtension = outputPath + ".fnt";
@@ -123,7 +123,7 @@ namespace FontSettings.Framework
             outputName = Path.GetFileNameWithoutExtension(outputPathWithExtension);
         }
 
-        public static void GenerateFile(LanguageCode code, string fontFilePath, string baseDir, string outputDir, string? outputName, out string outputPath,
+        public static void GenerateFile(string fontFilePath, string baseDir, string outputDir, string? outputName, out string outputPath,
             int? fontIndex = null, int? fontSize = null,
             IEnumerable<CharacterRange>? charRanges = null, string[]? charsFiles = null,
             int? paddingUp = null, int? paddingLeft = null, int? paddingDown = null, int? paddingRight = null,
@@ -132,7 +132,7 @@ namespace FontSettings.Framework
             string finalFontFile = InstalledFonts.GetFullPath(fontFilePath);
             int finalFontIndex = fontIndex ?? DefaultFontIndex;
             int finalFontSize = fontSize ?? DefaultFontSize;
-            string finalOutputName = outputName ?? $"{code}-{Path.GetFileNameWithoutExtension(fontFilePath)}-{finalFontSize}px-{DateTime.Now:HH-mm-ss}";
+            string finalOutputName = outputName ?? $"{Path.GetFileNameWithoutExtension(fontFilePath)}-{finalFontSize}px-{DateTime.Now:HH-mm-ss}";
             var finalCharRanges = charRanges ?? DefaultCharRanges;
             string[] finalCharsFiles = charsFiles ?? DefaultCharsFiles;
             int finalPaddingUp = paddingUp ?? DefaultPaddingUp;

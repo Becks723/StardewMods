@@ -58,9 +58,10 @@ namespace FontSettings.Framework
             {
                 float scale = stbtt_ScaleForPixelHeight(fontInfo, fontPixelHeight);
 
+                const int padding = 1;
                 int finalTexWidth, finalTexHeight;
                 if (bitmapWidth is null || bitmapHeight is null)
-                    EstimateTextureSize(fontInfo, characterRanges, scale, out finalTexWidth, out finalTexHeight);
+                    EstimateTextureSize(fontInfo, characterRanges, scale, out finalTexWidth, out finalTexHeight, padding);
                 else
                 {
                     finalTexWidth = bitmapWidth.Value;
@@ -81,7 +82,7 @@ namespace FontSettings.Framework
                 byte[] pixels = new byte[finalTexWidth * finalTexHeight];
                 stbtt_pack_context ctx = new stbtt_pack_context();
                 fixed (byte* pxPtr = pixels)
-                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, 0, null);  // TODO: padding是0时，空格（32）没长度。但padding是1时，空格就正常了。
+                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, padding, null);  // TODO: padding是0时，空格（32）没长度。但padding是1时，空格就正常了。
 
                 foreach (CharacterRange range in characterRanges)
                 {
@@ -135,23 +136,25 @@ namespace FontSettings.Framework
         private static void EstimateTextureSize(stbtt_fontinfo fontInfo, IEnumerable<CharacterRange> ranges, float scale,
             out int width, out int height, int padding = 0, bool requirePowerOfTwo = true)
         {
+            if (padding < 0) padding = 0;
+
             var glyphSizes = GetGlyphSizes(fontInfo, ranges, scale);
 
-            width = GuessWidth(glyphSizes.ToArray());
+            width = GuessWidth(glyphSizes.ToArray(), requirePowerOfTwo);
             int maxHeight = 0;
             int curX = 0, curY = 0;
-            foreach (var size in glyphSizes)
+            foreach (Point size in glyphSizes)
             {
                 // 需换行
                 if (curX + size.X > width)
                 {
-                    curX = size.X;  // 重置X坐标。
-                    curY += maxHeight;  // 更新Y坐标。
-                    maxHeight = 0;  // 清零最大高值。
+                    curX = size.X;                // 重置X坐标。
+                    curY += maxHeight + padding;  // 更新Y坐标。
+                    maxHeight = 0;                // 清零最大高值。
                 }
                 else
                 {
-                    curX += size.X;
+                    curX += size.X + padding;
 
                     // 更新最大高值。
                     if (size.Y > maxHeight)
@@ -162,10 +165,7 @@ namespace FontSettings.Framework
             // 更新最后一行的高。
             curY += maxHeight;
 
-            height = curY;
-
-            if (requirePowerOfTwo)
-                height = width;
+            height = MakeValidTextureSize(curY, requirePowerOfTwo);
         }
 
         private static unsafe IEnumerable<Point> GetGlyphSizes(stbtt_fontinfo fontInfo, IEnumerable<CharacterRange> ranges, float scale)
@@ -183,7 +183,7 @@ namespace FontSettings.Framework
             return result;
         }
 
-        private static int GuessWidth(Point[] glyphSizes)
+        private static int GuessWidth(Point[] glyphSizes, bool requirePowerOfTwo)
         {
             int totalSize = 0;
             int maxWidth = 0;
@@ -195,7 +195,7 @@ namespace FontSettings.Framework
             }
 
             int finalWidth = Math.Max((int)Math.Sqrt(totalSize), maxWidth);
-            return MakeValidTextureSize(finalWidth, true);
+            return MakeValidTextureSize(finalWidth, requirePowerOfTwo);
         }
 
         // From Microsoft.Xna.Framework.Content.Pipeline.Graphics.GlyphPacker

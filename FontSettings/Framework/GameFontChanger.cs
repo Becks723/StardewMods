@@ -24,7 +24,7 @@ namespace FontSettings.Framework
         // 替换当前游戏字体，如果失败，沿用当前字体。
         public bool ReplaceOriginalOrRamain(FontConfig font)
         {
-            return this.ReplaceOriginalAndCatchException(font, 
+            return this.ReplaceOriginalAndCatchException(font,
                 ex => $"替换{font.InGameType.LocalizedName()}失败，将沿用当前字体。{ex.Message}\n堆栈信息：\n{ex.StackTrace}");
         }
 
@@ -102,7 +102,7 @@ namespace FontSettings.Framework
                 newFont = SpriteFontGenerator.FromExisting(
                     builtIn,
                     font.FontSize,
-                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Lang),
+                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.GetLanguage()),
                     font.Spacing,
                     font.LineSpacing
                 );
@@ -120,7 +120,7 @@ namespace FontSettings.Framework
                     int? texHeight = font.TextureHeight;
                     int lineSpacing = font.LineSpacing;
                     int spacing = (int)font.Spacing;
-                    var charRanges = font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Lang);
+                    var charRanges = font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.GetLanguage());
                     newFont = SpriteFontGenerator.FromTtf(filePath, index, size, charRanges, texWidth, texHeight, spacing: spacing, lineSpacing: lineSpacing);
                 }
                 catch
@@ -164,7 +164,7 @@ namespace FontSettings.Framework
 
             if (!font.Enabled)
             {
-                GameBitmapSpriteFont builtInBmFont = this._fontManager.GetBuiltInBmFont(font.Lang);
+                GameBitmapSpriteFont builtInBmFont = this._fontManager.GetBuiltInBmFont(font.GetLanguage());
 
                 SpriteTextFields.FontFile = builtInBmFont.FontFile;
                 SpriteTextFields._characterMap = builtInBmFont.CharacterMap;
@@ -229,13 +229,12 @@ namespace FontSettings.Framework
                 try
                 {
                     BmFontGenerator.GenerateIntoMemory(
-                        font.Lang,
                         font.FontFilePath,
                         out fontFile, out pages,
                         font.FontIndex,
                         (int)font.FontSize,
                         Array.Empty<CharacterRange>(),
-                        new[] { CharsFileManager.Get(font.Lang) }
+                        new[] { CharsFileManager.Get(font.GetLanguage()) }
                     );
 
                     // 清空生成的fnt路径。
@@ -245,14 +244,13 @@ namespace FontSettings.Framework
                 {
                     // 再试生成文件，再读文件。
                     BmFontGenerator.GenerateFile(
-                        font.Lang,
                         font.FontFilePath,
                         out string outputDir,
                         out string outputName,
                         font.FontIndex,
                         (int)font.FontSize,
                         Array.Empty<CharacterRange>(),
-                        new[] { CharsFileManager.Get(font.Lang) }
+                        new[] { CharsFileManager.Get(font.GetLanguage()) }
                     );
                     BmFontGenerator.LoadBmFont(Path.Combine(outputDir, outputName),
                         out fontFile, out pages);

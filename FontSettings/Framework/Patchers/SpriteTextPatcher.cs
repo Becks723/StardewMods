@@ -59,7 +59,8 @@ namespace FontSettings.Framework.Patchers
                 _fontManager.RecordBuiltInBmFont();
 
                 var customFonts = _config.Fonts.Where(f => f.InGameType is GameFontType.SpriteText
-                    && f.Lang == (LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+                    && f.Lang == LocalizedContentManager.CurrentLanguageCode
+                    && f.Locale == FontHelpers.GetCurrentLocale());
                 foreach (var font in customFonts)
                 {
                     _fontChanger.ReplaceOriginalOrRamain(font);
@@ -80,7 +81,8 @@ namespace FontSettings.Framework.Patchers
 
                 List<Task> tasks = new();
                 var customFonts = _config.Fonts.Where(f => f.InGameType is GameFontType.SpriteText
-                    && f.Lang == (LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+                    && f.Lang == LocalizedContentManager.CurrentLanguageCode
+                    && f.Locale == FontHelpers.GetCurrentLocale());
                 foreach (var font in customFonts)
                 {
                     Task task = _fontChanger.ReplaceOriginalOrRemainAsync(font);

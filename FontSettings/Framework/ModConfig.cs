@@ -13,21 +13,21 @@ namespace FontSettings.Framework
 
         public string ExampleText { get; set; } = "AaBbYyZz\n测试用例";
 
-        public FontConfig GetFontConfig(LanguageCode currentLang, GameFontType inGameType)
+        public FontConfig GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
         {
             return (from font in this.Fonts
-                    where font.Lang == currentLang && font.InGameType == inGameType
+                    where font.Lang == code && font.Locale == locale && font.InGameType == inGameType
                     select font)
-                   .FirstOrDefault();
-        }
-
-        public void SetFontConfig(LanguageCode currentLang, GameFontType inGameType, string fontFilePath = null, bool? enabled = null)  // TODO: 如果想赋null值怎么办
-        {
-            FontConfig font = this.GetFontConfig(currentLang, inGameType);
-            if (fontFilePath != null)
-                font.FontFilePath = fontFilePath;
-            if (enabled != null)
-                font.Enabled = enabled.Value;
+                    .FirstOrDefault() ?? new FontConfig
+                    {
+                        Enabled = false,
+                        Lang = code,
+                        Locale = locale,
+                        InGameType = inGameType,
+                        FontSize = 24,
+                        Spacing = 0,
+                        LineSpacing = 24
+                    };
         }
     }
 }

@@ -69,15 +69,24 @@ namespace FontSettings
         {
             // 创建配置项。
             foreach (GameFontType type in Enum.GetValues<GameFontType>())
-                if (!this._config.Fonts.Any(f => (int)f.Lang == (int)e.NewLanguage && f.InGameType == type))
+            {
+                if (!this._config.Fonts.Any(f =>
+                    f.Locale == e.NewLocale
+                    && f.InGameType == type
+                    && f.Lang == e.NewLanguage))
+                {
                     this._config.Fonts.Add(new FontConfig()
                     {
-                        Lang = FontHelpers.ConvertLanguageCode(e.NewLanguage),
+                        Enabled = false,
+                        Lang = e.NewLanguage,
+                        Locale = !string.IsNullOrEmpty(e.NewLocale) ? e.NewLocale : "en",
                         InGameType = type,
                         FontSize = 24,
                         Spacing = 0,
                         LineSpacing = 24
                     });
+                }
+            }
             this.Helper.WriteConfig(this._config);
 
             // 记录字体数据。
@@ -88,7 +97,8 @@ namespace FontSettings
         {
             void ReplaceSpriteFont(GameFontType fontType)
             {
-                FontConfig config = this._config.GetFontConfig(FontHelpers.CurrentLanguageCode, fontType);
+                FontConfig config = this._config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                    FontHelpers.GetCurrentLocale(), fontType);
 
                 if (!config.Enabled)
                     return;
@@ -106,7 +116,7 @@ namespace FontSettings
                             InstalledFonts.GetFullPath(config.FontFilePath),
                             config.FontIndex,
                             config.FontSize,
-                            config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.Lang),
+                            config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.GetLanguage()),
                             spacing: config.Spacing,
                             lineSpacing: config.LineSpacing
                         );
@@ -134,9 +144,12 @@ namespace FontSettings
             if (string.IsNullOrEmpty(locale))
                 locale = "en";
 
-            if (!this._cacheTable.TryGetValue(locale, out bool isCached))
+            // 记录mod语言。
+            bool isCached = false;
+            if (languageCode is LocalizedContentManager.LanguageCode.mod &&
+                !this._cacheTable.TryGetValue(locale, out isCached))
             {
-                return;
+                this._cacheTable[locale] = false;
             }
 
             if (isCached)
@@ -163,12 +176,12 @@ namespace FontSettings
             // 记录字符范围，加载字体要用。
             CharRangeSource.RecordBuiltInCharRange(smallFont);
 
-            if (locale != "en")  // 如果是英文原版，InvalidateCache后会自动重新加载，导致this.OnAssetRequested误触发，所以不需要InvalidateCache。 TODO: 为啥有时候不是英文也会触发this.OnAssetRequested？
-            {
-                string LocalizedAssetName(string assetName) => locale != "en" ? $"{assetName}.{locale}" : assetName;
-                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
-                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
-            }
+            //if (locale != "en")  // 如果是英文原版，InvalidateCache后会自动重新加载，导致this.OnAssetRequested误触发，所以不需要InvalidateCache。 TODO: 为啥有时候不是英文也会触发this.OnAssetRequested？
+            //{
+            string LocalizedAssetName(string assetName) => locale != "en" ? $"{assetName}.{locale}" : assetName;
+            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
+            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
+            //}
 
             this.Monitor.Log($"已完成记录{locale}语言下的游戏字体数据！", LogLevel.Debug);
             this._cacheTable[locale] = true;

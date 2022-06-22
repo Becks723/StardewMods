@@ -11,43 +11,42 @@ namespace FontSettings.Framework
 {
     internal static class CharRangeSource
     {
-        private static readonly Dictionary<LanguageCode, IEnumerable<CharacterRange>> _builtInCharRanges = new();
+        private static readonly Dictionary<LanguageInfo, IEnumerable<CharacterRange>> _builtInCharRanges = new();
 
         public static void RecordBuiltInCharRange()
         {
-            RecordBuiltInCharRange((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode);
+            RecordBuiltInCharRange(FontHelpers.GetCurrentLanguage());
         }
 
         public static void RecordBuiltInCharRange(SpriteFont spriteFont)
         {
-            RecordBuiltInCharRange((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, spriteFont);
+            RecordBuiltInCharRange(FontHelpers.GetCurrentLanguage(), spriteFont);
         }
 
         public static IEnumerable<CharacterRange> GetBuiltInCharRange()
         {
-            LanguageCode code = (LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode;
-            return GetBuiltInCharRange(code);
+            return GetBuiltInCharRange(FontHelpers.GetCurrentLanguage());
         }
 
-        public static void RecordBuiltInCharRange(LanguageCode code)
+        public static void RecordBuiltInCharRange(LanguageInfo language)
         {
-            if (!_builtInCharRanges.ContainsKey(code))
+            if (!_builtInCharRanges.ContainsKey(language))
             {
-                _builtInCharRanges[code] = InternalGetBuiltInCharRange(Game1.smallFont);
+                _builtInCharRanges[language] = InternalGetBuiltInCharRange(Game1.smallFont);
             }
         }
 
-        public static void RecordBuiltInCharRange(LanguageCode code, SpriteFont spriteFont)
+        public static void RecordBuiltInCharRange(LanguageInfo language, SpriteFont spriteFont)
         {
-            if (!_builtInCharRanges.ContainsKey(code))
+            if (!_builtInCharRanges.ContainsKey(language))
             {
-                _builtInCharRanges[code] = InternalGetBuiltInCharRange(spriteFont);
+                _builtInCharRanges[language] = InternalGetBuiltInCharRange(spriteFont);
             }
         }
 
-        public static IEnumerable<CharacterRange> GetBuiltInCharRange(LanguageCode code)
+        public static IEnumerable<CharacterRange> GetBuiltInCharRange(LanguageInfo language)
         {
-            if (_builtInCharRanges.TryGetValue(code, out IEnumerable<CharacterRange> range))
+            if (_builtInCharRanges.TryGetValue(language, out IEnumerable<CharacterRange> range))
                 return range;
 
             throw new KeyNotFoundException();

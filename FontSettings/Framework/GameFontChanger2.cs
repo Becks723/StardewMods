@@ -15,7 +15,7 @@ namespace FontSettings.Framework
     internal class GameFontChanger2
     {
         /// <summary>每次成功替换后将配置储存在这里，以便下一次替换时与新配置比较，来优化替换方案。</summary>
-        private readonly Dictionary<LanguageCode, Dictionary<GameFontType, FontConfig>> _lastFontConfigs = new();
+        private readonly Dictionary<LanguageInfo, Dictionary<GameFontType, FontConfig>> _lastFontConfigs = new();
 
         private readonly RuntimeFontManager _fontManager;
 
@@ -112,7 +112,7 @@ namespace FontSettings.Framework
                 newFont = SpriteFontGenerator.FromExisting(
                     builtIn,
                     font.FontSize,
-                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Lang),
+                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Locale),  //TODO: 改config，LanguageCode改成string，再加一个bool IsModLanguage
                     font.Spacing,
                     font.LineSpacing
                 );
@@ -124,7 +124,7 @@ namespace FontSettings.Framework
                     InstalledFonts.GetFullPath(font.FontFilePath),
                     font.FontIndex,
                     font.FontSize,
-                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Lang),
+                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.Locale),//TODO
                     font.TextureWidth,
                     font.TextureHeight,
                     spacing: font.Spacing,
@@ -179,7 +179,7 @@ namespace FontSettings.Framework
 
             if (!font.Enabled)
             {
-                GameBitmapSpriteFont builtInBmFont = this._fontManager.GetBuiltInBmFont(font.Lang);
+                GameBitmapSpriteFont builtInBmFont = this._fontManager.GetBuiltInBmFont(new LanguageInfo(font.Lang, font.Locale));
 
                 SpriteTextFields.FontFile = builtInBmFont.FontFile;
                 SpriteTextFields._characterMap = builtInBmFont.CharacterMap;

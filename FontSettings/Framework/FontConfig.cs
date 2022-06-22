@@ -11,7 +11,9 @@ namespace FontSettings.Framework
     {
         public bool Enabled { get; set; } = false;
 
-        public LanguageCode Lang { get; set; }
+        public LocalizedContentManager.LanguageCode Lang { get; set; }
+
+        public string Locale { get; set; }
 
         public GameFontType InGameType { get; set; }
 
@@ -42,6 +44,7 @@ namespace FontSettings.Framework
 
             other.Enabled = this.Enabled;
             other.Lang = this.Lang;
+            other.Locale = this.Locale;
             other.InGameType = this.InGameType;
             other.ExistingFontPath = this.ExistingFontPath;
             other.FontFilePath = this.FontFilePath;
@@ -52,6 +55,11 @@ namespace FontSettings.Framework
             other.TextureWidth = this.TextureWidth;
             other.TextureHeight = this.TextureHeight;
             other.CharacterRanges = this.CharacterRanges?.AsEnumerable();
+        }
+
+        internal LanguageInfo GetLanguage()
+        {
+            return new LanguageInfo(this.Lang, this.Locale);
         }
     }
 }

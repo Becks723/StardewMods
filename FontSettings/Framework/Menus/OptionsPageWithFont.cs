@@ -110,7 +110,8 @@ namespace FontSettings.Framework.Menus
         public void AddFontSection()
         {
             GameFontType fontType = GameFontType.SmallFont;
-            FontConfig cfg = _config.GetFontConfig((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, fontType);
+            FontConfig config = _config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                FontHelpers.GetCurrentLocale(), fontType);
 
             var title = new OptionsElement(I18n.OptionsPage_FontHeader());
 
@@ -120,7 +121,7 @@ namespace FontSettings.Framework.Menus
             this._originalExample = new OptionsFontExample(I18n.OptionsPage_OriginalExample(), this._optionsPage.optionSlots[0].bounds.Width, this._optionsPage.optionSlots[0].bounds.Height);
             this._customExample = new OptionsFontExample(I18n.OptionsPage_CustomExample(), this._optionsPage.optionSlots[0].bounds.Width, this._optionsPage.optionSlots[0].bounds.Height);
 
-            this._enableCheckbox = new OptionsCheckBox(I18n.OptionsPage_Enable(), cfg.Enabled);
+            this._enableCheckbox = new OptionsCheckBox(I18n.OptionsPage_Enable(), config.Enabled);
             this._enableCheckbox.ValueChanged += this.EnableCheckbox_ValueChanged;
 
             this._fontDropDown = new OptionsDropDown(I18n.OptionsPage_Font())
@@ -135,7 +136,7 @@ namespace FontSettings.Framework.Menus
                 MinValue = 1,  // 目前暂定最大字号100px，最小字号1px。
                 MaxValue = 100,
                 Interval = 1,
-                Value = (int)cfg.FontSize
+                Value = (int)config.FontSize
             };
             this._fontSizeSlider.ValueChanged += this.FontSizeSlider_ValueChanged;
 
@@ -144,7 +145,7 @@ namespace FontSettings.Framework.Menus
                 MinValue = -10,
                 MaxValue = 10,
                 Interval = 1,
-                Value = (int)cfg.Spacing
+                Value = (int)config.Spacing
             };
             this._spacingSlider.ValueChanged += this.SpacingSlider_ValueChanged;
 
@@ -153,7 +154,7 @@ namespace FontSettings.Framework.Menus
                 MinValue = 1,
                 MaxValue = 100,
                 Interval = 1,
-                Value = cfg.LineSpacing
+                Value = config.LineSpacing
             };
             this._lineSpacingSlider.ValueChanged += this.LineSpacingSlider_ValueChanged;
 
@@ -193,54 +194,55 @@ namespace FontSettings.Framework.Menus
 
         private async void OkPressed(object sender, EventArgs e)
         {
-            FontConfig cfg = _config.GetFontConfig((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, this._fontSelector.CurrentFont);
+            FontConfig config = _config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                FontHelpers.GetCurrentLocale(), this._fontSelector.CurrentFont);
 
-            FontConfig tmpCfg = new FontConfig();
-            cfg.CopyTo(tmpCfg);
+            FontConfig tempConfig = new FontConfig();
+            config.CopyTo(tempConfig);
 
             this.ParseFontDropDownOption(this._fontDropDown.dropDownOptions[this._fontDropDown.selectedOption],
                 out string fontFile, out int fontIndex);
 
-            this._lastEnabled = tmpCfg.Enabled;
-            this._lastFontFilePath = tmpCfg.FontFilePath;
-            this._lastFontSize = (int)tmpCfg.FontSize;
-            this._lastSpacing = (int)tmpCfg.Spacing;
-            this._lastLineSpacing = tmpCfg.LineSpacing;
-            this._lastExistingFontPath = tmpCfg.ExistingFontPath;
+            this._lastEnabled = tempConfig.Enabled;
+            this._lastFontFilePath = tempConfig.FontFilePath;
+            this._lastFontSize = (int)tempConfig.FontSize;
+            this._lastSpacing = (int)tempConfig.Spacing;
+            this._lastLineSpacing = tempConfig.LineSpacing;
+            this._lastExistingFontPath = tempConfig.ExistingFontPath;
 
-            tmpCfg.Enabled = this._enableCheckbox.isChecked;
-            tmpCfg.FontFilePath = fontFile;
-            tmpCfg.FontIndex = fontIndex;
-            tmpCfg.FontSize = this._fontSizeSlider.Value;
-            tmpCfg.Spacing = this._spacingSlider.Value;
-            tmpCfg.LineSpacing = this._lineSpacingSlider.Value;
+            tempConfig.Enabled = this._enableCheckbox.isChecked;
+            tempConfig.FontFilePath = fontFile;
+            tempConfig.FontIndex = fontIndex;
+            tempConfig.FontSize = this._fontSizeSlider.Value;
+            tempConfig.Spacing = this._spacingSlider.Value;
+            tempConfig.LineSpacing = this._lineSpacingSlider.Value;
 
-            bool enabledChanged = this._lastEnabled != tmpCfg.Enabled;
-            bool fontFilePathChanged = this._lastFontFilePath != tmpCfg.FontFilePath;
-            bool fontSizeChanged = this._lastFontSize != tmpCfg.FontSize;
-            bool spacingChanged = this._lastSpacing != tmpCfg.Spacing;
-            bool lineSpacingChanged = this._lastLineSpacing != tmpCfg.LineSpacing;
+            bool enabledChanged = this._lastEnabled != tempConfig.Enabled;
+            bool fontFilePathChanged = this._lastFontFilePath != tempConfig.FontFilePath;
+            bool fontSizeChanged = this._lastFontSize != tempConfig.FontSize;
+            bool spacingChanged = this._lastSpacing != tempConfig.Spacing;
+            bool lineSpacingChanged = this._lastLineSpacing != tempConfig.LineSpacing;
 
             // 必要时重置字体文件路径。
             if (fontFilePathChanged || fontSizeChanged || spacingChanged || lineSpacingChanged)
-                tmpCfg.ExistingFontPath = null;
+                tempConfig.ExistingFontPath = null;
 
             var okButton = this.CurrentOkButton;
             okButton.SetStateProcessing();
-            bool success = await _fontChanger.ReplaceOriginalOrRemainAsync(tmpCfg);
+            bool success = await _fontChanger.ReplaceOriginalOrRemainAsync(tempConfig);
             okButton.SetStateCompleted(success,
                 success
-                ? I18n.HudMessage_SuccessSetFont(tmpCfg.InGameType.LocalizedName())
-                : I18n.HudMessage_FailedSetFont(tmpCfg.InGameType.LocalizedName()));
+                ? I18n.HudMessage_SuccessSetFont(tempConfig.InGameType.LocalizedName())
+                : I18n.HudMessage_FailedSetFont(tempConfig.InGameType.LocalizedName()));
 
             // 如果成功，更新配置值。
             if (success)
             {
-                tmpCfg.CopyTo(cfg);
+                tempConfig.CopyTo(config);
                 _saveConfig(_config);
 
                 // 删除bmfont文件。
-                if (cfg.InGameType is GameFontType.SpriteText)
+                if (config.InGameType is GameFontType.SpriteText)
                     FontHelpers.DeleteBmFont(this._lastExistingFontPath);
             }
         }
@@ -248,19 +250,20 @@ namespace FontSettings.Framework.Menus
         private void FontTypeChanged(object sender, EventArgs e)
         {
             GameFontType curFontType = this._fontSelector.CurrentFont;
-            FontConfig cfg = _config.GetFontConfig((LanguageCode)(int)LocalizedContentManager.CurrentLanguageCode, curFontType);
+            FontConfig config = _config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                FontHelpers.GetCurrentLocale(), curFontType);
 
             // 更新UI的值。
-            this._enableCheckbox.isChecked = cfg.Enabled;
+            this._enableCheckbox.isChecked = config.Enabled;
 
-            string opt = this.BuildFontDropDownOption(cfg.FontFilePath, cfg.FontIndex);
+            string opt = this.BuildFontDropDownOption(config.FontFilePath, config.FontIndex);
             int index = this._fontDropDown.dropDownOptions.IndexOf(opt);
             if (index == -1) index = 0;
             this._fontDropDown.selectedOption = index;
 
-            this._fontSizeSlider.Value = (int)cfg.FontSize;
-            this._spacingSlider.Value = (int)cfg.Spacing;
-            this._lineSpacingSlider.Value = cfg.LineSpacing;
+            this._fontSizeSlider.Value = (int)config.FontSize;
+            this._spacingSlider.Value = (int)config.Spacing;
+            this._lineSpacingSlider.Value = config.LineSpacing;
 
             // 更新可用UI。
             this._fontDropDown.greyedOut = !this._enableCheckbox.isChecked;
