@@ -71,28 +71,6 @@ namespace FontSettings
 
         private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
         {
-            // 创建配置项。
-            foreach (GameFontType type in Enum.GetValues<GameFontType>())
-            {
-                if (!this._config.Fonts.Any(f =>
-                    f.Locale == e.NewLocale
-                    && f.InGameType == type
-                    && f.Lang == e.NewLanguage))
-                {
-                    this._config.Fonts.Add(new FontConfig()
-                    {
-                        Enabled = false,
-                        Lang = e.NewLanguage,
-                        Locale = !string.IsNullOrEmpty(e.NewLocale) ? e.NewLocale : "en",
-                        InGameType = type,
-                        FontSize = 24,
-                        Spacing = 0,
-                        LineSpacing = 24
-                    });
-                }
-            }
-            this.Helper.WriteConfig(this._config);
-
             // 记录字体数据。
             this.RecordFontData(e.NewLanguage, e.NewLocale);
         }
