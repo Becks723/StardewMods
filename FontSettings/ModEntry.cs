@@ -17,6 +17,8 @@ namespace FontSettings
 {
     internal class ModEntry : Mod
     {
+        private readonly string _globalFontDataKey = "font-data";
+
         /// <summary>记录不同语言下字体信息是否已经缓存了。</summary>
         private readonly Dictionary<string, bool> _cacheTable = new();
 
@@ -32,7 +34,9 @@ namespace FontSettings
         {
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
+            FontConfigs fontConfigs = this.ReadFontSaveData();
             this._config = helper.ReadConfig<ModConfig>();
+            this._config.Fonts = fontConfigs;
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
             foreach (LocalizedContentManager.LanguageCode code in Enum.GetValues<LocalizedContentManager.LanguageCode>())
@@ -55,7 +59,7 @@ namespace FontSettings
                 new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
                     .Patch(Harmony, this.Monitor);
 
-                OptionsPageWithFont.Initialize(this._config, this._fontManager, this._fontChanger, (cfg) => helper.WriteConfig(cfg));
+                OptionsPageWithFont.Initialize(this._config, this._fontManager, this._fontChanger, this.SaveConfig);
                 OptionsPageWithFont.Patch(Harmony, this.Monitor);
             }
 
@@ -97,7 +101,7 @@ namespace FontSettings
         {
             void ReplaceSpriteFont(GameFontType fontType)
             {
-                FontConfig config = this._config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                FontConfig config = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
                     FontHelpers.GetCurrentLocale(), fontType);
 
                 if (!config.Enabled)
@@ -141,7 +145,7 @@ namespace FontSettings
 
         private void RecordFontData(LocalizedContentManager.LanguageCode languageCode, string locale)
         {
-            if (string.IsNullOrEmpty(locale))
+            if (languageCode is LocalizedContentManager.LanguageCode.en && string.IsNullOrEmpty(locale))
                 locale = "en";
 
             // 记录mod语言。
@@ -221,6 +225,24 @@ namespace FontSettings
             }
 
             return null;
+        }
+
+        private FontConfigs ReadFontSaveData()
+        {
+            FontConfigs fontConfigs = this.Helper.Data.ReadGlobalData<FontConfigs>(this._globalFontDataKey);
+            if (fontConfigs == null)
+            {
+                fontConfigs = new FontConfigs();
+                this.Helper.Data.WriteGlobalData(this._globalFontDataKey, fontConfigs);
+            }
+
+            return fontConfigs;
+        }
+
+        private void SaveConfig(ModConfig config)
+        {
+            this.Helper.WriteConfig(config);
+            this.Helper.Data.WriteGlobalData(this._globalFontDataKey, config.Fonts);
         }
 
         private T LoadWithoutCache<T>(string key, string locale)

@@ -110,7 +110,7 @@ namespace FontSettings.Framework.Menus
         public void AddFontSection()
         {
             GameFontType fontType = GameFontType.SmallFont;
-            FontConfig config = _config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+            FontConfig config = _config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
                 FontHelpers.GetCurrentLocale(), fontType);
 
             var title = new OptionsElement(I18n.OptionsPage_FontHeader());
@@ -194,7 +194,7 @@ namespace FontSettings.Framework.Menus
 
         private async void OkPressed(object sender, EventArgs e)
         {
-            FontConfig config = _config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+            FontConfig config = _config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
                 FontHelpers.GetCurrentLocale(), this._fontSelector.CurrentFont);
 
             FontConfig tempConfig = new FontConfig();
@@ -250,7 +250,7 @@ namespace FontSettings.Framework.Menus
         private void FontTypeChanged(object sender, EventArgs e)
         {
             GameFontType curFontType = this._fontSelector.CurrentFont;
-            FontConfig config = _config.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+            FontConfig config = _config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
                 FontHelpers.GetCurrentLocale(), curFontType);
 
             // 更新UI的值。
