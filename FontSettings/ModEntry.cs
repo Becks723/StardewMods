@@ -20,7 +20,7 @@ namespace FontSettings
         private readonly string _globalFontDataKey = "font-data";
 
         /// <summary>记录不同语言下字体信息是否已经缓存了。</summary>
-        private readonly Dictionary<string, bool> _cacheTable = new();
+        private readonly Dictionary<LanguageInfo, bool> _cacheTable = new();
 
         private ModConfig _config;
 
@@ -44,8 +44,8 @@ namespace FontSettings
                 if (code is LocalizedContentManager.LanguageCode.mod)
                     continue;
 
-                string locale = FontHelpers.GetLocale(code);
-                this._cacheTable[locale] = false;  // TODO: 支持mod语言。
+                LanguageInfo langInfo = new LanguageInfo(code, FontHelpers.GetLocale(code));
+                this._cacheTable[langInfo] = false;
             }
 
             BmFontGenerator.Initialize(helper);
@@ -125,13 +125,14 @@ namespace FontSettings
         {
             if (languageCode is LocalizedContentManager.LanguageCode.en && string.IsNullOrEmpty(locale))
                 locale = "en";
+            LanguageInfo langInfo = new LanguageInfo(languageCode, locale);
 
             // 记录mod语言。
             bool isCached = false;
             if (languageCode is LocalizedContentManager.LanguageCode.mod &&
-                !this._cacheTable.TryGetValue(locale, out isCached))
+                !this._cacheTable.TryGetValue(langInfo, out isCached))
             {
-                this._cacheTable[locale] = false;
+                this._cacheTable[langInfo] = false;
             }
 
             if (isCached)
@@ -166,7 +167,7 @@ namespace FontSettings
             //}
 
             this.Monitor.Log($"已完成记录{locale}语言下的游戏字体数据！", LogLevel.Debug);
-            this._cacheTable[locale] = true;
+            this._cacheTable[langInfo] = true;
         }
 
         private GameBitmapSpriteFont LoadGameBmFont(IModHelper helper, LocalizedContentManager.LanguageCode languageCode)
@@ -221,13 +222,6 @@ namespace FontSettings
         {
             this.Helper.WriteConfig(config);
             this.Helper.Data.WriteGlobalData(this._globalFontDataKey, config.Fonts);
-        }
-
-        private T LoadWithoutCache<T>(string key, string locale)
-        {
-            T result = this.Helper.GameContent.Load<T>(key);
-            this.Helper.GameContent.InvalidateCache($"{key}.{locale}");
-            return result;
         }
     }
 }
