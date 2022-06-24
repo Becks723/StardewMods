@@ -46,7 +46,7 @@ namespace FontSettings.Framework.Patchers
                 _fontManager.RecordBuiltInSpriteFont();
                 CharRangeSource.RecordBuiltInCharRange();
 
-                List<Task> tasks = new();
+                var tasks = new List<Task>();
                 var customFonts = _config.Fonts.Where(f => f.InGameType is GameFontType.SmallFont or GameFontType.DialogueFont
                     && f.Lang == LocalizedContentManager.CurrentLanguageCode
                     && f.Locale == FontHelpers.GetCurrentLocale());
@@ -55,11 +55,6 @@ namespace FontSettings.Framework.Patchers
                     Task task = _fontChanger.ReplaceOriginalOrRemainAsync(font);
                     tasks.Add(task);
                 }
-
-                //Texture2D tex = Game1.smallFont.Texture;
-                //string fileName = $"spriteFont-{Path.GetFileNameWithoutExtension(font.FontFilePath)}-{font.FontSize}px-{DateTime.Now:HH-mm-ss}";
-                //using Stream stream = File.OpenWrite(@$"D:\Program Files (x86)\Steam\steamapps\common\Stardew Valley\Mods\CustomFonts\Temp\{fileName}.png");
-                //tex.SaveAsPng(stream, tex.Width, tex.Height);
 
                 await Task.WhenAll(tasks);
             }
