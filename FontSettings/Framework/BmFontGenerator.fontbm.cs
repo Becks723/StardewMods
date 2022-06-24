@@ -17,7 +17,7 @@ namespace FontSettings.Framework
         private static readonly string _fontbmEntry = SConstants.TargetPlatform switch
         {
             SGamePlatform.Android => string.Empty,
-            SGamePlatform.Linux => NormalizePath(@"linux\fontbm"),
+            SGamePlatform.Linux => string.Empty,
             SGamePlatform.Mac => string.Empty,
             SGamePlatform.Windows => NormalizePath(@"win\fontbm.exe"),
             _ => string.Empty

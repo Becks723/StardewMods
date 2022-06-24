@@ -24,10 +24,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>fontbm\win\%(FileName)%(Extension)</TargetPath>
 		</ContentWithTargetPath>
-		<ContentWithTargetPath Include="dependencies\fontbm\0.5.0\linux\*.*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<TargetPath>fontbm\linux\%(FileName)%(Extension)</TargetPath>
-		</ContentWithTargetPath>
 		<Compile Remove="Framework\GameFontChanger2.cs" />
 		<None Include="Framework\GameFontChanger2.cs" />
 		<None Update="说明.txt">
