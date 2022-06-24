@@ -40,7 +40,7 @@ namespace BmFontCS
                 Size[] pageSizes = ArrangeGlyphs(glyphs, settings);
                 Page[] pgs = RenderGlyphsToPages(glyphs, pageSizes, settings);
 
-                fontFile = GetFontInfo(fontFilePath, settings, pgs.Length, glyphs);
+                fontFile = GetFontInfo(fontFilePath, settings, pgs.Length, glyphs, settings.Spacing.Horizontal);
                 pages = pgs.Select(pg =>
                 {
                     Texture2D texture = new Texture2D(Game1.graphics.GraphicsDevice, pg.Width, pg.Height);
@@ -92,7 +92,7 @@ namespace BmFontCS
 
         }
 
-        private static FontFile GetFontInfo(string fontFilePath, BmFontSettings settings, int pages, Glyph[] glyphs)
+        private static FontFile GetFontInfo(string fontFilePath, BmFontSettings settings, int pages, Glyph[] glyphs, int spacing)
         {
             return new FontFile
             {
@@ -134,7 +134,7 @@ namespace BmFontCS
                     Height = glyph.Height,
                     XOffset = glyph.XOffset,
                     YOffset = glyph.YOffset,
-                    XAdvance = glyph.XAdvance,
+                    XAdvance = glyph.XAdvance + spacing,
                     Page = glyph.Page,
                     Channel = 15
                 })),

@@ -234,7 +234,8 @@ namespace FontSettings.Framework
                         font.FontIndex,
                         (int)font.FontSize,
                         Array.Empty<CharacterRange>(),
-                        new[] { CharsFileManager.Get(font.GetLanguage()) }
+                        new[] { CharsFileManager.Get(font.GetLanguage()) },
+                        spacingHoriz: (int)font.Spacing
                     );
 
                     // 清空生成的fnt路径。

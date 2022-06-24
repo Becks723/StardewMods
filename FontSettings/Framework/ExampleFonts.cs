@@ -152,7 +152,8 @@ namespace FontSettings.Framework
                             out fontFile, out pages,
                             fontIndex,
                             (int)fontSize,
-                            FontHelpers.GetCharRange(text, '*')
+                            FontHelpers.GetCharRange(text, '*'),
+                            spacingHoriz: spacing
                         );
                     }
                     catch
