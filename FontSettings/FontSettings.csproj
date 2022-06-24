@@ -6,7 +6,7 @@
 	<Import Project="..\_build\translation-builder.targets" />
 
 	<PropertyGroup>
-		<Version>0.2.0</Version>
+		<Version>0.2.1</Version>
 		<TargetFramework>net5.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>
@@ -20,10 +20,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ContentWithTargetPath Include="dependencies\fontbm\0.5.0\win\*.*">
+		<!--<ContentWithTargetPath Include="dependencies\fontbm\0.5.0\win\*.*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>fontbm\win\%(FileName)%(Extension)</TargetPath>
-		</ContentWithTargetPath>
+		</ContentWithTargetPath>-->
 		<Compile Remove="Framework\GameFontChanger2.cs" />
 		<None Include="Framework\GameFontChanger2.cs" />
 		<None Update="说明.txt">

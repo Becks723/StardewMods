@@ -19,7 +19,7 @@ namespace FontSettings.Framework
             SGamePlatform.Android => string.Empty,
             SGamePlatform.Linux => string.Empty,
             SGamePlatform.Mac => string.Empty,
-            SGamePlatform.Windows => NormalizePath(@"win\fontbm.exe"),
+            SGamePlatform.Windows => /*NormalizePath(@"win\fontbm.exe")*/string.Empty,
             _ => string.Empty
         };
 
