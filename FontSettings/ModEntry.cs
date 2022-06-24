@@ -5,6 +5,7 @@ using BmFont;
 using FontSettings.Framework;
 using FontSettings.Framework.FontInfomation;
 using FontSettings.Framework.Menus;
+using FontSettings.Framework.Migrations;
 using FontSettings.Framework.Patchers;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
@@ -22,6 +23,8 @@ namespace FontSettings
         /// <summary>记录不同语言下字体信息是否已经缓存了。</summary>
         private readonly Dictionary<LanguageInfo, bool> _cacheTable = new();
 
+        private readonly MigrateTo_0_2_0 _0_2_0_Migration = new();
+
         private ModConfig _config;
 
         private RuntimeFontManager _fontManager;
@@ -34,9 +37,17 @@ namespace FontSettings
         {
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
-            FontConfigs fontConfigs = this.ReadFontSaveData();
-            this._config = helper.ReadConfig<ModConfig>();
-            this._config.Fonts = fontConfigs;
+            if (this._0_2_0_Migration.NeedMigrate(helper))
+            {
+                this._0_2_0_Migration.Apply(helper, out this._config);
+                this.SaveConfig(this._config);
+            }
+            else
+            {
+                this._config = helper.ReadConfig<ModConfig>();
+                FontConfigs fontConfigs = this.ReadFontSaveData();
+                this._config.Fonts = fontConfigs;
+            }
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
             foreach (LocalizedContentManager.LanguageCode code in Enum.GetValues<LocalizedContentManager.LanguageCode>())
