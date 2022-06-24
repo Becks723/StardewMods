@@ -82,7 +82,7 @@ namespace FontSettings.Framework
                 byte[] pixels = new byte[finalTexWidth * finalTexHeight];
                 stbtt_pack_context ctx = new stbtt_pack_context();
                 fixed (byte* pxPtr = pixels)
-                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, padding, null);  // TODO: padding是0时，空格（32）没长度。但padding是1时，空格就正常了。
+                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, padding, null);
 
                 foreach (CharacterRange range in characterRanges)
                 {
