@@ -53,10 +53,10 @@ namespace FontSettings.Framework
 
         public override void Draw(SpriteBatch b, string text, Vector2 position, Color color)
         {
-            this.drawString(b, text, (int)position.X, (int)position.Y);
+            this.drawString(b, text, (int)position.X, (int)position.Y, color);
         }
 
-        public void drawString(SpriteBatch b, string s, int x, int y, int characterPosition = 999999, int width = -1, int height = 999999, float alpha = 1f, float layerDepth = 0.88f, bool junimoText = false, int drawBGScroll = -1, string placeHolderScrollWidthText = "", int color = -1)
+        public void drawString(SpriteBatch b, string s, int x, int y, Color color, int characterPosition = 999999, int width = -1, int height = 999999, float alpha = 1f, float layerDepth = 0.88f, bool junimoText = false, int drawBGScroll = -1, string placeHolderScrollWidthText = "")
         {
             bool width_specified = true;
             if (width == -1)
@@ -227,11 +227,11 @@ namespace FontSettings.Framework
                         if (this.LanguageCode is LocalizedContentManager.LanguageCode.ru)
                         {
                             Vector2 offset = new Vector2(-1f, 1f) * this.FontPixelZoom;
-                            b.Draw(texture, position2 + offset, sourceRect, SpriteText.getColorFromIndex(color) * alpha * SpriteText.shadowAlpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
-                            b.Draw(texture, position2 + new Vector2(0f, offset.Y), sourceRect, SpriteText.getColorFromIndex(color) * alpha * SpriteText.shadowAlpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
-                            b.Draw(texture, position2 + new Vector2(offset.X, 0f), sourceRect, SpriteText.getColorFromIndex(color) * alpha * SpriteText.shadowAlpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
+                            b.Draw(texture, position2 + offset, sourceRect, /*SpriteText.getColorFromIndex(color)*/color * alpha * SpriteText.shadowAlpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
+                            b.Draw(texture, position2 + new Vector2(0f, offset.Y), sourceRect, /*SpriteText.getColorFromIndex(color)*/color * alpha * SpriteText.shadowAlpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
+                            b.Draw(texture, position2 + new Vector2(offset.X, 0f), sourceRect, /*SpriteText.getColorFromIndex(color)*/ color * alpha * SpriteText.shadowAlpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
                         }
-                        b.Draw(texture, position2, sourceRect, SpriteText.getColorFromIndex(color) * alpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
+                        b.Draw(texture, position2, sourceRect, /*SpriteText.getColorFromIndex(color)*/color * alpha, 0f, Vector2.Zero, this.FontPixelZoom, SpriteEffects.None, layerDepth);
                         position.X += fontChar.XAdvance * this.FontPixelZoom;
                     }
                 }

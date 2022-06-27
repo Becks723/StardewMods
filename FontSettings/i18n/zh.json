@@ -13,5 +13,20 @@
   "game-font-type.dialogue-font": " 中字体",
   "game-font-type.sprite-text": " 对话字体",
   "hud-message.success-set-font": "{{fontType}}设置成功！",
-  "hud-message.failed-set-font": "{{fontType}}设置失败，详见SMAPI窗口。"
+  "hud-message.failed-set-font": "{{fontType}}设置失败，详见SMAPI窗口。",
+
+  "config.example-text": "示例文本",
+  "config.example-text.description": "用来校准字体。‘\\n’表示换行，建议设置两行，这样校准行间距时看得清楚一点。",
+  "config.section.fonts": "字体",
+  "config.section.fonts.description": "设置当前语言下的字体。",
+  "config.fonts.enabled": "启用",
+  "config.fonts.enabled.description": "是否启用自定义字体。",
+  "config.fonts.font": "字体",
+  "config.fonts.font.description": "选择字体",
+  "config.fonts.font-size": "字体大小（px）",
+  "config.fonts.font-size.description": "设置字体大小，单位为像素。",
+  "config.fonts.spacing": "字间距",
+  "config.fonts.spacing.description": "设置每个字之间的距离。",
+  "config.fonts.line-spacing": "行间距",
+  "config.fonts.line-spacing.description": "设置每一行之间的距离。"
 }

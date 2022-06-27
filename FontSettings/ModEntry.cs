@@ -31,10 +31,13 @@ namespace FontSettings
 
         private GameFontChanger _fontChanger;
 
+        internal static IModHelper ModHelper { get; private set; }
+
         internal static Harmony Harmony { get; private set; }
 
         public override void Entry(IModHelper helper)
         {
+            ModHelper = this.Helper;
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
             if (this._0_2_0_Migration.NeedMigrate(helper))
@@ -76,8 +79,23 @@ namespace FontSettings
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
 
             this.RecordFontData(LocalizedContentManager.LanguageCode.en, null);
+        }
+
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            new GMCMIntegration(
+                getConfig: () => this._config,
+                fontManager: this._fontManager,
+                fontChanger: this._fontChanger,
+                reset: this.ResetConfig,
+                save: () => this.SaveConfig(this._config),
+                modRegistry: this.Helper.ModRegistry,
+                monitor: this.Monitor,
+                manifest: this.ModManifest)
+                .Integrate();
         }
 
         private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
@@ -233,6 +251,23 @@ namespace FontSettings
         {
             this.Helper.WriteConfig(config);
             this.Helper.Data.WriteGlobalData(this._globalFontDataKey, config.Fonts);
+        }
+
+        private void ResetConfig()
+        {
+            FontConfigs fonts = this._config.Fonts;
+
+            // 重置当前语言的字体设置数据。
+            var lang = LocalizedContentManager.CurrentLanguageCode;
+            var locale = FontHelpers.GetCurrentLocale();
+            fonts.RemoveAll(font => font.Lang == lang && font.Locale == locale);
+            foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
+                fonts.GetOrCreateFontConfig(lang, locale, fontType);
+
+            this._config = new ModConfig()
+            {
+                Fonts = fonts
+            };
         }
     }
 }

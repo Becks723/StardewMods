@@ -71,8 +71,10 @@ namespace CodeShared.Integrations.GenericModConfigMenu
             return this;
         }
 
-        public GenericModConfigMenuFluentHelper AddTextBox(Func<string> name, Func<string> get, Action<string> set, Func<string> tooltip = null)
+        public GenericModConfigMenuFluentHelper AddTextBox(Func<string> name, Func<string> get, Action<string> set, Func<string> tooltip = null, Action<string> fieldChanged = null)
         {
+            string fieldID = this.WhenChange(fieldChanged);
+
             this._api.AddTextOption(
                 mod: this._manifest,
                 getValue: get,
@@ -81,7 +83,7 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 tooltip: tooltip,
                 allowedValues: null,
                 formatAllowedValue: null,
-                fieldId: null
+                fieldId: fieldID
             );
             return this;
         }
@@ -214,8 +216,10 @@ namespace CodeShared.Integrations.GenericModConfigMenu
         //    return this;
         //}
 
-        public GenericModConfigMenuFluentHelper AddSlider(Func<string> name, Func<int> get, Action<int> set, int? min, int? max, int? interval = null, Func<string> tooltip = null)
+        public GenericModConfigMenuFluentHelper AddSlider(Func<string> name, Func<int> get, Action<int> set, int? min, int? max, int? interval = null, Func<string> tooltip = null, Action<int> fieldChanged = null)
         {
+            string fieldID = this.WhenChange(fieldChanged);
+
             this._api.AddNumberOption(
                 mod: this._manifest,
                 getValue: get,
@@ -225,13 +229,15 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 min: min,
                 max: max,
                 interval: interval,
-                fieldId: null
+                fieldId: fieldID
             );
             return this;
         }
 
-        public GenericModConfigMenuFluentHelper AddSlider(Func<string> name, Func<float> get, Action<float> set, float? min, float? max, float? interval = null, Func<string> tooltip = null)
+        public GenericModConfigMenuFluentHelper AddSlider(Func<string> name, Func<float> get, Action<float> set, float? min, float? max, float? interval = null, Func<string> tooltip = null, Action<float> fieldChanged = null)
         {
+            string fieldID = this.WhenChange(fieldChanged);
+
             this._api.AddNumberOption(
                 mod: this._manifest,
                 getValue: get,
@@ -241,7 +247,7 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 min: min,
                 max: max,
                 interval: interval,
-                fieldId: null
+                fieldId: fieldID
             );
             return this;
         }
@@ -278,6 +284,15 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 beforeReset: option.OnReseting,
                 afterReset: option.OnReset,
                 height: () => option.Height
+            );
+        }
+
+        public GenericModConfigMenuFluentHelper AddLineSpacing(int height = 40)
+        {
+            return this.AddCustom(
+                () => string.Empty,
+                null,
+                new SpacingOption(height)
             );
         }
 

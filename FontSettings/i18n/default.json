@@ -13,5 +13,20 @@
   "game-font-type.dialogue-font": "Medium Font",
   "game-font-type.sprite-text": "Dialogue Font",
   "hud-message.success-set-font": "{{fontType}} set ok!",
-  "hud-message.failed-set-font": "{{fontType}} set failed. See SMAPI console for details."
+  "hud-message.failed-set-font": "{{fontType}} set failed. See SMAPI console for details.",
+
+  "config.example-text": "Example Text",
+  "config.example-text.description": "Text for adjustion when setting fonts. '\\n' means a line break. I suggest you to use one line break, i.e, two lines, so you can recognize line spacing more.",
+  "config.section.fonts": "Font",
+  "config.section.fonts.description": "Set the fonts for the current language.",
+  "config.fonts.enabled": "Enabled",
+  "config.fonts.enabled.description": "Whether to enable custom fonts.",
+  "config.fonts.font": "Font",
+  "config.fonts.font.description": "Select a font.",
+  "config.fonts.font-size": "Font Size (px)",
+  "config.fonts.font-size.description": "Set the font size, in pixels.",
+  "config.fonts.spacing": "Spacing",
+  "config.fonts.spacing.description": "Set the distance between two horizontal characters.",
+  "config.fonts.line-spacing": "Line Spacing",
+  "config.fonts.line-spacing.description": "Set the distance between two lines."
 }
