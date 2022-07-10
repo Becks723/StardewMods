@@ -87,40 +87,15 @@ namespace FontSettings.Framework.Menus
 
         protected override Vector2 MeasureString(string text)
         {
-            switch (this.CurrentFont)
-            {
-                case GameFontType.SmallFont:
-                    return Game1.smallFont.MeasureString(text);
-
-                case GameFontType.DialogueFont:
-                    return Game1.dialogueFont.MeasureString(text);
-
-                case GameFontType.SpriteText:
-                    int width = SpriteText.getWidthOfString(text);
-                    int height = SpriteText.getHeightOfString(text);
-                    return new Vector2(width, height);
-
-                default:
-                    throw new NotSupportedException();
-            }
+            return new Vector2(
+                SpriteText.getWidthOfString(text), 
+                SpriteText.getHeightOfString(text)
+            );
         }
 
         protected override void DrawString(SpriteBatch b, string text, Vector2 position, Color color)
         {
-            switch (this.CurrentFont)
-            {
-                case GameFontType.SmallFont:
-                    b.DrawString(Game1.smallFont, text, position, color);
-                    break;
-
-                case GameFontType.DialogueFont:
-                    b.DrawString(Game1.dialogueFont, text, position, color);
-                    break;
-
-                case GameFontType.SpriteText:
-                    SpriteText.drawString(b, text, (int)position.X, (int)position.Y);
-                    break;
-            }
+            SpriteText.drawString(b, text, (int)position.X, (int)position.Y);
         }
     }
 }
