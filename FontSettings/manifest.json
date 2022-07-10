@@ -6,5 +6,11 @@
   "UniqueID": "Becks723.FontSettings",
   "MinimumApiVersion": "3.14.0",
   "EntryDll": "FontSettings.dll",
-  "UpdateKeys": [ "Nexus:12467" ]
+  "UpdateKeys": [ "Nexus:12467" ],
+  "Dependencies": [
+    {
+      "UniqueID": "spacechase0.GenericModConfigMenu",
+      "IsRequired": false
+    }
+  ]
 }
