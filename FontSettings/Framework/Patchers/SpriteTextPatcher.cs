@@ -52,44 +52,15 @@ namespace FontSettings.Framework.Patchers
             await OnLanguageChangedAsync("SpriteText.OnLanguageChange");
         }
 
-        private static void OnLanguageChangedSync(string methodName)
-        {
-            try
-            {
-                _fontManager.RecordBuiltInBmFont();
-
-                var customFonts = _config.Fonts.Where(f => f.InGameType is GameFontType.SpriteText
-                    && f.Lang == LocalizedContentManager.CurrentLanguageCode
-                    && f.Locale == FontHelpers.GetCurrentLocale());
-                foreach (var font in customFonts)
-                {
-                    _fontChanger.ReplaceOriginalOrRamain(font);
-                }
-            }
-            catch (Exception ex)
-            {
-                ILog.Error($"在修改{methodName}时遇到了错误：{ex.Message}\n堆栈信息：\n{ex.StackTrace}");
-                return;
-            }
-        }
-
         private static async Task OnLanguageChangedAsync(string methodName)
         {
             try
             {
                 _fontManager.RecordBuiltInBmFont();
 
-                List<Task> tasks = new();
-                var customFonts = _config.Fonts.Where(f => f.InGameType is GameFontType.SpriteText
-                    && f.Lang == LocalizedContentManager.CurrentLanguageCode
-                    && f.Locale == FontHelpers.GetCurrentLocale());
-                foreach (var font in customFonts)
-                {
-                    Task task = _fontChanger.ReplaceOriginalOrRemainAsync(font);
-                    tasks.Add(task);
-                }
-
-                await Task.WhenAll(tasks);
+                var font = _config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                    FontHelpers.GetCurrentLocale(), GameFontType.SpriteText);
+                await _fontChanger.ReplaceOriginalOrRemainAsync(font);
             }
             catch (Exception ex)
             {
