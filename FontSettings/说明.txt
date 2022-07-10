@@ -22,11 +22,13 @@
 
 
 兼容性：
-    当前版本（0.2.0）
+    当前版本（0.2.2）
         兼容Smapi 3.14.0及以上，Windows、MacOS、Linux系统，
         语言兼容所有游戏内置语言（语言选择菜单初始3x4=12种语言）。但是使用拉丁字符的语言（en、pt、es、de、fr、it、tr、hu）无法设置对话字体，因为游戏是使用另一种方法——精灵表，来绘制字符的。
         字体格式兼容TrueType（.ttf, .ttc）、OpenType（.otf, .otc, .ttf, .ttc）。
 
+        For latin language (en, pt, es, de, fr, it, tr, hu) users, 
+        it's hard to custom dialogue font because game draws those texts with a spritesheet, and its logic in code is really hardcoded to patch.
 
 其他问题：
     问：这个模组支持联机吗？一定要所有玩家同时安装吗？
@@ -34,11 +36,12 @@
 
 
 更新日志：
-【测试版】0.3.0 -
-    - 兼容模组配置菜单。
+【测试版】0.2.2 - 2022-07-10
+    - 兼容模组配置菜单GMCM。
+    - 瘦身模组文件。
 
     已知错误：
-    - 配置菜单保存设置后，有可能部分文字变糊。解决方法：退出菜单重进。
+    - 配置菜单保存设置后，部分文字可能变糊。解决方法：退出菜单重进。
 
 【测试版】0.2.1 - 2022-06-24
     - 移除了fontbm的依赖文件。（n网那个人工智障老是拦文件）

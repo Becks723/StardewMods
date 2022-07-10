@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if EXTERN_FONT_LIBS
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -67,3 +68,4 @@ namespace FontSettings.Framework.FontInfomation
         }
     }
 }
+#endif

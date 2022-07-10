@@ -13,7 +13,7 @@ namespace FontSettings.Framework.FontInfomation
     {
         private static IEnumerable<FontModel> _allFonts;
 
-        private static readonly IFontInfoSource _fontSource = new FontInfoFromOtherLibs();
+        private static readonly IFontInfoSource _fontSource = new /*FontInfoFromOtherLibs*/FontInfoSource();
 
         private static string[] SystemFontsFolders => NormalizeSystemFolders(GetSystemFontFolders());
 
@@ -145,18 +145,6 @@ namespace FontSettings.Framework.FontInfomation
             return raw.Select(path => Environment.ExpandEnvironmentVariables(path))
                 .Where(dir => Directory.Exists(dir))
                 .ToArray();
-        }
-
-        private static FontStyle ParseStyle(SixLabors.Fonts.FontStyle style)
-        {
-            return style switch
-            {
-                SixLabors.Fonts.FontStyle.Regular => FontStyle.Regular,
-                SixLabors.Fonts.FontStyle.Bold => FontStyle.Bold,
-                SixLabors.Fonts.FontStyle.Italic => FontStyle.Italic,
-                SixLabors.Fonts.FontStyle.BoldItalic => FontStyle.Bold | FontStyle.Italic,
-                _ => FontStyle.Regular
-            };
         }
     }
 }

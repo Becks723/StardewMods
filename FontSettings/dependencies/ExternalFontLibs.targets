@@ -1,0 +1,12 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+				<Import Project="..\..\_externals\Typography.OpenFont\Typography.OpenFont.projitems" Label="Shared" />
+
+	<ItemGroup>
+			<PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<DefineConstants>$(DefineConstants);EXTERN_FONT_LIBS</DefineConstants>
+	</PropertyGroup>
+
+</Project>

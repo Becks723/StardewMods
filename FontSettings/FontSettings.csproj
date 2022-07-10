@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
-	<Import Project="..\_externals\Typography.OpenFont\Typography.OpenFont.projitems" Label="Shared" />
 	<Import Project="..\_tools\bmfontcs\bmfontcs.projitems" Label="Shared" />
 	<Import Project="..\_build\smapi.targets" />
 	<Import Project="..\_build\translation-builder.targets" />
+	<!--<Import Project="dependencies\ExternalFontLibs.targets" Label="Shared" />-->
 
 	<PropertyGroup>
 		<Version>0.2.1</Version>
@@ -14,7 +14,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
 		<PackageReference Include="StbTrueTypeSharp" Version="1.26.9" />
 		<Reference Include="BmFont" HintPath="$(GamePath)\BmFont.dll" Private="false" />
 	</ItemGroup>
