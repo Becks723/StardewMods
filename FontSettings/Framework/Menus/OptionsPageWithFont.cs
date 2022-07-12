@@ -6,6 +6,7 @@ using FontSettings.Framework.FontInfomation;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
@@ -466,6 +467,11 @@ namespace FontSettings.Framework.Menus
         public override void receiveRightClick(int x, int y, bool playSound = true)
         {
             this._optionsPage.receiveRightClick(x, y, playSound);
+        }
+
+        public override void receiveKeyPress(Keys key)
+        {
+            this._optionsPage.receiveKeyPress(key);
         }
 
         public override void performHoverAction(int x, int y)
