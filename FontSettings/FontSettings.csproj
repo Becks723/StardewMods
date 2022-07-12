@@ -25,6 +25,7 @@
 		</ContentWithTargetPath>-->
 		<Compile Remove="Framework\GameFontChanger2.cs" />
 		<None Include="Framework\GameFontChanger2.cs" />
+		<ProjectReference Include="..\..\StardewValleyUI\src\StardewValleyUI\StardewValleyUI.csproj" />
 		<None Update="说明.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
