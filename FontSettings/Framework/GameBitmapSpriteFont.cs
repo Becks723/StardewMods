@@ -56,6 +56,43 @@ namespace FontSettings.Framework
             this.drawString(b, text, (int)position.X, (int)position.Y, color);
         }
 
+        public override void DrawBounds(SpriteBatch b, string text, Vector2 position, Color color)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+
+            Vector2 offset = Vector2.Zero;
+            foreach (char c in text)
+            {
+                switch (c)
+                {
+                    case '^':
+                        offset.X = 0;
+                        offset.Y += this.FontFile.Common.LineHeight * this.FontPixelZoom;
+                        continue;
+                }
+
+                if (this._characterMap.TryGetValue(c, out FontChar fontChar))
+                {
+                    var p = offset;
+                    p.X += fontChar.XOffset * this.FontPixelZoom;
+                    p.Y += fontChar.YOffset * this.FontPixelZoom;
+                    p += position;
+
+                    b.Draw(
+                        texture: Game1.staminaRect,
+                        destinationRectangle: new Rectangle((int)p.X, (int)p.Y, (int)(fontChar.Width * this.FontPixelZoom), (int)(fontChar.Height * this.FontPixelZoom)),
+                        sourceRectangle: null,
+                        color: color,
+                        rotation: 0f,
+                        origin: Vector2.Zero,
+                        effects: SpriteEffects.None,
+                        layerDepth: 0f
+                    );
+                    offset.X += fontChar.XAdvance * this.FontPixelZoom;  // 没有LeftBearing、RightBearing这些东西，字间距Spacing已算在XAdvance里面。
+                }
+            }
+        }
+
         public void drawString(SpriteBatch b, string s, int x, int y, Color color, int characterPosition = 999999, int width = -1, int height = 999999, float alpha = 1f, float layerDepth = 0.88f, bool junimoText = false, int drawBGScroll = -1, string placeHolderScrollWidthText = "")
         {
             bool width_specified = true;

@@ -18,6 +18,11 @@ namespace FontSettings.Framework.Menus
         private const string _fontTabName = "font";
         private static Lazy<Texture2D> _fontTab;
 
+        private static ModConfig _config;
+        private static RuntimeFontManager _fontManager;
+        private static GameFontChanger _fontChanger;
+        private static Action<ModConfig> _saveConfig;
+
         private readonly IModHelper _helper;
         private readonly Harmony _harmony;
 
@@ -28,9 +33,12 @@ namespace FontSettings.Framework.Menus
             _fontTab = new(() => this.LoadFontTab(helper));
         }
 
-        public void AddFontSettingsPage()
+        public void AddFontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action<ModConfig> saveConfig)
         {
-            this._helper.Events.Display.MenuChanged += this.OnMenuChanged;
+            _config = config;
+            _fontManager = fontManager;
+            _fontChanger = fontChanger;
+            _saveConfig = saveConfig;
 
             var harmony = this._harmony;
             harmony.Patch(
@@ -57,7 +65,8 @@ namespace FontSettings.Framework.Menus
                 tryDefaultIfNoDownNeighborExists = true,
                 fullyImmutable = true
             });
-            __instance.pages.Add(new FontSettingsPage(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height));
+            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _saveConfig, 
+                __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height));
         }
 
         private static void GameMenu_getTabNumberFromName_Postfix(string name, ref int __result)
@@ -166,24 +175,6 @@ namespace FontSettings.Framework.Menus
             }
 
             return false;
-        }
-
-        private void OnMenuChanged(object sender, MenuChangedEventArgs e)
-        {
-            //if (e.NewMenu is GameMenu gameMenu)
-            //{
-            //    var tabs = gameMenu.tabs;
-            //    var pages = gameMenu.pages;
-            //    tabs.Add(new ClickableComponent(new Rectangle(gameMenu.xPositionOnScreen + 576, gameMenu.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), _fontTabName, "字体")
-            //    {
-            //        myID = 12348,
-            //        downNeighborID = 8,
-            //        leftNeighborID = 12347,
-            //        tryDefaultIfNoDownNeighborExists = true,
-            //        fullyImmutable = true
-            //    });
-            //    pages.Add(new FontSettingsPage(gameMenu.xPositionOnScreen, gameMenu.yPositionOnScreen, gameMenu.width, gameMenu.height));
-            //}
         }
 
         private Texture2D LoadFontTab(IModHelper helper)

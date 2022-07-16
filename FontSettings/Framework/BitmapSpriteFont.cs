@@ -35,6 +35,8 @@ namespace FontSettings.Framework
 
         public abstract void Draw(SpriteBatch b, string text, Vector2 position, Color color);
 
+        public abstract void DrawBounds(SpriteBatch b, string text, Vector2 position, Color color);
+
         public abstract Vector2 MeasureString(string text);
     }
 }

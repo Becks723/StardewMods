@@ -81,7 +81,8 @@ namespace FontSettings
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
 
-            new GameMenuAdder(helper, Harmony).AddFontSettingsPage();
+            new GameMenuAdder(helper, Harmony)
+                .AddFontSettingsPage(this._config, this._fontManager, this._fontChanger, this.SaveConfig);
 
             this.RecordFontData(LocalizedContentManager.LanguageCode.en, null);
         }

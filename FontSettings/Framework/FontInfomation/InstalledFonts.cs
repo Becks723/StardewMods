@@ -31,6 +31,9 @@ namespace FontSettings.Framework.FontInfomation
 
         public static string SimplifyPath(string fullPath)
         {
+            if (string.IsNullOrWhiteSpace(fullPath))
+                return null;
+
             foreach (string dir in SystemFontsFolders)
             {
                 string relativePath = Path.GetRelativePath(dir, fullPath);
