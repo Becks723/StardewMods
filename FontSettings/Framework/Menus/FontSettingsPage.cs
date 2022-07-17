@@ -108,7 +108,7 @@ namespace FontSettings.Framework.Menus
             seperateBox.Unchecked += this.ExampleSeperateChanged;
             this._box_merge = new LabeledElement<Checkbox>(seperateBox)
             {
-                Text = "合并示例"
+                Text = I18n.OptionsPage_MergeExamples()
             };
 
             Checkbox showBoundsBox = new Checkbox();
@@ -116,7 +116,7 @@ namespace FontSettings.Framework.Menus
             showBoundsBox.Unchecked += this.ShowBoundsChanged;
             this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox)
             {
-                Text = "显示边框"
+                Text = I18n.OptionsPage_ShowExampleBounds()
             };
 
             Checkbox showTextBox = new Checkbox();
@@ -125,7 +125,7 @@ namespace FontSettings.Framework.Menus
             showTextBox.Unchecked += this.ShowTextChanged;
             this._box_showText = new LabeledElement<Checkbox>(showTextBox)
             {
-                Text = "显示文字"
+                Text = I18n.OptionsPage_ShowExampleText()
             };
             float gap = (this._exampleBoard.Height - this._box_merge.Height - this._box_showText.Height - this._box_showBounds.Height) / 4f;
             float insideBoardX = this._exampleBoard.LocalPosition.X + borderWidth / 3;

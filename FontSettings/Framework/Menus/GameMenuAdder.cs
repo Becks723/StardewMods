@@ -57,7 +57,7 @@ namespace FontSettings.Framework.Menus
 
         private static void GameMenu_ctor_Postfix(GameMenu __instance)
         {
-            __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 576, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), _fontTabName, "字体")
+            __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 576, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), _fontTabName, I18n.OptionsPage_FontHeader())
             {
                 myID = 12348,
                 downNeighborID = 8,
