@@ -3,6 +3,7 @@
 	<Import Project="..\_tools\bmfontcs\bmfontcs.projitems" Label="Shared" />
 	<Import Project="..\_build\smapi.targets" />
 	<Import Project="..\_build\translation-builder.targets" />
+	<Import Project="..\_build\stardewvalleyui.targets" />
 	<!--<Import Project="dependencies\ExternalFontLibs.targets" Label="Shared" />-->
 
 	<PropertyGroup>
@@ -25,7 +26,6 @@
 		</ContentWithTargetPath>-->
 		<Compile Remove="Framework\GameFontChanger2.cs" />
 		<None Include="Framework\GameFontChanger2.cs" />
-		<ProjectReference Include="..\..\StardewValleyUI\src\StardewValleyUI\StardewValleyUI.csproj" />
 		<None Update="说明.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
