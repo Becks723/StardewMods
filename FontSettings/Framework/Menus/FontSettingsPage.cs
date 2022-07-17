@@ -16,6 +16,7 @@ namespace FontSettings.Framework.Menus
     internal class FontSettingsPage : BaseMenu
     {
         private static readonly StateManager _states = new();
+        private static FontSettingsPage Instance { get; set; }
 
         private readonly ModConfig _config;
         private readonly RuntimeFontManager _fontManager;
@@ -60,6 +61,8 @@ namespace FontSettings.Framework.Menus
             int x, int y, int width, int height, bool showUpperRightCloseButton = false)
             : base(x, y, width, height, showUpperRightCloseButton)
         {
+            Instance = this;
+
             this._config = config;
             this._fontManager = fontManager;
             this._fontChanger = fontChanger;
@@ -240,6 +243,7 @@ namespace FontSettings.Framework.Menus
 
             this._okButton = new OKButton();
             this._okButton.Click += this.OkButtonClicked;
+            this._okButton.GreyedOut = _states.IsOn(this.CurrentFontType);
             this._okButton.LocalPosition = new Vector2(
                 width - spaceToClearSideBorder - borderWidth - this._okButton.Width,
                 height - spaceToClearSideBorder - borderWidth - this._okButton.Height);
@@ -335,7 +339,9 @@ namespace FontSettings.Framework.Menus
             if (fontFilePathChanged || fontSizeChanged || spacingChanged || lineSpacingChanged)
                 tempConfig.ExistingFontPath = null;
 
+            var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保On和Off的是同一个字体。
             this._okButton.GreyedOut = true;
+            _states.On(fontType);
             bool success = await this._fontChanger.ReplaceOriginalOrRemainAsync(tempConfig);
             if (success)
             {
@@ -347,7 +353,9 @@ namespace FontSettings.Framework.Menus
                 Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_FailedSetFont(tempConfig.InGameType.LocalizedName()), HUDMessage.error_type));
                 Game1.playSound("cancel");
             }
-            this._okButton.GreyedOut = false;
+            _states.Off(fontType);
+            /*this._okButton.GreyedOut = false;*/  // X
+            Instance._okButton.GreyedOut = false;  // √（因为是异步设置，所以这行代码运行的时候既可能是同一个菜单实例，又可能是关闭，再打开后的另一个实例。如果是不同实例，this.xxx表示的就是上一个实例，因此想要设置当前实例，就得用静态单例Instance下的字段）
 
             // 如果成功，更新配置值。
             if (success)
@@ -370,6 +378,7 @@ namespace FontSettings.Framework.Menus
             this._slider_lineSpacing.Element.Value = fontConfig.LineSpacing;
             this._dropDown_font.SelectedItem = this.FindFont(this._allFonts, fontConfig.FontFilePath,
                 fontConfig.FontIndex);
+            this._okButton.GreyedOut = _states.IsOn(fontType);
 
             this.UpdateGameExample();
             this.UpdateCustomExample();
