@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BmFont;
+using BmFontCS;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FontSettings.Framework
@@ -17,14 +18,15 @@ namespace FontSettings.Framework
             int paddingUp, int paddingRight, int paddingDown, int paddingLeft,
             int spacingHoriz, int spacingVert)
         {
-            BmFontCS.BmFont.GenerateIntoMemory(fontFilePath, out fontFile, out pages, new BmFontCS.BmFontSettings
+            var bmfont = new BmFontCS.BmFont();
+            bmfont.GenerateIntoMemory(fontFilePath, out fontFile, out pages, new BmFontSettings
             {
                 FontSize = fontSize,
                 FontIndex = fontIndex,
-                Chars = chars.Select(range => new BmFontCS.UnicodeRange { Start = range.Start, End = range.End }).ToArray(),
+                Chars = chars.Select(range => new UnicodeRange { Start = range.Start, End = range.End }).ToArray(),
                 CharsFiles = charsFiles,
-                Padding = new BmFontCS.Padding(paddingUp, paddingRight, paddingDown, paddingLeft),
-                Spacing = new BmFontCS.Spacing(spacingHoriz, spacingVert)
+                Padding = new Padding(paddingUp, paddingRight, paddingDown, paddingLeft),
+                Spacing = new Spacing(spacingHoriz, spacingVert)
             });
         }
     }

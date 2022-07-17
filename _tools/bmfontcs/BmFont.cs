@@ -13,11 +13,11 @@ namespace BmFontCS
 {
     public unsafe class BmFont
     {
-        private static stbtt_fontinfo _fontInfo;
-        private static float _scale;
-        private static float _ascender, _descender, _lineHeight;
+        private stbtt_fontinfo _fontInfo;
+        private float _scale;
+        private float _ascender, _descender, _lineHeight;
 
-        public static void GenerateIntoMemory(string fontFilePath, out FontFile fontFile, out Texture2D[] pages, BmFontSettings settings)
+        public void GenerateIntoMemory(string fontFilePath, out FontFile fontFile, out Texture2D[] pages, BmFontSettings settings)
         {
             byte[] ttf = File.ReadAllBytes(fontFilePath);
 
@@ -29,18 +29,18 @@ namespace BmFontCS
                     throw new IndexOutOfRangeException($"字体索引超出范围。索引值：{settings.FontIndex}");
             }
 
-            _fontInfo = CreateFont(ttf, offset);
-            if (_fontInfo == null)
+            this._fontInfo = CreateFont(ttf, offset);
+            if (this._fontInfo == null)
                 throw new Exception("无法初始化字体。");
             try
             {
-                InitFields(settings);
+                this.InitFields(settings);
                 var codepoints = GetChars(settings.Chars, settings.CharsFiles);
-                Glyph[] glyphs = CollectGlyphs(codepoints).ToArray();
+                Glyph[] glyphs = this.CollectGlyphs(codepoints).ToArray();
                 Size[] pageSizes = ArrangeGlyphs(glyphs, settings);
-                Page[] pgs = RenderGlyphsToPages(glyphs, pageSizes, settings);
+                Page[] pgs = this.RenderGlyphsToPages(glyphs, pageSizes, settings);
 
-                fontFile = GetFontInfo(fontFilePath, settings, pgs.Length, glyphs, settings.Spacing.Horizontal);
+                fontFile = this.GetFontInfo(fontFilePath, settings, pgs.Length, glyphs, settings.Spacing.Horizontal);
                 pages = pgs.Select(pg =>
                 {
                     Texture2D texture = new Texture2D(Game1.graphics.GraphicsDevice, pg.Width, pg.Height);
@@ -60,30 +60,30 @@ namespace BmFontCS
             }
             finally
             {
-                _fontInfo.Dispose();
+                this._fontInfo.Dispose();
             }
         }
 
-        public static void Generate(string fontFile, string output, BmFontSettings settings)
+        public void Generate(string fontFile, string output, BmFontSettings settings)
         {
             byte[] ttf = File.ReadAllBytes(fontFile);
 
-            _fontInfo = new stbtt_fontinfo();
+            this._fontInfo = new stbtt_fontinfo();
 
             fixed (byte* ttfPtr = ttf)
             {
                 int offset = stbtt_GetFontOffsetForIndex(ttfPtr, settings.FontIndex);
                 if (offset == -1)
                     throw new IndexOutOfRangeException($"字体索引超出范围。索引值：{settings.FontIndex}");
-                if (stbtt_InitFont(_fontInfo, ttfPtr, offset) == 0)
+                if (stbtt_InitFont(this._fontInfo, ttfPtr, offset) == 0)
                     throw new Exception("无法初始化字体。");
             }
 
-            InitFields(settings);
+            this.InitFields(settings);
             var codepoints = GetChars(settings.Chars, settings.CharsFiles);
-            Glyph[] glyphs = CollectGlyphs(codepoints).ToArray();
+            Glyph[] glyphs = this.CollectGlyphs(codepoints).ToArray();
             Size[] pageSizes = ArrangeGlyphs(glyphs, settings);
-            Page[] pages = RenderGlyphsToPages(glyphs, pageSizes, settings);
+            Page[] pages = this.RenderGlyphsToPages(glyphs, pageSizes, settings);
             SaveToFiles(output, pages);
         }
 
@@ -92,7 +92,7 @@ namespace BmFontCS
 
         }
 
-        private static FontFile GetFontInfo(string fontFilePath, BmFontSettings settings, int pages, Glyph[] glyphs, int spacing)
+        private FontFile GetFontInfo(string fontFilePath, BmFontSettings settings, int pages, Glyph[] glyphs, int spacing)
         {
             return new FontFile
             {
@@ -113,8 +113,8 @@ namespace BmFontCS
                 },
                 Common = new FontCommon
                 {
-                    LineHeight = (int)Math.Round(_lineHeight),
-                    Base = (int)Math.Round(_ascender),
+                    LineHeight = (int)Math.Round(this._lineHeight),
+                    Base = (int)Math.Round(this._ascender),
                     ScaleW = settings.TextureSize.Width,
                     ScaleH = settings.TextureSize.Height,
                     Pages = pages,
@@ -142,7 +142,7 @@ namespace BmFontCS
             };
         }
 
-        private static Page[] RenderGlyphsToPages(Glyph[] glyphs, Size[] pages, BmFontSettings settings)
+        private Page[] RenderGlyphsToPages(Glyph[] glyphs, Size[] pages, BmFontSettings settings)
         {
             List<Page> result = new(pages.Length);
 
@@ -155,10 +155,10 @@ namespace BmFontCS
                         if (glyph.Page != i)
                             continue;
 
-                        stbtt_MakeGlyphBitmapSubpixel(_fontInfo,
+                        stbtt_MakeGlyphBitmapSubpixel(this._fontInfo,
                             bufferPtr + glyph.X + glyph.Y * pages[i].Width,
                             glyph.Width, glyph.Height, pages[i].Width,
-                            _scale, _scale,
+                            this._scale, this._scale,
                             0, 0,
                             glyph.GlyphIndex);
                     }
@@ -218,17 +218,17 @@ namespace BmFontCS
             return pages.ToArray();
         }
 
-        private static void InitFields(BmFontSettings settings)
+        private void InitFields(BmFontSettings settings)
         {
-            _scale = stbtt_ScaleForPixelHeight(_fontInfo, settings.FontSize);
+            this._scale = stbtt_ScaleForPixelHeight(this._fontInfo, settings.FontSize);
 
             int ascent, descent, lineGap;
-            stbtt_GetFontVMetrics(_fontInfo, &ascent, &descent, &lineGap);
+            stbtt_GetFontVMetrics(this._fontInfo, &ascent, &descent, &lineGap);
             if (ascent == 0 && descent == 0)
-                stbtt_GetFontVMetricsOS2(_fontInfo, &ascent, &descent, &lineGap);
-            _ascender = ascent * _scale;
-            _descender = descent * _scale;
-            _lineHeight = (ascent - descent + lineGap) * _scale;
+                stbtt_GetFontVMetricsOS2(this._fontInfo, &ascent, &descent, &lineGap);
+            this._ascender = ascent * this._scale;
+            this._descender = descent * this._scale;
+            this._lineHeight = (ascent - descent + lineGap) * this._scale;
         }
 
         private static HashSet<int> GetChars(UnicodeRange[] chars, string[] charsFiles)
@@ -252,7 +252,7 @@ namespace BmFontCS
             return result;
         }
 
-        private static HashSet<Glyph> CollectGlyphs(HashSet<int> codepoints)
+        private HashSet<Glyph> CollectGlyphs(HashSet<int> codepoints)
         {
             HashSet<Glyph> result = new();
 
@@ -263,20 +263,20 @@ namespace BmFontCS
                 advanceWidth = 0;
             foreach (int codepoint in codepoints)
             {
-                int glyphIndex = stbtt_FindGlyphIndex(_fontInfo, codepoint);
+                int glyphIndex = stbtt_FindGlyphIndex(this._fontInfo, codepoint);
                 if (glyphIndex != 0)  // 未定义 TODO: 警告
                 {
                     Glyph glyph = new Glyph();
-                    stbtt_GetGlyphBox(_fontInfo, glyphIndex, &x0, &y0, &x1, &y1);
-                    stbtt_GetGlyphHMetrics(_fontInfo, glyphIndex, &advanceWidth, null);
+                    stbtt_GetGlyphBox(this._fontInfo, glyphIndex, &x0, &y0, &x1, &y1);
+                    stbtt_GetGlyphHMetrics(this._fontInfo, glyphIndex, &advanceWidth, null);
 
                     glyph.Id = codepoint;
                     glyph.GlyphIndex = glyphIndex;
-                    glyph.Width = (int)((x1 - x0) * _scale);
-                    glyph.Height = (int)((y1 - y0) * _scale);
-                    glyph.XAdvance = (int)(advanceWidth * _scale);
-                    glyph.XOffset = (int)(x0 * _scale);
-                    glyph.YOffset = (int)(_ascender - y1 * _scale);
+                    glyph.Width = (int)((x1 - x0) * this._scale);
+                    glyph.Height = (int)((y1 - y0) * this._scale);
+                    glyph.XAdvance = (int)(advanceWidth * this._scale);
+                    glyph.XOffset = (int)(x0 * this._scale);
+                    glyph.YOffset = (int)(this._ascender - y1 * this._scale);
                     result.Add(glyph);
                 }
             }
