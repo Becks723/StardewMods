@@ -72,9 +72,6 @@ namespace FontSettings
 
                 new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
                     .Patch(Harmony, this.Monitor);
-
-                OptionsPageWithFont.Initialize(this._config, this._fontManager, this._fontChanger, this.SaveConfig);
-                OptionsPageWithFont.Patch(Harmony, this.Monitor);
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
