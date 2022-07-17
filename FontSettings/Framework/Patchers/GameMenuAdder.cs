@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.Menus;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +12,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Patchers
 {
     internal class GameMenuAdder
     {
@@ -65,7 +66,7 @@ namespace FontSettings.Framework.Menus
                 tryDefaultIfNoDownNeighborExists = true,
                 fullyImmutable = true
             });
-            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _saveConfig, 
+            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _saveConfig,
                 __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height));
         }
 
@@ -80,9 +81,7 @@ namespace FontSettings.Framework.Menus
             if (!__instance.invisible)
             {
                 if (!Game1.options.showMenuBackground)
-                {
                     b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
-                }
 
                 Game1.drawDialogueBox(__instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.pages[__instance.currentTab].width, __instance.pages[__instance.currentTab].height, speaker: false, drawOnlyBox: true);
                 b.End();
@@ -130,9 +129,9 @@ namespace FontSettings.Framework.Menus
 
                     if (sheetIndex != null)
                     {
-                        b.Draw(Game1.mouseCursors, new Vector2(tab.bounds.X, tab.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(tab.name)) ? 8 : 0)), new Rectangle(sheetIndex.Value * 16, 368, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
+                        b.Draw(Game1.mouseCursors, new Vector2(tab.bounds.X, tab.bounds.Y + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)), new Rectangle(sheetIndex.Value * 16, 368, 16, 16), Color.White, 0f, Vector2.Zero, 4f, SpriteEffects.None, 0.0001f);
                         if (tab.name.Equals("skills"))
-                            Game1.player.FarmerRenderer.drawMiniPortrat(b, new Vector2(tab.bounds.X + 8, tab.bounds.Y + 12 + ((__instance.currentTab == __instance.getTabNumberFromName(tab.name)) ? 8 : 0)), 0.00011f, 3f, 2, Game1.player);
+                            Game1.player.FarmerRenderer.drawMiniPortrat(b, new Vector2(tab.bounds.X + 8, tab.bounds.Y + 12 + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)), 0.00011f, 3f, 2, Game1.player);
                     }
 
                     if (isFontTab)
@@ -140,7 +139,7 @@ namespace FontSettings.Framework.Menus
                         const int index = 2;
                         b.Draw(
                             _fontTab.Value,
-                            new Vector2(tab.bounds.X, tab.bounds.Y + ((__instance.currentTab == __instance.getTabNumberFromName(tab.name)) ? 8 : 0)),
+                            new Vector2(tab.bounds.X, tab.bounds.Y + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)),
                             new Rectangle(index * 16, 0, 16, 16),
                             Color.White,
                             0f,
@@ -155,24 +154,16 @@ namespace FontSettings.Framework.Menus
                 b.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
                 __instance.pages[__instance.currentTab].draw(b);
                 if (!__instance.hoverText.Equals(""))
-                {
                     IClickableMenu.drawHoverText(b, __instance.hoverText, Game1.smallFont);
-                }
             }
             else
-            {
                 __instance.pages[__instance.currentTab].draw(b);
-            }
 
             if (!GameMenu.forcePreventClose && __instance.pages[__instance.currentTab].shouldDrawCloseButton())
-            {
                 __instance.upperRightCloseButton?.draw(b);
-            }
 
             if ((!Game1.options.SnappyMenus || __instance.pages[__instance.currentTab] is not CollectionsPage || (__instance.pages[__instance.currentTab] as CollectionsPage).letterviewerSubMenu == null) && !Game1.options.hardwareCursor)
-            {
                 __instance.drawMouse(b, ignore_transparency: true);
-            }
 
             return false;
         }

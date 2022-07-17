@@ -72,14 +72,14 @@ namespace FontSettings
 
                 new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
                     .Patch(Harmony, this.Monitor);
+
+                new GameMenuAdder(helper, Harmony)
+                    .AddFontSettingsPage(this._config, this._fontManager, this._fontChanger, this.SaveConfig);
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-
-            new GameMenuAdder(helper, Harmony)
-                .AddFontSettingsPage(this._config, this._fontManager, this._fontChanger, this.SaveConfig);
 
             this.RecordFontData(LocalizedContentManager.LanguageCode.en, null);
         }
