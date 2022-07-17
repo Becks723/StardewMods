@@ -240,6 +240,7 @@ namespace FontSettings.Framework.Menus
                 MaxDisplayRows = 6,
             };
             this._dropDown_font.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - this._dropDown_font.Width, this._box_enabledFont.LocalPosition.Y);
+            this._dropDown_font.SelectionChanged += this.FontSelectionChanged;
 
             this._okButton = new OKButton();
             this._okButton.Click += this.OkButtonClicked;
@@ -252,7 +253,6 @@ namespace FontSettings.Framework.Menus
 
             this.ResetComponents();
         }
-
 
         private void LeftArrowClicked(object sender, EventArgs e)
         {
@@ -303,6 +303,11 @@ namespace FontSettings.Framework.Menus
         }
 
         private void LineSpacingSlider_ValueChanged(object sender, EventArgs e)
+        {
+            this.UpdateCustomExample();
+        }
+
+        private void FontSelectionChanged(object sender, EventArgs e)
         {
             this.UpdateCustomExample();
         }
