@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\_build\smapi.targets" />
+	<Import Project="..\_build\translation-builder.targets" />
+	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
+	
+	<ItemGroup>
+	  <None Update="说明.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+</Project>
