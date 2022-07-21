@@ -3,9 +3,13 @@ using System.Linq;
 
 namespace FontSettings.Framework
 {
-    internal class FontConfig : Legacy.FontConfig_0_1_0
+    internal class FontConfig : Legacy.FontConfig_0_2_0
     {
-        public string Locale { get; set; }
+        /// <summary>字符在横轴上的偏移量。</summary>
+        public float CharOffsetX { get; set; }
+
+        /// <summary>字符在纵轴上的偏移量。</summary>
+        public float CharOffsetY { get; set; }
 
         internal void CopyTo(FontConfig other)
         {
@@ -24,11 +28,8 @@ namespace FontSettings.Framework
             other.TextureWidth = this.TextureWidth;
             other.TextureHeight = this.TextureHeight;
             other.CharacterRanges = this.CharacterRanges?.AsEnumerable();
-        }
-
-        internal LanguageInfo GetLanguage()
-        {
-            return new LanguageInfo(this.Lang, this.Locale);
+            other.CharOffsetX = this.CharOffsetX;
+            other.CharOffsetY = this.CharOffsetY;
         }
     }
 }
