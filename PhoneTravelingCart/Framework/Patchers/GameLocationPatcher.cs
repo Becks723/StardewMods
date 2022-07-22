@@ -22,9 +22,27 @@ namespace PhoneTravelingCart.Framework.Patchers
         public void Patch(Harmony harmony, IMonitor monitor)
         {
             harmony.Patch(
+                original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.createQuestionDialogue), new[] { typeof(string), typeof(Response[]), typeof(string) }),
+                prefix: new HarmonyMethod(typeof(GameLocationPatcher), nameof(GameLocation_createQuestionDialogue_Prefix))
+            );
+            harmony.Patch(
                 original: AccessTools.Method(typeof(GameLocation), nameof(GameLocation.answerDialogueAction)),
                 prefix: new HarmonyMethod(typeof(GameLocationPatcher), nameof(GameLocation_answerDialogueAction_Prefix))
             );
+        }
+
+        private static void GameLocation_createQuestionDialogue_Prefix(string dialogKey, ref Response[] answerChoices)
+        {
+            if (dialogKey is "telephone")
+            {
+                if (Game1.dayOfMonth % 7 % 5 == 0  // 礼拜五或礼拜天
+                    && Game1.timeOfDay < 2000)     // 晚上8点之前
+                {
+                    var responses = answerChoices.ToList();
+                    responses.Add(new Response("Traveler", I18n.TravelingMerchantName()));
+                    answerChoices = responses.ToArray();
+                }
+            }
         }
 
         private static bool GameLocation_answerDialogueAction_Prefix(string questionAndAnswer, string[] questionParams)
@@ -59,6 +77,5 @@ namespace PhoneTravelingCart.Framework.Patchers
             DelayedAction.playSoundAfterDelay("telephone_buttonPush", 2410, null, 1200 + r.Next(-4, 5) * 100);
             DelayedAction.playSoundAfterDelay("telephone_ringingInEar", 3150);
         }
-
     }
 }

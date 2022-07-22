@@ -17,7 +17,6 @@ namespace PhoneTravelingCart
 
             Harmony harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                new Game1Patcher().Patch(harmony, this.Monitor);
                 new GameLocationPatcher(this._config).Patch(harmony, this.Monitor);
             }
 
