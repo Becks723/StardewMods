@@ -51,9 +51,10 @@ namespace FontSettings.Framework
             int? fontIndex = null, int? fontSize = null,
             IEnumerable<CharacterRange>? charRanges = null, string[]? charsFiles = null,
             int? paddingUp = null, int? paddingRight = null, int? paddingDown = null, int? paddingLeft = null,
-            int? spacingHoriz = null, int? spacingVert = null)
+            int? spacingHoriz = null, int? spacingVert = null,
+            float charOffsetX = 0, float charOffsetY = 0)
         {
-            string finalFontFile = InstalledFonts.GetFullPath(fontFilePath);
+            string finalFontFile = fontFilePath ?? throw new ArgumentNullException(nameof(fontFilePath));
             int finalFontIndex = fontIndex ?? DefaultFontIndex;
             int finalFontSize = fontSize ?? DefaultFontSize;
             int finalPaddingUp = paddingUp ?? DefaultPaddingUp;
@@ -64,13 +65,16 @@ namespace FontSettings.Framework
             int finalSpacingVert = spacingVert ?? DefaultSpacingVert;
             var finalChars = charRanges ?? DefaultCharRanges;
             string[] finalCharsFiles = charsFiles ?? DefaultCharsFiles;
+            float finalOffsetX = charOffsetX;
+            float finalOffsetY = charOffsetY;
 
             InternalGenerateIntoMemory(finalFontFile,
                 out fontFile, out pages,
                 finalFontIndex, finalFontSize,
                 finalChars.ToArray(), finalCharsFiles,
                 finalPaddingUp, finalPaddingRight, finalPaddingDown, finalPaddingLeft,
-                finalSpacingHoriz, finalSpacingVert);
+                finalSpacingHoriz, finalSpacingVert,
+                finalOffsetX, finalOffsetY);
         }
 
         public static void LoadBmFont(string fntPathWithoutExtension, out FontFile fontFile, out Texture2D[] pages)
@@ -129,7 +133,7 @@ namespace FontSettings.Framework
             int? paddingUp = null, int? paddingLeft = null, int? paddingDown = null, int? paddingRight = null,
             int? spacingHoriz = null, int? spacingVert = null)
         {
-            string finalFontFile = InstalledFonts.GetFullPath(fontFilePath);
+            string finalFontFile = fontFilePath?? throw new ArgumentNullException(nameof(fontFilePath));
             int finalFontIndex = fontIndex ?? DefaultFontIndex;
             int finalFontSize = fontSize ?? DefaultFontSize;
             string finalOutputName = outputName ?? $"{Path.GetFileNameWithoutExtension(fontFilePath)}-{finalFontSize}px-{DateTime.Now:HH-mm-ss}";

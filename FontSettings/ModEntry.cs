@@ -116,20 +116,28 @@ namespace FontSettings
                 else if (config.FontFilePath is null)
                     e.Edit(asset =>
                     {
-                        SpriteFont spriteFont = asset.GetData<SpriteFont>();
-                        spriteFont.Spacing = config.Spacing;
-                        spriteFont.LineSpacing = config.LineSpacing;
+                        SpriteFontGenerator.EditExisting(
+                            existingFont: asset.GetData<SpriteFont>(),
+                            overridePixelHeight: config.FontSize,
+                            overrideCharRange: config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.GetLanguage()),
+                            overrideSpacing: config.Spacing,
+                            overrideLineSpacing: config.LineSpacing,
+                            extraCharOffsetX: config.CharOffsetX,
+                            extraCharOffsetY: config.CharOffsetY
+                        );
                     });
                 else
                     e.LoadFrom(() =>
                     {
                         return SpriteFontGenerator.FromTtf(
-                            InstalledFonts.GetFullPath(config.FontFilePath),
-                            config.FontIndex,
-                            config.FontSize,
-                            config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.GetLanguage()),
+                            ttfPath: InstalledFonts.GetFullPath(config.FontFilePath),
+                            fontIndex: config.FontIndex,
+                            fontPixelHeight: config.FontSize,
+                            characterRanges: config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.GetLanguage()),
                             spacing: config.Spacing,
-                            lineSpacing: config.LineSpacing
+                            lineSpacing: config.LineSpacing,
+                            charOffsetX: config.CharOffsetX,
+                            charOffsetY: config.CharOffsetY
                         );
                     }, AssetLoadPriority.High);
             }

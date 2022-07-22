@@ -16,7 +16,8 @@ namespace FontSettings.Framework
             int fontIndex, int fontSize,
             CharacterRange[] chars, string[] charsFiles,
             int paddingUp, int paddingRight, int paddingDown, int paddingLeft,
-            int spacingHoriz, int spacingVert)
+            int spacingHoriz, int spacingVert,
+            float charOffsetX, float charOffsetY)
         {
             var bmfont = new BmFontCS.BmFont();
             bmfont.GenerateIntoMemory(fontFilePath, out fontFile, out pages, new BmFontSettings
@@ -28,6 +29,13 @@ namespace FontSettings.Framework
                 Padding = new Padding(paddingUp, paddingRight, paddingDown, paddingLeft),
                 Spacing = new Spacing(spacingHoriz, spacingVert)
             });
+
+            // offset
+            foreach (FontChar fontChar in fontFile.Chars)
+            {
+                fontChar.XOffset += (int)Math.Round(charOffsetX);
+                fontChar.YOffset += (int)Math.Round(charOffsetY);
+            }
         }
     }
 }

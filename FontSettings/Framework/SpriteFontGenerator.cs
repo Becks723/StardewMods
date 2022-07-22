@@ -14,8 +14,15 @@ namespace FontSettings.Framework
 {
     internal class SpriteFontGenerator
     {
-        public static SpriteFont FromExisting(SpriteFont existingFont, float? overridePixelHeight = null, IEnumerable<CharacterRange>? overrideCharRange = null, float? overrideSpacing = null, int? overrideLineSpacing = null)
-        {// TODO: 支持size和charRange
+        // TODO: 支持size和charRange
+        public static SpriteFont FromExisting(SpriteFont existingFont,
+            float? overridePixelHeight = null,
+            IEnumerable<CharacterRange>? overrideCharRange = null,
+            float? overrideSpacing = null,
+            int? overrideLineSpacing = null,
+            float extraCharOffsetX = 0,
+            float extraCharOffsetY = 0)
+        {
             if (existingFont is null) throw new ArgumentNullException(nameof(existingFont));
 
             Texture2D existingTexture = existingFont.Texture;
@@ -27,10 +34,18 @@ namespace FontSettings.Framework
             //    texture.SetData(data);
             //}
 
+            Rectangle CharOffset(Rectangle value)
+            {
+                value.Offset(
+                    (int)Math.Round(extraCharOffsetX),
+                    (int)Math.Round(extraCharOffsetY));
+                return value;
+            }
+
             return new SpriteFont(
                 existingTexture,
                 existingFont.Glyphs.Select(g => g.BoundsInTexture).ToList(),
-                existingFont.Glyphs.Select(g => g.Cropping).ToList(),
+                existingFont.Glyphs.Select(g => CharOffset(g.Cropping)).ToList(),
                 existingFont.Characters.ToList(),
                 overrideLineSpacing ?? existingFont.LineSpacing,
                 overrideSpacing ?? existingFont.Spacing,
@@ -39,7 +54,45 @@ namespace FontSettings.Framework
             );
         }
 
-        public static unsafe SpriteFont FromTtf(string ttfPath, int fontIndex, float fontPixelHeight, IEnumerable<CharacterRange> characterRanges, int? bitmapWidth = null, int? bitmapHeight = null, char? defaultCharacter = '*', float spacing = 0, int? lineSpacing = null)
+        public static void EditExisting(SpriteFont existingFont,
+            float? overridePixelHeight = null,
+            IEnumerable<CharacterRange>? overrideCharRange = null,
+            float? overrideSpacing = null,
+            int? overrideLineSpacing = null,
+            float extraCharOffsetX = 0,
+            float extraCharOffsetY = 0)
+        {
+            if (existingFont is null) throw new ArgumentNullException(nameof(existingFont));
+
+            // spacing
+            if (overrideSpacing != null)
+                existingFont.Spacing = overrideSpacing.Value;
+
+            // line spacing
+            if (overrideLineSpacing != null)
+                existingFont.LineSpacing = overrideLineSpacing.Value;
+
+            // char offset
+            foreach (SpriteFont.Glyph glyph in existingFont.Glyphs)
+            {
+                glyph.Cropping.Offset(
+                    (int)Math.Round(extraCharOffsetX),
+                    (int)Math.Round(extraCharOffsetY));
+            }
+        }
+
+        public static unsafe SpriteFont FromTtf(
+            string ttfPath,
+            int fontIndex,
+            float fontPixelHeight,
+            IEnumerable<CharacterRange> characterRanges,
+            int? bitmapWidth = null,
+            int? bitmapHeight = null,
+            char? defaultCharacter = '*',
+            float spacing = 0,
+            int? lineSpacing = null,
+            float charOffsetX = 0,
+            float charOffsetY = 0)
         {
             byte[] ttf = File.ReadAllBytes(ttfPath);
 
@@ -101,13 +154,20 @@ namespace FontSettings.Framework
                         int height = pc.y1 - pc.y0;
                         chars.Add((char)(range.Start + i));
                         bounds.Add(new Rectangle(pc.x0, pc.y0, width, height));
-                        cropping.Add(new Rectangle((int)Math.Round(pc.xoff), (int)Math.Round(yOff), width, height));
+                        cropping.Add(new Rectangle((int)Math.Round(pc.xoff + charOffsetX), (int)Math.Round(yOff + charOffsetY), width, height));
                         kerning.Add(new Vector3(0, width, pc.xadvance - width));
                     }
                 }
 
-                return new SpriteFont(GenerateTexture(pixels, finalTexWidth, finalTexHeight), bounds, cropping,
-                    chars, lineSpacing ?? lineHeight, spacing, kerning, defaultCharacter);
+                return new SpriteFont(
+                    texture: GenerateTexture(pixels, finalTexWidth, finalTexHeight),
+                    glyphBounds: bounds,
+                    cropping: cropping,
+                    characters: chars,
+                    lineSpacing: lineSpacing ?? lineHeight,
+                    spacing: spacing,
+                    kerning: kerning,
+                    defaultCharacter: defaultCharacter);
             }
             finally
             {

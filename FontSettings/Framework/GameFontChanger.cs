@@ -98,35 +98,31 @@ namespace FontSettings.Framework
 
             else if (font.FontFilePath is null)  // 保持原版字体，但可能改变大小、间距。
             {
-                SpriteFont builtIn = this._fontManager.GetBuiltInSpriteFont(font.InGameType);
                 newFont = SpriteFontGenerator.FromExisting(
-                    builtIn,
-                    font.FontSize,
-                    font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.GetLanguage()),
-                    font.Spacing,
-                    font.LineSpacing
+                    existingFont: this._fontManager.GetBuiltInSpriteFont(font.InGameType),
+                    overridePixelHeight: font.FontSize,
+                    overrideCharRange: font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.GetLanguage()),
+                    overrideSpacing: font.Spacing,
+                    overrideLineSpacing: font.LineSpacing,
+                    extraCharOffsetX: font.CharOffsetX,
+                    extraCharOffsetY: font.CharOffsetY
                 );
             }
 
             else
             {
-                try
-                {
-                    if (!InstalledFonts.TryGetFullPath(font.FontFilePath, out string filePath))
-                        throw new FileNotFoundException();
-                    int index = font.FontIndex;
-                    float size = font.FontSize;
-                    int? texWidth = font.TextureWidth;
-                    int? texHeight = font.TextureHeight;
-                    int lineSpacing = font.LineSpacing;
-                    int spacing = (int)font.Spacing;
-                    var charRanges = font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.GetLanguage());
-                    newFont = SpriteFontGenerator.FromTtf(filePath, index, size, charRanges, texWidth, texHeight, spacing: spacing, lineSpacing: lineSpacing);
-                }
-                catch
-                {
-                    throw;
-                }
+                newFont = SpriteFontGenerator.FromTtf(
+                    ttfPath: InstalledFonts.GetFullPath(font.FontFilePath),
+                    fontIndex: font.FontIndex,
+                    fontPixelHeight: font.FontSize,
+                    characterRanges: font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.GetLanguage()),
+                    bitmapWidth: font.TextureWidth,
+                    bitmapHeight: font.TextureHeight,
+                    spacing: font.Spacing,
+                    lineSpacing: font.LineSpacing,
+                    charOffsetX: font.CharOffsetX,
+                    charOffsetY: font.CharOffsetY
+                );
             }
 
             void Replace(ref SpriteFont oldValue, SpriteFont newValue)
@@ -182,6 +178,13 @@ namespace FontSettings.Framework
                     BmFontGenerator.LoadBmFont(font.ExistingFontPath,
                         out FontFile fontFile, out Texture2D[] pages);
 
+                    // 为所有字符增加偏移量。
+                    foreach (FontChar fontChar in fontFile.Chars)
+                    {
+                        fontChar.XOffset += (int)Math.Round(font.CharOffsetX);
+                        fontChar.YOffset += (int)Math.Round(font.CharOffsetY);
+                    }
+
                     var charMap = new Dictionary<char, FontChar>();
                     foreach (FontChar fontChar in fontFile.Chars)
                         charMap.Add((char)fontChar.ID, fontChar);
@@ -225,17 +228,20 @@ namespace FontSettings.Framework
             {
                 FontFile fontFile;
                 Texture2D[] pages;
-                // 先试直接生成进内存。
+                string fontFullPath = InstalledFonts.GetFullPath(font.FontFilePath);
                 try
                 {
+                    // 先试直接生成进内存。
                     BmFontGenerator.GenerateIntoMemory(
-                        font.FontFilePath,
-                        out fontFile, out pages,
-                        font.FontIndex,
-                        (int)font.FontSize,
-                        Array.Empty<CharacterRange>(),
-                        new[] { CharsFileManager.Get(font.GetLanguage()) },
-                        spacingHoriz: (int)font.Spacing
+                        fontFilePath: fontFullPath,
+                        fontFile: out fontFile, 
+                        pages: out pages,
+                        fontIndex: font.FontIndex,
+                        fontSize: (int)font.FontSize,
+                        charRanges: font.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(font.GetLanguage()),
+                        spacingHoriz: (int)font.Spacing,
+                        charOffsetX: font.CharOffsetX,
+                        charOffsetY: font.CharOffsetY
                     );
 
                     // 清空生成的fnt路径。
@@ -245,7 +251,7 @@ namespace FontSettings.Framework
                 {
                     // 再试生成文件，再读文件。
                     BmFontGenerator.GenerateFile(
-                        font.FontFilePath,
+                        fontFullPath,
                         out string outputDir,
                         out string outputName,
                         font.FontIndex,
@@ -255,6 +261,13 @@ namespace FontSettings.Framework
                     );
                     BmFontGenerator.LoadBmFont(Path.Combine(outputDir, outputName),
                         out fontFile, out pages);
+
+                    // 为所有字符增加偏移量。
+                    foreach (FontChar fontChar in fontFile.Chars)
+                    {
+                        fontChar.XOffset += (int)Math.Round(font.CharOffsetX);
+                        fontChar.YOffset += (int)Math.Round(font.CharOffsetY);
+                    }
 
                     // 保存生成的fnt路径。
                     font.ExistingFontPath = Path.Combine(outputDir, outputName);

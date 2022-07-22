@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BmFont;
 using FontSettings.Framework.FontInfomation;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FontSettings.Framework
@@ -38,16 +39,16 @@ namespace FontSettings.Framework
         }
 
         /// <summary>如果值存在，直接返回现有值；否则重新赋值。</summary>
-        public ISpriteFont Get(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, string chars)
+        public ISpriteFont Get(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, string chars)
         {
             ISpriteFont oldValue = this.Get(fontType);
             if (oldValue != null)
                 return oldValue;
 
-            return this.ResetThenGet(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, chars);
+            return this.ResetThenGet(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, chars);
         }
 
-        public ISpriteFont ResetThenGet(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, string chars)
+        public ISpriteFont ResetThenGet(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, string chars)
         {
             this.Dispose(fontType);
 
@@ -56,10 +57,10 @@ namespace FontSettings.Framework
             {
                 case GameFontType.SmallFont:
                 case GameFontType.DialogueFont:
-                    newValue = this.InternalCreateSpriteFont(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, chars);
+                    newValue = this.InternalCreateSpriteFont(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, chars);
                     break;
                 case GameFontType.SpriteText:
-                    newValue = this.InternalCreateBmFont(enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, chars);
+                    newValue = this.InternalCreateBmFont(enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, chars);
                     //newValue = this.InternalCreateSpriteFontAlternative(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, chars);
                     break;
                 default:
@@ -88,7 +89,7 @@ namespace FontSettings.Framework
             }
         }
 
-        private ISpriteFont InternalCreateSpriteFont(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, string text)
+        private ISpriteFont InternalCreateSpriteFont(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, string text)
         {
             SpriteFont spriteFont;
             if (!enabled)
@@ -98,28 +99,38 @@ namespace FontSettings.Framework
                 {
                     if (fontFilePath == null)
                         spriteFont = SpriteFontGenerator.FromExisting(
-                            this._fontManager.GetBuiltInSpriteFont(fontType),
+                            existingFont: this._fontManager.GetBuiltInSpriteFont(fontType),
                             overrideSpacing: spacing,
-                            overrideLineSpacing: lineSpacing
+                            overrideLineSpacing: lineSpacing,
+                            extraCharOffsetX: charOffset.X,
+                            extraCharOffsetY: charOffset.Y
                         );  // TODO: 支持charRange、size.
                     else
                     {
-                        if (!InstalledFonts.TryGetFullPath(fontFilePath, out string filePath))
-                            throw new System.IO.FileNotFoundException();
                         char? defaultChar = '*';
-                        var charRanges = FontHelpers.GetCharRange(text, defaultChar);
-                        spriteFont = SpriteFontGenerator.FromTtf(filePath, fontIndex, fontSize, charRanges, spacing: spacing, lineSpacing: lineSpacing, defaultCharacter: defaultChar);
+                        spriteFont = SpriteFontGenerator.FromTtf(
+                            InstalledFonts.GetFullPath(fontFilePath),
+                            fontIndex,
+                            fontSize,
+                            FontHelpers.GetCharRange(text, defaultChar),
+                            spacing: spacing,
+                            lineSpacing: lineSpacing,
+                            defaultCharacter: defaultChar,
+                            charOffsetX: charOffset.X,
+                            charOffsetY: charOffset.Y
+                        );
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    ILog.Error($"在生成SpriteFont时遇到了错误：{ex.Message}\n堆栈信息：\n{ex.StackTrace}");
                     return null;
                 }
 
             return new XNASpriteFont(spriteFont);
         }
 
-        private ISpriteFont InternalCreateBmFont(bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, string text)
+        private ISpriteFont InternalCreateBmFont(bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, string text)
         {
             if (StardewValley.LocalizedContentManager.CurrentLanguageLatin || !enabled)
                 return this._fontManager.GetBuiltInBmFont();
@@ -145,15 +156,19 @@ namespace FontSettings.Framework
                 {
                     FontFile fontFile;
                     Texture2D[] pages;
+                    string fontFullPath = InstalledFonts.GetFullPath(fontFilePath);
                     try
                     {
                         BmFontGenerator.GenerateIntoMemory(
-                            fontFilePath,
-                            out fontFile, out pages,
-                            fontIndex,
-                            (int)fontSize,
-                            FontHelpers.GetCharRange(text, '*'),
-                            spacingHoriz: spacing
+                            fontFilePath: fontFullPath,
+                            fontFile: out fontFile,
+                            pages: out pages,
+                            fontIndex: fontIndex,
+                            fontSize: (int)fontSize,
+                            charRanges: FontHelpers.GetCharRange(text, '*'),
+                            spacingHoriz: spacing,
+                            charOffsetX: charOffset.X,
+                            charOffsetY: charOffset.Y
                         );
                     }
                     catch
@@ -169,6 +184,13 @@ namespace FontSettings.Framework
                         this._bmFontFilePath = System.IO.Path.Combine(outputDir, outputName);
                         BmFontGenerator.LoadBmFont(this._bmFontFilePath,
                             out fontFile, out pages);
+
+                        // 为所有字符增加偏移量。
+                        foreach (FontChar fontChar in fontFile.Chars)
+                        {
+                            fontChar.XOffset += (int)Math.Round(charOffset.X);
+                            fontChar.YOffset += (int)Math.Round(charOffset.Y);
+                        }
                     }
 
                     fontFile.Common.LineHeight = lineSpacing;
