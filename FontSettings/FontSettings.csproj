@@ -24,7 +24,11 @@
 			<TargetPath>fontbm\win\%(FileName)%(Extension)</TargetPath>
 		</ContentWithTargetPath>-->
 		<Compile Remove="Framework\GameFontChanger2.cs" />
+		<Compile Remove="Framework\Legacy\Menus\OptionsPageWithFont.cs" />
+		
 		<None Include="Framework\GameFontChanger2.cs" />
+		<None Include="Framework\Legacy\Menus\OptionsPageWithFont.cs" />
+		
 		<None Update="说明.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
