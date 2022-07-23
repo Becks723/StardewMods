@@ -49,8 +49,7 @@ namespace FontSettings
             else
             {
                 this._config = helper.ReadConfig<ModConfig>();
-                FontConfigs fontConfigs = this.ReadFontSaveData();
-                this._config.Fonts = fontConfigs;
+                this._config.Fonts = this.ReadFontSettings();
             }
             this.CheckConfigValid(this._config);
             this._fontManager = new(helper.ModContent);
@@ -250,16 +249,16 @@ namespace FontSettings
             return null;
         }
 
-        private FontConfigs ReadFontSaveData()
+        private FontConfigs ReadFontSettings()
         {
-            FontConfigs fontConfigs = this.Helper.Data.ReadGlobalData<FontConfigs>(this._globalFontDataKey);
-            if (fontConfigs == null)
+            FontConfigs fonts = this.Helper.Data.ReadGlobalData<FontConfigs>(this._globalFontDataKey);
+            if (fonts == null)
             {
-                fontConfigs = new FontConfigs();
-                this.Helper.Data.WriteGlobalData(this._globalFontDataKey, fontConfigs);
+                fonts = new FontConfigs();
+                this.Helper.Data.WriteGlobalData(this._globalFontDataKey, fonts);
             }
 
-            return fontConfigs;
+            return fonts;
         }
 
         private void SaveConfig(ModConfig config)
