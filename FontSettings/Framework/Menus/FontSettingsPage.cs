@@ -16,6 +16,7 @@ namespace FontSettings.Framework.Menus
 {
     internal class FontSettingsPage : BaseMenu
     {
+        private static readonly PageOptions _optionValues = new();
         private static readonly StateManager _states = new();
         private static FontSettingsPage Instance { get; set; }
 
@@ -75,6 +76,7 @@ namespace FontSettings.Framework.Menus
             this._saveConfig = saveConfig;
             this._exampleFonts = new ExampleFonts(fontManager);
 
+            this.CurrentFontType = _optionValues.FontType;
             FontConfig fontConfig = config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
                 FontHelpers.GetCurrentLocale(), this.CurrentFontType);
 
@@ -109,15 +111,17 @@ namespace FontSettings.Framework.Menus
             };
             this._exampleBoard.SettableWidth = width - spaceToClearSideBorder - borderWidth - (int)this._exampleBoard.LocalPosition.X;
 
-            Checkbox seperateBox = new Checkbox();
-            seperateBox.Checked += this.ExampleSeperateToggled;
-            seperateBox.Unchecked += this.ExampleSeperateToggled;
-            this._box_merge = new LabeledElement<Checkbox>(seperateBox)
+            Checkbox mergeBox = new Checkbox();
+            mergeBox.IsChecked = _optionValues.ExampleMerged;
+            mergeBox.Checked += this.ExampleMergeToggled;
+            mergeBox.Unchecked += this.ExampleMergeToggled;
+            this._box_merge = new LabeledElement<Checkbox>(mergeBox)
             {
                 Text = I18n.OptionsPage_MergeExamples()
             };
 
             Checkbox showBoundsBox = new Checkbox();
+            showBoundsBox.IsChecked = _optionValues.ShowBounds;
             showBoundsBox.Checked += this.ShowBoundsToggled;
             showBoundsBox.Unchecked += this.ShowBoundsToggled;
             this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox)
@@ -126,7 +130,7 @@ namespace FontSettings.Framework.Menus
             };
 
             Checkbox showTextBox = new Checkbox();
-            showTextBox.IsChecked = true;
+            showTextBox.IsChecked = _optionValues.ShowText;
             showTextBox.Checked += this.ShowTextToggled;
             showTextBox.Unchecked += this.ShowTextToggled;
             this._box_showText = new LabeledElement<Checkbox>(showTextBox)
@@ -180,6 +184,7 @@ namespace FontSettings.Framework.Menus
                 this._exampleBoard.Height - borderWidth / 3 * 2);
 
             Checkbox offsetTuningBox = new Checkbox();
+            offsetTuningBox.IsChecked = _optionValues.OffsetTuning;
             offsetTuningBox.Checked += this.OffsetTuningToggled;
             offsetTuningBox.Unchecked += this.OffsetTuningToggled;
             this._box_offsetTuning = new LabeledElement<Checkbox>(offsetTuningBox)
@@ -321,6 +326,7 @@ namespace FontSettings.Framework.Menus
         private void ShowTextToggled(object sender, EventArgs e)
         {
             bool showText = this._box_showText.Element.IsChecked;
+            _optionValues.ShowText = showText;
             this._label_gameExample.ShowText = showText;
             this._label_currentExample.ShowText = showText;
         }
@@ -328,18 +334,21 @@ namespace FontSettings.Framework.Menus
         private void ShowBoundsToggled(object sender, EventArgs e)
         {
             bool showBounds = this._box_showBounds.Element.IsChecked;
+            _optionValues.ShowBounds = showBounds;
             this._label_gameExample.ShowBounds = showBounds;
             this._label_currentExample.ShowBounds = showBounds;
         }
 
-        private void ExampleSeperateToggled(object sender, EventArgs e)
+        private void ExampleMergeToggled(object sender, EventArgs e)
         {
+            _optionValues.ExampleMerged = this._box_merge.Element.IsChecked;
             this.UpdateExamplePositions();
         }
 
         private void OffsetTuningToggled(object sender, EventArgs e)
         {
             bool allowTuneOffset = this._box_offsetTuning.Element.IsChecked;
+            _optionValues.OffsetTuning = allowTuneOffset;
             this._slider_charOffsetX.Visibility = allowTuneOffset ? Visibility.Visible : Visibility.Disabled;
             this._slider_charOffsetY.Visibility = allowTuneOffset ? Visibility.Visible : Visibility.Disabled;
 
@@ -447,6 +456,8 @@ namespace FontSettings.Framework.Menus
 
         private void OnFontTypeChanged(GameFontType fontType)
         {
+            _optionValues.FontType = fontType;
+
             this._label_title.Text = fontType.LocalizedName();
             this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, 108);
 
@@ -609,6 +620,7 @@ namespace FontSettings.Framework.Menus
             return selectedFont.FontIndex;
         }
 
+        /// <summary>记录按下OK键后字体替换的进程。</summary>
         private class StateManager
         {
             private readonly Dictionary<GameFontType, bool> _states = new();
@@ -635,6 +647,16 @@ namespace FontSettings.Framework.Menus
                 if (this._states[fontType])
                     this._states[fontType] = false;
             }
+        }
+
+        /// <summary>保存用户控件的值，重新打开菜单时填入。</summary>
+        private class PageOptions
+        {
+            public bool ExampleMerged { get; set; } = false;
+            public bool ShowBounds { get; set; } = false;
+            public bool ShowText { get; set; } = true;
+            public bool OffsetTuning { get; set; } = false;
+            public GameFontType FontType { get; set; } = GameFontType.SmallFont;
         }
     }
 }
