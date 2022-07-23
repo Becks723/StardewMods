@@ -88,7 +88,7 @@ namespace FontSettings
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             new GMCMIntegration(
-                getConfig: () => this._config,
+                config: this._config,
                 fontManager: this._fontManager,
                 fontChanger: this._fontChanger,
                 reset: this.ResetConfig,
@@ -259,7 +259,11 @@ namespace FontSettings
         private void SaveConfig(ModConfig config)
         {
             this.Helper.WriteConfig(config);
-            this.Helper.Data.WriteGlobalData(this._globalFontDataKey, config.Fonts);
+        }
+
+        private void SaveFontSettings(FontConfigs fonts)
+        {
+            this.Helper.Data.WriteGlobalData(this._globalFontDataKey, fonts);
         }
 
         private void ResetConfig()
@@ -273,10 +277,8 @@ namespace FontSettings
             foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
                 fonts.GetOrCreateFontConfig(lang, locale, fontType);
 
-            this._config = new ModConfig()
-            {
-                Fonts = fonts
-            };
+            this._config.ResetToDefault();
+            this._config.Fonts = fonts;
         }
 
         private void CheckConfigValid(ModConfig config)

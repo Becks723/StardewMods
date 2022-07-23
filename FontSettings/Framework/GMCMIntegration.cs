@@ -21,22 +21,22 @@ namespace FontSettings.Framework
 
         private readonly FontExample _smallFontExample, _dialogueFontExample, _spriteTextExample;
 
-        private ModConfig Config => this._getConfig();
+        private ModConfig Config { get; }
 
         private readonly Dictionary<string, Func<string>> _fontDropDownOptions = InitDropDownOptions();
 
         private GenericModConfigMenuFluentHelper _gmcmHelper;
 
-        public GMCMIntegration(Func<ModConfig> getConfig, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
+        public GMCMIntegration(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
             : base(modRegistry, monitor)
         {
-            this._getConfig = getConfig;
+            this.Config = config;
 
             this._smallFontExample = new(GameFontType.SmallFont, fontManager, this.Config);
             this._dialogueFontExample = new(GameFontType.DialogueFont, fontManager, this.Config);
             this._spriteTextExample = new(GameFontType.SpriteText, fontManager, this.Config);
 
-            this.InitFields(reset, () => this.Save(save, fontChanger, getConfig()), manifest);
+            this.InitFields(reset, () => this.Save(save, fontChanger, config), manifest);
         }
 
         protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)

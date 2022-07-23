@@ -25,5 +25,19 @@
         public int MaxLineSpacing { get; set; } = 100;
 
         public int MinLineSpacing { get; } = 1;
+
+        public void ResetToDefault()
+        {
+            this.ExampleText = "AaBbYyZz\n测试用例";
+            this.Fonts = new FontConfigs();
+            this.MaxFontSize = 100;
+            this.MaxSpacing = 10;
+            this.MinSpacing = -10;
+            this.MaxLineSpacing = 100;
+            this.MaxCharOffsetX = 10;
+            this.MinCharOffsetX = -10;
+            this.MaxCharOffsetY = 10;
+            this.MinCharOffsetY = -10;
+        }
     }
 }
