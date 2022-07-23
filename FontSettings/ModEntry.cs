@@ -279,6 +279,9 @@ namespace FontSettings
 
             this._config.ResetToDefault();
             this._config.Fonts = fonts;
+
+            // 保存
+            this.Helper.WriteConfig(this._config);
         }
 
         private void CheckConfigValid(ModConfig config)
