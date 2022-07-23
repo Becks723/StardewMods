@@ -27,7 +27,7 @@ namespace FontSettings.Framework
 
         private GenericModConfigMenuFluentHelper _gmcmHelper;
 
-        public GMCMIntegration(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
+        public GMCMIntegration(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action reset, Action saveConfig, Action saveFonts, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
             : base(modRegistry, monitor)
         {
             this.Config = config;
@@ -36,7 +36,7 @@ namespace FontSettings.Framework
             this._dialogueFontExample = new(GameFontType.DialogueFont, fontManager, this.Config);
             this._spriteTextExample = new(GameFontType.SpriteText, fontManager, this.Config);
 
-            this.InitFields(reset, () => this.Save(save, fontChanger, config), manifest);
+            this.InitFields(reset, () => this.Save(saveConfig, saveFonts, fontChanger, config), manifest);
         }
 
         protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)
@@ -250,11 +250,11 @@ namespace FontSettings.Framework
                 );
         }
 
-        private async void Save(Action save, GameFontChanger fontChanger, ModConfig config)
+        private async void Save(Action saveConfig, Action saveFontSettings, GameFontChanger fontChanger, ModConfig config)
         {
             // 配置文件。
-            save();
-            this.Reregister(this._gmcmHelper);  // 涉及到控件的极值，因此重新注册。
+            saveConfig();
+            this.Reregister(this._gmcmHelper);  // 涉及到控件，因此重新注册。
 
             // 替换字体。
             bool anyFailed = false;
@@ -271,7 +271,7 @@ namespace FontSettings.Framework
                 if (success)
                 {
                     Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_SuccessSetFont(fontType.LocalizedName()), null));
-                    save?.Invoke();
+                    saveFontSettings();
                 }
                 else
                 {

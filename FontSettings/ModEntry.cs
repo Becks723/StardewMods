@@ -44,6 +44,7 @@ namespace FontSettings
             {
                 this._0_2_0_Migration.Apply(helper, out this._config);
                 this.SaveConfig(this._config);
+                this.SaveFontSettings(this._config.Fonts);
             }
             else
             {
@@ -75,7 +76,11 @@ namespace FontSettings
                     .Patch(Harmony, this.Monitor);
 
                 new GameMenuAdder(helper, Harmony)
-                    .AddFontSettingsPage(this._config, this._fontManager, this._fontChanger, this.SaveConfig);
+                    .AddFontSettingsPage(this._config, this._fontManager, this._fontChanger, config =>
+                    {
+                        this.SaveConfig(config);
+                        this.SaveFontSettings(config.Fonts);
+                    });
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
@@ -92,7 +97,8 @@ namespace FontSettings
                 fontManager: this._fontManager,
                 fontChanger: this._fontChanger,
                 reset: this.ResetConfig,
-                save: () => this.SaveConfig(this._config),
+                saveConfig: () => this.SaveConfig(this._config),
+                saveFonts: () => this.SaveFontSettings(this._config.Fonts),
                 modRegistry: this.Helper.ModRegistry,
                 monitor: this.Monitor,
                 manifest: this.ModManifest)
