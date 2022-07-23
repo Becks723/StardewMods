@@ -199,8 +199,8 @@ namespace FontSettings.Framework.Menus
                 Orientation = Orientation.Horizontal,
                 Length = exampleBounds.Width - 24,
                 BarThickness = 16,
-                Maximum = 10f,
-                Minimum = -10f,
+                Maximum = this._config.MaxCharOffsetX,
+                Minimum = this._config.MinCharOffsetX,
                 Interval = 0.5f,
                 Value = fontConfig.CharOffsetX,
                 Visibility = this._box_offsetTuning.Element.IsChecked ? Visibility.Visible : Visibility.Disabled
@@ -213,8 +213,8 @@ namespace FontSettings.Framework.Menus
                 Orientation = Orientation.Vertical,
                 Length = exampleBounds.Height - 24,
                 BarThickness = 16,
-                Maximum = 10f,
-                Minimum = -10f,
+                Maximum = this._config.MaxCharOffsetY,
+                Minimum = this._config.MinCharOffsetY,
                 Interval = 0.5f,
                 Value = fontConfig.CharOffsetY,
                 Visibility = this._box_offsetTuning.Element.IsChecked ? Visibility.Visible : Visibility.Disabled

@@ -51,6 +51,7 @@ namespace FontSettings
                 FontConfigs fontConfigs = this.ReadFontSaveData();
                 this._config.Fonts = fontConfigs;
             }
+            this.CheckConfigValid(this._config);
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
             foreach (LocalizedContentManager.LanguageCode code in Enum.GetValues<LocalizedContentManager.LanguageCode>())
@@ -276,6 +277,23 @@ namespace FontSettings
             {
                 Fonts = fonts
             };
+        }
+
+        private void CheckConfigValid(ModConfig config)
+        {
+            if (config.MaxCharOffsetX < config.MinCharOffsetX)
+            {
+                ILog.Warn($"最大值：{config.MaxCharOffsetX} 小于最小值：{config.MinCharOffsetX}。已重置。");
+                config.MaxCharOffsetX = 10;
+                config.MinCharOffsetX = -10;
+            }
+
+            if (config.MaxCharOffsetY < config.MinCharOffsetY)
+            {
+                ILog.Warn($"最大值：{config.MaxCharOffsetY} 小于最小值：{config.MinCharOffsetY}。已重置。");
+                config.MaxCharOffsetY = 10;
+                config.MinCharOffsetY = -10;
+            }
         }
     }
 }
