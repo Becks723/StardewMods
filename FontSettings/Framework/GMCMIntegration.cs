@@ -25,59 +25,158 @@ namespace FontSettings.Framework
 
         private readonly Dictionary<string, Func<string>> _fontDropDownOptions = InitDropDownOptions();
 
+        private GenericModConfigMenuFluentHelper _gmcmHelper;
+
         public GMCMIntegration(Func<ModConfig> getConfig, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
-            : base(reset, () => Save(save, fontChanger, getConfig()), modRegistry, monitor, manifest)
+            : base(modRegistry, monitor)
         {
             this._getConfig = getConfig;
 
             this._smallFontExample = new(GameFontType.SmallFont, fontManager, this.Config);
             this._dialogueFontExample = new(GameFontType.DialogueFont, fontManager, this.Config);
             this._spriteTextExample = new(GameFontType.SpriteText, fontManager, this.Config);
+
+            this.InitFields(reset, () => this.Save(save, fontChanger, getConfig()), manifest);
         }
 
         protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)
         {
+            this._gmcmHelper = helper;
+
             // 当语言更改时，重新注册GMCM选项。
             LocalizedContentManager.OnLanguageChange += code =>
             {
-                helper.Unregister();
-                RegisterOptions();
+                this.Reregister(helper);
 
                 this._smallFontExample.OnLanguageChanged();
                 this._dialogueFontExample.OnLanguageChanged();
                 this._spriteTextExample.OnLanguageChanged();
             };
 
-            void RegisterOptions()
+            this.RegisterOptions(helper);
+        }
+
+        private void Reregister(GenericModConfigMenuFluentHelper helper)
+        {
+            helper.Unregister();
+            this.RegisterOptions(helper);
+        }
+
+        private void RegisterOptions(GenericModConfigMenuFluentHelper helper)
+        {
+            helper.Register()
+                .AddTextBox(
+                    name: I18n.Config_ExampleText,
+                    tooltip: I18n.Config_ExampleText_Description,
+                    get: () => this.NormalizeExampleText(this.Config.ExampleText),
+                    set: val => this.Config.ExampleText = this.ParseBackExampleText(val),
+                    fieldChanged: val =>
+                    {
+                        this.Example(GameFontType.SmallFont).ExampleText = this.ParseBackExampleText(val);
+                        this.Example(GameFontType.DialogueFont).ExampleText = this.ParseBackExampleText(val);
+                        this.Example(GameFontType.SpriteText).ExampleText = this.ParseBackExampleText(val);
+                    }
+                )
+
+                // max font size
+                .AddSlider(
+                    name: I18n.Config_MaxFontSize,
+                    tooltip: I18n.Config_MaxFontSize_Description,
+                    get: () => this.Config.MaxFontSize,
+                    set: val => this.Config.MaxFontSize = val,
+                    max: 150,
+                    min: 50,
+                    interval: 1
+                )
+
+                // max spacing
+                .AddSlider(
+                    name: I18n.Config_MaxSpacing,
+                    tooltip: I18n.Config_MaxSpacing_Description,
+                    get: () => this.Config.MaxSpacing,
+                    set: val => this.Config.MaxSpacing = val,
+                    max: 20,
+                    min: 5,
+                    interval: 1
+                )
+
+                // min spacing
+                .AddSlider(
+                    name: I18n.Config_MinSpacing,
+                    tooltip: I18n.Config_MinSpacing_Description,
+                    get: () => this.Config.MinSpacing,
+                    set: val => this.Config.MinSpacing = val,
+                    max: -5,
+                    min: -20,
+                    interval: 1
+                )
+
+                // max line spacing
+                .AddSlider(
+                    name: I18n.Config_MaxLineSpacing,
+                    tooltip: I18n.Config_MaxLineSpacing_Description,
+                    get: () => this.Config.MaxLineSpacing,
+                    set: val => this.Config.MaxLineSpacing = val,
+                    max: 150,
+                    min: 50,
+                    interval: 1
+                )
+
+                // max x offset
+                .AddSlider(
+                    name: I18n.Config_MaxOffsetX,
+                    tooltip: I18n.Config_MaxOffsetX_Description,
+                    get: () => this.Config.MaxCharOffsetX,
+                    set: val => this.Config.MaxCharOffsetX = val,
+                    max: 25,
+                    min: 5,
+                    interval: 1
+                )
+
+                // min x offset
+                .AddSlider(
+                    name: I18n.Config_MinOffsetX,
+                    tooltip: I18n.Config_MinOffsetX_Description,
+                    get: () => this.Config.MinCharOffsetX,
+                    set: val => this.Config.MinCharOffsetX = val,
+                    max: -5,
+                    min: -25,
+                    interval: 1
+                )
+
+                // max y offset
+                .AddSlider(
+                    name: I18n.Config_MaxOffsetY,
+                    tooltip: I18n.Config_MaxOffsetY_Description,
+                    get: () => this.Config.MaxCharOffsetY,
+                    set: val => this.Config.MaxCharOffsetY = val,
+                    max: 25,
+                    min: 5,
+                    interval: 1
+                )
+
+                // min y offset
+                .AddSlider(
+                    name: I18n.Config_MinOffsetY,
+                    tooltip: I18n.Config_MinOffsetY_Description,
+                    get: () => this.Config.MinCharOffsetY,
+                    set: val => this.Config.MinCharOffsetY = val,
+                    max: -5,
+                    min: -25,
+                    interval: 1
+                )
+                .AddLineSpacing()
+                .AddSectionTitle(I18n.Config_Section_Fonts, I18n.Config_Section_Fonts_Description);
+
+            this.AddFontSettings(helper, GameFontType.SmallFont);
+            helper.AddLineSpacing();
+            this.AddFontSettings(helper, GameFontType.DialogueFont);
+            helper.AddLineSpacing();
+            if (!LocalizedContentManager.CurrentLanguageLatin)
             {
-                helper.Register()
-                    .AddTextBox(
-                        name: I18n.Config_ExampleText,
-                        tooltip: I18n.Config_ExampleText_Description,
-                        get: () => this.NormalizeExampleText(this.Config.ExampleText),
-                        set: val => this.Config.ExampleText = this.ParseBackExampleText(val),
-                        fieldChanged: val =>
-                        {
-                            this.Example(GameFontType.SmallFont).ExampleText = this.ParseBackExampleText(val);
-                            this.Example(GameFontType.DialogueFont).ExampleText = this.ParseBackExampleText(val);
-                            this.Example(GameFontType.SpriteText).ExampleText = this.ParseBackExampleText(val);
-                        }
-                    )
-                    .AddLineSpacing()
-                    .AddSectionTitle(I18n.Config_Section_Fonts, I18n.Config_Section_Fonts_Description);
-
-                this.AddFontSettings(helper, GameFontType.SmallFont);
+                this.AddFontSettings(helper, GameFontType.SpriteText);
                 helper.AddLineSpacing();
-                this.AddFontSettings(helper, GameFontType.DialogueFont);
-                helper.AddLineSpacing();
-                if (!LocalizedContentManager.CurrentLanguageLatin)
-                {
-                    this.AddFontSettings(helper, GameFontType.SpriteText);
-                    helper.AddLineSpacing();
-                }
             }
-
-            RegisterOptions();
         }
 
         private void AddFontSettings(GenericModConfigMenuFluentHelper helper, GameFontType fontType)
@@ -120,8 +219,8 @@ namespace FontSettings.Framework
                     tooltip: I18n.Config_Fonts_FontSize_Description,
                     get: () => Font().FontSize,
                     set: val => Font().FontSize = val,
-                    min: 1,
-                    max: 100,
+                    min: this.Config.MinFontSize,
+                    max: this.Config.MaxFontSize,
                     interval: 1,
                     fieldChanged: val => Example().UpdateFontSize(val)
                 )
@@ -132,8 +231,8 @@ namespace FontSettings.Framework
                     tooltip: I18n.Config_Fonts_Spacing_Description,
                     get: () => Font().Spacing,
                     set: val => Font().Spacing = val,
-                    min: -10,
-                    max: 10,
+                    min: this.Config.MinSpacing,
+                    max: this.Config.MaxSpacing,
                     interval: 1,
                     fieldChanged: val => Example().UpdateSpacing(val)
                 )
@@ -144,15 +243,20 @@ namespace FontSettings.Framework
                     tooltip: I18n.Config_Fonts_LineSpacing_Description,
                     get: () => Font().LineSpacing,
                     set: val => Font().LineSpacing = val,
-                    min: 1,
-                    max: 100,
+                    min: this.Config.MinLineSpacing,
+                    max: this.Config.MaxLineSpacing,
                     interval: 1,
                     fieldChanged: val => Example().UpdateLineSpacing(val)
                 );
         }
 
-        private static async void Save(Action save, GameFontChanger fontChanger, ModConfig config)
+        private async void Save(Action save, GameFontChanger fontChanger, ModConfig config)
         {
+            // 配置文件。
+            save();
+            this.Reregister(this._gmcmHelper);  // 涉及到控件的极值，因此重新注册。
+
+            // 替换字体。
             bool anyFailed = false;
             foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
             {
@@ -164,7 +268,6 @@ namespace FontSettings.Framework
                     FontHelpers.GetCurrentLocale(),
                     fontType);
                 bool success = await fontChanger.ReplaceOriginalOrRemainAsync(fontConfig);
-                //bool success = fontChanger.ReplaceOriginalOrRamain(fontConfig);
                 if (success)
                 {
                     Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_SuccessSetFont(fontType.LocalizedName()), null));
