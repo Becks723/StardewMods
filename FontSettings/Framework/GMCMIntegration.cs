@@ -428,6 +428,7 @@ namespace FontSettings.Framework
                      (int)this._lastFontSize,
                      (int)this._lastSpacing,
                      this._lastLineSpacing,
+                     Vector2.Zero,
                      this.ExampleText
                  );
             }

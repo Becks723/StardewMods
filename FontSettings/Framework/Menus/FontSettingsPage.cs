@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.FontInfomation;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
@@ -40,6 +41,9 @@ namespace FontSettings.Framework.Menus
         private readonly Label2 _label_current;
         private readonly ColorBlock _colorBlock_game;
         private readonly ColorBlock _colorBlock_current;
+        private readonly LabeledElement<Checkbox> _box_offsetTuning;  // TODO: 改成图标
+        private readonly Slider<float> _slider_charOffsetX;
+        private readonly Slider<float> _slider_charOffsetY;
         private readonly ComboBox _dropDown_font;
         private readonly LabeledElement<Slider<int>> _slider_fontSize;
         private readonly LabeledElement<Slider<int>> _slider_spacing;
@@ -51,6 +55,8 @@ namespace FontSettings.Framework.Menus
         private int _lastFontSize;
         private int _lastSpacing;
         private int _lastLineSpacing;
+        private float _lastCharOffsetX;
+        private float _lastCharOffsetY;
         private FontModel[] _allFonts;
 
         protected override bool ManualInitializeComponents => true;
@@ -104,16 +110,16 @@ namespace FontSettings.Framework.Menus
             this._exampleBoard.SettableWidth = width - spaceToClearSideBorder - borderWidth - (int)this._exampleBoard.LocalPosition.X;
 
             Checkbox seperateBox = new Checkbox();
-            seperateBox.Checked += this.ExampleSeperateChanged;
-            seperateBox.Unchecked += this.ExampleSeperateChanged;
+            seperateBox.Checked += this.ExampleSeperateToggled;
+            seperateBox.Unchecked += this.ExampleSeperateToggled;
             this._box_merge = new LabeledElement<Checkbox>(seperateBox)
             {
                 Text = I18n.OptionsPage_MergeExamples()
             };
 
             Checkbox showBoundsBox = new Checkbox();
-            showBoundsBox.Checked += this.ShowBoundsChanged;
-            showBoundsBox.Unchecked += this.ShowBoundsChanged;
+            showBoundsBox.Checked += this.ShowBoundsToggled;
+            showBoundsBox.Unchecked += this.ShowBoundsToggled;
             this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox)
             {
                 Text = I18n.OptionsPage_ShowExampleBounds()
@@ -121,8 +127,8 @@ namespace FontSettings.Framework.Menus
 
             Checkbox showTextBox = new Checkbox();
             showTextBox.IsChecked = true;
-            showTextBox.Checked += this.ShowTextChanged;
-            showTextBox.Unchecked += this.ShowTextChanged;
+            showTextBox.Checked += this.ShowTextToggled;
+            showTextBox.Unchecked += this.ShowTextToggled;
             this._box_showText = new LabeledElement<Checkbox>(showTextBox)
             {
                 Text = I18n.OptionsPage_ShowExampleText()
@@ -166,6 +172,50 @@ namespace FontSettings.Framework.Menus
                 ShowText = this._box_showText.Element.IsChecked,
             };
 
+            int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
+            Rectangle exampleBounds = new Rectangle(
+                (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
+                (int)(this._exampleBoard.LocalPosition.Y + borderWidth / 3),
+                (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
+                this._exampleBoard.Height - borderWidth / 3 * 2);
+
+            Checkbox offsetTuningBox = new Checkbox();
+            offsetTuningBox.Checked += this.OffsetTuningToggled;
+            offsetTuningBox.Unchecked += this.OffsetTuningToggled;
+            this._box_offsetTuning = new LabeledElement<Checkbox>(offsetTuningBox)
+            {
+                Text = "微调偏移量",
+                LocalPosition = new Vector2(this._colorBlock_game.LocalPosition.X, exampleBounds.Y)
+            };
+
+            this._slider_charOffsetX = new Slider<float>
+            {
+                LocalPosition = new Vector2(exampleBounds.X + 24, exampleBounds.Y),
+                Orientation = Orientation.Horizontal,
+                Length = exampleBounds.Width - 24,
+                BarThickness = 16,
+                Maximum = 10f,
+                Minimum = -10f,
+                Interval = 0.5f,
+                Value = fontConfig.CharOffsetX,
+                Visibility = this._box_offsetTuning.Element.IsChecked ? Visibility.Visible : Visibility.Disabled
+            };
+            this._slider_charOffsetX.ValueChanged += this.OffsetXSlider_ValueChanged;
+
+            this._slider_charOffsetY = new Slider<float>
+            {
+                LocalPosition = new Vector2(exampleBounds.X, exampleBounds.Y + 24),
+                Orientation = Orientation.Vertical,
+                Length = exampleBounds.Height - 24,
+                BarThickness = 16,
+                Maximum = 10f,
+                Minimum = -10f,
+                Interval = 0.5f,
+                Value = fontConfig.CharOffsetY,
+                Visibility = this._box_offsetTuning.Element.IsChecked ? Visibility.Visible : Visibility.Disabled
+            };
+            this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
+
             Checkbox enabledFontBox = new Checkbox();
             enabledFontBox.Checked += this.FontEnableChanged;
             enabledFontBox.Unchecked += this.FontEnableChanged;
@@ -174,7 +224,7 @@ namespace FontSettings.Framework.Menus
             int sliderLength = this._exampleBoard.Width / 3;
             var fontSizeSlider = new Slider<int>
             {
-                RequestWidth = sliderLength,
+                Length = sliderLength,
                 Minimum = 1,
                 Maximum = 100,
                 Interval = 1,
@@ -183,7 +233,7 @@ namespace FontSettings.Framework.Menus
             fontSizeSlider.ValueChanged += this.FontSizeSlider_ValueChanged;
             var spacingSlider = new Slider<int>
             {
-                RequestWidth = sliderLength,
+                Length = sliderLength,
                 Minimum = -10,
                 Maximum = 10,
                 Interval = 1,
@@ -192,7 +242,7 @@ namespace FontSettings.Framework.Menus
             spacingSlider.ValueChanged += this.SpacingSlider_ValueChanged;
             var lineSpacingSlider = new Slider<int>
             {
-                RequestWidth = sliderLength,
+                Length = sliderLength,
                 Minimum = 1,
                 Maximum = 100,
                 Interval = 1,
@@ -268,23 +318,42 @@ namespace FontSettings.Framework.Menus
             this.OnFontTypeChanged(this.CurrentFontType);
         }
 
-        private void ShowTextChanged(object sender, EventArgs e)
+        private void ShowTextToggled(object sender, EventArgs e)
         {
-            bool newValue = this._box_showText.Element.IsChecked;
-            this._label_gameExample.ShowText = newValue;
-            this._label_currentExample.ShowText = newValue;
+            bool showText = this._box_showText.Element.IsChecked;
+            this._label_gameExample.ShowText = showText;
+            this._label_currentExample.ShowText = showText;
         }
 
-        private void ShowBoundsChanged(object sender, EventArgs e)
+        private void ShowBoundsToggled(object sender, EventArgs e)
         {
-            bool newValue = this._box_showBounds.Element.IsChecked;
-            this._label_gameExample.ShowBounds = newValue;
-            this._label_currentExample.ShowBounds = newValue;
+            bool showBounds = this._box_showBounds.Element.IsChecked;
+            this._label_gameExample.ShowBounds = showBounds;
+            this._label_currentExample.ShowBounds = showBounds;
         }
 
-        private void ExampleSeperateChanged(object sender, EventArgs e)
+        private void ExampleSeperateToggled(object sender, EventArgs e)
         {
             this.UpdateExamplePositions();
+        }
+
+        private void OffsetTuningToggled(object sender, EventArgs e)
+        {
+            bool allowTuneOffset = this._box_offsetTuning.Element.IsChecked;
+            this._slider_charOffsetX.Visibility = allowTuneOffset ? Visibility.Visible : Visibility.Disabled;
+            this._slider_charOffsetY.Visibility = allowTuneOffset ? Visibility.Visible : Visibility.Disabled;
+
+            this.UpdateExamplePositions();
+        }
+
+        private void OffsetXSlider_ValueChanged(object sender, EventArgs e)
+        {
+            this.UpdateCustomExample();
+        }
+
+        private void OffsetYSlider_ValueChanged(object sender, EventArgs e)
+        {
+            this.UpdateCustomExample();
         }
 
         private void FontEnableChanged(object sender, EventArgs e)
@@ -326,6 +395,8 @@ namespace FontSettings.Framework.Menus
             this._lastFontSize = (int)tempConfig.FontSize;
             this._lastSpacing = (int)tempConfig.Spacing;
             this._lastLineSpacing = tempConfig.LineSpacing;
+            this._lastCharOffsetX = tempConfig.CharOffsetX;
+            this._lastCharOffsetY = tempConfig.CharOffsetY;
 
             tempConfig.Enabled = this._box_enabledFont.Element.IsChecked;
             tempConfig.FontFilePath = this.GetFontFile();
@@ -333,12 +404,16 @@ namespace FontSettings.Framework.Menus
             tempConfig.FontSize = this._slider_fontSize.Element.Value;
             tempConfig.Spacing = this._slider_spacing.Element.Value;
             tempConfig.LineSpacing = this._slider_lineSpacing.Element.Value;
+            tempConfig.CharOffsetX = this._slider_charOffsetX.Value;
+            tempConfig.CharOffsetY = this._slider_charOffsetY.Value;
 
             bool enabledChanged = this._lastEnabled != tempConfig.Enabled;
             bool fontFilePathChanged = this._lastFontFilePath != tempConfig.FontFilePath;
             bool fontSizeChanged = this._lastFontSize != tempConfig.FontSize;
             bool spacingChanged = this._lastSpacing != tempConfig.Spacing;
             bool lineSpacingChanged = this._lastLineSpacing != tempConfig.LineSpacing;
+            bool charOffsetXChanged = this._lastCharOffsetX != tempConfig.CharOffsetX;
+            bool charOffsetYChanged = this._lastCharOffsetY != tempConfig.CharOffsetY;
 
             // 必要时重置字体文件路径。
             if (fontFilePathChanged || fontSizeChanged || spacingChanged || lineSpacingChanged)
@@ -383,6 +458,8 @@ namespace FontSettings.Framework.Menus
             this._slider_lineSpacing.Element.Value = fontConfig.LineSpacing;
             this._dropDown_font.SelectedItem = this.FindFont(this._allFonts, fontConfig.FontFilePath,
                 fontConfig.FontIndex);
+            this._slider_charOffsetX.Value = fontConfig.CharOffsetX;
+            this._slider_charOffsetY.Value = fontConfig.CharOffsetY;
             this._okButton.GreyedOut = _states.IsOn(fontType);
 
             this.UpdateGameExample();
@@ -409,6 +486,9 @@ namespace FontSettings.Framework.Menus
                 this._label_current,
                 this._label_gameExample,
                 this._label_currentExample,
+                this._box_offsetTuning,
+                this._slider_charOffsetX,
+                this._slider_charOffsetY,
                 this._box_enabledFont,
                 this._slider_fontSize,
                 this._slider_spacing,
@@ -448,6 +528,7 @@ namespace FontSettings.Framework.Menus
                     this._slider_fontSize.Element.Value,
                     this._slider_spacing.Element.Value,
                     this._slider_lineSpacing.Element.Value,
+                    new Vector2(this._slider_charOffsetX.Value, this._slider_charOffsetY.Value),
                     this._label_currentExample.Text
                 );
             else
@@ -458,6 +539,7 @@ namespace FontSettings.Framework.Menus
                     this._slider_fontSize.Element.Value,
                     this._slider_spacing.Element.Value,
                     this._slider_lineSpacing.Element.Value,
+                    new Vector2(this._slider_charOffsetX.Value, this._slider_charOffsetY.Value),
                     this._label_currentExample.Text
                 );
 
@@ -466,26 +548,35 @@ namespace FontSettings.Framework.Menus
 
         private void UpdateExamplePositions()
         {
-            int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
-            Rectangle exampleBounds = new Rectangle(
-                (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
-                (int)(this._exampleBoard.LocalPosition.Y + borderWidth / 3),
-                (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
-                this._exampleBoard.Height - borderWidth / 3 * 2);
+            Rectangle exampleBounds;
+            if (this._box_offsetTuning.Element.IsChecked)
+                exampleBounds = new Rectangle(
+                    (int)(this._slider_charOffsetY.LocalPosition.X + this._slider_charOffsetY.Width + borderWidth / 2),
+                    (int)(this._slider_charOffsetX.LocalPosition.Y + this._slider_charOffsetX.Height + borderWidth / 3),
+                    (int)(this._colorBlock_game.LocalPosition.X - this._slider_charOffsetY.LocalPosition.X - this._slider_charOffsetY.Width - borderWidth),
+                    (int)(this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height - this._slider_charOffsetX.LocalPosition.Y - this._slider_charOffsetX.Height - borderWidth / 3 * 2));
+            else
+            {
+                int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
+                exampleBounds = new Rectangle(
+                    (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
+                    (int)(this._exampleBoard.LocalPosition.Y + borderWidth / 3),
+                    (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
+                    this._exampleBoard.Height - borderWidth / 3 * 2);
+            }
 
             int maxWidth = Math.Max(this._label_gameExample.Width, this._label_currentExample.Width);
             int maxHeight = Math.Max(this._label_gameExample.Height, this._label_currentExample.Height);
-            int exampleX = exampleBounds.Center.X - maxWidth / 2;
-            int exampleY = exampleBounds.Center.Y - maxHeight / 2;
+            int centerX = exampleBounds.Center.X - maxWidth / 2;
+            int centerY = exampleBounds.Center.Y - maxHeight / 2;
             if (this._box_merge.Element.IsChecked)
             {
-                this._label_gameExample.LocalPosition = new Vector2(exampleX, exampleY);
-                this._label_currentExample.LocalPosition = new Vector2(exampleX, exampleY);
+                this._label_gameExample.LocalPosition = this._label_currentExample.LocalPosition = new Vector2(centerX, centerY);
             }
             else
             {
-                this._label_gameExample.LocalPosition = new Vector2(exampleX, exampleBounds.Y);
-                this._label_currentExample.LocalPosition = new Vector2(exampleX, exampleBounds.Center.Y /*exampleBounds.Bottom - this._label_currentExample.Height*/);
+                this._label_gameExample.LocalPosition = new Vector2(centerX, exampleBounds.Y);
+                this._label_currentExample.LocalPosition = new Vector2(centerX, exampleBounds.Center.Y);
             }
         }
 
