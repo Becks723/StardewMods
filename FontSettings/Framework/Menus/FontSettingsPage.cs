@@ -230,8 +230,8 @@ namespace FontSettings.Framework.Menus
             var fontSizeSlider = new Slider<int>
             {
                 Length = sliderLength,
-                Minimum = 1,
-                Maximum = 100,
+                Maximum = this._config.MaxFontSize,
+                Minimum = this._config.MinFontSize,
                 Interval = 1,
                 Value = (int)fontConfig.FontSize
             };
@@ -239,8 +239,8 @@ namespace FontSettings.Framework.Menus
             var spacingSlider = new Slider<int>
             {
                 Length = sliderLength,
-                Minimum = -10,
-                Maximum = 10,
+                Maximum = this._config.MaxSpacing,
+                Minimum = this._config.MinSpacing,
                 Interval = 1,
                 Value = (int)fontConfig.Spacing
             };
@@ -248,8 +248,8 @@ namespace FontSettings.Framework.Menus
             var lineSpacingSlider = new Slider<int>
             {
                 Length = sliderLength,
-                Minimum = 1,
-                Maximum = 100,
+                Maximum = this._config.MaxLineSpacing,
+                Minimum = this._config.MinLineSpacing,
                 Interval = 1,
                 Value = fontConfig.LineSpacing
             };
