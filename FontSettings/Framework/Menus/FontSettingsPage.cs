@@ -42,7 +42,7 @@ namespace FontSettings.Framework.Menus
         private readonly Label2 _label_current;
         private readonly ColorBlock _colorBlock_game;
         private readonly ColorBlock _colorBlock_current;
-        private readonly LabeledElement<Checkbox> _box_offsetTuning;  // TODO: 改成图标
+        private readonly TextureButton _button_offsetTuning;
         private readonly Slider<float> _slider_charOffsetX;
         private readonly Slider<float> _slider_charOffsetY;
         private readonly ComboBox _dropDown_font;
@@ -183,15 +183,13 @@ namespace FontSettings.Framework.Menus
                 (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
                 this._exampleBoard.Height - borderWidth / 3 * 2);
 
-            Checkbox offsetTuningBox = new Checkbox();
-            offsetTuningBox.IsChecked = _optionValues.OffsetTuning;
-            offsetTuningBox.Checked += this.OffsetTuningToggled;
-            offsetTuningBox.Unchecked += this.OffsetTuningToggled;
-            this._box_offsetTuning = new LabeledElement<Checkbox>(offsetTuningBox)
+            this._button_offsetTuning = new TextureButton(Game1.mouseCursors, new Rectangle(257, 284, 16, 16), 2f)
             {
-                Text = "微调偏移量",
-                LocalPosition = new Vector2(this._colorBlock_game.LocalPosition.X, exampleBounds.Y)
+                SettableWidth = 32,
+                SettableHeight = 32,
+                LocalPosition = new Vector2(this._label_game.LocalPosition.X + this._label_game.Width - 32, exampleBounds.Y)
             };
+            this._button_offsetTuning.Click += this.OffsetTuningToggled;
 
             this._slider_charOffsetX = new Slider<float>
             {
@@ -203,7 +201,7 @@ namespace FontSettings.Framework.Menus
                 Minimum = this._config.MinCharOffsetX,
                 Interval = 0.5f,
                 Value = fontConfig.CharOffsetX,
-                Visibility = this._box_offsetTuning.Element.IsChecked ? Visibility.Visible : Visibility.Disabled
+                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled
             };
             this._slider_charOffsetX.ValueChanged += this.OffsetXSlider_ValueChanged;
 
@@ -217,7 +215,7 @@ namespace FontSettings.Framework.Menus
                 Minimum = this._config.MinCharOffsetY,
                 Interval = 0.5f,
                 Value = fontConfig.CharOffsetY,
-                Visibility = this._box_offsetTuning.Element.IsChecked ? Visibility.Visible : Visibility.Disabled
+                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled
             };
             this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
 
@@ -347,10 +345,10 @@ namespace FontSettings.Framework.Menus
 
         private void OffsetTuningToggled(object sender, EventArgs e)
         {
-            bool allowTuneOffset = this._box_offsetTuning.Element.IsChecked;
-            _optionValues.OffsetTuning = allowTuneOffset;
-            this._slider_charOffsetX.Visibility = allowTuneOffset ? Visibility.Visible : Visibility.Disabled;
-            this._slider_charOffsetY.Visibility = allowTuneOffset ? Visibility.Visible : Visibility.Disabled;
+            Game1.playSound("smallSelect");
+            _optionValues.OffsetTuning = !_optionValues.OffsetTuning;
+            this._slider_charOffsetX.Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled;
+            this._slider_charOffsetY.Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled;
 
             this.UpdateExamplePositions();
         }
@@ -497,7 +495,7 @@ namespace FontSettings.Framework.Menus
                 this._label_current,
                 this._label_gameExample,
                 this._label_currentExample,
-                this._box_offsetTuning,
+                this._button_offsetTuning,
                 this._slider_charOffsetX,
                 this._slider_charOffsetY,
                 this._box_enabledFont,
@@ -560,7 +558,7 @@ namespace FontSettings.Framework.Menus
         private void UpdateExamplePositions()
         {
             Rectangle exampleBounds;
-            if (this._box_offsetTuning.Element.IsChecked)
+            if (_optionValues.OffsetTuning)
                 exampleBounds = new Rectangle(
                     (int)(this._slider_charOffsetY.LocalPosition.X + this._slider_charOffsetY.Width + borderWidth / 2),
                     (int)(this._slider_charOffsetX.LocalPosition.Y + this._slider_charOffsetX.Height + borderWidth / 3),
