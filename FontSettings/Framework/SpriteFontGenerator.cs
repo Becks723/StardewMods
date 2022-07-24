@@ -194,38 +194,33 @@ namespace FontSettings.Framework
         }
 
         private static void EstimateTextureSize(stbtt_fontinfo fontInfo, IEnumerable<CharacterRange> ranges, float scale,
-            out int width, out int height, int padding = 0, bool requirePowerOfTwo = true)
+            out int width, out int height, int padding = 1, bool requirePowerOfTwo = true)
         {
             if (padding < 0) padding = 0;
 
-            var glyphSizes = GetGlyphSizes(fontInfo, ranges, scale);
+            var glyphSizes = GetGlyphSizes(fontInfo, ranges, scale)
+                .Select(size => size + new Point(padding));
 
             width = GuessWidth(glyphSizes.ToArray(), requirePowerOfTwo);
-            int maxHeight = 0;
-            int curX = 0, curY = 0;
+            int bottomY = 0;
+            int x = 0, y = 0;
             foreach (Point size in glyphSizes)
             {
                 // 需换行
-                if (curX + size.X > width)
+                if (x + size.X > width)
                 {
-                    curX = size.X;                // 重置X坐标。
-                    curY += maxHeight + padding;  // 更新Y坐标。
-                    maxHeight = 0;                // 清零最大高值。
+                    x = 0;        // 重置X坐标。
+                    y = bottomY;  // 更新Y坐标。
                 }
-                else
-                {
-                    curX += size.X + padding;
 
-                    // 更新最大高值。
-                    if (size.Y > maxHeight)
-                        maxHeight = size.Y;
-                }
+                x += size.X;
+
+                // 更新最底y值。
+                if (bottomY < y + size.Y)
+                    bottomY = y + size.Y;
             }
 
-            // 更新最后一行的高。
-            curY += maxHeight;
-
-            height = MakeValidTextureSize(curY, requirePowerOfTwo);
+            height = MakeValidTextureSize(bottomY, requirePowerOfTwo);
         }
 
         private static unsafe IEnumerable<Point> GetGlyphSizes(stbtt_fontinfo fontInfo, IEnumerable<CharacterRange> ranges, float scale)
