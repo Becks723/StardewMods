@@ -201,7 +201,8 @@ namespace FontSettings.Framework.Menus
                 Minimum = this._config.MinCharOffsetX,
                 Interval = 0.5f,
                 Value = fontConfig.CharOffsetX,
-                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled
+                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled,
+                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
             };
             this._slider_charOffsetX.ValueChanged += this.OffsetXSlider_ValueChanged;
 
@@ -215,7 +216,8 @@ namespace FontSettings.Framework.Menus
                 Minimum = this._config.MinCharOffsetY,
                 Interval = 0.5f,
                 Value = fontConfig.CharOffsetY,
-                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled
+                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled,
+                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
             };
             this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
 
@@ -231,7 +233,8 @@ namespace FontSettings.Framework.Menus
                 Maximum = this._config.MaxFontSize,
                 Minimum = this._config.MinFontSize,
                 Interval = 1,
-                Value = (int)fontConfig.FontSize
+                Value = (int)fontConfig.FontSize,
+                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
             };
             fontSizeSlider.ValueChanged += this.FontSizeSlider_ValueChanged;
             var spacingSlider = new Slider<int>
@@ -240,7 +243,8 @@ namespace FontSettings.Framework.Menus
                 Maximum = this._config.MaxSpacing,
                 Minimum = this._config.MinSpacing,
                 Interval = 1,
-                Value = (int)fontConfig.Spacing
+                Value = (int)fontConfig.Spacing,
+                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
             };
             spacingSlider.ValueChanged += this.SpacingSlider_ValueChanged;
             var lineSpacingSlider = new Slider<int>
@@ -249,7 +253,8 @@ namespace FontSettings.Framework.Menus
                 Maximum = this._config.MaxLineSpacing,
                 Minimum = this._config.MinLineSpacing,
                 Interval = 1,
-                Value = fontConfig.LineSpacing
+                Value = fontConfig.LineSpacing,
+                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
             };
             lineSpacingSlider.ValueChanged += this.LineSpacingSlider_ValueChanged;
 
@@ -505,6 +510,16 @@ namespace FontSettings.Framework.Menus
                 this._dropDown_font,
                 this._okButton);
         }
+
+#if DEBUG
+        public override void draw(SpriteBatch b)
+        {
+            base.draw(b);
+            b.DrawString(Game1.smallFont, $"Size: {this._slider_fontSize.Element.Value}\n"
+                + $"Spacing: {this._slider_spacing.Element.Value}\n"
+                + $"Line spacing: {this._slider_lineSpacing.Element.Value}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
+        }
+#endif
 
         private void UpdateGameExample()
         {
