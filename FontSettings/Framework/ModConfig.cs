@@ -6,7 +6,7 @@
 
         internal FontConfigs Fonts { get; set; }  // 这个不要储存在config.json里，故设为internal。
 
-        public int MinFontSize { get; } = 1;
+        internal int MinFontSize { get; } = 1;  // 只读属性pulic的话会显示在json文件里。
 
         public int MaxFontSize { get; set; } = 100;
 
@@ -14,7 +14,7 @@
 
         public int MaxSpacing { get; set; } = 10;
 
-        public int MinLineSpacing { get; } = 1;
+        internal int MinLineSpacing { get; } = 1;
 
         public int MaxLineSpacing { get; set; } = 100;
 
