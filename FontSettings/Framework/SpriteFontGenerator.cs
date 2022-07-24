@@ -201,31 +201,25 @@ namespace FontSettings.Framework
             var glyphSizes = GetGlyphSizes(fontInfo, ranges, scale);
 
             width = GuessWidth(glyphSizes.ToArray(), requirePowerOfTwo);
-            int maxHeight = 0;
-            int curX = 0, curY = 0;
+            int bottomY = 0;
+            int x = 0, y = 0;
             foreach (Point size in glyphSizes)
             {
                 // 需换行
-                if (curX + size.X > width)
+                if (x + size.X > width)
                 {
-                    curX = size.X;                // 重置X坐标。
-                    curY += maxHeight + padding;  // 更新Y坐标。
-                    maxHeight = 0;                // 清零最大高值。
+                    x = 0;        // 重置X坐标。
+                    y = bottomY;  // 更新Y坐标。
                 }
-                else
-                {
-                    curX += size.X + padding;
 
-                    // 更新最大高值。
-                    if (size.Y > maxHeight)
-                        maxHeight = size.Y;
-                }
+                x += size.X + padding;
+
+                // 更新最底y值。
+                if (bottomY < y + size.Y + padding)
+                    bottomY = y + size.Y + padding;
             }
 
-            // 更新最后一行的高。
-            curY += maxHeight;
-
-            height = MakeValidTextureSize(curY, requirePowerOfTwo);
+            height = MakeValidTextureSize(bottomY, requirePowerOfTwo);
         }
 
         private static unsafe IEnumerable<Point> GetGlyphSizes(stbtt_fontinfo fontInfo, IEnumerable<CharacterRange> ranges, float scale)
