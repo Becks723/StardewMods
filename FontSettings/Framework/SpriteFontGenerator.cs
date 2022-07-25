@@ -214,7 +214,7 @@ namespace FontSettings.Framework
                 }
 
                 x += size.X;
-
+                
                 // 更新最底y值。
                 if (bottomY < y + size.Y)
                     bottomY = y + size.Y;
