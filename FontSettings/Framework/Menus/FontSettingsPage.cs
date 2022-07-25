@@ -46,6 +46,7 @@ namespace FontSettings.Framework.Menus
         private readonly Slider<float> _slider_charOffsetX;
         private readonly Slider<float> _slider_charOffsetY;
         private readonly ComboBox _dropDown_font;
+        private readonly RefreshButton _button_refresh;
         private readonly LabeledElement<Slider<int>> _slider_fontSize;
         private readonly LabeledElement<Slider<int>> _slider_spacing;
         private readonly LabeledElement<Slider<int>> _slider_lineSpacing;
@@ -300,6 +301,18 @@ namespace FontSettings.Framework.Menus
             this._dropDown_font.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - this._dropDown_font.Width, this._box_enabledFont.LocalPosition.Y);
             this._dropDown_font.SelectionChanged += this.FontSelectionChanged;
 
+            float refreshScale = 2.5f;
+            int refreshWidth = (int)(16 * refreshScale);
+            int refreshHeight = (int)(16 * refreshScale);
+            this._button_refresh = new RefreshButton(refreshScale)
+            {
+                AnimationDuration = 300,
+                LocalPosition = new Vector2(this._dropDown_font.LocalPosition.X - borderWidth / 3 - refreshWidth, this._dropDown_font.LocalPosition.Y + this._dropDown_font.Height / 2 - refreshHeight / 2),
+                SettableWidth = refreshWidth,
+                SettableHeight = refreshHeight
+            };
+            this._button_refresh.Click += this.RefreshAllFonts;
+
             this._okButton = new OKButton();
             this._okButton.Click += this.OkButtonClicked;
             this._okButton.GreyedOut = _states.IsOn(this.CurrentFontType);
@@ -310,6 +323,16 @@ namespace FontSettings.Framework.Menus
             this.OnFontTypeChanged(this.CurrentFontType);
 
             this.ResetComponents();
+        }
+
+        private void RefreshAllFonts(object sender, EventArgs e)
+        {
+            Game1.playSound("trashcan");
+
+            //var lastSelected = this._dropDown_font.SelectedItem;
+            //this._allFonts = this.LoadAllFonts();
+            //this._dropDown_font.Choices = this._allFonts;
+            //this._dropDown_font.SelectedItem = lastSelected;
         }
 
         private void LeftArrowClicked(object sender, EventArgs e)
@@ -508,6 +531,7 @@ namespace FontSettings.Framework.Menus
                 this._slider_spacing,
                 this._slider_lineSpacing,
                 this._dropDown_font,
+                this._button_refresh,
                 this._okButton);
         }
 
