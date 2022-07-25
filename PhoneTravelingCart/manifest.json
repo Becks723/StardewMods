@@ -1,7 +1,7 @@
 ﻿{
   "Name": "猪车电话",
   "Author": "Becks723",
-  "Version": "1.0.0",
+  "Version": "1.0.1",
   "Description": "允许打电话给猪车。",
   "UniqueID": "Becks723.PhoneTravelingCart",
   "MinimumApiVersion": "3.14.0",
