@@ -187,7 +187,7 @@ namespace FontSettings.Framework.Menus
             {
                 SettableWidth = 32,
                 SettableHeight = 32,
-                LocalPosition = new Vector2(this._label_game.LocalPosition.X + this._label_game.Width - 32, exampleBounds.Y)
+                LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - 32, exampleBounds.Y)
             };
             this._button_offsetTuning.Click += this.OffsetTuningToggled;
 
