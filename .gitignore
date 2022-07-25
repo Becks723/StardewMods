@@ -17,6 +17,9 @@
 [Rr]eleases/
 !/_libs/*/[Dd]ebug/
 !/_libs/*/[Rr]elease/
+!/FontSettings/dependencies/*/[Dd]ebug/
+!/FontSettings/dependencies/*/[Rr]elease/
+_releases/
 x64/
 x86/
 bld/
@@ -56,6 +59,7 @@ artifacts/
 *.pch
 *.pdb
 !/_libs/**/*.pdb
+!/FontSettings/dependencies/**/*.pdb
 *.pgc
 *.pgd
 *.rsp
