@@ -39,7 +39,8 @@ namespace PhoneTravelingCart.Framework.Patchers
                     && Game1.timeOfDay < 2000)     // 晚上8点之前
                 {
                     var responses = answerChoices.ToList();
-                    responses.Add(new Response("Traveler", I18n.TravelingMerchantName()));
+                    responses.Insert(responses.Count - 1,  // 插入到倒数第二个，最后一个是“取消”。
+                        new Response("Traveler", I18n.TravelingMerchantName()));
                     answerChoices = responses.ToArray();
                 }
             }
