@@ -24,13 +24,14 @@ namespace FontSettings.Framework.Patchers
         private static GameFontChanger _fontChanger;
         private static Action<ModConfig> _saveConfig;
 
-        private readonly IModHelper _helper;
+        private static IModHelper _helper;
         private readonly Harmony _harmony;
 
         public GameMenuAdder(IModHelper helper, Harmony harmony)
         {
-            this._helper = helper;
             this._harmony = harmony;
+
+            _helper = helper;
             _fontTab = new(() => this.LoadFontTab(helper));
         }
 
@@ -67,7 +68,9 @@ namespace FontSettings.Framework.Patchers
                 fullyImmutable = true
             });
             __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _saveConfig,
-                __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height));
+                __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height)
+                .FixConflictWithStarrySkyInterface(_helper.ModRegistry)
+            );
         }
 
         private static void GameMenu_getTabNumberFromName_Postfix(string name, ref int __result)

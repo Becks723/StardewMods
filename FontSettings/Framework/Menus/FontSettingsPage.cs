@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FontSettings.Framework.FontInfomation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
@@ -323,6 +324,21 @@ namespace FontSettings.Framework.Menus
             this.OnFontTypeChanged(this.CurrentFontType);
 
             this.ResetComponents();
+        }
+
+        /// <summary>问题：如果同时安装了<see href="https://www.nexusmods.com/stardewvalley/mods/2668">魔法少女界面</see>，设置字体的界面会出现黑框问题，此函数为解决方法。</summary>
+        /// <remarks>
+        /// 问题根源在两个模组使用了不同的贴图。魔法少女最近一次更新在18年8月23号，当时即使最新的游戏版本也是1.3.28。当时Maps/MenuTiles中（64，320，64，64）的图片和现在不同，当时是深青色背景一个淡青色的鬼；现在则是一个背景框。扔进游戏里自然就出错了。
+        /// </remarks>
+        public FontSettingsPage FixConflictWithStarrySkyInterface(IModRegistry registry)
+        {
+            const string ID = "BeneathThePlass.StarrySkyInterfaceCP";
+            if (registry.IsLoaded(ID))
+            {
+                this._exampleBoard.Kind = TextureBoxs.Default;  // 解决方法：将背景框改成默认款。
+            }
+
+            return this;
         }
 
         private void RefreshAllFonts(object sender, EventArgs e)
