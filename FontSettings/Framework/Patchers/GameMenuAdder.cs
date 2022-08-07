@@ -139,7 +139,20 @@ namespace FontSettings.Framework.Patchers
 
                     if (isFontTab)
                     {
-                        const int index = 2;
+                        // 框
+                        b.Draw(
+                            Game1.mouseCursors,
+                            new Vector2(tab.bounds.X, tab.bounds.Y + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)),
+                            new Rectangle(16, 368, 16, 16),
+                            Color.White,
+                            0f,
+                            Vector2.Zero,
+                            4f,
+                            SpriteEffects.None,
+                            0.0001f);
+
+                        // 内容
+                        const int index = 3;
                         b.Draw(
                             _fontTab.Value,
                             new Vector2(tab.bounds.X, tab.bounds.Y + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)),
