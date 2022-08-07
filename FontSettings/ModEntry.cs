@@ -80,6 +80,9 @@ namespace FontSettings
                         this.SaveConfig(config);
                         this.SaveFontSettings(config.Fonts);
                     });
+
+                new FontShadowPatcher(this._config)
+                    .Patch(Harmony, this.Monitor);
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;

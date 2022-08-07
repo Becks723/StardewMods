@@ -165,6 +165,15 @@ namespace FontSettings.Framework
                     min: -25,
                     interval: 1
                 )
+
+                // diable font shadow
+                .AddCheckbox(
+                    name: I18n.Config_DisableTextShadow,
+                    tooltip: I18n.Config_DisableTextShadow_Description,
+                    get: () => this.Config.DisableTextShadow,
+                    set: val => this.Config.DisableTextShadow = val
+                )
+
                 .AddLineSpacing()
                 .AddSectionTitle(I18n.Config_Section_Fonts, I18n.Config_Section_Fonts_Description);
 

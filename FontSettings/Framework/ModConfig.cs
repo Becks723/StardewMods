@@ -26,6 +26,8 @@
 
         public int MaxCharOffsetY { get; set; } = 10;
 
+        public bool DisableTextShadow { get; set; } = false;
+
         public void ResetToDefault()
         {
             this.ExampleText = "AaBbYyZz\n测试用例";

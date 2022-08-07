@@ -36,7 +36,8 @@
   "config.max-offset-y.description": "Max y-offset of all characters.",
   "config.min-offset-y": "Min char y-offset",
   "config.min-offset-y.description": "Min y-offset of all characters.",
-
+  "config.disable-text-shadow": "Diable text shadow",
+  "config.disable-text-shadow.description": "Whether to hide font shadow.",
   "config.section.fonts": "Font",
   "config.section.fonts.description": "Set the fonts for the current language.",
   "config.fonts.enabled": "Enabled",

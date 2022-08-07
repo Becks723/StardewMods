@@ -36,7 +36,8 @@
   "config.max-offset-y.description": "字符在纵轴上的偏移量 最大值",
   "config.min-offset-y": "最小纵轴偏移量",
   "config.min-offset-y.description": "字符在纵轴上的偏移量 最小值",
-
+  "config.disable-text-shadow": "禁用字体阴影",
+  "config.disable-text-shadow.description": "禁用字体阴影。",
   "config.section.fonts": "字体",
   "config.section.fonts.description": "设置当前语言下的字体。",
   "config.fonts.enabled": "启用",
