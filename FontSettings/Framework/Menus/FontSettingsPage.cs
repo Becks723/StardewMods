@@ -297,6 +297,7 @@ namespace FontSettings.Framework.Menus
                 SettableWidth = this._exampleBoard.Width / 2,
                 Choices = _allFonts,
                 DisplayTextReslover = (_, item) => ParseFontData((FontModel)item),
+                EqualityComparer = new FontEqualityComparer(),
                 MaxDisplayRows = 6,
             };
             this._dropDown_font.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - this._dropDown_font.Width, this._box_enabledFont.LocalPosition.Y);
@@ -339,16 +340,6 @@ namespace FontSettings.Framework.Menus
             }
 
             return this;
-        }
-
-        private void RefreshAllFonts(object sender, EventArgs e)
-        {
-            Game1.playSound("trashcan");
-
-            //var lastSelected = this._dropDown_font.SelectedItem;
-            //this._allFonts = this.LoadAllFonts();
-            //this._dropDown_font.Choices = this._allFonts;
-            //this._dropDown_font.SelectedItem = lastSelected;
         }
 
         private void LeftArrowClicked(object sender, EventArgs e)
@@ -644,9 +635,11 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        private FontModel[] LoadAllFonts()
+        private FontModel[] LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。
         {
             FontModel empty = new FontModel();
+            if (rescan)
+                InstalledFonts.Rescan();
             FontModel[] fonts = InstalledFonts.GetAll().ToArray();
             return new FontModel[1] { empty }
                 .Concat(fonts)
@@ -655,10 +648,42 @@ namespace FontSettings.Framework.Menus
 
         private FontModel FindFont(FontModel[] fonts, string fontFilePath, int fontIndex) // 这里path是简化后的
         {
-            if (fontFilePath == null)
+            // 如果找不到字体文件，保持原版。
+            if (fontFilePath == null                                                                        
+                || !InstalledFonts.TryGetFullPath(fontFilePath, out string fullPath))
                 return fonts[0];
-            return fonts.Where(f => f.FullPath == InstalledFonts.GetFullPath(fontFilePath) && f.FontIndex == fontIndex)
+
+            return fonts.Where(f => f.FullPath == fullPath && f.FontIndex == fontIndex)
                 .FirstOrDefault();
+        }
+
+        private void RefreshAllFonts(object sender, EventArgs e)
+        {
+            Game1.playSound("trashcan");
+
+            var lastSelected = this._dropDown_font.SelectedItem as FontModel;  // 记录当前选中的字体。
+            this._dropDown_font.Choices = this._allFonts = this.LoadAllFonts(true);  // 重新扫描本地字体文件。
+
+            // 检查重新扫描后，之前选中的还在不在。
+            bool match = false;
+            var comparer = new FontEqualityComparer();
+            foreach (object item in this._dropDown_font.Choices)
+            {
+                FontModel font = item as FontModel;
+                if (comparer.Equals(font, lastSelected))
+                {
+                    match = true;
+                    break;
+                }
+            }
+
+            if (match)
+                this._dropDown_font.SelectedItem = lastSelected;  // 如果还在，更新选中项。
+            else
+            {
+                this._dropDown_font.SelectedItem = this._dropDown_font.Choices[0];  // 如果不在了，保持原版。
+                this.UpdateCustomExample();                                         // 同时更新示例。
+            }
         }
 
         private string GetFontFile()
