@@ -79,7 +79,7 @@ namespace FontSettings.Framework.Menus
 
         private static Texture2D LoadRefreshTexture()
         {
-            return ModEntry.ModHelper.ModContent.Load<Texture2D>("assets/refresh.png");
+            return Textures.Refresh;
         }
     }
 }

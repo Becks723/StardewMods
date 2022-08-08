@@ -40,6 +40,7 @@ namespace FontSettings
             ModHelper = this.Helper;
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
+            Textures.Init(helper.ModContent);
             if (this._0_2_0_Migration.NeedMigrate(helper))
             {
                 this._0_2_0_Migration.Apply(helper, out this._config);

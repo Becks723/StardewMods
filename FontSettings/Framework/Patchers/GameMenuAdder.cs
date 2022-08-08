@@ -32,7 +32,7 @@ namespace FontSettings.Framework.Patchers
             this._harmony = harmony;
 
             _helper = helper;
-            _fontTab = new(() => this.LoadFontTab(helper));
+            _fontTab = new(() => Textures.FontTab);
         }
 
         public void AddFontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action<ModConfig> saveConfig)
@@ -182,11 +182,6 @@ namespace FontSettings.Framework.Patchers
                 __instance.drawMouse(b, ignore_transparency: true);
 
             return false;
-        }
-
-        private Texture2D LoadFontTab(IModHelper helper)
-        {
-            return helper.ModContent.Load<Texture2D>(@"assets/font-tab.png");
         }
     }
 }
