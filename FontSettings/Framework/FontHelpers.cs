@@ -123,25 +123,6 @@ namespace FontSettings.Framework
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="path">不带扩展名的完整路径。</param>
-        public static void DeleteBmFont(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path)) return;
-
-            string fakePath = path + ".txt";
-            string dir = Path.GetDirectoryName(fakePath);
-            string name = Path.GetFileNameWithoutExtension(fakePath);
-
-            string fnt = Path.Combine(dir, name + ".fnt");
-            string[] pngs = Directory.EnumerateFiles(dir, $"{name}_*.png", SearchOption.TopDirectoryOnly).ToArray();
-            File.Delete(fnt);
-            foreach (string png in pngs)
-                File.Delete(png);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="path">Absolute path to the text file generated.</param>
         /// <param name="charRanges"></param>
         public static void GenerateTextFile(string path, IEnumerable<CharacterRange> charRanges)

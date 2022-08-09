@@ -457,10 +457,6 @@ namespace FontSettings.Framework.Menus
             bool charOffsetXChanged = this._lastCharOffsetX != tempConfig.CharOffsetX;
             bool charOffsetYChanged = this._lastCharOffsetY != tempConfig.CharOffsetY;
 
-            // 必要时重置字体文件路径。
-            if (fontFilePathChanged || fontSizeChanged || spacingChanged || lineSpacingChanged)
-                tempConfig.ExistingFontPath = null;
-
             var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保On和Off的是同一个字体。
             this._okButton.GreyedOut = true;
             _states.On(fontType);

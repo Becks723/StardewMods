@@ -32,6 +32,7 @@ namespace FontSettings.Framework
             this._content = content;
         }
 
+        [Obsolete("自0.5.0版本起正式废除。")]
         public SpriteFont GetLoadedFont(FontConfig config)
         {
             if (this._spriteFonts.TryGetValue(config, out SpriteFont spriteFont))
@@ -44,6 +45,7 @@ namespace FontSettings.Framework
             }
         }
 
+        [Obsolete("自0.5.0版本起正式废除。")]
         public void RecordSpriteFont(FontConfig fontConfig, SpriteFont value)
         {
             if (value != null && !this._spriteFonts.ContainsKey(fontConfig))

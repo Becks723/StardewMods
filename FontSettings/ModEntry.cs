@@ -64,9 +64,6 @@ namespace FontSettings
                 this._cacheTable[langInfo] = false;
             }
 
-            BmFontGenerator.Initialize(helper);
-            CharsFileManager.Initialize(System.IO.Path.Combine(helper.DirectoryPath, "Chars"));
-
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
                 new Game1Patcher(this._config, this._fontManager, this._fontChanger)

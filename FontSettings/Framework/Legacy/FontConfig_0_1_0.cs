@@ -12,7 +12,8 @@ namespace FontSettings.Framework.Legacy
         public LocalizedContentManager.LanguageCode Lang { get; set; }
 
         public GameFontType InGameType { get; set; }
-
+        
+        [Obsolete("自0.5.0版本起正式废除。")]
         public string ExistingFontPath { get; set; }
 
         public string FontFilePath { get; set; }

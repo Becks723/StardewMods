@@ -30,22 +30,6 @@ namespace FontSettings.Framework
         private static string _baseDir;
         private static string _tmpDir;
 
-        public static void Initialize(IModHelper modHelper)
-        {
-            _baseDir = modHelper.DirectoryPath;
-            _tmpDir = Path.Combine(modHelper.DirectoryPath, "Temp");
-
-            Directory.CreateDirectory(_tmpDir);
-        }
-
-        public static void Initialize(string baseDir)
-        {
-            _baseDir = baseDir;
-            _tmpDir = Path.Combine(baseDir, "Temp");
-
-            Directory.CreateDirectory(_tmpDir);
-        }
-
         public static void GenerateIntoMemory(string fontFilePath,
             out FontFile fontFile, out Texture2D[] pages,
             int? fontIndex = null, int? fontSize = null,
@@ -113,6 +97,7 @@ namespace FontSettings.Framework
 
         // outputDir: 输出文件夹的完整路径。
         // outputName: 输出文件的名称（不带扩展名）。
+        [Obsolete("现在可以直接生成进内存。就用不上先生成文件，再读进内存了。")]
         public static void GenerateFile(string fontFilePath, out string outputDir, out string outputName,
             int? fontIndex = null, int? fontSize = null,
             IEnumerable<CharacterRange>? charRanges = null, string[]? charsFiles = null,
@@ -127,6 +112,7 @@ namespace FontSettings.Framework
             outputName = Path.GetFileNameWithoutExtension(outputPathWithExtension);
         }
 
+        [Obsolete("现在可以直接生成进内存。就用不上先生成文件，再读进内存了。")]
         public static void GenerateFile(string fontFilePath, string baseDir, string outputDir, string? outputName, out string outputPath,
             int? fontIndex = null, int? fontSize = null,
             IEnumerable<CharacterRange>? charRanges = null, string[]? charsFiles = null,
@@ -152,6 +138,5 @@ namespace FontSettings.Framework
                 finalPaddingUp, finalPaddingRight, finalPaddingDown, finalPaddingLeft,
                 finalSpacingHoriz, finalSpacingVert);
         }
-
     }
 }
