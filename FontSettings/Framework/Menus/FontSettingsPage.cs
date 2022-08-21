@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FontSettings.Framework.FontInfomation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValleyUI;
@@ -24,8 +25,10 @@ namespace FontSettings.Framework.Menus
         private readonly ModConfig _config;
         private readonly RuntimeFontManager _fontManager;
         private readonly GameFontChanger _fontChanger;
+        private readonly FontPresetManager _presetManager;
         private readonly Action<ModConfig> _saveConfig;
         private readonly ExampleFonts _exampleFonts;
+        private readonly FontPresetController _presetController;
 
         private readonly Color _gameExampleColor = Color.Gray * 0.67f;
         private readonly Color _customExampleColor = Game1.textColor;
@@ -38,6 +41,12 @@ namespace FontSettings.Framework.Menus
         private readonly LabeledElement<Checkbox> _box_showText;
         private readonly FontExampleLabel _label_gameExample;
         private readonly FontExampleLabel _label_currentExample;
+        private readonly Label2 _label_currentPreset;
+        private readonly TextureButton _button_lastPreset;
+        private readonly TextureButton _button_nextPreset;
+        private readonly TextureButton _button_new;
+        private readonly TextureButton _button_save;
+        private readonly TextureButton _button_delete;
         private readonly LabeledElement<Checkbox> _box_enabledFont;
         private readonly Label2 _label_game;
         private readonly Label2 _label_current;
@@ -52,7 +61,6 @@ namespace FontSettings.Framework.Menus
         private readonly LabeledElement<Slider<int>> _slider_spacing;
         private readonly LabeledElement<Slider<int>> _slider_lineSpacing;
         private readonly OKButton _okButton;
-
         private bool _lastEnabled;
         private string _lastFontFilePath;
         private int _lastFontSize;
@@ -61,22 +69,31 @@ namespace FontSettings.Framework.Menus
         private float _lastCharOffsetX;
         private float _lastCharOffsetY;
         private FontModel[] _allFonts;
+        private bool _isNewPresetMenu;
+        private NewPresetMenu _newPresetMenu;
 
         protected override bool ManualInitializeComponents => true;
 
         private GameFontType CurrentFontType { get; set; }
 
-        public FontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action<ModConfig> saveConfig,
+        public FontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig,
             int x, int y, int width, int height, bool showUpperRightCloseButton = false)
             : base(x, y, width, height, showUpperRightCloseButton)
         {
+            // 游戏中GameMenu在每次窗口大小改变时，都会重新创建实例。这导致GameMenu的子菜单（见GameMenu.pages字段）中保存的信息、状态直接清零。
+            // 于是，下面这个函数通过一个单例，将前一实例的信息传递到下一实例。
+            this.BeforeUpdateSingleton(Instance);
+
             Instance = this;
 
             this._config = config;
             this._fontManager = fontManager;
             this._fontChanger = fontChanger;
+            this._presetManager = presetManager;
             this._saveConfig = saveConfig;
             this._exampleFonts = new ExampleFonts(fontManager);
+            this._presetController = new FontPresetController(presetManager, () => this._allFonts);
+            this._presetController.PresetChanged += this.OnPresetChanged;
 
             this.CurrentFontType = _optionValues.FontType;
             FontConfig fontConfig = config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
@@ -106,7 +123,7 @@ namespace FontSettings.Framework.Menus
 
             this._exampleBoard = new TextureBox
             {
-                Kind = TextureBoxs.DefaultBorderless,
+                Kind = TextureBoxes.DefaultBorderless,
                 DrawShadow = false,
                 LocalPosition = new Vector2(spaceToClearSideBorder + borderWidth, this._label_title.LocalPosition.Y + this._label_title.Height),
                 SettableHeight = height / 3
@@ -223,6 +240,64 @@ namespace FontSettings.Framework.Menus
             };
             this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
 
+            float exampleBoardBottom = this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height;
+            float exampleBoardX = this._exampleBoard.LocalPosition.X;
+            float presetSectionY = exampleBoardBottom + borderWidth / 2;
+            float presetSectionBottom = 0;
+            {
+                Vector2 size_new = new(10 * 3f);
+                Vector2 size_save = new(16 * 3f);
+                Vector2 size_delete = new(64 * 0.75f);
+                Vector2 size_last = new Vector2(12, 11) * 4f;
+                Vector2 size_next = new Vector2(12, 11) * 4f;
+                float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_last, size_next }.Max(v => v.Y);
+                this._label_currentPreset = new Label2()
+                {
+                    LocalPosition = new Vector2(exampleBoardX, presetSectionY),
+                };
+                this._button_delete = new TextureButton(Game1.mouseCursors, new Rectangle(192, 256, 64, 64), 0.75f)
+                {
+                    LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - size_delete.X, presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2),
+                    SettableWidth = (int)size_delete.X,
+                    SettableHeight = (int)size_delete.Y
+                };
+                this._button_delete.Click += this.DeletePresetButtonClicked;
+
+                this._button_save = new TextureButton(Game1.mouseCursors, new Rectangle(274, 284, 16, 16), 3f)
+                {
+                    LocalPosition = new Vector2(this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X, presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2),
+                    SettableWidth = (int)size_save.X,
+                    SettableHeight = (int)size_save.Y
+                };
+                this._button_save.Click += this.SavePresetButtonClicked;
+
+                this._button_new = new TextureButton(Game1.mouseCursors, new Rectangle(0, 428, 10, 10), 3f)
+                {
+                    LocalPosition = new Vector2(this._button_save.LocalPosition.X - borderWidth / 3 - size_new.X, presetSectionY + presetSectionMaxHeight / 2 - size_new.Y / 2),
+                    SettableWidth = (int)size_new.X,
+                    SettableHeight = (int)size_new.Y
+                };
+                this._button_new.Click += this.NewPresetButtonClicked;
+
+                this._button_nextPreset = new TextureButton(Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f)
+                {
+                    LocalPosition = new Vector2(this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X, presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2),
+                    SettableWidth = (int)size_next.X,
+                    SettableHeight = (int)size_next.Y
+                };
+                this._button_nextPreset.Click += this.NextPresetButtonClicked;
+
+                this._button_lastPreset = new TextureButton(Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f)
+                {
+                    LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_last.X, presetSectionY + presetSectionMaxHeight / 2 - size_last.Y / 2),
+                    SettableWidth = (int)size_last.X,
+                    SettableHeight = (int)size_last.Y
+                };
+                this._button_lastPreset.Click += this.PreviousPresetButtonClicked;
+
+                presetSectionBottom = presetSectionY + presetSectionMaxHeight;
+            }
+
             Checkbox enabledFontBox = new Checkbox();
             enabledFontBox.Checked += this.FontEnableChanged;
             enabledFontBox.Unchecked += this.FontEnableChanged;
@@ -276,10 +351,8 @@ namespace FontSettings.Framework.Menus
             {
                 Text = I18n.OptionsPage_LineSpacing()
             };
-            float exampleBoardBottom = this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height;
-            float exampleBoardX = this._exampleBoard.LocalPosition.X;
-            gap = (height - spaceToClearSideBorder - exampleBoardBottom - this._box_enabledFont.Height - this._slider_fontSize.Height - this._slider_spacing.Height - this._slider_lineSpacing.Height) / 5;
-            this._box_enabledFont.LocalPosition = new Vector2(exampleBoardX, exampleBoardBottom + gap);
+            gap = (height - spaceToClearSideBorder - presetSectionBottom - this._box_enabledFont.Height - this._slider_fontSize.Height - this._slider_spacing.Height - this._slider_lineSpacing.Height) / 5;
+            this._box_enabledFont.LocalPosition = new Vector2(exampleBoardX, presetSectionBottom + gap);
             this._slider_fontSize.LocalPosition = new Vector2(exampleBoardX, this._box_enabledFont.LocalPosition.Y + this._box_enabledFont.Height + gap);
             this._slider_spacing.LocalPosition = new Vector2(exampleBoardX, this._slider_fontSize.LocalPosition.Y + this._slider_fontSize.Height + gap);
             this._slider_lineSpacing.LocalPosition = new Vector2(exampleBoardX, this._slider_spacing.LocalPosition.Y + this._slider_spacing.Height + gap);
@@ -336,7 +409,7 @@ namespace FontSettings.Framework.Menus
             const string ID = "BeneathThePlass.StarrySkyInterfaceCP";
             if (registry.IsLoaded(ID))
             {
-                this._exampleBoard.Kind = TextureBoxs.Default;  // 解决方法：将背景框改成默认款。
+                this._exampleBoard.Kind = TextureBoxes.Default;  // 解决方法：将背景框改成默认款。
             }
 
             return this;
@@ -502,8 +575,59 @@ namespace FontSettings.Framework.Menus
             this._slider_charOffsetY.Value = fontConfig.CharOffsetY;
             this._okButton.GreyedOut = _states.IsOn(fontType);
 
+            this.OnPresetChanged(this._presetController, new PresetChangedEventArgs(fontType));
+
             this.UpdateGameExample();
             this.UpdateCustomExample();
+        }
+
+        private void OnPresetChanged(object sender, PresetChangedEventArgs e)
+        {
+            FontPreset? newPreset = this._presetController.CurrentPreset(this.CurrentFontType);
+
+            this._label_currentPreset.Text = newPreset?.Name;
+            this.UpdateSelectedPreset(newPreset);
+        }
+
+        private void PreviousPresetButtonClicked(object sender, EventArgs e)
+        {
+            Game1.playSound("smallSelect");
+            this._presetController.SwitchToPreviousPreset(this.CurrentFontType);
+        }
+
+        private void NextPresetButtonClicked(object sender, EventArgs e)
+        {
+            Game1.playSound("smallSelect");
+            this._presetController.SwitchToNextPreset(this.CurrentFontType);
+        }
+
+        private void NewPresetButtonClicked(object sender, EventArgs e)
+        {
+            Game1.playSound("coin");
+
+            this._newPresetMenu ??= this.CreateNewPresetMenu();
+            this._isNewPresetMenu = true;
+        }
+
+        private void SavePresetButtonClicked(object sender, EventArgs e)
+        {
+            Game1.playSound("newRecipe");
+
+            this._presetController.SaveCurrentPreset(this.CurrentFontType,
+                System.IO.Path.GetFileName(this.GetFontFile()),
+                this.GetFontIndex(),
+                this._slider_fontSize.Element.Value,
+                this._slider_spacing.Element.Value,
+                this._slider_lineSpacing.Element.Value,
+                this._slider_charOffsetX.Value,
+                this._slider_charOffsetY.Value);
+        }
+
+        private void DeletePresetButtonClicked(object sender, EventArgs e)
+        {
+            Game1.playSound("trashcan");
+
+            this._presetController.DeleteCurrentPreset(this.CurrentFontType);
         }
 
         protected override void ResetComponents(RootElement root, IBindingContext context)
@@ -529,6 +653,12 @@ namespace FontSettings.Framework.Menus
                 this._button_offsetTuning,
                 this._slider_charOffsetX,
                 this._slider_charOffsetY,
+                this._label_currentPreset,
+                this._button_lastPreset,
+                this._button_nextPreset,
+                this._button_new,
+                this._button_save,
+                this._button_delete,
                 this._box_enabledFont,
                 this._slider_fontSize,
                 this._slider_spacing,
@@ -536,17 +666,79 @@ namespace FontSettings.Framework.Menus
                 this._dropDown_font,
                 this._button_refresh,
                 this._okButton);
+
+            context
+                .AddBinding(() => !this._presetController.CanUseNewButton(this.CurrentFontType), () => this._button_new.GreyedOut, BindingMode.OneWay)
+                .AddBinding(() => !this._presetController.CanUseSaveButton(this.CurrentFontType), () => this._button_save.GreyedOut, BindingMode.OneWay)
+                .AddBinding(() => !this._presetController.CanUseDeleteButton(this.CurrentFontType), () => this._button_delete.GreyedOut, BindingMode.OneWay)
+                .AddBinding(() => !this._presetController.IsCurrentPresetValid, () => this._okButton.GreyedOut, BindingMode.OneWay);
         }
 
-#if DEBUG
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            this._newPresetMenu?.Dispose();
+        }
+
+        public override void update(GameTime time)
+        {
+            if (!this._isNewPresetMenu)
+                base.update(time);
+            else
+            {
+                this._newPresetMenu ??= this.CreateNewPresetMenu();
+
+                if (this._newPresetMenu.IsFinished)
+                {
+                    this._newPresetMenu.Dispose();
+                    this._newPresetMenu = null;
+                    this._isNewPresetMenu = false;
+                    return;
+                }
+
+                this._newPresetMenu.update(time);
+            }
+        }
+
         public override void draw(SpriteBatch b)
         {
             base.draw(b);
+
+#if DEBUG
             b.DrawString(Game1.smallFont, $"Size: {this._slider_fontSize.Element.Value}\n"
                 + $"Spacing: {this._slider_spacing.Element.Value}\n"
                 + $"Line spacing: {this._slider_lineSpacing.Element.Value}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
-        }
 #endif
+
+            if (this._isNewPresetMenu)
+            {
+                b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
+                this._newPresetMenu ??= this.CreateNewPresetMenu();
+                this._newPresetMenu.draw(b);
+            }
+        }
+
+        public override void receiveKeyPress(Keys key)
+        {
+            base.receiveKeyPress(key);
+
+            if (this._isNewPresetMenu)
+            {
+                this._newPresetMenu ??= this.CreateNewPresetMenu();
+                this._newPresetMenu.receiveKeyPress(key);
+            }
+        }
+
+        protected override bool CanClose()
+        {
+            if (!this._isNewPresetMenu)
+                return true;
+            else
+            {
+                this._newPresetMenu ??= this.CreateNewPresetMenu();
+                return this._newPresetMenu.readyToClose();
+            }
+        }
 
         private void UpdateGameExample()
         {
@@ -645,7 +837,7 @@ namespace FontSettings.Framework.Menus
         private FontModel FindFont(FontModel[] fonts, string fontFilePath, int fontIndex) // 这里path是简化后的
         {
             // 如果找不到字体文件，保持原版。
-            if (fontFilePath == null                                                                        
+            if (fontFilePath == null
                 || !InstalledFonts.TryGetFullPath(fontFilePath, out string fullPath))
                 return fonts[0];
 
@@ -692,6 +884,74 @@ namespace FontSettings.Framework.Menus
         {
             FontModel selectedFont = this._dropDown_font.SelectedItem as FontModel;
             return selectedFont.FontIndex;
+        }
+
+        private void UpdateSelectedPreset(FontPreset? newPreset)
+        {
+            // 如果无预设，则载入保存的设置。
+            if (newPreset == null)
+            {
+                FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                    FontHelpers.GetCurrentLocale(), this.CurrentFontType);
+                this._box_enabledFont.Element.IsChecked = fontConfig.Enabled;
+                this._slider_fontSize.Element.Value = (int)fontConfig.FontSize;
+                this._slider_spacing.Element.Value = (int)fontConfig.Spacing;
+                this._slider_lineSpacing.Element.Value = fontConfig.LineSpacing;
+                this._dropDown_font.SelectedItem = this.FindFont(this._allFonts, fontConfig.FontFilePath,
+                    fontConfig.FontIndex);
+                this._slider_charOffsetX.Value = fontConfig.CharOffsetX;
+                this._slider_charOffsetY.Value = fontConfig.CharOffsetY;
+
+                this.UpdateCustomExample();
+                return;
+            }
+
+            if (this._presetController.IsCurrentPresetValid)
+            {
+                this._presetController.MeetsRequirement(newPreset, this._allFonts, out FontModel font);
+                this._dropDown_font.SelectedItem = font;
+                this._box_enabledFont.Element.IsChecked = true;
+                this._slider_fontSize.Element.Value = (int)newPreset.FontSize;
+                this._slider_spacing.Element.Value = (int)newPreset.Spacing;
+                this._slider_lineSpacing.Element.Value = newPreset.LineSpacing;
+                this._slider_charOffsetX.Value = newPreset.CharOffsetX;
+                this._slider_charOffsetY.Value = newPreset.CharOffsetY;
+
+                this.UpdateCustomExample();
+            }
+        }
+
+        private NewPresetMenu CreateNewPresetMenu()
+        {
+            var result = new NewPresetMenu(
+                this._presetManager,
+                this.xPositionOnScreen + this.width / 4,
+                this.yPositionOnScreen + this.height / 3,
+                this.width / 2,
+                this.height / 3);
+            result.Accepted += (_, name) =>
+                this._presetController.SaveCurrentAsNewPreset(
+                    this.CurrentFontType,
+                    name,
+                    System.IO.Path.GetFileName(this.GetFontFile()),
+                    this.GetFontIndex(),
+                    this._slider_fontSize.Element.Value,
+                    this._slider_spacing.Element.Value,
+                    this._slider_lineSpacing.Element.Value,
+                    this._slider_charOffsetX.Value,
+                    this._slider_charOffsetY.Value);
+
+            return result;
+        }
+
+        /// <summary>一些在单例<see cref="Instance"/>更新前（单例在每次创建实例时更新）要做的事。</summary>
+        /// <param name="instance">上一个实例<see cref="Instance"/>。</param>
+        private void BeforeUpdateSingleton(FontSettingsPage instance)
+        {
+            // 首次创建实例，直接返回。
+            if (instance == null) return;
+
+            this._isNewPresetMenu = instance._isNewPresetMenu;
         }
 
         /// <summary>记录按下OK键后字体替换的进程。</summary>

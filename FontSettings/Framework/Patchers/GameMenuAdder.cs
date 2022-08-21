@@ -17,32 +17,24 @@ namespace FontSettings.Framework.Patchers
     internal class GameMenuAdder
     {
         private const string _fontTabName = "font";
-        private static Lazy<Texture2D> _fontTab;
+        private static readonly Lazy<Texture2D> _fontTab = new(() => Textures.FontTab);
 
+        private static IModHelper _helper;
         private static ModConfig _config;
         private static RuntimeFontManager _fontManager;
         private static GameFontChanger _fontChanger;
+        private static FontPresetManager _presetManager;
         private static Action<ModConfig> _saveConfig;
 
-        private static IModHelper _helper;
-        private readonly Harmony _harmony;
-
-        public GameMenuAdder(IModHelper helper, Harmony harmony)
+        public void AddFontSettingsPage(IModHelper helper, Harmony harmony, ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
         {
-            this._harmony = harmony;
-
             _helper = helper;
-            _fontTab = new(() => Textures.FontTab);
-        }
-
-        public void AddFontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, Action<ModConfig> saveConfig)
-        {
             _config = config;
             _fontManager = fontManager;
             _fontChanger = fontChanger;
+            _presetManager = presetManager;
             _saveConfig = saveConfig;
 
-            var harmony = this._harmony;
             harmony.Patch(
                 original: AccessTools.Constructor(typeof(GameMenu), new Type[] { typeof(bool) }),
                 postfix: new HarmonyMethod(typeof(GameMenuAdder), nameof(GameMenuAdder.GameMenu_ctor_Postfix))
@@ -54,6 +46,10 @@ namespace FontSettings.Framework.Patchers
             harmony.Patch(
                 original: AccessTools.Method(typeof(GameMenu), nameof(GameMenu.getTabNumberFromName)),
                 postfix: new HarmonyMethod(typeof(GameMenuAdder), nameof(GameMenuAdder.GameMenu_getTabNumberFromName_Postfix))
+            );
+            harmony.Patch(
+                original: AccessTools.Method(typeof(Game1), "set_activeClickableMenu"),
+                prefix: new HarmonyMethod(typeof(GameMenuAdder), nameof(GameMenuAdder.Game1_set_activeClickableMenu_Prefix))
             );
         }
 
@@ -67,8 +63,8 @@ namespace FontSettings.Framework.Patchers
                 tryDefaultIfNoDownNeighborExists = true,
                 fullyImmutable = true
             });
-            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _saveConfig,
-                __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height)
+            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _presetManager, _saveConfig,
+                __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height + 64)
                 .FixConflictWithStarrySkyInterface(_helper.ModRegistry)
             );
         }
@@ -182,6 +178,16 @@ namespace FontSettings.Framework.Patchers
                 __instance.drawMouse(b, ignore_transparency: true);
 
             return false;
+        }
+
+        private static void Game1_set_activeClickableMenu_Prefix()
+        {
+            if (Game1.activeClickableMenu is GameMenu gameMenu)
+            {
+                foreach (IClickableMenu page in gameMenu.pages)
+                    if (page is IDisposable disposable)
+                        disposable.Dispose();
+            }
         }
     }
 }

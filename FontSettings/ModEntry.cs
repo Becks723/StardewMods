@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using BmFont;
 using FontSettings.Framework;
 using FontSettings.Framework.FontInfomation;
@@ -31,6 +32,8 @@ namespace FontSettings
 
         private GameFontChanger _fontChanger;
 
+        private FontPresetManager _presetManager;
+
         internal static IModHelper ModHelper { get; private set; }
 
         internal static Harmony Harmony { get; private set; }
@@ -55,6 +58,8 @@ namespace FontSettings
             this.CheckConfigValid(this._config);
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
+            this._presetManager = new(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"), "System");
+
             foreach (LocalizedContentManager.LanguageCode code in Enum.GetValues<LocalizedContentManager.LanguageCode>())
             {
                 if (code is LocalizedContentManager.LanguageCode.mod)
@@ -72,8 +77,8 @@ namespace FontSettings
                 new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
                     .Patch(Harmony, this.Monitor);
 
-                new GameMenuAdder(helper, Harmony)
-                    .AddFontSettingsPage(this._config, this._fontManager, this._fontChanger, config =>
+                new GameMenuAdder()
+                    .AddFontSettingsPage(helper, Harmony, this._config, this._fontManager, this._fontChanger, this._presetManager, config =>
                     {
                         this.SaveConfig(config);
                         this.SaveFontSettings(config.Fonts);
