@@ -1,24 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontPresetCellController
+    internal class FontPresetViewModel
     {
         private readonly FontPresetManager _presetManager;
         private readonly FontPresetFontType _targetFontType;
 
-        public FontPreset? CurrentPreset { get; private set; }
+        public FontPreset? CurrentPreset { get; set; }
 
         public event EventHandler PresetChanged;
 
-        public FontPresetCellController(FontPresetManager presetManager, FontPresetFontType targetFontType)
+        public FontPresetViewModel(FontPresetManager presetManager, FontPresetFontType targetFontType)
         {
             this._presetManager = presetManager;
             this._targetFontType = targetFontType;
         }
 
-        public void SwitchToPreviousPreset()
+        public void MoveToPreviousPreset()
         {
             var presets = this.GetAvailablePresets();
             this.CurrentPreset = GetPreviousItem(presets, this.CurrentPreset, ComparePresets);
@@ -26,7 +29,7 @@ namespace FontSettings.Framework.Menus
             this.RaisePresetChanged(EventArgs.Empty);
         }
 
-        public void SwitchToNextPreset()
+        public void MoveToNextPreset()
         {
             var presets = this.GetAvailablePresets();
             this.CurrentPreset = GetNextItem(presets, this.CurrentPreset, ComparePresets);

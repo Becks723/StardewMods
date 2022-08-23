@@ -18,63 +18,47 @@ namespace FontSettings.Framework.Menus
 {
     internal class FontSettingsPage : BaseMenu
     {
-        private static readonly PageOptions _optionValues = new();
-        private static readonly StateManager _states = new();
         private static FontSettingsPage Instance { get; set; }
 
-        private readonly ModConfig _config;
-        private readonly RuntimeFontManager _fontManager;
-        private readonly GameFontChanger _fontChanger;
         private readonly FontPresetManager _presetManager;
-        private readonly Action<ModConfig> _saveConfig;
-        private readonly ExampleFonts _exampleFonts;
-        private readonly FontPresetController _presetController;
+        private readonly FontSettingsMenuModel _viewModel;
 
         private readonly Color _gameExampleColor = Color.Gray * 0.67f;
         private readonly Color _customExampleColor = Game1.textColor;
-        private readonly TextureButton _leftArrow;
-        private readonly TextureButton _rightArrow;
-        private readonly Label2 _label_title;
-        private readonly TextureBox _exampleBoard;
-        private readonly LabeledElement<Checkbox> _box_merge;  // TODO: 改成图标？
-        private readonly LabeledElement<Checkbox> _box_showBounds;
-        private readonly LabeledElement<Checkbox> _box_showText;
-        private readonly FontExampleLabel _label_gameExample;
-        private readonly FontExampleLabel _label_currentExample;
-        private readonly Label2 _label_currentPreset;
-        private readonly TextureButton _button_lastPreset;
-        private readonly TextureButton _button_nextPreset;
-        private readonly TextureButton _button_new;
-        private readonly TextureButton _button_save;
-        private readonly TextureButton _button_delete;
-        private readonly LabeledElement<Checkbox> _box_enabledFont;
-        private readonly Label2 _label_game;
-        private readonly Label2 _label_current;
-        private readonly ColorBlock _colorBlock_game;
-        private readonly ColorBlock _colorBlock_current;
-        private readonly TextureButton _button_offsetTuning;
-        private readonly Slider<float> _slider_charOffsetX;
-        private readonly Slider<float> _slider_charOffsetY;
-        private readonly ComboBox _dropDown_font;
-        private readonly RefreshButton _button_refresh;
-        private readonly LabeledElement<Slider<int>> _slider_fontSize;
-        private readonly LabeledElement<Slider<int>> _slider_spacing;
-        private readonly LabeledElement<Slider<int>> _slider_lineSpacing;
-        private readonly OKButton _okButton;
-        private bool _lastEnabled;
-        private string _lastFontFilePath;
-        private int _lastFontSize;
-        private int _lastSpacing;
-        private int _lastLineSpacing;
-        private float _lastCharOffsetX;
-        private float _lastCharOffsetY;
-        private FontModel[] _allFonts;
+        private TextureButton _button_prevFontType;
+        private TextureButton _button_nextFontType;
+        private Label2 _label_title;
+        private TextureBox _exampleBoard;
+        private LabeledElement<Checkbox> _box_merge;  // TODO: 改成图标？
+        private LabeledElement<Checkbox> _box_showBounds;
+        private LabeledElement<Checkbox> _box_showText;
+        private FontExampleLabel _label_gameExample;
+        private FontExampleLabel _label_currentExample;
+        private Label2 _label_currentPreset;
+        private TextureButton _button_prevPreset;
+        private TextureButton _button_nextPreset;
+        private TextureButton _button_new;
+        private TextureButton _button_save;
+        private TextureButton _button_delete;
+        private LabeledElement<Checkbox> _box_enabledFont;
+        private Label2 _label_game;
+        private Label2 _label_current;
+        private ColorBlock _colorBlock_game;
+        private ColorBlock _colorBlock_current;
+        private TextureButton _button_offsetTuning;
+        private Slider<float> _slider_charOffsetX;
+        private Slider<float> _slider_charOffsetY;
+        private ComboBox _dropDown_font;
+        private RefreshButton _button_refresh;
+        private LabeledElement<Slider<int>> _slider_fontSize;
+        private LabeledElement<Slider<int>> _slider_spacing;
+        private LabeledElement<Slider<int>> _slider_lineSpacing;
+        private TextureButton _button_ok;
+
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
         protected override bool ManualInitializeComponents => true;
-
-        private GameFontType CurrentFontType { get; set; }
 
         public FontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig,
             int x, int y, int width, int height, bool showUpperRightCloseButton = false)
@@ -86,318 +70,33 @@ namespace FontSettings.Framework.Menus
 
             Instance = this;
 
-            this._config = config;
-            this._fontManager = fontManager;
-            this._fontChanger = fontChanger;
             this._presetManager = presetManager;
-            this._saveConfig = saveConfig;
-            this._exampleFonts = new ExampleFonts(fontManager);
-            this._presetController = new FontPresetController(presetManager, () => this._allFonts);
-            this._presetController.PresetChanged += this.OnPresetChanged;
-
-            this.CurrentFontType = _optionValues.FontType;
-            FontConfig fontConfig = config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                FontHelpers.GetCurrentLocale(), this.CurrentFontType);
-
-            this._leftArrow = new TextureButton(Game1.mouseCursors, new(352, 495, 12, 11), 4f)
-            {
-                LocalPosition = new Vector2(-48 - 48, height / 2),
-                SettableWidth = 48,
-                SettableHeight = 44
-            };
-            this._leftArrow.Click += this.LeftArrowClicked;
-            this._rightArrow = new TextureButton(Game1.mouseCursors, new(365, 495, 12, 11), 4f)
-            {
-                LocalPosition = new Vector2(width + 48, height / 2),
-                SettableWidth = 48,
-                SettableHeight = 44
-            };
-            this._rightArrow.Click += this.RightArrowClicked;
-
-            this._label_title = new Label2
-            {
-                Bold = true,
-                Text = this.CurrentFontType.LocalizedName(),
-            };
-            this._label_title.LocalPosition = new Vector2(width / 2 - this._label_title.Width / 2, 108);
-
-            this._exampleBoard = new TextureBox
-            {
-                Kind = TextureBoxes.DefaultBorderless,
-                DrawShadow = false,
-                LocalPosition = new Vector2(spaceToClearSideBorder + borderWidth, this._label_title.LocalPosition.Y + this._label_title.Height),
-                SettableHeight = height / 3
-            };
-            this._exampleBoard.SettableWidth = width - spaceToClearSideBorder - borderWidth - (int)this._exampleBoard.LocalPosition.X;
-
-            Checkbox mergeBox = new Checkbox();
-            mergeBox.IsChecked = _optionValues.ExampleMerged;
-            mergeBox.Checked += this.ExampleMergeToggled;
-            mergeBox.Unchecked += this.ExampleMergeToggled;
-            this._box_merge = new LabeledElement<Checkbox>(mergeBox)
-            {
-                Text = I18n.OptionsPage_MergeExamples()
-            };
-
-            Checkbox showBoundsBox = new Checkbox();
-            showBoundsBox.IsChecked = _optionValues.ShowBounds;
-            showBoundsBox.Checked += this.ShowBoundsToggled;
-            showBoundsBox.Unchecked += this.ShowBoundsToggled;
-            this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox)
-            {
-                Text = I18n.OptionsPage_ShowExampleBounds()
-            };
-
-            Checkbox showTextBox = new Checkbox();
-            showTextBox.IsChecked = _optionValues.ShowText;
-            showTextBox.Checked += this.ShowTextToggled;
-            showTextBox.Unchecked += this.ShowTextToggled;
-            this._box_showText = new LabeledElement<Checkbox>(showTextBox)
-            {
-                Text = I18n.OptionsPage_ShowExampleText()
-            };
-            float gap = (this._exampleBoard.Height - this._box_merge.Height - this._box_showText.Height - this._box_showBounds.Height) / 4f;
-            float insideBoardX = this._exampleBoard.LocalPosition.X + borderWidth / 3;
-            this._box_merge.LocalPosition = new Vector2(insideBoardX, this._exampleBoard.LocalPosition.Y + gap);
-            this._box_showBounds.LocalPosition = new Vector2(insideBoardX, this._box_merge.LocalPosition.Y + this._box_merge.Height + gap);
-            this._box_showText.LocalPosition = new Vector2(insideBoardX, this._box_showBounds.LocalPosition.Y + this._box_showBounds.Height + gap);
-
-            this._label_game = new Label2
-            {
-                Text = I18n.OptionsPage_OriginalExample()
-            };
-            this._label_current = new Label2
-            {
-                Text = I18n.OptionsPage_CustomExample()
-            };
-            this._colorBlock_game = new ColorBlock(this._gameExampleColor, 20);
-            this._colorBlock_current = new ColorBlock(this._customExampleColor, 20);
-            int maxWidth = Math.Max(this._label_game.Width, this._label_current.Width);
-            int exampleLabelHeight = Math.Max(this._colorBlock_game.Height, this._label_game.Height);
-            int currentLabelHeight = Math.Max(this._colorBlock_current.Height, this._label_current.Height);
-            this._label_current.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - maxWidth, this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height - borderWidth / 3 - currentLabelHeight);
-            this._label_game.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - maxWidth, this._label_current.LocalPosition.Y - borderWidth / 3 - exampleLabelHeight);
-            this._colorBlock_current.LocalPosition = new Vector2(this._label_current.LocalPosition.X - borderWidth / 6 - this._colorBlock_current.Width, this._label_current.LocalPosition.Y + this._label_current.Height / 2 - this._colorBlock_current.Height / 2);
-            this._colorBlock_game.LocalPosition = new Vector2(this._label_game.LocalPosition.X - borderWidth / 6 - this._colorBlock_game.Width, this._label_game.LocalPosition.Y + this._label_game.Height / 2 - this._colorBlock_game.Height / 2);
-
-            this._label_gameExample = new FontExampleLabel()
-            {
-                IdleTextColor = _gameExampleColor,
-                BoundsColor = Color.Red * 0.5f,
-                ShowBounds = this._box_showBounds.Element.IsChecked,
-                ShowText = this._box_showText.Element.IsChecked,
-            };
-            this._label_currentExample = new FontExampleLabel()
-            {
-                IdleTextColor = _customExampleColor,
-                BoundsColor = Color.Green * 0.5f,
-                ShowBounds = this._box_showBounds.Element.IsChecked,
-                ShowText = this._box_showText.Element.IsChecked,
-            };
-
-            int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
-            Rectangle exampleBounds = new Rectangle(
-                (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
-                (int)(this._exampleBoard.LocalPosition.Y + borderWidth / 3),
-                (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
-                this._exampleBoard.Height - borderWidth / 3 * 2);
-
-            this._button_offsetTuning = new TextureButton(Game1.mouseCursors, new Rectangle(257, 284, 16, 16), 2f)
-            {
-                SettableWidth = 32,
-                SettableHeight = 32,
-                LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - 32, exampleBounds.Y)
-            };
-            this._button_offsetTuning.Click += this.OffsetTuningToggled;
-
-            this._slider_charOffsetX = new Slider<float>
-            {
-                LocalPosition = new Vector2(exampleBounds.X + 24, exampleBounds.Y),
-                Orientation = Orientation.Horizontal,
-                Length = exampleBounds.Width - 24,
-                BarThickness = 16,
-                Maximum = this._config.MaxCharOffsetX,
-                Minimum = this._config.MinCharOffsetX,
-                Interval = 0.5f,
-                Value = fontConfig.CharOffsetX,
-                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled,
-                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
-            };
-            this._slider_charOffsetX.ValueChanged += this.OffsetXSlider_ValueChanged;
-
-            this._slider_charOffsetY = new Slider<float>
-            {
-                LocalPosition = new Vector2(exampleBounds.X, exampleBounds.Y + 24),
-                Orientation = Orientation.Vertical,
-                Length = exampleBounds.Height - 24,
-                BarThickness = 16,
-                Maximum = this._config.MaxCharOffsetY,
-                Minimum = this._config.MinCharOffsetY,
-                Interval = 0.5f,
-                Value = fontConfig.CharOffsetY,
-                Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled,
-                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
-            };
-            this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
-
-            float exampleBoardBottom = this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height;
-            float exampleBoardX = this._exampleBoard.LocalPosition.X;
-            float presetSectionY = exampleBoardBottom + borderWidth / 2;
-            float presetSectionBottom = 0;
-            {
-                Vector2 size_new = new(10 * 3f);
-                Vector2 size_save = new(16 * 3f);
-                Vector2 size_delete = new(64 * 0.75f);
-                Vector2 size_last = new Vector2(12, 11) * 4f;
-                Vector2 size_next = new Vector2(12, 11) * 4f;
-                float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_last, size_next }.Max(v => v.Y);
-                this._label_currentPreset = new Label2()
-                {
-                    LocalPosition = new Vector2(exampleBoardX, presetSectionY),
-                };
-                this._button_delete = new TextureButton(Game1.mouseCursors, new Rectangle(192, 256, 64, 64), 0.75f)
-                {
-                    LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - size_delete.X, presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2),
-                    SettableWidth = (int)size_delete.X,
-                    SettableHeight = (int)size_delete.Y
-                };
-                this._button_delete.Click += this.DeletePresetButtonClicked;
-
-                this._button_save = new TextureButton(Game1.mouseCursors, new Rectangle(274, 284, 16, 16), 3f)
-                {
-                    LocalPosition = new Vector2(this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X, presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2),
-                    SettableWidth = (int)size_save.X,
-                    SettableHeight = (int)size_save.Y
-                };
-                this._button_save.Click += this.SavePresetButtonClicked;
-
-                this._button_new = new TextureButton(Game1.mouseCursors, new Rectangle(0, 428, 10, 10), 3f)
-                {
-                    LocalPosition = new Vector2(this._button_save.LocalPosition.X - borderWidth / 3 - size_new.X, presetSectionY + presetSectionMaxHeight / 2 - size_new.Y / 2),
-                    SettableWidth = (int)size_new.X,
-                    SettableHeight = (int)size_new.Y
-                };
-                this._button_new.Click += this.NewPresetButtonClicked;
-
-                this._button_nextPreset = new TextureButton(Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f)
-                {
-                    LocalPosition = new Vector2(this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X, presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2),
-                    SettableWidth = (int)size_next.X,
-                    SettableHeight = (int)size_next.Y
-                };
-                this._button_nextPreset.Click += this.NextPresetButtonClicked;
-
-                this._button_lastPreset = new TextureButton(Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f)
-                {
-                    LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_last.X, presetSectionY + presetSectionMaxHeight / 2 - size_last.Y / 2),
-                    SettableWidth = (int)size_last.X,
-                    SettableHeight = (int)size_last.Y
-                };
-                this._button_lastPreset.Click += this.PreviousPresetButtonClicked;
-
-                presetSectionBottom = presetSectionY + presetSectionMaxHeight;
-            }
-
-            Checkbox enabledFontBox = new Checkbox();
-            enabledFontBox.Checked += this.FontEnableChanged;
-            enabledFontBox.Unchecked += this.FontEnableChanged;
-            enabledFontBox.IsChecked = fontConfig.Enabled;
-
-            int sliderLength = this._exampleBoard.Width / 3;
-            var fontSizeSlider = new Slider<int>
-            {
-                Length = sliderLength,
-                Maximum = this._config.MaxFontSize,
-                Minimum = this._config.MinFontSize,
-                Interval = 1,
-                Value = (int)fontConfig.FontSize,
-                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
-            };
-            fontSizeSlider.ValueChanged += this.FontSizeSlider_ValueChanged;
-            var spacingSlider = new Slider<int>
-            {
-                Length = sliderLength,
-                Maximum = this._config.MaxSpacing,
-                Minimum = this._config.MinSpacing,
-                Interval = 1,
-                Value = (int)fontConfig.Spacing,
-                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
-            };
-            spacingSlider.ValueChanged += this.SpacingSlider_ValueChanged;
-            var lineSpacingSlider = new Slider<int>
-            {
-                Length = sliderLength,
-                Maximum = this._config.MaxLineSpacing,
-                Minimum = this._config.MinLineSpacing,
-                Interval = 1,
-                Value = fontConfig.LineSpacing,
-                RaiseEventOccasion = RaiseOccasion.WhenValueChanged
-            };
-            lineSpacingSlider.ValueChanged += this.LineSpacingSlider_ValueChanged;
-
-            this._box_enabledFont = new LabeledElement<Checkbox>(enabledFontBox)
-            {
-                Text = I18n.OptionsPage_Enable()
-            };
-            this._slider_fontSize = new LabeledElement<Slider<int>>(fontSizeSlider)
-            {
-                Text = I18n.OptionsPage_FontSize()
-            };
-            this._slider_spacing = new LabeledElement<Slider<int>>(spacingSlider)
-            {
-                Text = I18n.OptionsPage_Spacing()
-            };
-            this._slider_lineSpacing = new LabeledElement<Slider<int>>(lineSpacingSlider)
-            {
-                Text = I18n.OptionsPage_LineSpacing()
-            };
-            gap = (height - spaceToClearSideBorder - presetSectionBottom - this._box_enabledFont.Height - this._slider_fontSize.Height - this._slider_spacing.Height - this._slider_lineSpacing.Height) / 5;
-            this._box_enabledFont.LocalPosition = new Vector2(exampleBoardX, presetSectionBottom + gap);
-            this._slider_fontSize.LocalPosition = new Vector2(exampleBoardX, this._box_enabledFont.LocalPosition.Y + this._box_enabledFont.Height + gap);
-            this._slider_spacing.LocalPosition = new Vector2(exampleBoardX, this._slider_fontSize.LocalPosition.Y + this._slider_fontSize.Height + gap);
-            this._slider_lineSpacing.LocalPosition = new Vector2(exampleBoardX, this._slider_spacing.LocalPosition.Y + this._slider_spacing.Height + gap);
-
-            this._allFonts = this.LoadAllFonts();
-            string ParseFontData(FontModel item)
-            {
-                if (item.FullPath == null)
-                    return I18n.OptionsPage_Font_KeepOrig();
-                else
-                    return $"{item.FamilyName} ({item.SubfamilyName})";
-            }
-            this._dropDown_font = new ComboBox
-            {
-                SettableWidth = this._exampleBoard.Width / 2,
-                Choices = _allFonts,
-                DisplayTextReslover = (_, item) => ParseFontData((FontModel)item),
-                EqualityComparer = new FontEqualityComparer(),
-                MaxDisplayRows = 6,
-            };
-            this._dropDown_font.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - this._dropDown_font.Width, this._box_enabledFont.LocalPosition.Y);
-            this._dropDown_font.SelectionChanged += this.FontSelectionChanged;
-
-            float refreshScale = 2.5f;
-            int refreshWidth = (int)(16 * refreshScale);
-            int refreshHeight = (int)(16 * refreshScale);
-            this._button_refresh = new RefreshButton(refreshScale)
-            {
-                AnimationDuration = 300,
-                LocalPosition = new Vector2(this._dropDown_font.LocalPosition.X - borderWidth / 3 - refreshWidth, this._dropDown_font.LocalPosition.Y + this._dropDown_font.Height / 2 - refreshHeight / 2),
-                SettableWidth = refreshWidth,
-                SettableHeight = refreshHeight
-            };
-            this._button_refresh.Click += this.RefreshAllFonts;
-
-            this._okButton = new OKButton();
-            this._okButton.Click += this.OkButtonClicked;
-            this._okButton.GreyedOut = _states.IsOn(this.CurrentFontType);
-            this._okButton.LocalPosition = new Vector2(
-                width - spaceToClearSideBorder - borderWidth - this._okButton.Width,
-                height - spaceToClearSideBorder - borderWidth - this._okButton.Height);
-
-            this.OnFontTypeChanged(this.CurrentFontType);
 
             this.ResetComponents();
+
+            this._viewModel = new FontSettingsMenuModel(config, fontManager, fontChanger, presetManager, saveConfig);
+            this._viewModel.TitleChanged += (_, _) => this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, 108);  // TODO: 去掉
+            this._viewModel.ExampleVanillaUpdated += (_, _) => this.UpdateExamplePositions();  // TODO: 去掉
+            this._viewModel.ExampleCurrentUpdated += (_, _) => this.UpdateExamplePositions();  // TODO: 去掉
+            this._viewModel.PropertyChanged += (_, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case nameof(this._viewModel.AllFonts):
+                        this._dropDown_font.Choices = this._viewModel.AllFonts.ToArray();
+                        break;
+
+                    case nameof(this._viewModel.CurrentFont):
+                        this._dropDown_font.SelectedItem = this._viewModel.CurrentFont;
+                        break;
+                }
+            };
+
+            this._viewModel.UpdateExampleCurrent();
+            this._viewModel.AllFonts = this._viewModel.AllFonts;
+            this._viewModel.CurrentFont = this._viewModel.CurrentFont;
+            this._slider_charOffsetX.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
+            this._slider_charOffsetY.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
         }
 
         /// <summary>问题：如果同时安装了<see href="https://www.nexusmods.com/stardewvalley/mods/2668">魔法少女界面</see>，设置字体的界面会出现黑框问题，此函数为解决方法。</summary>
@@ -415,190 +114,127 @@ namespace FontSettings.Framework.Menus
             return this;
         }
 
-        private void LeftArrowClicked(object sender, EventArgs e)
+        private void OnPrevFontTypeButtonClicked(object sender, EventArgs e)
         {
             Game1.playSound("smallSelect");
-            this.CurrentFontType = this.CurrentFontType.Previous(LocalizedContentManager.CurrentLanguageLatin);
-            this.OnFontTypeChanged(this.CurrentFontType);
+
+            this._viewModel.MoveToPreviousFontType();
         }
 
-        private void RightArrowClicked(object sender, EventArgs e)
+        private void OnNextFontTypeButtonClicked(object sender, EventArgs e)
         {
             Game1.playSound("smallSelect");
-            this.CurrentFontType = this.CurrentFontType.Next(LocalizedContentManager.CurrentLanguageLatin);
-            this.OnFontTypeChanged(this.CurrentFontType);
-        }
 
-        private void ShowTextToggled(object sender, EventArgs e)
-        {
-            bool showText = this._box_showText.Element.IsChecked;
-            _optionValues.ShowText = showText;
-            this._label_gameExample.ShowText = showText;
-            this._label_currentExample.ShowText = showText;
-        }
-
-        private void ShowBoundsToggled(object sender, EventArgs e)
-        {
-            bool showBounds = this._box_showBounds.Element.IsChecked;
-            _optionValues.ShowBounds = showBounds;
-            this._label_gameExample.ShowBounds = showBounds;
-            this._label_currentExample.ShowBounds = showBounds;
+            this._viewModel.MoveToNextFontType();
         }
 
         private void ExampleMergeToggled(object sender, EventArgs e)
         {
-            _optionValues.ExampleMerged = this._box_merge.Element.IsChecked;
+            this._viewModel.ExamplesMerged = this._box_merge.Element.IsChecked;  // TODO: 实现双向绑定后删。
             this.UpdateExamplePositions();
+        }
+
+        private void ShowTextToggled(object sender, EventArgs e)
+        {
+            this._viewModel.ExamplesMerged = this._box_showText.Element.IsChecked;  // TODO: 实现双向绑定后删。
+        }
+
+        private void ShowBoundsToggled(object sender, EventArgs e)
+        {
+            this._viewModel.ExamplesMerged = this._box_showBounds.Element.IsChecked;  // TODO: 实现双向绑定后删。
         }
 
         private void OffsetTuningToggled(object sender, EventArgs e)
         {
             Game1.playSound("smallSelect");
-            _optionValues.OffsetTuning = !_optionValues.OffsetTuning;
-            this._slider_charOffsetX.Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled;
-            this._slider_charOffsetY.Visibility = _optionValues.OffsetTuning ? Visibility.Visible : Visibility.Disabled;
+
+            this._viewModel.IsTuningCharOffset = !this._viewModel.IsTuningCharOffset;  // TODO: 实现双向绑定后删。
+
+            // TODO: 实现数据绑定的值转换器后删。
+            this._slider_charOffsetX.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
+            this._slider_charOffsetY.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
 
             this.UpdateExamplePositions();
         }
 
         private void OffsetXSlider_ValueChanged(object sender, EventArgs e)
         {
-            this.UpdateCustomExample();
+            this._viewModel.CharOffsetX = this._slider_charOffsetX.Value;  // TODO: 实现双向绑定后删。
+
+            this._viewModel.UpdateExampleCurrent();
         }
 
         private void OffsetYSlider_ValueChanged(object sender, EventArgs e)
         {
-            this.UpdateCustomExample();
+            this._viewModel.CharOffsetY = this._slider_charOffsetY.Value;  // TODO: 实现双向绑定后删。
+
+            this._viewModel.UpdateExampleCurrent();
         }
 
         private void FontEnableChanged(object sender, EventArgs e)
         {
-            this.UpdateCustomExample();
+            this._viewModel.FontEnabled = this._box_enabledFont.Element.IsChecked;  // TODO: 实现双向绑定后删。
+
+            this._viewModel.UpdateExampleCurrent();
         }
 
         private void FontSizeSlider_ValueChanged(object sender, EventArgs e)
         {
-            this.UpdateCustomExample();
+            this._viewModel.FontSize = this._slider_fontSize.Element.Value;  // TODO: 实现双向绑定后删。
+
+            this._viewModel.UpdateExampleCurrent();
         }
 
         private void SpacingSlider_ValueChanged(object sender, EventArgs e)
         {
-            this.UpdateCustomExample();
+            this._viewModel.Spacing = this._slider_spacing.Element.Value;  // TODO: 实现双向绑定后删。
+
+            this._viewModel.UpdateExampleCurrent();
         }
 
         private void LineSpacingSlider_ValueChanged(object sender, EventArgs e)
         {
-            this.UpdateCustomExample();
+            this._viewModel.LineSpacing = this._slider_lineSpacing.Element.Value;  // TODO: 实现双向绑定后删。
+
+            this._viewModel.UpdateExampleCurrent();
         }
 
         private void FontSelectionChanged(object sender, EventArgs e)
         {
-            this.UpdateCustomExample();
+            this._viewModel.CurrentFont = this._dropDown_font.SelectedItem as FontModel;
+
+            this._viewModel.UpdateExampleCurrent();
         }
 
         private async void OkButtonClicked(object sender, EventArgs e)
         {
             Game1.playSound("coin");
-            FontConfig config = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                FontHelpers.GetCurrentLocale(), this.CurrentFontType);
 
-            FontConfig tempConfig = new FontConfig();
-            config.CopyTo(tempConfig);
-
-            this._lastEnabled = tempConfig.Enabled;
-            this._lastFontFilePath = tempConfig.FontFilePath;
-            this._lastFontSize = (int)tempConfig.FontSize;
-            this._lastSpacing = (int)tempConfig.Spacing;
-            this._lastLineSpacing = tempConfig.LineSpacing;
-            this._lastCharOffsetX = tempConfig.CharOffsetX;
-            this._lastCharOffsetY = tempConfig.CharOffsetY;
-
-            tempConfig.Enabled = this._box_enabledFont.Element.IsChecked;
-            tempConfig.FontFilePath = this.GetFontFile();
-            tempConfig.FontIndex = this.GetFontIndex();
-            tempConfig.FontSize = this._slider_fontSize.Element.Value;
-            tempConfig.Spacing = this._slider_spacing.Element.Value;
-            tempConfig.LineSpacing = this._slider_lineSpacing.Element.Value;
-            tempConfig.CharOffsetX = this._slider_charOffsetX.Value;
-            tempConfig.CharOffsetY = this._slider_charOffsetY.Value;
-
-            bool enabledChanged = this._lastEnabled != tempConfig.Enabled;
-            bool fontFilePathChanged = this._lastFontFilePath != tempConfig.FontFilePath;
-            bool fontSizeChanged = this._lastFontSize != tempConfig.FontSize;
-            bool spacingChanged = this._lastSpacing != tempConfig.Spacing;
-            bool lineSpacingChanged = this._lastLineSpacing != tempConfig.LineSpacing;
-            bool charOffsetXChanged = this._lastCharOffsetX != tempConfig.CharOffsetX;
-            bool charOffsetYChanged = this._lastCharOffsetY != tempConfig.CharOffsetY;
-
-            var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保On和Off的是同一个字体。
-            this._okButton.GreyedOut = true;
-            _states.On(fontType);
-            bool success = await this._fontChanger.ReplaceOriginalOrRemainAsync(tempConfig);
+            var (fontType, success) = await this._viewModel.TryGenerateFont();
             if (success)
             {
-                Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_SuccessSetFont(tempConfig.InGameType.LocalizedName()), null));
+                Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_SuccessSetFont(fontType.LocalizedName()), null));
                 Game1.playSound("money");
             }
             else
             {
-                Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_FailedSetFont(tempConfig.InGameType.LocalizedName()), HUDMessage.error_type));
+                Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_FailedSetFont(fontType.LocalizedName()), HUDMessage.error_type));
                 Game1.playSound("cancel");
             }
-            _states.Off(fontType);
-            /*this._okButton.GreyedOut = false;*/  // X
-            Instance._okButton.GreyedOut = false;  // √（因为是异步设置，所以这行代码运行的时候既可能是同一个菜单实例，又可能是关闭，再打开后的另一个实例。如果是不同实例，this.xxx表示的就是上一个实例，因此想要设置当前实例，就得用静态单例Instance下的字段）
-
-            // 如果成功，更新配置值。
-            if (success)
-            {
-                tempConfig.CopyTo(config);
-                this._saveConfig(this._config);
-            }
-        }
-
-        private void OnFontTypeChanged(GameFontType fontType)
-        {
-            _optionValues.FontType = fontType;
-
-            this._label_title.Text = fontType.LocalizedName();
-            this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, 108);
-
-            FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                FontHelpers.GetCurrentLocale(), this.CurrentFontType);
-            this._box_enabledFont.Element.IsChecked = fontConfig.Enabled;
-            this._slider_fontSize.Element.Value = (int)fontConfig.FontSize;
-            this._slider_spacing.Element.Value = (int)fontConfig.Spacing;
-            this._slider_lineSpacing.Element.Value = fontConfig.LineSpacing;
-            this._dropDown_font.SelectedItem = this.FindFont(this._allFonts, fontConfig.FontFilePath,
-                fontConfig.FontIndex);
-            this._slider_charOffsetX.Value = fontConfig.CharOffsetX;
-            this._slider_charOffsetY.Value = fontConfig.CharOffsetY;
-            this._okButton.GreyedOut = _states.IsOn(fontType);
-
-            this.OnPresetChanged(this._presetController, new PresetChangedEventArgs(fontType));
-
-            this.UpdateGameExample();
-            this.UpdateCustomExample();
-        }
-
-        private void OnPresetChanged(object sender, PresetChangedEventArgs e)
-        {
-            FontPreset? newPreset = this._presetController.CurrentPreset(this.CurrentFontType);
-
-            this._label_currentPreset.Text = newPreset?.Name;
-            this.UpdateSelectedPreset(newPreset);
         }
 
         private void PreviousPresetButtonClicked(object sender, EventArgs e)
         {
             Game1.playSound("smallSelect");
-            this._presetController.SwitchToPreviousPreset(this.CurrentFontType);
+
+            this._viewModel.MoveToPreviousPreset();
         }
 
         private void NextPresetButtonClicked(object sender, EventArgs e)
         {
             Game1.playSound("smallSelect");
-            this._presetController.SwitchToNextPreset(this.CurrentFontType);
+
+            this._viewModel.MoveToNextPreset();
         }
 
         private void NewPresetButtonClicked(object sender, EventArgs e)
@@ -613,32 +249,250 @@ namespace FontSettings.Framework.Menus
         {
             Game1.playSound("newRecipe");
 
-            this._presetController.SaveCurrentPreset(this.CurrentFontType,
-                System.IO.Path.GetFileName(this.GetFontFile()),
-                this.GetFontIndex(),
-                this._slider_fontSize.Element.Value,
-                this._slider_spacing.Element.Value,
-                this._slider_lineSpacing.Element.Value,
-                this._slider_charOffsetX.Value,
-                this._slider_charOffsetY.Value);
+            this._viewModel.SaveCurrentPreset();
         }
 
         private void DeletePresetButtonClicked(object sender, EventArgs e)
         {
             Game1.playSound("trashcan");
 
-            this._presetController.DeleteCurrentPreset(this.CurrentFontType);
+            this._viewModel.DeleteCurrentPreset();
         }
 
         protected override void ResetComponents(RootElement root, IBindingContext context)
         {
             root.LocalPosition = new Vector2(this.xPositionOnScreen, this.yPositionOnScreen);
-            root.SettableWidth = this.width;
-            root.SettableHeight = this.height;
+
+            this._button_prevFontType = new TextureButton(
+                Game1.mouseCursors, new(352, 495, 12, 11), 4f);
+            this._button_prevFontType.LocalPosition = new Vector2(-48 - 48, this.height / 2);
+            this._button_prevFontType.SettableWidth = 48;
+            this._button_prevFontType.SettableHeight = 44;
+            this._button_prevFontType.Click += this.OnPrevFontTypeButtonClicked;
+
+            this._button_nextFontType = new TextureButton(
+                Game1.mouseCursors, new(365, 495, 12, 11), 4f);
+            this._button_nextFontType.LocalPosition = new Vector2(this.width + 48, this.height / 2);
+            this._button_nextFontType.SettableWidth = 48;
+            this._button_nextFontType.SettableHeight = 44;
+            this._button_nextFontType.Click += this.OnNextFontTypeButtonClicked;
+
+            this._label_title = new Label2();
+            this._label_title.Bold = true;
+            this._label_title.Text = "小字体";  // 这行只是用于初始化label的高度。
+            this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, 108);
+
+            this._exampleBoard = new TextureBox();
+            this._exampleBoard.Kind = TextureBoxes.DefaultBorderless;
+            this._exampleBoard.DrawShadow = false;
+            this._exampleBoard.LocalPosition = new Vector2(spaceToClearSideBorder + borderWidth, this._label_title.LocalPosition.Y + this._label_title.Height);
+            this._exampleBoard.SettableHeight = this.height / 3;
+            this._exampleBoard.SettableWidth = this.width - spaceToClearSideBorder - borderWidth - (int)this._exampleBoard.LocalPosition.X;
+
+            Checkbox mergeBox = new Checkbox();
+            mergeBox.Checked += this.ExampleMergeToggled;
+            mergeBox.Unchecked += this.ExampleMergeToggled;
+            this._box_merge = new LabeledElement<Checkbox>(mergeBox);
+            this._box_merge.Text = I18n.OptionsPage_MergeExamples();
+
+            Checkbox showBoundsBox = new Checkbox();
+            showBoundsBox.Checked += this.ShowBoundsToggled;
+            showBoundsBox.Unchecked += this.ShowBoundsToggled;
+            this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox);
+            this._box_showBounds.Text = I18n.OptionsPage_ShowExampleBounds();
+
+            Checkbox showTextBox = new Checkbox();
+            showTextBox.Checked += this.ShowTextToggled;
+            showTextBox.Unchecked += this.ShowTextToggled;
+            this._box_showText = new LabeledElement<Checkbox>(showTextBox);
+            this._box_showText.Text = I18n.OptionsPage_ShowExampleText();
+
+            float gap = (this._exampleBoard.Height - this._box_merge.Height - this._box_showText.Height - this._box_showBounds.Height) / 4f;
+            float insideBoardX = this._exampleBoard.LocalPosition.X + borderWidth / 3;
+            this._box_merge.LocalPosition = new Vector2(insideBoardX, this._exampleBoard.LocalPosition.Y + gap);
+            this._box_showBounds.LocalPosition = new Vector2(insideBoardX, this._box_merge.LocalPosition.Y + this._box_merge.Height + gap);
+            this._box_showText.LocalPosition = new Vector2(insideBoardX, this._box_showBounds.LocalPosition.Y + this._box_showBounds.Height + gap);
+
+            this._label_game = new Label2();
+            this._label_game.Text = I18n.OptionsPage_OriginalExample();
+
+            this._label_current = new Label2();
+            this._label_current.Text = I18n.OptionsPage_CustomExample();
+
+            this._colorBlock_game = new ColorBlock(this._gameExampleColor, 20);
+            this._colorBlock_current = new ColorBlock(this._customExampleColor, 20);
+
+            int maxWidth = Math.Max(this._label_game.Width, this._label_current.Width);
+            int exampleLabelHeight = Math.Max(this._colorBlock_game.Height, this._label_game.Height);
+            int currentLabelHeight = Math.Max(this._colorBlock_current.Height, this._label_current.Height);
+            this._label_current.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - maxWidth, this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height - borderWidth / 3 - currentLabelHeight);
+            this._label_game.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - maxWidth, this._label_current.LocalPosition.Y - borderWidth / 3 - exampleLabelHeight);
+            this._colorBlock_current.LocalPosition = new Vector2(this._label_current.LocalPosition.X - borderWidth / 6 - this._colorBlock_current.Width, this._label_current.LocalPosition.Y + this._label_current.Height / 2 - this._colorBlock_current.Height / 2);
+            this._colorBlock_game.LocalPosition = new Vector2(this._label_game.LocalPosition.X - borderWidth / 6 - this._colorBlock_game.Width, this._label_game.LocalPosition.Y + this._label_game.Height / 2 - this._colorBlock_game.Height / 2);
+
+            this._label_gameExample = new FontExampleLabel();
+            this._label_gameExample.IdleTextColor = this._gameExampleColor;
+            this._label_gameExample.BoundsColor = Color.Red * 0.5f;
+            this._label_gameExample.ShowBounds = this._box_showBounds.Element.IsChecked;
+            this._label_gameExample.ShowText = this._box_showText.Element.IsChecked;
+
+            this._label_currentExample = new FontExampleLabel();
+            this._label_currentExample.IdleTextColor = this._customExampleColor;
+            this._label_currentExample.BoundsColor = Color.Green * 0.5f;
+            this._label_currentExample.ShowBounds = this._box_showBounds.Element.IsChecked;
+            this._label_currentExample.ShowText = this._box_showText.Element.IsChecked;
+
+            int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
+            Rectangle exampleBounds = new Rectangle(
+                (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
+                (int)(this._exampleBoard.LocalPosition.Y + borderWidth / 3),
+                (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
+                this._exampleBoard.Height - borderWidth / 3 * 2);
+
+            this._button_offsetTuning = new TextureButton(
+                Game1.mouseCursors, new Rectangle(257, 284, 16, 16), 2f);
+            this._button_offsetTuning.SettableWidth = 32;
+            this._button_offsetTuning.SettableHeight = 32;
+            this._button_offsetTuning.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - 32, exampleBounds.Y);
+            this._button_offsetTuning.Click += this.OffsetTuningToggled;
+
+            this._slider_charOffsetX = new Slider<float>();
+            this._slider_charOffsetX.LocalPosition = new Vector2(exampleBounds.X + 24, exampleBounds.Y);
+            this._slider_charOffsetX.Orientation = Orientation.Horizontal;
+            this._slider_charOffsetX.Length = exampleBounds.Width - 24;
+            this._slider_charOffsetX.BarThickness = 16;
+            this._slider_charOffsetX.Interval = 0.5f;
+            this._slider_charOffsetX.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+            this._slider_charOffsetX.ValueChanged += this.OffsetXSlider_ValueChanged;
+
+            this._slider_charOffsetY = new Slider<float>();
+            this._slider_charOffsetY.LocalPosition = new Vector2(exampleBounds.X, exampleBounds.Y + 24);
+            this._slider_charOffsetY.Orientation = Orientation.Vertical;
+            this._slider_charOffsetY.Length = exampleBounds.Height - 24;
+            this._slider_charOffsetY.BarThickness = 16;
+            this._slider_charOffsetY.Interval = 0.5f;
+            this._slider_charOffsetY.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+            this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
+
+            float exampleBoardBottom = this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height;
+            float exampleBoardX = this._exampleBoard.LocalPosition.X;
+            float presetSectionY = exampleBoardBottom + borderWidth / 2;
+            float presetSectionBottom = 0;
+            {
+                Vector2 size_new = new(10 * 3f);
+                Vector2 size_save = new(16 * 3f);
+                Vector2 size_delete = new(64 * 0.75f);
+                Vector2 size_last = new Vector2(12, 11) * 4f;
+                Vector2 size_next = new Vector2(12, 11) * 4f;
+                float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_last, size_next }.Max(v => v.Y);
+                this._label_currentPreset = new Label2();
+                this._label_currentPreset.LocalPosition = new Vector2(exampleBoardX, presetSectionY);
+
+                this._button_delete = new TextureButton(
+                    Game1.mouseCursors, new Rectangle(192, 256, 64, 64), 0.75f);
+                this._button_delete.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - size_delete.X, presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2);
+                this._button_delete.SettableWidth = (int)size_delete.X;
+                this._button_delete.SettableHeight = (int)size_delete.Y;
+                this._button_delete.Click += this.DeletePresetButtonClicked;
+
+                this._button_save = new TextureButton(
+                    Game1.mouseCursors, new Rectangle(274, 284, 16, 16), 3f);
+                this._button_save.LocalPosition = new Vector2(this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X, presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2);
+                this._button_save.SettableWidth = (int)size_save.X;
+                this._button_save.SettableHeight = (int)size_save.Y;
+                this._button_save.Click += this.SavePresetButtonClicked;
+
+                this._button_new = new TextureButton(
+                    Game1.mouseCursors, new Rectangle(0, 428, 10, 10), 3f);
+                this._button_new.LocalPosition = new Vector2(this._button_save.LocalPosition.X - borderWidth / 3 - size_new.X, presetSectionY + presetSectionMaxHeight / 2 - size_new.Y / 2);
+                this._button_new.SettableWidth = (int)size_new.X;
+                this._button_new.SettableHeight = (int)size_new.Y;
+                this._button_new.Click += this.NewPresetButtonClicked;
+
+                this._button_nextPreset = new TextureButton(
+                    Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);
+                this._button_nextPreset.LocalPosition = new Vector2(this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X, presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2);
+                this._button_nextPreset.SettableWidth = (int)size_next.X;
+                this._button_nextPreset.SettableHeight = (int)size_next.Y;
+                this._button_nextPreset.Click += this.NextPresetButtonClicked;
+
+                this._button_prevPreset = new TextureButton(
+                    Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f);
+                this._button_prevPreset.LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_last.X, presetSectionY + presetSectionMaxHeight / 2 - size_last.Y / 2);
+                this._button_prevPreset.SettableWidth = (int)size_last.X;
+                this._button_prevPreset.SettableHeight = (int)size_last.Y;
+                this._button_prevPreset.Click += this.PreviousPresetButtonClicked;
+
+                presetSectionBottom = presetSectionY + presetSectionMaxHeight;
+            }
+
+            Checkbox enabledFontBox = new Checkbox();
+            enabledFontBox.Checked += this.FontEnableChanged;
+            enabledFontBox.Unchecked += this.FontEnableChanged;
+            this._box_enabledFont = new LabeledElement<Checkbox>(enabledFontBox);
+            this._box_enabledFont.Text = I18n.OptionsPage_Enable();
+
+            int sliderLength = this._exampleBoard.Width / 3;
+            var fontSizeSlider = new Slider<int>();
+            fontSizeSlider.Length = sliderLength;
+            fontSizeSlider.Interval = 1;
+            fontSizeSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+            fontSizeSlider.ValueChanged += this.FontSizeSlider_ValueChanged;
+            this._slider_fontSize = new LabeledElement<Slider<int>>(fontSizeSlider);
+            this._slider_fontSize.Text = I18n.OptionsPage_FontSize();
+
+            var spacingSlider = new Slider<int>();
+            spacingSlider.Length = sliderLength;
+            spacingSlider.Interval = 1;
+            spacingSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+            spacingSlider.ValueChanged += this.SpacingSlider_ValueChanged;
+            this._slider_spacing = new LabeledElement<Slider<int>>(spacingSlider);
+            this._slider_spacing.Text = I18n.OptionsPage_Spacing();
+
+            var lineSpacingSlider = new Slider<int>();
+            lineSpacingSlider.Length = sliderLength;
+            lineSpacingSlider.Interval = 1;
+            lineSpacingSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+            lineSpacingSlider.ValueChanged += this.LineSpacingSlider_ValueChanged;
+            this._slider_lineSpacing = new LabeledElement<Slider<int>>(lineSpacingSlider);
+            this._slider_lineSpacing.Text = I18n.OptionsPage_LineSpacing();
+
+            gap = (this.height - spaceToClearSideBorder - presetSectionBottom - this._box_enabledFont.Height - this._slider_fontSize.Height - this._slider_spacing.Height - this._slider_lineSpacing.Height) / 5;
+            this._box_enabledFont.LocalPosition = new Vector2(exampleBoardX, presetSectionBottom + gap);
+            this._slider_fontSize.LocalPosition = new Vector2(exampleBoardX, this._box_enabledFont.LocalPosition.Y + this._box_enabledFont.Height + gap);
+            this._slider_spacing.LocalPosition = new Vector2(exampleBoardX, this._slider_fontSize.LocalPosition.Y + this._slider_fontSize.Height + gap);
+            this._slider_lineSpacing.LocalPosition = new Vector2(exampleBoardX, this._slider_spacing.LocalPosition.Y + this._slider_spacing.Height + gap);
+
+            this._dropDown_font = new ComboBox();
+            this._dropDown_font.SettableWidth = this._exampleBoard.Width / 2;
+            this._dropDown_font.DisplayTextReslover = this.DisplayFontOnComboBox;
+            this._dropDown_font.EqualityComparer = new FontEqualityComparer();
+            this._dropDown_font.MaxDisplayRows = 6;
+            this._dropDown_font.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - this._dropDown_font.Width, this._box_enabledFont.LocalPosition.Y);
+            this._dropDown_font.SelectionChanged += this.FontSelectionChanged;
+
+            float refreshScale = 2.5f;
+            int refreshWidth = (int)(16 * refreshScale);
+            int refreshHeight = (int)(16 * refreshScale);
+            this._button_refresh = new RefreshButton(refreshScale);
+            this._button_refresh.AnimationDuration = 300;
+            this._button_refresh.LocalPosition = new Vector2(this._dropDown_font.LocalPosition.X - borderWidth / 3 - refreshWidth, this._dropDown_font.LocalPosition.Y + this._dropDown_font.Height / 2 - refreshHeight / 2);
+            this._button_refresh.SettableWidth = refreshWidth;
+            this._button_refresh.SettableHeight = refreshHeight;
+            this._button_refresh.Click += this.RefreshAllFonts;
+
+            this._button_ok = new TextureButton(
+                Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
+            this._button_ok.Click += this.OkButtonClicked;
+            this._button_ok.SettableWidth = 64;
+            this._button_ok.SettableHeight = 64;
+            this._button_ok.LocalPosition = new Vector2(
+                this.width - spaceToClearSideBorder - borderWidth - this._button_ok.Width,
+                this.height - spaceToClearSideBorder - borderWidth - this._button_ok.Height);
 
             root.Add(
-                this._leftArrow,
-                this._rightArrow,
+                this._button_prevFontType,
+                this._button_nextFontType,
                 this._label_title,
                 this._exampleBoard,
                 this._box_merge,
@@ -654,7 +508,7 @@ namespace FontSettings.Framework.Menus
                 this._slider_charOffsetX,
                 this._slider_charOffsetY,
                 this._label_currentPreset,
-                this._button_lastPreset,
+                this._button_prevPreset,
                 this._button_nextPreset,
                 this._button_new,
                 this._button_save,
@@ -665,13 +519,52 @@ namespace FontSettings.Framework.Menus
                 this._slider_lineSpacing,
                 this._dropDown_font,
                 this._button_refresh,
-                this._okButton);
+                this._button_ok);
 
-            context
-                .AddBinding(() => !this._presetController.CanUseNewButton(this.CurrentFontType), () => this._button_new.GreyedOut, BindingMode.OneWay)
-                .AddBinding(() => !this._presetController.CanUseSaveButton(this.CurrentFontType), () => this._button_save.GreyedOut, BindingMode.OneWay)
-                .AddBinding(() => !this._presetController.CanUseDeleteButton(this.CurrentFontType), () => this._button_delete.GreyedOut, BindingMode.OneWay)
-                .AddBinding(() => !this._presetController.IsCurrentPresetValid, () => this._okButton.GreyedOut, BindingMode.OneWay);
+#pragma warning disable format
+            context.AddBinding(() => this._viewModel.Title, () => this._label_title.Text, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.FontEnabled, () => this._box_enabledFont.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            
+            context.AddBinding(() => this._viewModel.FontSize, () => this._slider_fontSize.Element.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.MinFontSize, () => this._slider_fontSize.Element.Minimum, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MaxFontSize, () => this._slider_fontSize.Element.Maximum, BindingMode.OneWay);
+            
+            context.AddBinding(() => this._viewModel.Spacing, () => this._slider_spacing.Element.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.MinSpacing, () => this._slider_spacing.Element.Minimum, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MaxSpacing, () => this._slider_spacing.Element.Maximum, BindingMode.OneWay);
+            
+            context.AddBinding(() => this._viewModel.LineSpacing, () => this._slider_lineSpacing.Element.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.MinLineSpacing, () => this._slider_lineSpacing.Element.Minimum, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MaxLineSpacing, () => this._slider_lineSpacing.Element.Maximum, BindingMode.OneWay);
+
+            context.AddBinding(() => this._viewModel.CharOffsetX, () => this._slider_charOffsetX.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.MinCharOffsetX, () => this._slider_charOffsetX.Minimum, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MaxCharOffsetX, () => this._slider_charOffsetX.Maximum, BindingMode.OneWay);
+
+            context.AddBinding(() => this._viewModel.CharOffsetY, () => this._slider_charOffsetY.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.MinCharOffsetY, () => this._slider_charOffsetY.Minimum, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MaxCharOffsetY, () => this._slider_charOffsetY.Maximum, BindingMode.OneWay);
+
+            //context.AddBinding(() => this._viewModel.AllFonts, () => this._dropDown_font.Choices, BindingMode.OneWay);
+            //context.AddBinding(() => this._viewModel.CurrentFont, () => this._dropDown_font.SelectedItem);
+            context.AddBinding(() => this._viewModel.ExamplesMerged, () => this._box_merge.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._box_showBounds.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._label_gameExample.ShowBounds, BindingMode.OneWay);  
+            context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._label_currentExample.ShowBounds, BindingMode.OneWay);  
+            context.AddBinding(() => this._viewModel.ShowExampleText, () => this._box_showText.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.ShowExampleText, () => this._label_gameExample.ShowText, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.ShowExampleText, () => this._label_currentExample.ShowText, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.ExampleText, () => this._label_gameExample.Text, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.ExampleText, () => this._label_currentExample.Text, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.ExampleVanillaFont, () => this._label_gameExample.Font, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.ExampleCurrentFont, () => this._label_currentExample.Font, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.CurrentPresetName, () => this._label_currentPreset.Text, BindingMode.OneWay);
+
+            context.AddBinding(() => !this._viewModel.CanSaveCurrentAsNewPreset(), () => this._button_new.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => !this._viewModel.CanSaveCurrentPreset(), () => this._button_save.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => !this._viewModel.CanDeleteCurrentPreset(), () => this._button_delete.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => !this._viewModel.IsGeneratingFont && this._viewModel.IsCurrentPresetValid,    () => this._button_ok.GreyedOut, BindingMode.OneWay);
+#pragma warning restore format
         }
 
         protected override void Dispose(bool disposing)
@@ -680,10 +573,18 @@ namespace FontSettings.Framework.Menus
             this._newPresetMenu?.Dispose();
         }
 
+        private System.Collections.ObjectModel.ObservableCollection<FontModel> _lastFonts;
         public override void update(GameTime time)
         {
             if (!this._isNewPresetMenu)
+            {
+                // TODO: 暂时方案，等Items绑定完成后删。
+                if (object.ReferenceEquals(this._lastFonts, this._viewModel.AllFonts))
+                    this._dropDown_font.Choices = this._viewModel.AllFonts.ToArray();
+                this._lastFonts = this._viewModel.AllFonts;
+
                 base.update(time);
+            }
             else
             {
                 this._newPresetMenu ??= this.CreateNewPresetMenu();
@@ -705,9 +606,13 @@ namespace FontSettings.Framework.Menus
             base.draw(b);
 
 #if DEBUG
-            b.DrawString(Game1.smallFont, $"Size: {this._slider_fontSize.Element.Value}\n"
-                + $"Spacing: {this._slider_spacing.Element.Value}\n"
-                + $"Line spacing: {this._slider_lineSpacing.Element.Value}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
+            b.DrawString(Game1.smallFont, $"Size: {this._viewModel.FontSize}\n"
+                + $"Spacing: {this._viewModel.Spacing}\n"
+                + $"Line spacing: {this._viewModel.LineSpacing}\n"
+                + $"Font: {this._viewModel.FontFilePath}\n"
+                + $"Font index: {this._viewModel.FontIndex}\n"
+                + $"Offset-x: {this._viewModel.CharOffsetX}\n"
+                + $"Offset-y: {this._viewModel.CharOffsetY}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif
 
             if (this._isNewPresetMenu)
@@ -740,59 +645,10 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        private void UpdateGameExample()
-        {
-            if (this.CurrentFontType is GameFontType.SpriteText)
-            {
-                this._label_gameExample.Font = this._fontManager.GetBuiltInBmFont();
-                this._label_gameExample.Text = this._config.ExampleText?.Replace('\n', '^');
-            }
-            else
-            {
-                this._label_gameExample.Font = new XNASpriteFont(this._fontManager.GetBuiltInSpriteFont(this.CurrentFontType));
-                this._label_gameExample.Text = this._config.ExampleText;
-            }
-
-            this.UpdateExamplePositions();
-        }
-
-        private void UpdateCustomExample(bool reset = true)  // reset：是否重置当前的示例。
-        {
-            if (this.CurrentFontType is GameFontType.SpriteText)
-                this._label_currentExample.Text = this._config.ExampleText?.Replace('\n', '^');
-            else
-                this._label_currentExample.Text = this._config.ExampleText;
-
-            if (reset)
-                this._label_currentExample.Font = this._exampleFonts.ResetThenGet(this.CurrentFontType,
-                    this._box_enabledFont.Element.IsChecked,
-                    this.GetFontFile(),
-                    this.GetFontIndex(),
-                    this._slider_fontSize.Element.Value,
-                    this._slider_spacing.Element.Value,
-                    this._slider_lineSpacing.Element.Value,
-                    new Vector2(this._slider_charOffsetX.Value, this._slider_charOffsetY.Value),
-                    this._label_currentExample.Text
-                );
-            else
-                this._label_currentExample.Font = this._exampleFonts.Get(this.CurrentFontType,
-                    this._box_enabledFont.Element.IsChecked,
-                    this.GetFontFile(),
-                    this.GetFontIndex(),
-                    this._slider_fontSize.Element.Value,
-                    this._slider_spacing.Element.Value,
-                    this._slider_lineSpacing.Element.Value,
-                    new Vector2(this._slider_charOffsetX.Value, this._slider_charOffsetY.Value),
-                    this._label_currentExample.Text
-                );
-
-            this.UpdateExamplePositions();
-        }
-
         private void UpdateExamplePositions()
         {
             Rectangle exampleBounds;
-            if (_optionValues.OffsetTuning)
+            if (this._viewModel.IsTuningCharOffset)
                 exampleBounds = new Rectangle(
                     (int)(this._slider_charOffsetY.LocalPosition.X + this._slider_charOffsetY.Width + borderWidth / 2),
                     (int)(this._slider_charOffsetX.LocalPosition.Y + this._slider_charOffsetX.Height + borderWidth / 3),
@@ -823,102 +679,21 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        private FontModel[] LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。
+        private string DisplayFontOnComboBox(object[] source, object item)
         {
-            FontModel empty = new FontModel();
-            if (rescan)
-                InstalledFonts.Rescan();
-            FontModel[] fonts = InstalledFonts.GetAll().ToArray();
-            return new FontModel[1] { empty }
-                .Concat(fonts)
-                .ToArray();
-        }
+            FontModel font = item as FontModel;
 
-        private FontModel FindFont(FontModel[] fonts, string fontFilePath, int fontIndex) // 这里path是简化后的
-        {
-            // 如果找不到字体文件，保持原版。
-            if (fontFilePath == null
-                || !InstalledFonts.TryGetFullPath(fontFilePath, out string fullPath))
-                return fonts[0];
-
-            return fonts.Where(f => f.FullPath == fullPath && f.FontIndex == fontIndex)
-                .FirstOrDefault();
+            if (font.FullPath == null)
+                return I18n.OptionsPage_Font_KeepOrig();
+            else
+                return $"{font.FamilyName} ({font.SubfamilyName})";
         }
 
         private void RefreshAllFonts(object sender, EventArgs e)
         {
             Game1.playSound("trashcan");
 
-            var lastSelected = this._dropDown_font.SelectedItem as FontModel;  // 记录当前选中的字体。
-            this._dropDown_font.Choices = this._allFonts = this.LoadAllFonts(true);  // 重新扫描本地字体文件。
-
-            // 检查重新扫描后，之前选中的还在不在。
-            bool match = false;
-            var comparer = new FontEqualityComparer();
-            foreach (object item in this._dropDown_font.Choices)
-            {
-                FontModel font = item as FontModel;
-                if (comparer.Equals(font, lastSelected))
-                {
-                    match = true;
-                    break;
-                }
-            }
-
-            if (match)
-                this._dropDown_font.SelectedItem = lastSelected;  // 如果还在，更新选中项。
-            else
-            {
-                this._dropDown_font.SelectedItem = this._dropDown_font.Choices[0];  // 如果不在了，保持原版。
-                this.UpdateCustomExample();                                         // 同时更新示例。
-            }
-        }
-
-        private string GetFontFile()
-        {
-            FontModel selectedFont = this._dropDown_font.SelectedItem as FontModel;
-            return InstalledFonts.SimplifyPath(selectedFont.FullPath);
-        }
-
-        private int GetFontIndex()
-        {
-            FontModel selectedFont = this._dropDown_font.SelectedItem as FontModel;
-            return selectedFont.FontIndex;
-        }
-
-        private void UpdateSelectedPreset(FontPreset? newPreset)
-        {
-            // 如果无预设，则载入保存的设置。
-            if (newPreset == null)
-            {
-                FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                    FontHelpers.GetCurrentLocale(), this.CurrentFontType);
-                this._box_enabledFont.Element.IsChecked = fontConfig.Enabled;
-                this._slider_fontSize.Element.Value = (int)fontConfig.FontSize;
-                this._slider_spacing.Element.Value = (int)fontConfig.Spacing;
-                this._slider_lineSpacing.Element.Value = fontConfig.LineSpacing;
-                this._dropDown_font.SelectedItem = this.FindFont(this._allFonts, fontConfig.FontFilePath,
-                    fontConfig.FontIndex);
-                this._slider_charOffsetX.Value = fontConfig.CharOffsetX;
-                this._slider_charOffsetY.Value = fontConfig.CharOffsetY;
-
-                this.UpdateCustomExample();
-                return;
-            }
-
-            if (this._presetController.IsCurrentPresetValid)
-            {
-                this._presetController.MeetsRequirement(newPreset, this._allFonts, out FontModel font);
-                this._dropDown_font.SelectedItem = font;
-                this._box_enabledFont.Element.IsChecked = true;
-                this._slider_fontSize.Element.Value = (int)newPreset.FontSize;
-                this._slider_spacing.Element.Value = (int)newPreset.Spacing;
-                this._slider_lineSpacing.Element.Value = newPreset.LineSpacing;
-                this._slider_charOffsetX.Value = newPreset.CharOffsetX;
-                this._slider_charOffsetY.Value = newPreset.CharOffsetY;
-
-                this.UpdateCustomExample();
-            }
+            this._viewModel.RefreshAllFonts();
         }
 
         private NewPresetMenu CreateNewPresetMenu()
@@ -929,17 +704,7 @@ namespace FontSettings.Framework.Menus
                 this.yPositionOnScreen + this.height / 3,
                 this.width / 2,
                 this.height / 3);
-            result.Accepted += (_, name) =>
-                this._presetController.SaveCurrentAsNewPreset(
-                    this.CurrentFontType,
-                    name,
-                    System.IO.Path.GetFileName(this.GetFontFile()),
-                    this.GetFontIndex(),
-                    this._slider_fontSize.Element.Value,
-                    this._slider_spacing.Element.Value,
-                    this._slider_lineSpacing.Element.Value,
-                    this._slider_charOffsetX.Value,
-                    this._slider_charOffsetY.Value);
+            result.Accepted += (_, name) => this._viewModel.SaveCurrentAsNewPreset(name);
 
             return result;
         }
@@ -952,45 +717,6 @@ namespace FontSettings.Framework.Menus
             if (instance == null) return;
 
             this._isNewPresetMenu = instance._isNewPresetMenu;
-        }
-
-        /// <summary>记录按下OK键后字体替换的进程。</summary>
-        private class StateManager
-        {
-            private readonly Dictionary<GameFontType, bool> _states = new();
-
-            public StateManager()
-            {
-                foreach (GameFontType key in Enum.GetValues<GameFontType>())
-                    this._states[key] = false;
-            }
-
-            public bool IsOn(GameFontType fontType)
-            {
-                return this._states[fontType];
-            }
-
-            public void On(GameFontType fontType)
-            {
-                if (!this._states[fontType])
-                    this._states[fontType] = true;
-            }
-
-            public void Off(GameFontType fontType)
-            {
-                if (this._states[fontType])
-                    this._states[fontType] = false;
-            }
-        }
-
-        /// <summary>保存用户控件的值，重新打开菜单时填入。</summary>
-        private class PageOptions
-        {
-            public bool ExampleMerged { get; set; } = false;
-            public bool ShowBounds { get; set; } = false;
-            public bool ShowText { get; set; } = true;
-            public bool OffsetTuning { get; set; } = false;
-            public GameFontType FontType { get; set; } = GameFontType.SmallFont;
         }
     }
 }
