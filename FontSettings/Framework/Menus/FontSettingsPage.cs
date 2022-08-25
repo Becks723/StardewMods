@@ -78,23 +78,7 @@ namespace FontSettings.Framework.Menus
             this._viewModel.TitleChanged += (_, _) => this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, 108);  // TODO: 去掉
             this._viewModel.ExampleVanillaUpdated += (_, _) => this.UpdateExamplePositions();  // TODO: 去掉
             this._viewModel.ExampleCurrentUpdated += (_, _) => this.UpdateExamplePositions();  // TODO: 去掉
-            this._viewModel.PropertyChanged += (_, e) =>
-            {
-                switch (e.PropertyName)
-                {
-                    case nameof(this._viewModel.AllFonts):
-                        this._dropDown_font.Choices = this._viewModel.AllFonts.ToArray();
-                        break;
-
-                    case nameof(this._viewModel.CurrentFont):
-                        this._dropDown_font.SelectedItem = this._viewModel.CurrentFont;
-                        break;
-                }
-            };
-
             this._viewModel.UpdateExampleCurrent();
-            this._viewModel.AllFonts = this._viewModel.AllFonts;
-            this._viewModel.CurrentFont = this._viewModel.CurrentFont;
             this._slider_charOffsetX.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
             this._slider_charOffsetY.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
         }
@@ -201,7 +185,7 @@ namespace FontSettings.Framework.Menus
 
         private void FontSelectionChanged(object sender, EventArgs e)
         {
-            this._viewModel.CurrentFont = this._dropDown_font.SelectedItem as FontModel;
+            this._viewModel.CurrentFont = this._dropDown_font.SelectedItem as FontModel;  // TODO: 实现双向绑定后删。
 
             this._viewModel.UpdateExampleCurrent();
         }
@@ -545,8 +529,8 @@ namespace FontSettings.Framework.Menus
             context.AddBinding(() => this._viewModel.MinCharOffsetY, () => this._slider_charOffsetY.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxCharOffsetY, () => this._slider_charOffsetY.Maximum, BindingMode.OneWay);
 
-            //context.AddBinding(() => this._viewModel.AllFonts, () => this._dropDown_font.Choices, BindingMode.OneWay);
-            //context.AddBinding(() => this._viewModel.CurrentFont, () => this._dropDown_font.SelectedItem);
+            context.AddBinding(() => this._viewModel.AllFonts, () => this._dropDown_font.ItemsSource, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.CurrentFont, () => this._dropDown_font.SelectedItem, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.ExamplesMerged, () => this._box_merge.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._box_showBounds.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._label_gameExample.ShowBounds, BindingMode.OneWay);  
@@ -560,10 +544,10 @@ namespace FontSettings.Framework.Menus
             context.AddBinding(() => this._viewModel.ExampleCurrentFont, () => this._label_currentExample.Font, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.CurrentPresetName, () => this._label_currentPreset.Text, BindingMode.OneWay);
 
-            context.AddBinding(() => !this._viewModel.CanSaveCurrentAsNewPreset(), () => this._button_new.GreyedOut, BindingMode.OneWay);
-            context.AddBinding(() => !this._viewModel.CanSaveCurrentPreset(), () => this._button_save.GreyedOut, BindingMode.OneWay);
-            context.AddBinding(() => !this._viewModel.CanDeleteCurrentPreset(), () => this._button_delete.GreyedOut, BindingMode.OneWay);
-            context.AddBinding(() => !this._viewModel.IsGeneratingFont && this._viewModel.IsCurrentPresetValid,    () => this._button_ok.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => !this._viewModel.CanSaveCurrentAsNewPreset, () => this._button_new.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => !this._viewModel.CanSaveCurrentPreset, () => this._button_save.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => !this._viewModel.CanDeleteCurrentPreset, () => this._button_delete.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => !this._viewModel.CanGenerateFont,    () => this._button_ok.GreyedOut, BindingMode.OneWay);
 #pragma warning restore format
         }
 
@@ -573,18 +557,10 @@ namespace FontSettings.Framework.Menus
             this._newPresetMenu?.Dispose();
         }
 
-        private System.Collections.ObjectModel.ObservableCollection<FontModel> _lastFonts;
         public override void update(GameTime time)
         {
             if (!this._isNewPresetMenu)
-            {
-                // TODO: 暂时方案，等Items绑定完成后删。
-                if (object.ReferenceEquals(this._lastFonts, this._viewModel.AllFonts))
-                    this._dropDown_font.Choices = this._viewModel.AllFonts.ToArray();
-                this._lastFonts = this._viewModel.AllFonts;
-
                 base.update(time);
-            }
             else
             {
                 this._newPresetMenu ??= this.CreateNewPresetMenu();

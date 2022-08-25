@@ -14,6 +14,8 @@ namespace FontSettings.Framework.Menus
 {
     internal class FontSettingsMenuModel : ViewModel
     {
+        private static FontSettingsMenuModel _instance;
+
         private static readonly Dictionary<GameFontType, bool> _isGeneratingFont = new()
         {
             { GameFontType.SmallFont, false },
@@ -37,7 +39,11 @@ namespace FontSettings.Framework.Menus
         public GameFontType CurrentFontType
         {
             get => this._currentFontType;
-            set => this.SetField(ref this._currentFontType, value);
+            set
+            {
+                this.SetField(ref this._currentFontType, value);
+                this.RaisePropertyChanged(nameof(this.ExampleText));
+            }
         }
 
         #endregion
@@ -211,9 +217,9 @@ namespace FontSettings.Framework.Menus
             get => this._currentFont;
             set
             {
-                /*this.SetField(ref this._currentFont, value);*/    // TODO: 取消注释。
-                this._currentFont = value;      // TODO: 删
-                this.RaisePropertyChanged();    // TODO: 删
+                this.SetField(ref this._currentFont, value);   // TODO: 取消注释。
+                //this._currentFont = value;      // TODO: 删
+                //this.RaisePropertyChanged();    // TODO: 删
 
                 this.RaisePropertyChanged(nameof(this.FontFilePath));
                 this.RaisePropertyChanged(nameof(this.FontIndex));
@@ -228,6 +234,8 @@ namespace FontSettings.Framework.Menus
 
         public bool IsGeneratingFont => _isGeneratingFont[this.CurrentFontType];
 
+        public bool CanGenerateFont => !this.IsGeneratingFont && this.IsCurrentPresetValid;
+
         #region AllFonts Property
 
         private ObservableCollection<FontModel> _allFonts;
@@ -235,16 +243,10 @@ namespace FontSettings.Framework.Menus
         public ObservableCollection<FontModel> AllFonts
         {
             get => this._allFonts;
-            set
-            {
-                this._allFonts = value;
-                this.RaisePropertyChanged();
-            }
+            set => this.SetField(ref this._allFonts, value);
         }
 
         #endregion
-
-        //public ObservableCollection<FontModel> AllFonts { get; set; } = new();  // TODO: setter去掉，只变化内容，壳只读。
 
         public FontPreset? CurrentPreset => this.PresetViewModel(this.CurrentFontType).CurrentPreset;
 
@@ -260,9 +262,69 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
-        public bool IsCurrentPresetValid { get; private set; }
+        #region IsCurrentPresetValid Property
 
-        public string MessageWhenPresetIsInvalid { get; private set; }
+        private bool _isCurrentPresetValid;
+
+        public bool IsCurrentPresetValid
+        {
+            get => this._isCurrentPresetValid;
+            set
+            {
+                this.SetField(ref this._isCurrentPresetValid, value);
+                this.RaisePropertyChanged(nameof(this.CanGenerateFont));
+            }
+        }
+
+        #endregion
+
+        #region MessageWhenPresetIsInvalid Property
+
+        private string _messageWhenPresetIsInvalid;
+
+        public string MessageWhenPresetIsInvalid
+        {
+            get => this._messageWhenPresetIsInvalid;
+            set => this.SetField(ref this._messageWhenPresetIsInvalid, value);
+        }
+
+        #endregion
+
+        #region CanSaveCurrentPreset Property
+
+        private bool _canSaveCurrentPreset;
+
+        public bool CanSaveCurrentPreset
+        {
+            get => this._canSaveCurrentPreset;
+            set => this.SetField(ref this._canSaveCurrentPreset, value);
+        }
+
+        #endregion
+
+        #region CanSaveCurrentAsNewPreset Property
+
+        private bool _canSaveCurrentAsNewPreset;
+
+        public bool CanSaveCurrentAsNewPreset
+        {
+            get => this._canSaveCurrentAsNewPreset;
+            set => this.SetField(ref this._canSaveCurrentAsNewPreset, value);
+        }
+
+        #endregion
+
+        #region CanDeleteCurrentPreset Property
+
+        private bool _canDeleteCurrentPreset;
+
+        public bool CanDeleteCurrentPreset
+        {
+            get => this._canDeleteCurrentPreset;
+            set => this.SetField(ref this._canDeleteCurrentPreset, value);
+        }
+
+        #endregion
 
         #region MinCharOffsetX Property
 
@@ -392,6 +454,7 @@ namespace FontSettings.Framework.Menus
 
         public FontSettingsMenuModel(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
         {
+            _instance = this;
             this._config = config;
             this._fontManager = fontManager;
             this._fontChanger = fontChanger;
@@ -474,27 +537,6 @@ namespace FontSettings.Framework.Menus
             this.PresetViewModel(this.CurrentFontType).DeleteCurrentPreset();
         }
 
-        public bool CanSaveCurrentAsNewPreset()
-        {
-            return true;
-        }
-
-        public bool CanSaveCurrentPreset()
-        {
-            FontPreset? preset = this.CurrentPreset;
-
-            return preset != null                                 // 无选中预设时不可。
-                && !this._presetManager.IsBuiltInPreset(preset);  // 内置的预设不可编辑。
-        }
-
-        public bool CanDeleteCurrentPreset()
-        {
-            FontPreset? preset = this.CurrentPreset;
-
-            return preset != null                                 // 无选中预设时不可。
-                && !this._presetManager.IsBuiltInPreset(preset);  // 内置的预设不可删除。
-        }
-
         public void RefreshAllFonts()
         {
             var lastFont = this.CurrentFont;  // 记录当前选中的字体。
@@ -542,10 +584,14 @@ namespace FontSettings.Framework.Menus
 
             var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保异步前后是同一个字体。
             _isGeneratingFont[fontType] = true;
-            bool success = await this._fontChanger.ReplaceOriginalOrRemainAsync(tempConfig);
+            this.RaisePropertyChanged(nameof(this.IsGeneratingFont));
+            this.RaisePropertyChanged(nameof(this.CanGenerateFont));
+
             return await this._fontChanger.ReplaceOriginalOrRemainAsync(tempConfig).ContinueWith(task =>
             {
                 _isGeneratingFont[fontType] = false;
+                _instance.RaisePropertyChanged(nameof(this.IsGeneratingFont));
+                _instance.RaisePropertyChanged(nameof(this.CanGenerateFont));
 
                 bool success = task.Result;
                 // 如果成功，更新配置值。
@@ -586,9 +632,6 @@ namespace FontSettings.Framework.Menus
 
         private void OnFontTypeChanged(GameFontType newFontType)
         {
-            // TODO:
-            // 这里记录字体款式。static
-
             // 更新标题。
             this.Title = newFontType.LocalizedName();
             TitleChanged?.Invoke(this, EventArgs.Empty);
@@ -619,6 +662,11 @@ namespace FontSettings.Framework.Menus
             // 更新预设名字。
             this.CurrentPresetName = newPreset?.Name;
 
+            // 更新几个状态：是否能保存、另存为、删除该预设。
+            this.CanSaveCurrentPreset = this.CanSavePreset(newPreset);
+            this.CanSaveCurrentAsNewPreset = this.CanSaveAsNewPreset(newPreset);
+            this.CanDeleteCurrentPreset = this.CanDeletePreset(newPreset);
+
             // 如果无预设，则载入保存的设置。
             if (newPreset == null)
             {
@@ -636,8 +684,7 @@ namespace FontSettings.Framework.Menus
                 return;
             }
 
-            // 如果有预设
-            // 检查是否满足该预设的要求。
+            // 如果有预设，检查是否满足该预设的要求。
             this.IsCurrentPresetValid = this.IsPresetValid(newPreset, out FontModel fontMatched, out string message);
             this.MessageWhenPresetIsInvalid = message;
             // 满足，则填值。
@@ -721,6 +768,23 @@ namespace FontSettings.Framework.Menus
 
             invalidMessage = $"当前预设不可用。需要安装字体文件：{preset.Requires.FontFileName}。";
             return false;
+        }
+
+        private bool CanSaveAsNewPreset(FontPreset? preset)
+        {
+            return true;
+        }
+
+        private bool CanSavePreset(FontPreset? preset)
+        {
+            return preset != null                                 // 无选中预设时不可。
+                && !this._presetManager.IsBuiltInPreset(preset);  // 内置的预设不可编辑。
+        }
+
+        private bool CanDeletePreset(FontPreset? preset)
+        {
+            return preset != null                                 // 无选中预设时不可。
+                && !this._presetManager.IsBuiltInPreset(preset);  // 内置的预设不可删除。
         }
 
         private FontPresetViewModel PresetViewModel(GameFontType fontType)
