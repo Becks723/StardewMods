@@ -670,6 +670,9 @@ namespace FontSettings.Framework.Menus
             // 如果无预设，则载入保存的设置。
             if (newPreset == null)
             {
+                // 无预设时当然满足。
+                this.IsCurrentPresetValid = true;
+
                 FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
                     FontHelpers.GetCurrentLocale(), this.CurrentFontType);
                 this.FontEnabled = fontConfig.Enabled;
