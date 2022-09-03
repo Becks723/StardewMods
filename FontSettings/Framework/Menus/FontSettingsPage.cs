@@ -46,7 +46,7 @@ namespace FontSettings.Framework.Menus
         private Label2 _label_current;
         private ColorBlock _colorBlock_game;
         private ColorBlock _colorBlock_current;
-        private TextureButton _button_offsetTuning;
+        private ToggleTextureButton _button_offsetTuning;
         private Slider<float> _slider_charOffsetX;
         private Slider<float> _slider_charOffsetY;
         private ComboBox _dropDown_font;
@@ -120,8 +120,6 @@ namespace FontSettings.Framework.Menus
         private void OffsetTuningToggled(object sender, EventArgs e)
         {
             Game1.playSound("smallSelect");
-
-            this._viewModel.IsTuningCharOffset = !this._viewModel.IsTuningCharOffset;  // TODO: 添加一个变量
 
             this.UpdateExamplePositions();
         }
@@ -300,11 +298,12 @@ namespace FontSettings.Framework.Menus
                 (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
                 this._exampleBoard.Height - borderWidth / 3 * 2);
 
-            this._button_offsetTuning = new TextureButton(
-                Game1.mouseCursors, new Rectangle(257, 284, 16, 16), 2f);
-            this._button_offsetTuning.SettableWidth = 32;
-            this._button_offsetTuning.SettableHeight = 32;
-            this._button_offsetTuning.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - 32, exampleBounds.Y);
+            float offsetTuningScale = 3f;
+            this._button_offsetTuning = new ToggleTextureButton(
+                Game1.mouseCursors, new Rectangle(257, 284, 16, 16), offsetTuningScale);
+            this._button_offsetTuning.SettableWidth = (int)(16 * offsetTuningScale);
+            this._button_offsetTuning.SettableHeight = (int)(16 * offsetTuningScale);
+            this._button_offsetTuning.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - this._button_offsetTuning.Width, exampleBounds.Y);
             this._button_offsetTuning.Click += this.OffsetTuningToggled;
 
             this._slider_charOffsetX = new Slider<float>();
@@ -330,48 +329,53 @@ namespace FontSettings.Framework.Menus
             float presetSectionY = exampleBoardBottom + borderWidth / 2;
             float presetSectionBottom = 0;
             {
-                Vector2 size_new = new(10 * 3f);
-                Vector2 size_save = new(16 * 3f);
-                Vector2 size_delete = new(64 * 0.75f);
-                Vector2 size_last = new Vector2(12, 11) * 4f;
-                Vector2 size_next = new Vector2(12, 11) * 4f;
-                float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_last, size_next }.Max(v => v.Y);
+                float scale_new = 4f;
+                float scale_save = 3f;
+                float scale_delete = 0.75f;
+                float scale_prev = 4f;
+                float scale_next = 4f;
+                Vector2 size_new = new(10 * scale_new);
+                Vector2 size_save = new(16 * scale_save);
+                Vector2 size_delete = new(64 * scale_delete);
+                Vector2 size_prev = new Vector2(12, 11) * scale_prev;
+                Vector2 size_next = new Vector2(12, 11) * scale_next;
+                float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_prev, size_next }.Max(v => v.Y);
                 this._label_currentPreset = new Label2();
                 this._label_currentPreset.LocalPosition = new Vector2(exampleBoardX, presetSectionY);
 
                 this._button_delete = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(192, 256, 64, 64), 0.75f);
+                    Game1.mouseCursors, new Rectangle(192, 256, 64, 64), scale_delete);
                 this._button_delete.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - size_delete.X, presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2);
                 this._button_delete.SettableWidth = (int)size_delete.X;
                 this._button_delete.SettableHeight = (int)size_delete.Y;
                 this._button_delete.Click += this.DeletePresetButtonClicked;
 
                 this._button_save = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(274, 284, 16, 16), 3f);
+                    Game1.mouseCursors, new Rectangle(274, 284, 16, 16), scale_save);
                 this._button_save.LocalPosition = new Vector2(this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X, presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2);
                 this._button_save.SettableWidth = (int)size_save.X;
                 this._button_save.SettableHeight = (int)size_save.Y;
                 this._button_save.Click += this.SavePresetButtonClicked;
 
                 this._button_new = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(0, 428, 10, 10), 3f);
+                    Game1.mouseCursors, new Rectangle(0, 428, 10, 10), scale_new);
                 this._button_new.LocalPosition = new Vector2(this._button_save.LocalPosition.X - borderWidth / 3 - size_new.X, presetSectionY + presetSectionMaxHeight / 2 - size_new.Y / 2);
                 this._button_new.SettableWidth = (int)size_new.X;
                 this._button_new.SettableHeight = (int)size_new.Y;
                 this._button_new.Click += this.NewPresetButtonClicked;
 
                 this._button_nextPreset = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);
+                    Game1.mouseCursors, new Rectangle(365, 495, 12, 11), scale_next);
                 this._button_nextPreset.LocalPosition = new Vector2(this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X, presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2);
                 this._button_nextPreset.SettableWidth = (int)size_next.X;
                 this._button_nextPreset.SettableHeight = (int)size_next.Y;
                 this._button_nextPreset.Click += this.NextPresetButtonClicked;
 
                 this._button_prevPreset = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f);
-                this._button_prevPreset.LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_last.X, presetSectionY + presetSectionMaxHeight / 2 - size_last.Y / 2);
-                this._button_prevPreset.SettableWidth = (int)size_last.X;
-                this._button_prevPreset.SettableHeight = (int)size_last.Y;
+                    Game1.mouseCursors, new Rectangle(352, 495, 12, 11), scale_prev);
+                this._button_prevPreset.LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_prev.X, presetSectionY + presetSectionMaxHeight / 2 - size_prev.Y / 2);
+                this._button_prevPreset.SettableWidth = (int)size_prev.X;
+                this._button_prevPreset.SettableHeight = (int)size_prev.Y;
                 this._button_prevPreset.Click += this.PreviousPresetButtonClicked;
 
                 presetSectionBottom = presetSectionY + presetSectionMaxHeight;
@@ -474,35 +478,35 @@ namespace FontSettings.Framework.Menus
 
 #pragma warning disable format
             context.AddBinding(() => this._viewModel.Title, () => this._label_title.Text, BindingMode.OneWay);
-            context.AddBinding(() => this._viewModel.FontEnabled, () => this._box_enabledFont.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.FontEnabled, () => this._box_enabledFont.Element.IsChecked, BindingMode.TwoWay);
             
-            context.AddBinding(() => this._viewModel.FontSize, () => this._slider_fontSize.Element.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.FontSize, () => this._slider_fontSize.Element.Value, BindingMode.TwoWay);
             context.AddBinding(() => this._viewModel.MinFontSize, () => this._slider_fontSize.Element.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxFontSize, () => this._slider_fontSize.Element.Maximum, BindingMode.OneWay);
             
-            context.AddBinding(() => this._viewModel.Spacing, () => this._slider_spacing.Element.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.Spacing, () => this._slider_spacing.Element.Value, BindingMode.TwoWay);
             context.AddBinding(() => this._viewModel.MinSpacing, () => this._slider_spacing.Element.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxSpacing, () => this._slider_spacing.Element.Maximum, BindingMode.OneWay);
             
-            context.AddBinding(() => this._viewModel.LineSpacing, () => this._slider_lineSpacing.Element.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.LineSpacing, () => this._slider_lineSpacing.Element.Value, BindingMode.TwoWay);
             context.AddBinding(() => this._viewModel.MinLineSpacing, () => this._slider_lineSpacing.Element.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxLineSpacing, () => this._slider_lineSpacing.Element.Maximum, BindingMode.OneWay);
 
-            context.AddBinding(() => this._viewModel.CharOffsetX, () => this._slider_charOffsetX.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.CharOffsetX, () => this._slider_charOffsetX.Value, BindingMode.TwoWay);
             context.AddBinding(() => this._viewModel.MinCharOffsetX, () => this._slider_charOffsetX.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxCharOffsetX, () => this._slider_charOffsetX.Maximum, BindingMode.OneWay);
 
-            context.AddBinding(() => this._viewModel.CharOffsetY, () => this._slider_charOffsetY.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.CharOffsetY, () => this._slider_charOffsetY.Value, BindingMode.TwoWay);
             context.AddBinding(() => this._viewModel.MinCharOffsetY, () => this._slider_charOffsetY.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxCharOffsetY, () => this._slider_charOffsetY.Maximum, BindingMode.OneWay);
 
             context.AddBinding(() => this._viewModel.AllFonts, () => this._dropDown_font.ItemsSource, BindingMode.OneWay);
-            context.AddBinding(() => this._viewModel.CurrentFont, () => this._dropDown_font.SelectedItem, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
-            context.AddBinding(() => this._viewModel.ExamplesMerged, () => this._box_merge.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
-            context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._box_showBounds.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.CurrentFont, () => this._dropDown_font.SelectedItem, BindingMode.TwoWay);
+            context.AddBinding(() => this._viewModel.ExamplesMerged, () => this._box_merge.Element.IsChecked, BindingMode.TwoWay);  
+            context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._box_showBounds.Element.IsChecked, BindingMode.TwoWay);  
             context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._label_gameExample.ShowBounds, BindingMode.OneWay);  
             context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._label_currentExample.ShowBounds, BindingMode.OneWay);  
-            context.AddBinding(() => this._viewModel.ShowExampleText, () => this._box_showText.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.ShowExampleText, () => this._box_showText.Element.IsChecked, BindingMode.TwoWay); 
             context.AddBinding(() => this._viewModel.ShowExampleText, () => this._label_gameExample.ShowText, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ShowExampleText, () => this._label_currentExample.ShowText, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ExampleText, () => this._label_gameExample.Text, BindingMode.OneWay);
@@ -510,6 +514,7 @@ namespace FontSettings.Framework.Menus
             context.AddBinding(() => this._viewModel.ExampleVanillaFont, () => this._label_gameExample.Font, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ExampleCurrentFont, () => this._label_currentExample.Font, BindingMode.OneWay);
 
+            context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => this._button_offsetTuning.IsToggled, BindingMode.TwoWay);
             context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => this._slider_charOffsetX.Visibility, BindingMode.OneWay, new BooleanVisibilityConverter());
             context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => this._slider_charOffsetY.Visibility, BindingMode.OneWay, new BooleanVisibilityConverter());
 
@@ -614,10 +619,8 @@ namespace FontSettings.Framework.Menus
             int maxHeight = Math.Max(this._label_gameExample.Height, this._label_currentExample.Height);
             int centerX = exampleBounds.Center.X - maxWidth / 2;
             int centerY = exampleBounds.Center.Y - maxHeight / 2;
-            if (this._box_merge.Element.IsChecked)
-            {
+            if (this._viewModel.ExamplesMerged)
                 this._label_gameExample.LocalPosition = this._label_currentExample.LocalPosition = new Vector2(centerX, centerY);
-            }
             else
             {
                 this._label_gameExample.LocalPosition = new Vector2(centerX, exampleBounds.Y);
