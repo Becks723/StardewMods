@@ -12,11 +12,12 @@ using StardewValley;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 using StardewValleyUI.Data;
+using StardewValleyUI.Data.Converters;
 using StardewValleyUI.Menus;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontSettingsPage : BaseMenu
+    internal class FontSettingsPage : BaseMenu<FontSettingsMenuModel>
     {
         private static FontSettingsPage Instance { get; set; }
 
@@ -79,8 +80,7 @@ namespace FontSettings.Framework.Menus
             this._viewModel.ExampleVanillaUpdated += (_, _) => this.UpdateExamplePositions();  // TODO: 去掉
             this._viewModel.ExampleCurrentUpdated += (_, _) => this.UpdateExamplePositions();  // TODO: 去掉
             this._viewModel.UpdateExampleCurrent();
-            this._slider_charOffsetX.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
-            this._slider_charOffsetY.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
+            this.DataContext = this._viewModel;
         }
 
         /// <summary>问题：如果同时安装了<see href="https://www.nexusmods.com/stardewvalley/mods/2668">魔法少女界面</see>，设置字体的界面会出现黑框问题，此函数为解决方法。</summary>
@@ -114,79 +114,50 @@ namespace FontSettings.Framework.Menus
 
         private void ExampleMergeToggled(object sender, EventArgs e)
         {
-            this._viewModel.ExamplesMerged = this._box_merge.Element.IsChecked;  // TODO: 实现双向绑定后删。
             this.UpdateExamplePositions();
-        }
-
-        private void ShowTextToggled(object sender, EventArgs e)
-        {
-            this._viewModel.ExamplesMerged = this._box_showText.Element.IsChecked;  // TODO: 实现双向绑定后删。
-        }
-
-        private void ShowBoundsToggled(object sender, EventArgs e)
-        {
-            this._viewModel.ExamplesMerged = this._box_showBounds.Element.IsChecked;  // TODO: 实现双向绑定后删。
         }
 
         private void OffsetTuningToggled(object sender, EventArgs e)
         {
             Game1.playSound("smallSelect");
 
-            this._viewModel.IsTuningCharOffset = !this._viewModel.IsTuningCharOffset;  // TODO: 实现双向绑定后删。
-
-            // TODO: 实现数据绑定的值转换器后删。
-            this._slider_charOffsetX.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
-            this._slider_charOffsetY.Visibility = this._viewModel.IsTuningCharOffset ? Visibility.Visible : Visibility.Disabled;
+            this._viewModel.IsTuningCharOffset = !this._viewModel.IsTuningCharOffset;  // TODO: 添加一个变量
 
             this.UpdateExamplePositions();
         }
 
         private void OffsetXSlider_ValueChanged(object sender, EventArgs e)
         {
-            this._viewModel.CharOffsetX = this._slider_charOffsetX.Value;  // TODO: 实现双向绑定后删。
-
             this._viewModel.UpdateExampleCurrent();
         }
 
         private void OffsetYSlider_ValueChanged(object sender, EventArgs e)
         {
-            this._viewModel.CharOffsetY = this._slider_charOffsetY.Value;  // TODO: 实现双向绑定后删。
-
             this._viewModel.UpdateExampleCurrent();
         }
 
         private void FontEnableChanged(object sender, EventArgs e)
         {
-            this._viewModel.FontEnabled = this._box_enabledFont.Element.IsChecked;  // TODO: 实现双向绑定后删。
-
             this._viewModel.UpdateExampleCurrent();
         }
 
         private void FontSizeSlider_ValueChanged(object sender, EventArgs e)
         {
-            this._viewModel.FontSize = this._slider_fontSize.Element.Value;  // TODO: 实现双向绑定后删。
-
             this._viewModel.UpdateExampleCurrent();
         }
 
         private void SpacingSlider_ValueChanged(object sender, EventArgs e)
         {
-            this._viewModel.Spacing = this._slider_spacing.Element.Value;  // TODO: 实现双向绑定后删。
-
             this._viewModel.UpdateExampleCurrent();
         }
 
         private void LineSpacingSlider_ValueChanged(object sender, EventArgs e)
         {
-            this._viewModel.LineSpacing = this._slider_lineSpacing.Element.Value;  // TODO: 实现双向绑定后删。
-
             this._viewModel.UpdateExampleCurrent();
         }
 
         private void FontSelectionChanged(object sender, EventArgs e)
         {
-            this._viewModel.CurrentFont = this._dropDown_font.SelectedItem as FontModel;  // TODO: 实现双向绑定后删。
-
             this._viewModel.UpdateExampleCurrent();
         }
 
@@ -280,14 +251,10 @@ namespace FontSettings.Framework.Menus
             this._box_merge.Text = I18n.OptionsPage_MergeExamples();
 
             Checkbox showBoundsBox = new Checkbox();
-            showBoundsBox.Checked += this.ShowBoundsToggled;
-            showBoundsBox.Unchecked += this.ShowBoundsToggled;
             this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox);
             this._box_showBounds.Text = I18n.OptionsPage_ShowExampleBounds();
 
             Checkbox showTextBox = new Checkbox();
-            showTextBox.Checked += this.ShowTextToggled;
-            showTextBox.Unchecked += this.ShowTextToggled;
             this._box_showText = new LabeledElement<Checkbox>(showTextBox);
             this._box_showText.Text = I18n.OptionsPage_ShowExampleText();
 
@@ -507,47 +474,50 @@ namespace FontSettings.Framework.Menus
 
 #pragma warning disable format
             context.AddBinding(() => this._viewModel.Title, () => this._label_title.Text, BindingMode.OneWay);
-            context.AddBinding(() => this._viewModel.FontEnabled, () => this._box_enabledFont.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.FontEnabled, () => this._box_enabledFont.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             
-            context.AddBinding(() => this._viewModel.FontSize, () => this._slider_fontSize.Element.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.FontSize, () => this._slider_fontSize.Element.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.MinFontSize, () => this._slider_fontSize.Element.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxFontSize, () => this._slider_fontSize.Element.Maximum, BindingMode.OneWay);
             
-            context.AddBinding(() => this._viewModel.Spacing, () => this._slider_spacing.Element.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.Spacing, () => this._slider_spacing.Element.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.MinSpacing, () => this._slider_spacing.Element.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxSpacing, () => this._slider_spacing.Element.Maximum, BindingMode.OneWay);
             
-            context.AddBinding(() => this._viewModel.LineSpacing, () => this._slider_lineSpacing.Element.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.LineSpacing, () => this._slider_lineSpacing.Element.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.MinLineSpacing, () => this._slider_lineSpacing.Element.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxLineSpacing, () => this._slider_lineSpacing.Element.Maximum, BindingMode.OneWay);
 
-            context.AddBinding(() => this._viewModel.CharOffsetX, () => this._slider_charOffsetX.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.CharOffsetX, () => this._slider_charOffsetX.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.MinCharOffsetX, () => this._slider_charOffsetX.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxCharOffsetX, () => this._slider_charOffsetX.Maximum, BindingMode.OneWay);
 
-            context.AddBinding(() => this._viewModel.CharOffsetY, () => this._slider_charOffsetY.Value, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.CharOffsetY, () => this._slider_charOffsetY.Value, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.MinCharOffsetY, () => this._slider_charOffsetY.Minimum, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.MaxCharOffsetY, () => this._slider_charOffsetY.Maximum, BindingMode.OneWay);
 
             context.AddBinding(() => this._viewModel.AllFonts, () => this._dropDown_font.ItemsSource, BindingMode.OneWay);
-            context.AddBinding(() => this._viewModel.CurrentFont, () => this._dropDown_font.SelectedItem, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
-            context.AddBinding(() => this._viewModel.ExamplesMerged, () => this._box_merge.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
-            context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._box_showBounds.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.CurrentFont, () => this._dropDown_font.SelectedItem, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.ExamplesMerged, () => this._box_merge.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._box_showBounds.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._label_gameExample.ShowBounds, BindingMode.OneWay);  
             context.AddBinding(() => this._viewModel.ShowExampleBounds, () => this._label_currentExample.ShowBounds, BindingMode.OneWay);  
-            context.AddBinding(() => this._viewModel.ShowExampleText, () => this._box_showText.Element.IsChecked, BindingMode.OneWay);  // TODO: 等实现双向绑定后改成TwoWay。
+            context.AddBinding(() => this._viewModel.ShowExampleText, () => this._box_showText.Element.IsChecked, BindingMode.TwoWay);  // TODO: 等实现双向绑定后改成TwoWay。
             context.AddBinding(() => this._viewModel.ShowExampleText, () => this._label_gameExample.ShowText, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ShowExampleText, () => this._label_currentExample.ShowText, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ExampleText, () => this._label_gameExample.Text, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ExampleText, () => this._label_currentExample.Text, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ExampleVanillaFont, () => this._label_gameExample.Font, BindingMode.OneWay);
             context.AddBinding(() => this._viewModel.ExampleCurrentFont, () => this._label_currentExample.Font, BindingMode.OneWay);
-            context.AddBinding(() => this._viewModel.CurrentPresetName, () => this._label_currentPreset.Text, BindingMode.OneWay);
 
-            context.AddBinding(() => !this._viewModel.CanSaveCurrentAsNewPreset, () => this._button_new.GreyedOut, BindingMode.OneWay);
-            context.AddBinding(() => !this._viewModel.CanSaveCurrentPreset, () => this._button_save.GreyedOut, BindingMode.OneWay);
-            context.AddBinding(() => !this._viewModel.CanDeleteCurrentPreset, () => this._button_delete.GreyedOut, BindingMode.OneWay);
-            context.AddBinding(() => !this._viewModel.CanGenerateFont,    () => this._button_ok.GreyedOut, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => this._slider_charOffsetX.Visibility, BindingMode.OneWay, new BooleanVisibilityConverter());
+            context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => this._slider_charOffsetY.Visibility, BindingMode.OneWay, new BooleanVisibilityConverter());
+
+            context.AddBinding(() => this._viewModel.CurrentPresetName, () => this._label_currentPreset.Text, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.CanSaveCurrentAsNewPreset, () => this._button_new.GreyedOut, BindingMode.OneWay, new TrueFalseConverter());
+            context.AddBinding(() => this._viewModel.CanSaveCurrentPreset, () => this._button_save.GreyedOut, BindingMode.OneWay, new TrueFalseConverter());
+            context.AddBinding(() => this._viewModel.CanDeleteCurrentPreset, () => this._button_delete.GreyedOut, BindingMode.OneWay, new TrueFalseConverter());
+            context.AddBinding(() => this._viewModel.CanGenerateFont,    () => this._button_ok.GreyedOut, BindingMode.OneWay, new TrueFalseConverter());
 #pragma warning restore format
         }
 

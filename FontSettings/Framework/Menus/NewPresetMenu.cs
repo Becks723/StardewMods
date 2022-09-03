@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 using StardewValleyUI.Data;
+using StardewValleyUI.Data.Converters;
 using StardewValleyUI.Menus;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class NewPresetMenu : BaseMenu
+    internal class NewPresetMenu : BaseMenu<NewPresetMenuModel>
     {
         private readonly NewPresetMenuModel _viewModel;
 
@@ -38,6 +33,7 @@ namespace FontSettings.Framework.Menus
 
             this._viewModel = new NewPresetMenuModel(presetManager);
             this._viewModel.Accepted += (_, _) => this.RaisedAccepted(this._viewModel.Name);
+            this.DataContext = this._viewModel;
         }
 
         protected override void ResetComponents(RootElement root, IBindingContext context)
@@ -92,9 +88,9 @@ namespace FontSettings.Framework.Menus
                 this._button_cancel);
 
             context
-                .AddBinding(() => this._textbox_name.String, () => this._viewModel.Name, BindingMode.OneWay)
+                .AddBinding(() => this._viewModel.Name, () => this._textbox_name.String, BindingMode.OneWayReversed)
                 .AddBinding(() => this._viewModel.InvalidNameMessage, () => this._label_invalidNameMessage.Text, BindingMode.OneWay)
-                .AddBinding(() => !this._viewModel.CanOk, () => this._button_ok.GreyedOut, BindingMode.OneWay)
+                .AddBinding(() => this._viewModel.CanOk, () => this._button_ok.GreyedOut, BindingMode.OneWay, new TrueFalseConverter())
                 .AddBinding(() => this._viewModel.IsFinished, () => this.IsFinished, BindingMode.OneWay);
         }
 
