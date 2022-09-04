@@ -20,12 +20,17 @@ namespace FontSettings.Framework.Migrations
     {
         public bool NeedMigrate(IModHelper helper)
         {
-            if (!File.Exists(Path.Combine(helper.DirectoryPath, "config.json")))
+            string configPath = Path.Combine(helper.DirectoryPath, "config.json");
+            if (!File.Exists(configPath))  // 如果没有找到config.json，说明根本没有进过游戏，不需要迁移。
                 return false;
+
+            // 我们创建一个临时的配置文件拷贝。
+            string copiedConfigPath = Path.Combine(helper.DirectoryPath, "config-migrating-0.1-to-0.2.json");
+            File.Copy(configPath, copiedConfigPath);
 
             try
             {
-                ModConfig_0_1_0 config = helper.ReadConfig<ModConfig_0_1_0>();
+                ModConfig_0_1_0 config = helper.Data.ReadJsonFile<ModConfig_0_1_0>(Path.GetFileName(copiedConfigPath));
                 if (config.Fonts.Count > 0)
                     return true;
                 return false;
@@ -33,6 +38,10 @@ namespace FontSettings.Framework.Migrations
             catch  // 要是有什么乱七八糟的错误，一律视作需要迁移。
             {
                 return true;
+            }
+            finally
+            {
+                File.Delete(copiedConfigPath);  // 用完删除临时的配置文件。
             }
         }
 
