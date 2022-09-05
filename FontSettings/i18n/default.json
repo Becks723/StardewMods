@@ -24,6 +24,7 @@
   "ui.tooltip.new-preset": "Save current as...",
   "ui.tooltip.save-preset": "Save",
   "ui.tooltip.del-preset": "Delete",
+  "ui.tooltip.refresh-fonts": "Refresh Font List",
   "ui.new-preset-menu.title": "Name for New Preset",
   "ui.invalid-preset-name.empty": "Cannot be empty.",
   "ui.invalid-preset-name.invalid-char": "Contains invalid chars (/, \\, *, \", |, <, >, ?).",

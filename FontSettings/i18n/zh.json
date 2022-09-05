@@ -24,6 +24,7 @@
   "ui.tooltip.new-preset": "保存当前设置为新预设",
   "ui.tooltip.save-preset": "保存",
   "ui.tooltip.del-preset": "删除",
+  "ui.tooltip.refresh-fonts": "刷新字体列表",
   "ui.new-preset-menu.title": "为新预设命名",
   "ui.invalid-preset-name.empty": "不可为空。",
   "ui.invalid-preset-name.invalid-char": "不可包含非法字符，如：/、\\、*、\"、|、<、>、? 等。",

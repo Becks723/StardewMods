@@ -438,6 +438,7 @@ namespace FontSettings.Framework.Menus
             int refreshWidth = (int)(16 * refreshScale);
             int refreshHeight = (int)(16 * refreshScale);
             this._button_refresh = new RefreshButton(refreshScale);
+            this._button_refresh.ToolTipText = I18n.Ui_Tooltip_RefreshFonts();
             this._button_refresh.AnimationDuration = 300;
             this._button_refresh.LocalPosition = new Vector2(this._dropDown_font.LocalPosition.X - borderWidth / 3 - refreshWidth, this._dropDown_font.LocalPosition.Y + this._dropDown_font.Height / 2 - refreshHeight / 2);
             this._button_refresh.SettableWidth = refreshWidth;
