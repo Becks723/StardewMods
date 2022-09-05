@@ -16,11 +16,11 @@ namespace FontSettings.Framework.Patchers
     {
         private static ModConfig _config;
 
-        private static RuntimeFontManager _fontManager;
+        private static FontManager _fontManager;
 
         private static GameFontChanger _fontChanger;
 
-        public Game1Patcher(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger)
+        public Game1Patcher(ModConfig config, FontManager fontManager, GameFontChanger fontChanger)
         {
             _config = config;
             _fontManager = fontManager;

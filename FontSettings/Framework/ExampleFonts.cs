@@ -18,9 +18,9 @@ namespace FontSettings.Framework
 
         private ISpriteFont _spriteTextFont;
 
-        private readonly RuntimeFontManager _fontManager;
+        private readonly FontManager _fontManager;
 
-        public ExampleFonts(RuntimeFontManager fontManager)
+        public ExampleFonts(FontManager fontManager)
         {
             this._fontManager = fontManager;
         }

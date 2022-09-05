@@ -14,9 +14,9 @@ namespace FontSettings.Framework
 {
     internal class GameFontChanger
     {
-        private readonly RuntimeFontManager _fontManager;
+        private readonly FontManager _fontManager;
 
-        public GameFontChanger(RuntimeFontManager fontManager)
+        public GameFontChanger(FontManager fontManager)
         {
             this._fontManager = fontManager;
         }

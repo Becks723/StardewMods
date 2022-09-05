@@ -29,7 +29,7 @@ namespace FontSettings
 
         private ModConfig _config;
 
-        private RuntimeFontManager _fontManager;
+        private FontManager _fontManager;
 
         private GameFontChanger _fontChanger;
 
@@ -78,7 +78,7 @@ namespace FontSettings
                 new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
                     .Patch(Harmony, this.Monitor);
 
-                new GameMenuAdder()
+                new GameMenuPatcher()
                     .AddFontSettingsPage(helper, Harmony, this._config, this._fontManager, this._fontChanger, this._presetManager, config =>
                     {
                         this.SaveConfig(config);

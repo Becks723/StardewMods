@@ -14,19 +14,19 @@ using StardewValley.Menus;
 
 namespace FontSettings.Framework.Patchers
 {
-    internal class GameMenuAdder
+    internal class GameMenuPatcher
     {
         private const string _fontTabName = "font";
         private static readonly Lazy<Texture2D> _fontTab = new(() => Textures.FontTab);
 
         private static IModHelper _helper;
         private static ModConfig _config;
-        private static RuntimeFontManager _fontManager;
+        private static FontManager _fontManager;
         private static GameFontChanger _fontChanger;
         private static FontPresetManager _presetManager;
         private static Action<ModConfig> _saveConfig;
 
-        public void AddFontSettingsPage(IModHelper helper, Harmony harmony, ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
+        public void AddFontSettingsPage(IModHelper helper, Harmony harmony, ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
         {
             _helper = helper;
             _config = config;
@@ -37,19 +37,19 @@ namespace FontSettings.Framework.Patchers
 
             harmony.Patch(
                 original: AccessTools.Constructor(typeof(GameMenu), new Type[] { typeof(bool) }),
-                postfix: new HarmonyMethod(typeof(GameMenuAdder), nameof(GameMenuAdder.GameMenu_ctor_Postfix))
+                postfix: new HarmonyMethod(typeof(GameMenuPatcher), nameof(GameMenuPatcher.GameMenu_ctor_Postfix))
             );
             harmony.Patch(
                 original: AccessTools.Method(typeof(GameMenu), nameof(GameMenu.draw), new Type[] { typeof(SpriteBatch) }),
-                prefix: new HarmonyMethod(typeof(GameMenuAdder), nameof(GameMenuAdder.GameMenu_draw_Prefix))
+                prefix: new HarmonyMethod(typeof(GameMenuPatcher), nameof(GameMenuPatcher.GameMenu_draw_Prefix))
             );
             harmony.Patch(
                 original: AccessTools.Method(typeof(GameMenu), nameof(GameMenu.getTabNumberFromName)),
-                postfix: new HarmonyMethod(typeof(GameMenuAdder), nameof(GameMenuAdder.GameMenu_getTabNumberFromName_Postfix))
+                postfix: new HarmonyMethod(typeof(GameMenuPatcher), nameof(GameMenuPatcher.GameMenu_getTabNumberFromName_Postfix))
             );
             harmony.Patch(
                 original: AccessTools.Method(typeof(Game1), "set_activeClickableMenu"),
-                prefix: new HarmonyMethod(typeof(GameMenuAdder), nameof(GameMenuAdder.Game1_set_activeClickableMenu_Prefix))
+                prefix: new HarmonyMethod(typeof(GameMenuPatcher), nameof(GameMenuPatcher.Game1_set_activeClickableMenu_Prefix))
             );
         }
 

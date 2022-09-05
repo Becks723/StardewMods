@@ -26,7 +26,7 @@ namespace FontSettings.Framework.Menus
 
         private readonly Dictionary<FontPresetFontType, FontPresetViewModel> _presetViewModels = new();
         private readonly ModConfig _config;
-        private readonly RuntimeFontManager _fontManager;
+        private readonly FontManager _fontManager;
         private readonly GameFontChanger _fontChanger;
         private readonly FontPresetManager _presetManager;
         private readonly Action<ModConfig> _saveConfig;
@@ -452,7 +452,7 @@ namespace FontSettings.Framework.Menus
 
         public event EventHandler ExampleCurrentUpdated;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
 
-        public FontSettingsMenuModel(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
+        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
         {
             _instance = this;
             this._config = config;

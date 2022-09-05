@@ -62,7 +62,7 @@ namespace FontSettings.Framework.Menus
 
         protected override bool ManualInitializeComponents => true;
 
-        public FontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig,
+        public FontSettingsPage(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig,
             int x, int y, int width, int height, bool showUpperRightCloseButton = false, bool isStandalone = false)
             : base(x, y, width, height, showUpperRightCloseButton)
         {

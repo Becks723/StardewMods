@@ -12,10 +12,10 @@ namespace FontSettings.Framework.Patchers
     internal class SpriteTextPatcher
     {
         private static ModConfig _config;
-        private static RuntimeFontManager _fontManager;
+        private static FontManager _fontManager;
         private static GameFontChanger _fontChanger;
 
-        public SpriteTextPatcher(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger)
+        public SpriteTextPatcher(ModConfig config, FontManager fontManager, GameFontChanger fontChanger)
         {
             _config = config;
             _fontManager = fontManager;

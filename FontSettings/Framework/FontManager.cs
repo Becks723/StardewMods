@@ -11,7 +11,7 @@ using StardewValley.BellsAndWhistles;
 
 namespace FontSettings.Framework
 {
-    internal class RuntimeFontManager : IDisposable
+    internal class FontManager : IDisposable
     {
         /// <summary>无需手动释放。</summary> 
         private readonly IDictionary<LanguageInfo, Dictionary<GameFontType, SpriteFont>> _builtInSpriteFonts = new Dictionary<LanguageInfo, Dictionary<GameFontType, SpriteFont>>();
@@ -27,7 +27,7 @@ namespace FontSettings.Framework
 
         private readonly IModContentHelper _content;
 
-        public RuntimeFontManager(IModContentHelper content)
+        public FontManager(IModContentHelper content)
         {
             this._content = content;
         }
