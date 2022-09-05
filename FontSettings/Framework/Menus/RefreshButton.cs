@@ -49,7 +49,7 @@ namespace FontSettings.Framework.Menus
             {
                 int texturewidth = this.SourceRectangle.HasValue ? this.SourceRectangle.Value.Width : this.Texture.Width;
                 int textureHeight = this.SourceRectangle.HasValue ? this.SourceRectangle.Value.Height : this.Texture.Height;
-                b.Draw(this.Texture, this.Position + new Vector2(texturewidth / 2, textureHeight / 2) * this.BaseScale, this.SourceRectangle, Color.White * (this.GreyedOut ? 0.33f : 1f), this.CalculateRotationByAngle(this._angle), new Vector2(texturewidth / 2, textureHeight / 2), this.Scale, SpriteEffects.None, 0f);
+                b.Draw(this.Texture, this.Position + new Vector2(texturewidth / 2, textureHeight / 2) * this.Scale, this.SourceRectangle, Color.White * (this.GreyedOut ? 0.33f : 1f), this.CalculateRotationByAngle(this._angle), new Vector2(texturewidth / 2, textureHeight / 2), this.CurrentScale, SpriteEffects.None, 0f);
             }
         }
 
