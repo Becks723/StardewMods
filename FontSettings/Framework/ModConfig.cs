@@ -1,4 +1,7 @@
-﻿namespace FontSettings.Framework
+﻿using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
+
+namespace FontSettings.Framework
 {
     internal class ModConfig
     {
@@ -28,6 +31,10 @@
 
         public bool DisableTextShadow { get; set; } = false;
 
+        public KeybindList OpenFontSettingsMenu { get; set; } = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
+
+        public bool FontSettingsInGameMenu { get; set; } = true;
+
         public void ResetToDefault()
         {
             this.ExampleText = "AaBbYyZz\n测试用例";
@@ -40,6 +47,9 @@
             this.MaxCharOffsetX = 10;
             this.MinCharOffsetY = -10;
             this.MaxCharOffsetY = 10;
+            this.DisableTextShadow = false;
+            this.OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
+            this.FontSettingsInGameMenu = true;
         }
     }
 }

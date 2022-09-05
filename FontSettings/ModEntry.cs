@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using BmFont;
 using FontSettings.Framework;
 using FontSettings.Framework.FontInfomation;
@@ -14,6 +14,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.GameData;
+using StardewValley.Menus;
 
 namespace FontSettings
 {
@@ -91,6 +92,7 @@ namespace FontSettings
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
 
             this.RecordFontData(LocalizedContentManager.LanguageCode.en, null);
         }
@@ -99,15 +101,31 @@ namespace FontSettings
         {
             new GMCMIntegration(
                 config: this._config,
-                fontManager: this._fontManager,
-                fontChanger: this._fontChanger,
                 reset: this.ResetConfig,
-                saveConfig: () => this.SaveConfig(this._config),
-                saveFonts: () => this.SaveFontSettings(this._config.Fonts),
+                save: () => this.SaveConfig(this._config),
                 modRegistry: this.Helper.ModRegistry,
                 monitor: this.Monitor,
-                manifest: this.ModManifest)
-                .Integrate();
+                manifest: this.ModManifest
+            ).Integrate();
+        }
+
+        private void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)
+        {
+            if (this._config.OpenFontSettingsMenu.JustPressed())
+            {
+                int width = 800 + IClickableMenu.borderWidth * 2;
+                int height = 600 + IClickableMenu.borderWidth * 2 + 64;
+                Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, this._fontChanger, this._presetManager, config =>
+                {
+                    this.SaveConfig(config);
+                    this.SaveFontSettings(config.Fonts);
+                },
+                Game1.uiViewport.Width / 2 - width / 2,
+                Game1.uiViewport.Height / 2 - height / 2,
+                width,
+                height,
+                isStandalone: true);
+            }
         }
 
         private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
@@ -279,17 +297,8 @@ namespace FontSettings
 
         private void ResetConfig()
         {
-            FontConfigs fonts = this._config.Fonts;
-
-            // 重置当前语言的字体设置数据。
-            var lang = LocalizedContentManager.CurrentLanguageCode;
-            var locale = FontHelpers.GetCurrentLocale();
-            fonts.RemoveAll(font => font.Lang == lang && font.Locale == locale);
-            foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
-                fonts.GetOrCreateFontConfig(lang, locale, fontType);
-
+            // 重置
             this._config.ResetToDefault();
-            this._config.Fonts = fonts;
 
             // 保存
             this.Helper.WriteConfig(this._config);

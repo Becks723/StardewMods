@@ -22,6 +22,7 @@ namespace FontSettings.Framework.Menus
         private static FontSettingsPage Instance { get; set; }
 
         private readonly FontPresetManager _presetManager;
+        private readonly bool _isStandalone;
         private readonly FontSettingsMenuModel _viewModel;
 
         private readonly Color _gameExampleColor = Color.Gray * 0.67f;
@@ -62,7 +63,7 @@ namespace FontSettings.Framework.Menus
         protected override bool ManualInitializeComponents => true;
 
         public FontSettingsPage(ModConfig config, RuntimeFontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig,
-            int x, int y, int width, int height, bool showUpperRightCloseButton = false)
+            int x, int y, int width, int height, bool showUpperRightCloseButton = false, bool isStandalone = false)
             : base(x, y, width, height, showUpperRightCloseButton)
         {
             // 游戏中GameMenu在每次窗口大小改变时，都会重新创建实例。这导致GameMenu的子菜单（见GameMenu.pages字段）中保存的信息、状态直接清零。
@@ -72,6 +73,7 @@ namespace FontSettings.Framework.Menus
             Instance = this;
 
             this._presetManager = presetManager;
+            this._isStandalone = isStandalone;
 
             this.ResetComponents();
 
@@ -560,6 +562,10 @@ namespace FontSettings.Framework.Menus
 
         public override void draw(SpriteBatch b)
         {
+            // 如果是独立菜单，需要画一个背景框。
+            if (this._isStandalone)
+                Game1.drawDialogueBox(this.xPositionOnScreen, this.yPositionOnScreen, this.width, this.height, false, true);
+
             base.draw(b);
 
 #if DEBUG

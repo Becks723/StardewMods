@@ -49,16 +49,8 @@
   "config.min-offset-y.description": "Min y-offset of all characters.",
   "config.disable-text-shadow": "Diable text shadow",
   "config.disable-text-shadow.description": "Whether to hide font shadow.",
-  "config.section.fonts": "Font",
-  "config.section.fonts.description": "Set the fonts for the current language.",
-  "config.fonts.enabled": "Enabled",
-  "config.fonts.enabled.description": "Whether to enable custom fonts.",
-  "config.fonts.font": "Font",
-  "config.fonts.font.description": "Select a font.",
-  "config.fonts.font-size": "Font Size (px)",
-  "config.fonts.font-size.description": "Set the font size, in pixels.",
-  "config.fonts.spacing": "Spacing",
-  "config.fonts.spacing.description": "Set the distance between two horizontal characters.",
-  "config.fonts.line-spacing": "Line Spacing",
-  "config.fonts.line-spacing.description": "Set the distance between two lines."
+  "config.font-menu-key": "Open Font Menu",
+  "config.font-menu-key.description": "Key-binding to open a font settings menu.",
+  "config.font-settings-in-game-menu": "Font Page in Game Menu",
+  "config.font-settings-in-game-menu.description": "Whether to add a tab into the game menu to configure fonts."
 }

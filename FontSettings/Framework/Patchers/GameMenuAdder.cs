@@ -55,6 +55,10 @@ namespace FontSettings.Framework.Patchers
 
         private static void GameMenu_ctor_Postfix(GameMenu __instance)
         {
+            // 如果禁用了游戏菜单内设置字体，直接返回。
+            if (!_config.FontSettingsInGameMenu)
+                return;
+
             __instance.tabs.Add(new ClickableComponent(new Rectangle(__instance.xPositionOnScreen + 576, __instance.yPositionOnScreen + IClickableMenu.tabYPositionRelativeToMenuY + 64, 64, 64), _fontTabName, I18n.OptionsPage_FontHeader())
             {
                 myID = 12348,
@@ -76,7 +80,11 @@ namespace FontSettings.Framework.Patchers
         }
 
         private static bool GameMenu_draw_Prefix(GameMenu __instance, SpriteBatch b)
-        {
+        {            
+            // 如果禁用了游戏菜单内设置字体，直接返回，执行原函数。
+            if (!_config.FontSettingsInGameMenu)
+                return true;
+
             if (!__instance.invisible)
             {
                 if (!Game1.options.showMenuBackground)
