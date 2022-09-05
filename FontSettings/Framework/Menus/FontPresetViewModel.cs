@@ -88,7 +88,7 @@ namespace FontSettings.Framework.Menus
         {
             var result = new List<FontPreset>();
             result.Add(null);
-            result.AddRange(this._presetManager.GetAllUnder(this._targetFontType));
+            result.AddRange(this._presetManager.GetAllUnder(this._targetFontType, FontHelpers.GetCurrentLanguage()));
 
             return result.ToArray();
         }

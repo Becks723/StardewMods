@@ -51,10 +51,10 @@ namespace FontSettings.Framework
             }
         }
 
-        public IEnumerable<FontPreset> GetAllUnder(FontPresetFontType fontType, bool includeGeneral = true, bool skipBuiltIn = false, bool skipUserDefined = false)
+        public IEnumerable<FontPreset> GetAllUnder(FontPresetFontType fontType, LanguageInfo language, bool includeGeneral = true, bool skipBuiltIn = false, bool skipUserDefined = false)
         {
             var all = this.GetAll(skipBuiltIn, skipUserDefined);
-            var result = all.Where(p => p.FontType == fontType);
+            var result = all.Where(p => p.FontType == fontType && p.Lang == language.Code && p.Locale == language.Locale);
             if (includeGeneral)
                 result = result.Concat(all.Where(p => p.FontType is FontPresetFontType.Any));
             return result;
@@ -109,7 +109,6 @@ namespace FontSettings.Framework
             }
         }
 
-
         public bool RemovePreset(string name, bool canRemoveBuiltIn = false)
         {
             if (!this.TryFindPreset(name, out FontPreset preset))
@@ -129,59 +128,6 @@ namespace FontSettings.Framework
             }
 
             return false;
-        }
-
-        public void EditPreset<TField>(string name, string fieldName, TField newValue)
-        {
-            if (!this.TryFindPreset(name, out FontPreset preset))
-                throw new KeyNotFoundException($"未找到名字为{name}的预设。");
-
-            static void EnsureTypeMatch(Type expectedType)
-            {
-                if (expectedType != typeof(TField))
-                    throw new ArgumentException($"预期输入一个{expectedType}类型，但实际上输入了{typeof(TField)}类型。");
-            }
-            static T ParseValue<T>(TField value) => (T)(object)value;
-
-            switch (fieldName)
-            {
-                case nameof(FontPreset.FontType):
-                    EnsureTypeMatch(typeof(FontPresetFontType));
-                    preset.FontType = ParseValue<FontPresetFontType>(newValue);
-                    break;
-                case nameof(FontPreset.FontIndex):
-                    EnsureTypeMatch(typeof(int));
-                    preset.FontIndex = ParseValue<int>(newValue);
-                    break;
-                case nameof(FontPreset.Lang):
-                    EnsureTypeMatch(typeof(StardewValley.LocalizedContentManager.LanguageCode));
-                    preset.Lang = ParseValue<StardewValley.LocalizedContentManager.LanguageCode>(newValue);
-                    break;
-                case nameof(FontPreset.Locale):
-                    EnsureTypeMatch(typeof(string));
-                    preset.Locale = ParseValue<string>(newValue);
-                    break;
-                case nameof(FontPreset.FontSize):
-                    EnsureTypeMatch(typeof(float));
-                    preset.FontSize = ParseValue<float>(newValue);
-                    break;
-                case nameof(FontPreset.Spacing):
-                    EnsureTypeMatch(typeof(float));
-                    preset.Spacing = ParseValue<float>(newValue);
-                    break;
-                case nameof(FontPreset.LineSpacing):
-                    EnsureTypeMatch(typeof(int));
-                    preset.LineSpacing = ParseValue<int>(newValue);
-                    break;
-                case nameof(FontPreset.CharOffsetX):
-                    EnsureTypeMatch(typeof(float));
-                    preset.CharOffsetX = ParseValue<float>(newValue);
-                    break;
-                case nameof(FontPreset.CharOffsetY):
-                    EnsureTypeMatch(typeof(float));
-                    preset.CharOffsetY = ParseValue<float>(newValue);
-                    break;
-            }
         }
 
         public void EditPreset(FontPreset preset,
