@@ -29,6 +29,15 @@ namespace FontSettings.Framework
                     get: () => this.Config.FontSettingsInGameMenu,
                     set: val => this.Config.FontSettingsInGameMenu = val
                 )
+
+                // diable font shadow
+                .AddCheckbox(
+                    name: I18n.Config_DisableTextShadow,
+                    tooltip: I18n.Config_DisableTextShadow_Description,
+                    get: () => this.Config.DisableTextShadow,
+                    set: val => this.Config.DisableTextShadow = val
+                )
+
                 .AddTextBox(
                     name: I18n.Config_ExampleText,
                     tooltip: I18n.Config_ExampleText_Description,
@@ -122,14 +131,6 @@ namespace FontSettings.Framework
                     max: -5,
                     min: -25,
                     interval: 1
-                )
-
-                // diable font shadow
-                .AddCheckbox(
-                    name: I18n.Config_DisableTextShadow,
-                    tooltip: I18n.Config_DisableTextShadow_Description,
-                    get: () => this.Config.DisableTextShadow,
-                    set: val => this.Config.DisableTextShadow = val
                 );
         }
 
