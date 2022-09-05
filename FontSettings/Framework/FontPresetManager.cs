@@ -147,20 +147,19 @@ namespace FontSettings.Framework
             this.WriteToFile(preset);
         }
 
-        public bool IsValidPresetName(string? name, out string invalidMessage)
+        public bool IsValidPresetName(string? name, out InvalidPresetNameTypes? invalidType)
         {
-            string reason = null;
+            invalidType = null;
             if (string.IsNullOrWhiteSpace(name))
-                reason = "不可为空。";
+                invalidType = InvalidPresetNameTypes.EmptyName;
 
             if (this.ContainsInvalidChar(name))
-                reason = "不可包含非法字符，如：<、>、? 等。";
+                invalidType = InvalidPresetNameTypes.ContainsInvalidChar;
 
             if (this.DuplicatePresetName(name))
-                reason = "该名称已被占用。";
+                invalidType = InvalidPresetNameTypes.DuplicatedName;
 
-            invalidMessage = reason;
-            return reason == null;
+            return invalidType == null;
         }
 
         private void WriteToFile(FontPreset preset)  // 名称必须合法。
@@ -242,8 +241,8 @@ namespace FontSettings.Framework
 
         private void AssertValidName(string? name)
         {
-            if (!this.IsValidPresetName(name, out string message))
-                throw new ArgumentException(message, nameof(name));
+            if (!this.IsValidPresetName(name, out InvalidPresetNameTypes? invalidType))
+                throw new ArgumentException(invalidType.Value.GetMessage(), nameof(name));
         }
 
         private bool ContainsInvalidChar(string name)

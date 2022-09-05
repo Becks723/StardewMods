@@ -51,7 +51,7 @@ namespace FontSettings.Framework.Menus
             Thickness margin = new Thickness(borderWidth / 2) + this._background.BorderThickness;
 
             this._label_title = new Label2();
-            this._label_title.Text = "为新预设命名";
+            this._label_title.Text = I18n.Ui_NewPresetMenu_Title();
             this._label_title.Bold = true;
             this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, margin.Top);
 

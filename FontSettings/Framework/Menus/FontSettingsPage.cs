@@ -301,6 +301,7 @@ namespace FontSettings.Framework.Menus
             float offsetTuningScale = 3f;
             this._button_offsetTuning = new ToggleTextureButton(
                 Game1.mouseCursors, new Rectangle(257, 284, 16, 16), offsetTuningScale);
+            this._button_offsetTuning.ToolTipText = I18n.Ui_Tooltip_ToggleCharOffsetTuning();
             this._button_offsetTuning.SettableWidth = (int)(16 * offsetTuningScale);
             this._button_offsetTuning.SettableHeight = (int)(16 * offsetTuningScale);
             this._button_offsetTuning.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - this._button_offsetTuning.Width, exampleBounds.Y);
@@ -345,6 +346,7 @@ namespace FontSettings.Framework.Menus
 
                 this._button_delete = new TextureButton(
                     Game1.mouseCursors, new Rectangle(192, 256, 64, 64), scale_delete);
+                this._button_delete.ToolTipText = I18n.Ui_Tooltip_DelPreset();
                 this._button_delete.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - size_delete.X, presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2);
                 this._button_delete.SettableWidth = (int)size_delete.X;
                 this._button_delete.SettableHeight = (int)size_delete.Y;
@@ -352,6 +354,7 @@ namespace FontSettings.Framework.Menus
 
                 this._button_save = new TextureButton(
                     Game1.mouseCursors, new Rectangle(274, 284, 16, 16), scale_save);
+                this._button_save.ToolTipText = I18n.Ui_Tooltip_SavePreset();
                 this._button_save.LocalPosition = new Vector2(this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X, presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2);
                 this._button_save.SettableWidth = (int)size_save.X;
                 this._button_save.SettableHeight = (int)size_save.Y;
@@ -359,6 +362,7 @@ namespace FontSettings.Framework.Menus
 
                 this._button_new = new TextureButton(
                     Game1.mouseCursors, new Rectangle(0, 428, 10, 10), scale_new);
+                this._button_new.ToolTipText = I18n.Ui_Tooltip_NewPreset();
                 this._button_new.LocalPosition = new Vector2(this._button_save.LocalPosition.X - borderWidth / 3 - size_new.X, presetSectionY + presetSectionMaxHeight / 2 - size_new.Y / 2);
                 this._button_new.SettableWidth = (int)size_new.X;
                 this._button_new.SettableHeight = (int)size_new.Y;
@@ -366,6 +370,7 @@ namespace FontSettings.Framework.Menus
 
                 this._button_nextPreset = new TextureButton(
                     Game1.mouseCursors, new Rectangle(365, 495, 12, 11), scale_next);
+                this._button_nextPreset.ToolTipText = I18n.Ui_Tooltip_NextPreset();
                 this._button_nextPreset.LocalPosition = new Vector2(this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X, presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2);
                 this._button_nextPreset.SettableWidth = (int)size_next.X;
                 this._button_nextPreset.SettableHeight = (int)size_next.Y;
@@ -373,6 +378,7 @@ namespace FontSettings.Framework.Menus
 
                 this._button_prevPreset = new TextureButton(
                     Game1.mouseCursors, new Rectangle(352, 495, 12, 11), scale_prev);
+                this._button_prevPreset.ToolTipText = I18n.Ui_Tooltip_PrevPreset();
                 this._button_prevPreset.LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_prev.X, presetSectionY + presetSectionMaxHeight / 2 - size_prev.Y / 2);
                 this._button_prevPreset.SettableWidth = (int)size_prev.X;
                 this._button_prevPreset.SettableHeight = (int)size_prev.Y;

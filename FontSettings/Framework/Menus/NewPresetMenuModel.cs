@@ -57,8 +57,10 @@ namespace FontSettings.Framework.Menus
 
         public void CheckNameValid()
         {
-            this.CanOk = this._presetManager.IsValidPresetName(this.Name, out string message);
-            this.InvalidNameMessage = message;
+            this.CanOk = this._presetManager.IsValidPresetName(this.Name, out InvalidPresetNameTypes? invalidType);
+            this.InvalidNameMessage = invalidType.HasValue
+                ? invalidType.Value.GetMessage()
+                : null;
         }
     }
 }
