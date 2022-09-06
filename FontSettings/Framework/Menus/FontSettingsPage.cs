@@ -168,13 +168,23 @@ namespace FontSettings.Framework.Menus
             var (fontType, success) = await this._viewModel.TryGenerateFont();
             if (success)
             {
-                Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_SuccessSetFont(fontType.LocalizedName()), null));
                 Game1.playSound("money");
+
+                string message = I18n.HudMessage_SuccessSetFont(fontType.LocalizedName());
+                if (Game1.gameMode == 0)  // 如果在标题页面，HUD无法显示，
+                    ILog.Info(message);   // 写在日志中
+                else
+                    Game1.addHUDMessage(new OverlayHUDMessage(message, null));
             }
             else
             {
-                Game1.addHUDMessage(new HUDMessage(I18n.HudMessage_FailedSetFont(fontType.LocalizedName()), HUDMessage.error_type));
                 Game1.playSound("cancel");
+
+                string message = I18n.HudMessage_FailedSetFont(fontType.LocalizedName());
+                if (Game1.gameMode == 0)  // 如果在标题页面，HUD无法显示，
+                    ILog.Error(message);  // 写在日志中
+                else
+                    Game1.addHUDMessage(new OverlayHUDMessage(message, HUDMessage.error_type));
             }
         }
 
