@@ -29,22 +29,22 @@ namespace FontSettings.Framework.Menus
         private readonly Color _customExampleColor = Game1.textColor;
         private TextureButton _button_prevFontType;
         private TextureButton _button_nextFontType;
-        private Label2 _label_title;
+        private Label _label_title;
         private TextureBox _exampleBoard;
         private LabeledElement<Checkbox> _box_merge;  // TODO: 改成图标？
         private LabeledElement<Checkbox> _box_showBounds;
         private LabeledElement<Checkbox> _box_showText;
         private FontExampleLabel _label_gameExample;
         private FontExampleLabel _label_currentExample;
-        private Label2 _label_currentPreset;
+        private Label _label_currentPreset;
         private TextureButton _button_prevPreset;
         private TextureButton _button_nextPreset;
         private TextureButton _button_new;
         private TextureButton _button_save;
         private TextureButton _button_delete;
         private LabeledElement<Checkbox> _box_enabledFont;
-        private Label2 _label_game;
-        private Label2 _label_current;
+        private Label _label_game;
+        private Label _label_current;
         private ColorBlock _colorBlock_game;
         private ColorBlock _colorBlock_current;
         private ToggleTextureButton _button_offsetTuning;
@@ -242,8 +242,8 @@ namespace FontSettings.Framework.Menus
             this._button_nextFontType.SettableHeight = 44;
             this._button_nextFontType.Click += this.OnNextFontTypeButtonClicked;
 
-            this._label_title = new Label2();
-            this._label_title.Bold = true;
+            this._label_title = new Label();
+            this._label_title.Font = FontType.SpriteText;
             this._label_title.Text = "小字体";  // 这行只是用于初始化label的高度。
             this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, 108);
 
@@ -274,10 +274,10 @@ namespace FontSettings.Framework.Menus
             this._box_showBounds.LocalPosition = new Vector2(insideBoardX, this._box_merge.LocalPosition.Y + this._box_merge.Height + gap);
             this._box_showText.LocalPosition = new Vector2(insideBoardX, this._box_showBounds.LocalPosition.Y + this._box_showBounds.Height + gap);
 
-            this._label_game = new Label2();
+            this._label_game = new Label();
             this._label_game.Text = I18n.OptionsPage_OriginalExample();
 
-            this._label_current = new Label2();
+            this._label_current = new Label();
             this._label_current.Text = I18n.OptionsPage_CustomExample();
 
             this._colorBlock_game = new ColorBlock(this._gameExampleColor, 20);
@@ -292,13 +292,13 @@ namespace FontSettings.Framework.Menus
             this._colorBlock_game.LocalPosition = new Vector2(this._label_game.LocalPosition.X - borderWidth / 6 - this._colorBlock_game.Width, this._label_game.LocalPosition.Y + this._label_game.Height / 2 - this._colorBlock_game.Height / 2);
 
             this._label_gameExample = new FontExampleLabel();
-            this._label_gameExample.IdleTextColor = this._gameExampleColor;
+            this._label_gameExample.Forground = this._gameExampleColor;
             this._label_gameExample.BoundsColor = Color.Red * 0.5f;
             this._label_gameExample.ShowBounds = this._box_showBounds.Element.IsChecked;
             this._label_gameExample.ShowText = this._box_showText.Element.IsChecked;
 
             this._label_currentExample = new FontExampleLabel();
-            this._label_currentExample.IdleTextColor = this._customExampleColor;
+            this._label_currentExample.Forground = this._customExampleColor;
             this._label_currentExample.BoundsColor = Color.Green * 0.5f;
             this._label_currentExample.ShowBounds = this._box_showBounds.Element.IsChecked;
             this._label_currentExample.ShowText = this._box_showText.Element.IsChecked;
@@ -353,7 +353,7 @@ namespace FontSettings.Framework.Menus
                 Vector2 size_prev = new Vector2(12, 11) * scale_prev;
                 Vector2 size_next = new Vector2(12, 11) * scale_next;
                 float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_prev, size_next }.Max(v => v.Y);
-                this._label_currentPreset = new Label2();
+                this._label_currentPreset = new Label();
                 this._label_currentPreset.LocalPosition = new Vector2(exampleBoardX, presetSectionY);
 
                 this._button_delete = new TextureButton(

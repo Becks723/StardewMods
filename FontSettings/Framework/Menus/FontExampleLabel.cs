@@ -10,7 +10,7 @@ using StardewValleyUI.Controls;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontExampleLabel : Label2
+    internal class FontExampleLabel : Label
     {
         public new ISpriteFont Font { get; set; }
 
@@ -54,7 +54,7 @@ namespace FontSettings.Framework.Menus
 
                 // 再画文字
                 if (this.ShowText)
-                    this.Font.Draw(b, text, this.Position, this.IdleTextColor);
+                    this.Font.Draw(b, text, this.Position, this.Forground);
             }
         }
     }

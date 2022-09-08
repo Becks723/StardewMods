@@ -14,11 +14,11 @@ namespace FontSettings.Framework.Menus
         private readonly NewPresetMenuModel _viewModel;
 
         private TextureBox _background;
-        private Label2 _label_title;
+        private Label _label_title;
         private Textbox _textbox_name;
         private TextureButton _button_ok;
         private TextureButton _button_cancel;
-        private Label2 _label_invalidNameMessage;
+        private Label _label_invalidNameMessage;
 
         protected override bool ManualInitializeComponents => true;
 
@@ -50,16 +50,14 @@ namespace FontSettings.Framework.Menus
 
             Thickness margin = new Thickness(borderWidth / 2) + this._background.BorderThickness;
 
-            this._label_title = new Label2();
+            this._label_title = new Label();
             this._label_title.Text = I18n.Ui_NewPresetMenu_Title();
-            this._label_title.Bold = true;
+            this._label_title.Font = FontType.SpriteText;
             this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, margin.Top);
 
-            this._label_invalidNameMessage = new Label2();
-            this._label_invalidNameMessage.Bold = false;
+            this._label_invalidNameMessage = new Label();
             this._label_invalidNameMessage.Font = FontType.SmallFont;
-            this._label_invalidNameMessage.IdleTextColor = Color.Red;
-            this._label_invalidNameMessage.HoverTextColor = Color.Red;
+            this._label_invalidNameMessage.Forground = Color.Red;
             this._label_invalidNameMessage.LocalPosition = new Vector2(margin.Left, this.height - margin.Bottom - this._label_invalidNameMessage.Height);
 
             this._textbox_name = new Textbox();
