@@ -6,9 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using FontSettings.Framework.FontInfomation;
 using StardewModdingAPI.Utilities;
 using StardewValley;
+using StardewValleyUI.Mvvm;
 
 namespace FontSettings.Framework.Menus
 {
@@ -452,6 +454,22 @@ namespace FontSettings.Framework.Menus
 
         public event EventHandler ExampleCurrentUpdated;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
 
+        public ICommand MoveToPrevFont { get; }
+
+        public ICommand MoveToNextFont { get; }
+
+        public ICommand MoveToPrevPreset { get; }
+
+        public ICommand MoveToNextPreset { get; }
+
+        public ICommand SaveCurrentPreset { get; }
+
+        public ICommand SaveCurrentAsNewPreset { get; }
+
+        public ICommand DeleteCurrentPreset { get; }
+
+        public ICommand RefreshFonts { get; }
+
         public FontSettingsMenuModel(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
         {
             _instance = this;
@@ -496,48 +514,58 @@ namespace FontSettings.Framework.Menus
             this.MaxSpacing = this._config.MaxSpacing;
             this.MinLineSpacing = this._config.MinLineSpacing;
             this.MaxLineSpacing = this._config.MaxLineSpacing;
+
+            // 初始化命令。
+            this.MoveToPrevFont = new DelegateCommand(this.PreviousFontType);
+            this.MoveToNextFont = new DelegateCommand(this.NextFontType);
+            this.MoveToPrevPreset = new DelegateCommand(this.PreviousPreset);
+            this.MoveToNextPreset = new DelegateCommand(this.NextPreset);
+            this.SaveCurrentPreset = new DelegateCommand(this._SaveCurrentPreset);
+            //this.SaveCurrentAsNewPreset = new DelegateCommand(this._SaveCurrentAsNewPreset);
+            this.DeleteCurrentPreset = new DelegateCommand(this._DeleteCurrentPreset);
+            this.RefreshFonts = new DelegateCommand(this.RefreshAllFonts);
         }
 
-        public void MoveToPreviousFontType()
+        private void PreviousFontType()
         {
             this.CurrentFontType = this.CurrentFontType.Previous(LocalizedContentManager.CurrentLanguageLatin);
             this.OnFontTypeChanged(this.CurrentFontType);
         }
 
-        public void MoveToNextFontType()
+        private void NextFontType()
         {
             this.CurrentFontType = this.CurrentFontType.Next(LocalizedContentManager.CurrentLanguageLatin);
             this.OnFontTypeChanged(this.CurrentFontType);
         }
 
-        public void MoveToPreviousPreset()
+        private void PreviousPreset()
         {
             this.PresetViewModel(this.CurrentFontType).MoveToPreviousPreset();
         }
 
-        public void MoveToNextPreset()
+        private void NextPreset()
         {
             this.PresetViewModel(this.CurrentFontType).MoveToNextPreset();
         }
 
-        public void SaveCurrentPreset()
+        private void _SaveCurrentPreset()
         {
             this.PresetViewModel(this.CurrentFontType).SaveCurrentPreset(
                 this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);
         }
 
-        public void SaveCurrentAsNewPreset(string newPresetName)
+        public void _SaveCurrentAsNewPreset(string newPresetName)
         {
             this.PresetViewModel(this.CurrentFontType).SaveCurrentAsNewPreset(newPresetName,
                 this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);
         }
 
-        public void DeleteCurrentPreset()
+        private void _DeleteCurrentPreset()
         {
             this.PresetViewModel(this.CurrentFontType).DeleteCurrentPreset();
         }
 
-        public void RefreshAllFonts()
+        private void RefreshAllFonts()
         {
             var lastFont = this.CurrentFont;  // 记录当前选中的字体。
 

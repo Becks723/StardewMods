@@ -100,20 +100,6 @@ namespace FontSettings.Framework.Menus
             return this;
         }
 
-        private void OnPrevFontTypeButtonClicked(object sender, EventArgs e)
-        {
-            Game1.playSound("smallSelect");
-
-            this._viewModel.MoveToPreviousFontType();
-        }
-
-        private void OnNextFontTypeButtonClicked(object sender, EventArgs e)
-        {
-            Game1.playSound("smallSelect");
-
-            this._viewModel.MoveToNextFontType();
-        }
-
         private void ExampleMergeToggled(object sender, EventArgs e)
         {
             this.UpdateExamplePositions();
@@ -188,40 +174,12 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        private void PreviousPresetButtonClicked(object sender, EventArgs e)
-        {
-            Game1.playSound("smallSelect");
-
-            this._viewModel.MoveToPreviousPreset();
-        }
-
-        private void NextPresetButtonClicked(object sender, EventArgs e)
-        {
-            Game1.playSound("smallSelect");
-
-            this._viewModel.MoveToNextPreset();
-        }
-
         private void NewPresetButtonClicked(object sender, EventArgs e)
         {
             Game1.playSound("coin");
 
             this._newPresetMenu ??= this.CreateNewPresetMenu();
             this._isNewPresetMenu = true;
-        }
-
-        private void SavePresetButtonClicked(object sender, EventArgs e)
-        {
-            Game1.playSound("newRecipe");
-
-            this._viewModel.SaveCurrentPreset();
-        }
-
-        private void DeletePresetButtonClicked(object sender, EventArgs e)
-        {
-            Game1.playSound("trashcan");
-
-            this._viewModel.DeleteCurrentPreset();
         }
 
         protected override void ResetComponents(RootElement root, IBindingContext context)
@@ -233,14 +191,14 @@ namespace FontSettings.Framework.Menus
             this._button_prevFontType.LocalPosition = new Vector2(-48 - 48, this.height / 2);
             this._button_prevFontType.SettableWidth = 48;
             this._button_prevFontType.SettableHeight = 44;
-            this._button_prevFontType.Click += this.OnPrevFontTypeButtonClicked;
+            this._button_prevFontType.Click += (_, _) => Game1.playSound("smallSelect");
 
             this._button_nextFontType = new TextureButton(
                 Game1.mouseCursors, new(365, 495, 12, 11), 4f);
             this._button_nextFontType.LocalPosition = new Vector2(this.width + 48, this.height / 2);
             this._button_nextFontType.SettableWidth = 48;
             this._button_nextFontType.SettableHeight = 44;
-            this._button_nextFontType.Click += this.OnNextFontTypeButtonClicked;
+            this._button_nextFontType.Click += (_, _) => Game1.playSound("smallSelect");
 
             this._label_title = new Label();
             this._label_title.Font = FontType.SpriteText;
@@ -362,7 +320,7 @@ namespace FontSettings.Framework.Menus
                 this._button_delete.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - size_delete.X, presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2);
                 this._button_delete.SettableWidth = (int)size_delete.X;
                 this._button_delete.SettableHeight = (int)size_delete.Y;
-                this._button_delete.Click += this.DeletePresetButtonClicked;
+                this._button_delete.Click += (_, _) => Game1.playSound("trashcan");
 
                 this._button_save = new TextureButton(
                     Game1.mouseCursors, new Rectangle(274, 284, 16, 16), scale_save);
@@ -370,7 +328,7 @@ namespace FontSettings.Framework.Menus
                 this._button_save.LocalPosition = new Vector2(this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X, presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2);
                 this._button_save.SettableWidth = (int)size_save.X;
                 this._button_save.SettableHeight = (int)size_save.Y;
-                this._button_save.Click += this.SavePresetButtonClicked;
+                this._button_save.Click += (_, _) => Game1.playSound("newRecipe");
 
                 this._button_new = new TextureButton(
                     Game1.mouseCursors, new Rectangle(0, 428, 10, 10), scale_new);
@@ -386,7 +344,7 @@ namespace FontSettings.Framework.Menus
                 this._button_nextPreset.LocalPosition = new Vector2(this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X, presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2);
                 this._button_nextPreset.SettableWidth = (int)size_next.X;
                 this._button_nextPreset.SettableHeight = (int)size_next.Y;
-                this._button_nextPreset.Click += this.NextPresetButtonClicked;
+                this._button_nextPreset.Click += (_, _) => Game1.playSound("smallSelect");
 
                 this._button_prevPreset = new TextureButton(
                     Game1.mouseCursors, new Rectangle(352, 495, 12, 11), scale_prev);
@@ -394,7 +352,7 @@ namespace FontSettings.Framework.Menus
                 this._button_prevPreset.LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_prev.X, presetSectionY + presetSectionMaxHeight / 2 - size_prev.Y / 2);
                 this._button_prevPreset.SettableWidth = (int)size_prev.X;
                 this._button_prevPreset.SettableHeight = (int)size_prev.Y;
-                this._button_prevPreset.Click += this.PreviousPresetButtonClicked;
+                this._button_prevPreset.Click += (_, _) => Game1.playSound("smallSelect");
 
                 presetSectionBottom = presetSectionY + presetSectionMaxHeight;
             }
@@ -453,7 +411,7 @@ namespace FontSettings.Framework.Menus
             this._button_refresh.LocalPosition = new Vector2(this._dropDown_font.LocalPosition.X - borderWidth / 3 - refreshWidth, this._dropDown_font.LocalPosition.Y + this._dropDown_font.Height / 2 - refreshHeight / 2);
             this._button_refresh.SettableWidth = refreshWidth;
             this._button_refresh.SettableHeight = refreshHeight;
-            this._button_refresh.Click += this.RefreshAllFonts;
+            this._button_refresh.Click += (_, _) => Game1.playSound("trashcan");
 
             this._button_ok = new TextureButton(
                 Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
@@ -542,6 +500,21 @@ namespace FontSettings.Framework.Menus
             context.AddBinding(() => this._viewModel.CanSaveCurrentPreset, () => this._button_save.GreyedOut, BindingMode.OneWay, new TrueFalseConverter());
             context.AddBinding(() => this._viewModel.CanDeleteCurrentPreset, () => this._button_delete.GreyedOut, BindingMode.OneWay, new TrueFalseConverter());
             context.AddBinding(() => this._viewModel.CanGenerateFont,    () => this._button_ok.GreyedOut, BindingMode.OneWay, new TrueFalseConverter());
+
+            // commands
+            context.AddBinding(() => this._viewModel.MoveToPrevFont, () => this._button_prevFontType.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MoveToNextFont, () => this._button_nextFontType.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MoveToPrevPreset, () => this._button_prevPreset.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.MoveToNextPreset, () => this._button_nextPreset.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.SaveCurrentPreset, () => this._button_save.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.DeleteCurrentPreset, () => this._button_delete.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.RefreshFonts, () => this._button_refresh.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.SaveCurrentPreset, () => this._button_save.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.SaveCurrentPreset, () => this._button_save.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.SaveCurrentPreset, () => this._button_save.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.SaveCurrentPreset, () => this._button_save.Command, BindingMode.OneWay);
+            context.AddBinding(() => this._viewModel.SaveCurrentPreset, () => this._button_save.Command, BindingMode.OneWay);
+
 #pragma warning restore format
         }
 
@@ -661,13 +634,6 @@ namespace FontSettings.Framework.Menus
                 return $"{font.FamilyName} ({font.SubfamilyName})";
         }
 
-        private void RefreshAllFonts(object sender, EventArgs e)
-        {
-            Game1.playSound("trashcan");
-
-            this._viewModel.RefreshAllFonts();
-        }
-
         private NewPresetMenu CreateNewPresetMenu()
         {
             var result = new NewPresetMenu(
@@ -676,7 +642,7 @@ namespace FontSettings.Framework.Menus
                 this.yPositionOnScreen + this.height / 3,
                 this.width / 2,
                 this.height / 3);
-            result.Accepted += (_, name) => this._viewModel.SaveCurrentAsNewPreset(name);
+            result.Accepted += (_, name) => this._viewModel._SaveCurrentAsNewPreset(name);
 
             return result;
         }
