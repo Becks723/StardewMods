@@ -18,7 +18,7 @@ namespace FontSettings.Framework.Menus
 
         public bool ShowBounds { get; set; } = false;
 
-        public Color BoundsColor { get; set; }
+        public Color BoundsColor { get; set; } = Color.Transparent;
 
         public override int Width
         {

@@ -30,7 +30,7 @@ namespace FontSettings.Framework.Menus
         private TextureButton _button_prevFontType;
         private TextureButton _button_nextFontType;
         private Label _label_title;
-        private TextureBox _exampleBoard;
+        private TextureBox _previewBoard;
         private LabeledElement<Checkbox> _box_merge;  // TODO: 改成图标？
         private LabeledElement<Checkbox> _box_showBounds;
         private LabeledElement<Checkbox> _box_showText;
@@ -94,7 +94,7 @@ namespace FontSettings.Framework.Menus
             const string ID = "BeneathThePlass.StarrySkyInterfaceCP";
             if (registry.IsLoaded(ID))
             {
-                this._exampleBoard.Kind = TextureBoxes.Default;  // 解决方法：将背景框改成默认款。
+                this._previewBoard.Kind = TextureBoxes.Default;  // 解决方法：将背景框改成默认款。
             }
 
             return this;
@@ -176,8 +176,6 @@ namespace FontSettings.Framework.Menus
 
         private void NewPresetButtonClicked(object sender, EventArgs e)
         {
-            Game1.playSound("coin");
-
             this._newPresetMenu ??= this.CreateNewPresetMenu();
             this._isNewPresetMenu = true;
         }
@@ -205,156 +203,263 @@ namespace FontSettings.Framework.Menus
             this._label_title.Text = "小字体";  // 这行只是用于初始化label的高度。
             this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, 108);
 
-            this._exampleBoard = new TextureBox();
-            this._exampleBoard.Kind = TextureBoxes.DefaultBorderless;
-            this._exampleBoard.DrawShadow = false;
-            this._exampleBoard.LocalPosition = new Vector2(spaceToClearSideBorder + borderWidth, this._label_title.LocalPosition.Y + this._label_title.Height);
-            this._exampleBoard.SettableHeight = this.height / 3;
-            this._exampleBoard.SettableWidth = this.width - spaceToClearSideBorder - borderWidth - (int)this._exampleBoard.LocalPosition.X;
-
-            Checkbox mergeBox = new Checkbox();
-            mergeBox.Checked += this.ExampleMergeToggled;
-            mergeBox.Unchecked += this.ExampleMergeToggled;
-            this._box_merge = new LabeledElement<Checkbox>(mergeBox);
-            this._box_merge.Text = I18n.OptionsPage_MergeExamples();
-
-            Checkbox showBoundsBox = new Checkbox();
-            this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox);
-            this._box_showBounds.Text = I18n.OptionsPage_ShowExampleBounds();
-
-            Checkbox showTextBox = new Checkbox();
-            this._box_showText = new LabeledElement<Checkbox>(showTextBox);
-            this._box_showText.Text = I18n.OptionsPage_ShowExampleText();
-
-            float gap = (this._exampleBoard.Height - this._box_merge.Height - this._box_showText.Height - this._box_showBounds.Height) / 4f;
-            float insideBoardX = this._exampleBoard.LocalPosition.X + borderWidth / 3;
-            this._box_merge.LocalPosition = new Vector2(insideBoardX, this._exampleBoard.LocalPosition.Y + gap);
-            this._box_showBounds.LocalPosition = new Vector2(insideBoardX, this._box_merge.LocalPosition.Y + this._box_merge.Height + gap);
-            this._box_showText.LocalPosition = new Vector2(insideBoardX, this._box_showBounds.LocalPosition.Y + this._box_showBounds.Height + gap);
-
-            this._label_game = new Label();
-            this._label_game.Text = I18n.OptionsPage_OriginalExample();
-
-            this._label_current = new Label();
-            this._label_current.Text = I18n.OptionsPage_CustomExample();
-
-            this._colorBlock_game = new ColorBlock(this._gameExampleColor, 20);
-            this._colorBlock_current = new ColorBlock(this._customExampleColor, 20);
-
-            int maxWidth = Math.Max(this._label_game.Width, this._label_current.Width);
-            int exampleLabelHeight = Math.Max(this._colorBlock_game.Height, this._label_game.Height);
-            int currentLabelHeight = Math.Max(this._colorBlock_current.Height, this._label_current.Height);
-            this._label_current.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - maxWidth, this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height - borderWidth / 3 - currentLabelHeight);
-            this._label_game.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - maxWidth, this._label_current.LocalPosition.Y - borderWidth / 3 - exampleLabelHeight);
-            this._colorBlock_current.LocalPosition = new Vector2(this._label_current.LocalPosition.X - borderWidth / 6 - this._colorBlock_current.Width, this._label_current.LocalPosition.Y + this._label_current.Height / 2 - this._colorBlock_current.Height / 2);
-            this._colorBlock_game.LocalPosition = new Vector2(this._label_game.LocalPosition.X - borderWidth / 6 - this._colorBlock_game.Width, this._label_game.LocalPosition.Y + this._label_game.Height / 2 - this._colorBlock_game.Height / 2);
-
-            this._label_gameExample = new FontExampleLabel();
-            this._label_gameExample.Forground = this._gameExampleColor;
-            this._label_gameExample.BoundsColor = Color.Red * 0.5f;
-            this._label_gameExample.ShowBounds = this._box_showBounds.Element.IsChecked;
-            this._label_gameExample.ShowText = this._box_showText.Element.IsChecked;
-
-            this._label_currentExample = new FontExampleLabel();
-            this._label_currentExample.Forground = this._customExampleColor;
-            this._label_currentExample.BoundsColor = Color.Green * 0.5f;
-            this._label_currentExample.ShowBounds = this._box_showBounds.Element.IsChecked;
-            this._label_currentExample.ShowText = this._box_showText.Element.IsChecked;
-
-            int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
-            Rectangle exampleBounds = new Rectangle(
-                (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
-                (int)(this._exampleBoard.LocalPosition.Y + borderWidth / 3),
-                (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
-                this._exampleBoard.Height - borderWidth / 3 * 2);
-
-            float offsetTuningScale = 3f;
-            this._button_offsetTuning = new ToggleTextureButton(
-                Game1.mouseCursors, new Rectangle(257, 284, 16, 16), offsetTuningScale);
-            this._button_offsetTuning.ToolTipText = I18n.Ui_Tooltip_ToggleCharOffsetTuning();
-            this._button_offsetTuning.SettableWidth = (int)(16 * offsetTuningScale);
-            this._button_offsetTuning.SettableHeight = (int)(16 * offsetTuningScale);
-            this._button_offsetTuning.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - borderWidth / 3 - this._button_offsetTuning.Width, exampleBounds.Y);
-            this._button_offsetTuning.Click += this.OffsetTuningToggled;
-
-            this._slider_charOffsetX = new Slider<float>();
-            this._slider_charOffsetX.LocalPosition = new Vector2(exampleBounds.X + 24, exampleBounds.Y);
-            this._slider_charOffsetX.Orientation = Orientation.Horizontal;
-            this._slider_charOffsetX.Length = exampleBounds.Width - 24;
-            this._slider_charOffsetX.BarThickness = 16;
-            this._slider_charOffsetX.Interval = 0.5f;
-            this._slider_charOffsetX.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-            this._slider_charOffsetX.ValueChanged += this.OffsetXSlider_ValueChanged;
-
-            this._slider_charOffsetY = new Slider<float>();
-            this._slider_charOffsetY.LocalPosition = new Vector2(exampleBounds.X, exampleBounds.Y + 24);
-            this._slider_charOffsetY.Orientation = Orientation.Vertical;
-            this._slider_charOffsetY.Length = exampleBounds.Height - 24;
-            this._slider_charOffsetY.BarThickness = 16;
-            this._slider_charOffsetY.Interval = 0.5f;
-            this._slider_charOffsetY.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-            this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
-
-            float exampleBoardBottom = this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height;
-            float exampleBoardX = this._exampleBoard.LocalPosition.X;
-            float presetSectionY = exampleBoardBottom + borderWidth / 2;
-            float presetSectionBottom = 0;
+            this._previewBoard = new TextureBox();
+            this._previewBoard.Kind = TextureBoxes.DefaultBorderless;
+            this._previewBoard.DrawShadow = false;
+            this._previewBoard.LocalPosition = new Vector2(spaceToClearSideBorder + borderWidth, this._label_title.LocalPosition.Y + this._label_title.Height);
+            this._previewBoard.SettableHeight = this.height / 3;
+            this._previewBoard.SettableWidth = this.width - spaceToClearSideBorder - borderWidth - (int)this._previewBoard.LocalPosition.X;
+            root.AddChild(this._previewBoard);
             {
-                float scale_new = 4f;
-                float scale_save = 3f;
-                float scale_delete = 0.75f;
-                float scale_prev = 4f;
-                float scale_next = 4f;
-                Vector2 size_new = new(10 * scale_new);
-                Vector2 size_save = new(16 * scale_save);
-                Vector2 size_delete = new(64 * scale_delete);
-                Vector2 size_prev = new Vector2(12, 11) * scale_prev;
-                Vector2 size_next = new Vector2(12, 11) * scale_next;
-                float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_prev, size_next }.Max(v => v.Y);
-                this._label_currentPreset = new Label();
-                this._label_currentPreset.LocalPosition = new Vector2(exampleBoardX, presetSectionY);
+                Vector2 previewBoardPos = this._previewBoard.LocalPosition;
+                int previewBoardWidth = this._previewBoard.Width;
+                int previewBoardHeight = this._previewBoard.Height;
+                Thickness previewBoardPadding = new Thickness(16);
 
-                this._button_delete = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(192, 256, 64, 64), scale_delete);
-                this._button_delete.ToolTipText = I18n.Ui_Tooltip_DelPreset();
-                this._button_delete.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - size_delete.X, presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2);
-                this._button_delete.SettableWidth = (int)size_delete.X;
-                this._button_delete.SettableHeight = (int)size_delete.Y;
-                this._button_delete.Click += (_, _) => Game1.playSound("trashcan");
+                var offsetTuningButton = new ToggleTextureButton(
+                    Game1.mouseCursors, new Rectangle(257, 284, 16, 16), 2f);
+                offsetTuningButton.ToolTipText = I18n.Ui_Tooltip_ToggleCharOffsetTuning();
+                offsetTuningButton.ClickSound = "smallSelect";
+                offsetTuningButton.LocalPosition = previewBoardPos + new Vector2(previewBoardPadding.Left, previewBoardPadding.Top);
 
-                this._button_save = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(274, 284, 16, 16), scale_save);
-                this._button_save.ToolTipText = I18n.Ui_Tooltip_SavePreset();
-                this._button_save.LocalPosition = new Vector2(this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X, presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2);
-                this._button_save.SettableWidth = (int)size_save.X;
-                this._button_save.SettableHeight = (int)size_save.Y;
-                this._button_save.Click += (_, _) => Game1.playSound("newRecipe");
+                int offsetButtonToOffsetSliderGap = 8;
 
-                this._button_new = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(0, 428, 10, 10), scale_new);
-                this._button_new.ToolTipText = I18n.Ui_Tooltip_NewPreset();
-                this._button_new.LocalPosition = new Vector2(this._button_save.LocalPosition.X - borderWidth / 3 - size_new.X, presetSectionY + presetSectionMaxHeight / 2 - size_new.Y / 2);
-                this._button_new.SettableWidth = (int)size_new.X;
-                this._button_new.SettableHeight = (int)size_new.Y;
-                this._button_new.Click += this.NewPresetButtonClicked;
+                var xOffsetSlider = new Slider<float>();
+                xOffsetSlider.Orientation = Orientation.Horizontal;
+                xOffsetSlider.BarThickness = 24;
+                xOffsetSlider.Interval = 0.5f;
+                xOffsetSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                xOffsetSlider.LocalPosition = offsetTuningButton.LocalPosition
+                    + new Vector2(offsetTuningButton.Width + offsetButtonToOffsetSliderGap,
+                                  offsetTuningButton.Height / 2 - xOffsetSlider.Height / 2);
+                xOffsetSlider.ValueChanged += this.OffsetXSlider_ValueChanged;
 
-                this._button_nextPreset = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(365, 495, 12, 11), scale_next);
-                this._button_nextPreset.ToolTipText = I18n.Ui_Tooltip_NextPreset();
-                this._button_nextPreset.LocalPosition = new Vector2(this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X, presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2);
-                this._button_nextPreset.SettableWidth = (int)size_next.X;
-                this._button_nextPreset.SettableHeight = (int)size_next.Y;
-                this._button_nextPreset.Click += (_, _) => Game1.playSound("smallSelect");
+                var yOffsetSlider = new Slider<float>();
+                yOffsetSlider.Orientation = Orientation.Vertical;
+                yOffsetSlider.BarThickness = 24;
+                yOffsetSlider.Interval = 0.5f;
+                yOffsetSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                yOffsetSlider.LocalPosition = offsetTuningButton.LocalPosition
+                    + new Vector2(offsetTuningButton.Width / 2 - yOffsetSlider.Width / 2,
+                                  offsetTuningButton.Height + offsetButtonToOffsetSliderGap);
+                yOffsetSlider.Length = (int)(previewBoardPos.Y + previewBoardHeight - yOffsetSlider.LocalPosition.Y - previewBoardPadding.Bottom);
+                yOffsetSlider.ValueChanged += this.OffsetYSlider_ValueChanged;
 
-                this._button_prevPreset = new TextureButton(
-                    Game1.mouseCursors, new Rectangle(352, 495, 12, 11), scale_prev);
-                this._button_prevPreset.ToolTipText = I18n.Ui_Tooltip_PrevPreset();
-                this._button_prevPreset.LocalPosition = new Vector2(this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_prev.X, presetSectionY + presetSectionMaxHeight / 2 - size_prev.Y / 2);
-                this._button_prevPreset.SettableWidth = (int)size_prev.X;
-                this._button_prevPreset.SettableHeight = (int)size_prev.Y;
-                this._button_prevPreset.Click += (_, _) => Game1.playSound("smallSelect");
+                var mergeBox = new LabeledElement<Checkbox>(new Checkbox());
+                mergeBox.Text = I18n.OptionsPage_MergeExamples();
+                mergeBox.Font = FontType.SmallFont;
 
-                presetSectionBottom = presetSectionY + presetSectionMaxHeight;
+                var showBoundsBox = new LabeledElement<Checkbox>(new Checkbox());
+                showBoundsBox.Text = I18n.OptionsPage_ShowExampleBounds();
+                showBoundsBox.Font = FontType.SmallFont;
+
+                var showTextBox = new LabeledElement<Checkbox>(new Checkbox());
+                showTextBox.Text = I18n.OptionsPage_ShowExampleText();
+                showTextBox.Font = FontType.SmallFont;
+
+                int maxBoxWidth = new[] { mergeBox, showBoundsBox, showTextBox }.Max(elem => elem.Width);
+                float boxPosX = previewBoardPos.X + previewBoardWidth - previewBoardPadding.Right - maxBoxWidth;
+                float currentBoxPosY = previewBoardPos.Y + previewBoardPadding.Top;
+                float boxGap = 8;
+
+                mergeBox.LocalPosition = new Vector2(boxPosX, currentBoxPosY);
+                currentBoxPosY += mergeBox.Height + boxGap;
+                showBoundsBox.LocalPosition = new Vector2(boxPosX, currentBoxPosY);
+                currentBoxPosY += showBoundsBox.Height + boxGap;
+                showTextBox.LocalPosition = new Vector2(boxPosX, currentBoxPosY);
+
+                xOffsetSlider.Length = (int)(boxPosX - 16 - xOffsetSlider.LocalPosition.X);
+
+                int previewBlockWidth = (xOffsetSlider.Length - 16) / 2;
+                int previewBlockHeight = yOffsetSlider.Length;
+
+                var previewControl = new FontPreviewControl();
+                previewControl.Orientation = Orientation.Horizontal;
+                previewControl.Gap = 16;
+                previewControl.VanillaLabel.Forground = Color.Gray * 0.67f;
+                previewControl.CurrentLabel.Forground = Game1.textColor;
+                previewControl.CellPreviewWidth = previewBlockWidth;
+                previewControl.CellPreviewHeight = previewBlockHeight;
+                previewControl.LocalPosition = new Vector2(xOffsetSlider.LocalPosition.X, yOffsetSlider.LocalPosition.Y);
+
+                mergeBox.Element.Checked += (_, _) => previewControl.MergePreviews();
+                mergeBox.Element.Unchecked += (_, _) => previewControl.SeperatePreviews();
+
+                root.AddChildren(offsetTuningButton, xOffsetSlider, yOffsetSlider, mergeBox, showBoundsBox, showTextBox, previewControl);
+
+                context.AddBinding(() => this._viewModel.CharOffsetX, () => xOffsetSlider.Value, BindingMode.TwoWay);
+                context.AddBinding(() => this._viewModel.MinCharOffsetX, () => xOffsetSlider.Minimum, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.MaxCharOffsetX, () => xOffsetSlider.Maximum, BindingMode.OneWay);
+
+                context.AddBinding(() => this._viewModel.CharOffsetY, () => yOffsetSlider.Value, BindingMode.TwoWay);
+                context.AddBinding(() => this._viewModel.MinCharOffsetY, () => yOffsetSlider.Minimum, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.MaxCharOffsetY, () => yOffsetSlider.Maximum, BindingMode.OneWay);
+
+                context.AddBinding(() => this._viewModel.ExamplesMerged, () => mergeBox.Element.IsChecked, BindingMode.TwoWay);
+                context.AddBinding(() => this._viewModel.ShowExampleBounds, () => showBoundsBox.Element.IsChecked, BindingMode.TwoWay);
+                context.AddBinding(() => this._viewModel.ShowExampleBounds, () => previewControl.VanillaLabel.ShowBounds, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.ShowExampleBounds, () => previewControl.CurrentLabel.ShowBounds, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.ShowExampleText, () => showTextBox.Element.IsChecked, BindingMode.TwoWay);
+                context.AddBinding(() => this._viewModel.ShowExampleText, () => previewControl.VanillaLabel.ShowText, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.ShowExampleText, () => previewControl.CurrentLabel.ShowText, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.ExampleText, () => previewControl.VanillaLabel.Text, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.ExampleText, () => previewControl.CurrentLabel.Text, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.ExampleVanillaFont, () => previewControl.VanillaLabel.Font, BindingMode.OneWay);
+                context.AddBinding(() => this._viewModel.ExampleCurrentFont, () => previewControl.CurrentLabel.Font, BindingMode.OneWay);
+
+                context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => offsetTuningButton.IsToggled, BindingMode.TwoWay);
+                context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => xOffsetSlider.Visibility, BindingMode.OneWay, new BooleanVisibilityConverter());
+                context.AddBinding(() => this._viewModel.IsTuningCharOffset, () => yOffsetSlider.Visibility, BindingMode.OneWay, new BooleanVisibilityConverter());
+
+                //Checkbox mergeBox = new Checkbox();
+                //mergeBox.Checked += this.ExampleMergeToggled;
+                //mergeBox.Unchecked += this.ExampleMergeToggled;
+                //this._box_merge = new LabeledElement<Checkbox>(mergeBox);
+                //this._box_merge.Text = I18n.OptionsPage_MergeExamples();
+
+                //Checkbox showBoundsBox = new Checkbox();
+                //this._box_showBounds = new LabeledElement<Checkbox>(showBoundsBox);
+                //this._box_showBounds.Text = I18n.OptionsPage_ShowExampleBounds();
+
+                //Checkbox showTextBox = new Checkbox();
+                //this._box_showText = new LabeledElement<Checkbox>(showTextBox);
+                //this._box_showText.Text = I18n.OptionsPage_ShowExampleText();
+
+                //float gap = (this._previewBoard.Height - this._box_merge.Height - this._box_showText.Height - this._box_showBounds.Height) / 4f;
+                //float insideBoardX = this._previewBoard.LocalPosition.X + borderWidth / 3;
+                //this._box_merge.LocalPosition = new Vector2(insideBoardX, this._previewBoard.LocalPosition.Y + gap);
+                //this._box_showBounds.LocalPosition = new Vector2(insideBoardX, this._box_merge.LocalPosition.Y + this._box_merge.Height + gap);
+                //this._box_showText.LocalPosition = new Vector2(insideBoardX, this._box_showBounds.LocalPosition.Y + this._box_showBounds.Height + gap);
+
+                //this._label_game = new Label();
+                //this._label_game.Text = I18n.OptionsPage_OriginalExample();
+
+                //this._label_current = new Label();
+                //this._label_current.Text = I18n.OptionsPage_CustomExample();
+
+                //this._colorBlock_game = new ColorBlock(this._gameExampleColor, 20);
+                //this._colorBlock_current = new ColorBlock(this._customExampleColor, 20);
+
+                //int maxWidth = Math.Max(this._label_game.Width, this._label_current.Width);
+                //int exampleLabelHeight = Math.Max(this._colorBlock_game.Height, this._label_game.Height);
+                //int currentLabelHeight = Math.Max(this._colorBlock_current.Height, this._label_current.Height);
+                //this._label_current.LocalPosition = new Vector2(this._previewBoard.LocalPosition.X + this._previewBoard.Width - borderWidth / 3 - maxWidth, this._previewBoard.LocalPosition.Y + this._previewBoard.Height - borderWidth / 3 - currentLabelHeight);
+                //this._label_game.LocalPosition = new Vector2(this._previewBoard.LocalPosition.X + this._previewBoard.Width - borderWidth / 3 - maxWidth, this._label_current.LocalPosition.Y - borderWidth / 3 - exampleLabelHeight);
+                //this._colorBlock_current.LocalPosition = new Vector2(this._label_current.LocalPosition.X - borderWidth / 6 - this._colorBlock_current.Width, this._label_current.LocalPosition.Y + this._label_current.Height / 2 - this._colorBlock_current.Height / 2);
+                //this._colorBlock_game.LocalPosition = new Vector2(this._label_game.LocalPosition.X - borderWidth / 6 - this._colorBlock_game.Width, this._label_game.LocalPosition.Y + this._label_game.Height / 2 - this._colorBlock_game.Height / 2);
+
+                //this._label_gameExample = new FontExampleLabel();
+                //this._label_gameExample.Forground = this._gameExampleColor;
+                //this._label_gameExample.BoundsColor = Color.Red * 0.5f;
+                //this._label_gameExample.ShowBounds = this._box_showBounds.Element.IsChecked;
+                //this._label_gameExample.ShowText = this._box_showText.Element.IsChecked;
+
+                //this._label_currentExample = new FontExampleLabel();
+                //this._label_currentExample.Forground = this._customExampleColor;
+                //this._label_currentExample.BoundsColor = Color.Green * 0.5f;
+                //this._label_currentExample.ShowBounds = this._box_showBounds.Element.IsChecked;
+                //this._label_currentExample.ShowText = this._box_showText.Element.IsChecked;
+
+                //int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
+                //Rectangle exampleBounds = new Rectangle(
+                //    (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
+                //    (int)(this._previewBoard.LocalPosition.Y + borderWidth / 3),
+                //    (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
+                //    this._previewBoard.Height - borderWidth / 3 * 2);
+
+                //float offsetTuningScale = 3f;
+                //this._button_offsetTuning = new ToggleTextureButton(
+                //    Game1.mouseCursors, new Rectangle(257, 284, 16, 16), offsetTuningScale);
+                //this._button_offsetTuning.ToolTipText = I18n.Ui_Tooltip_ToggleCharOffsetTuning();
+                //this._button_offsetTuning.SettableWidth = (int)(16 * offsetTuningScale);
+                //this._button_offsetTuning.SettableHeight = (int)(16 * offsetTuningScale);
+                //this._button_offsetTuning.LocalPosition = new Vector2(this._previewBoard.LocalPosition.X + this._previewBoard.Width - borderWidth / 3 - this._button_offsetTuning.Width, exampleBounds.Y);
+                //this._button_offsetTuning.Click += this.OffsetTuningToggled;
+
+                //this._slider_charOffsetX = new Slider<float>();
+                //this._slider_charOffsetX.LocalPosition = new Vector2(exampleBounds.X + 24, exampleBounds.Y);
+                //this._slider_charOffsetX.Orientation = Orientation.Horizontal;
+                //this._slider_charOffsetX.Length = exampleBounds.Width - 24;
+                //this._slider_charOffsetX.BarThickness = 16;
+                //this._slider_charOffsetX.Interval = 0.5f;
+                //this._slider_charOffsetX.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                //this._slider_charOffsetX.ValueChanged += this.OffsetXSlider_ValueChanged;
+
+                //this._slider_charOffsetY = new Slider<float>();
+                //this._slider_charOffsetY.LocalPosition = new Vector2(exampleBounds.X, exampleBounds.Y + 24);
+                //this._slider_charOffsetY.Orientation = Orientation.Vertical;
+                //this._slider_charOffsetY.Length = exampleBounds.Height - 24;
+                //this._slider_charOffsetY.BarThickness = 16;
+                //this._slider_charOffsetY.Interval = 0.5f;
+                //this._slider_charOffsetY.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                //this._slider_charOffsetY.ValueChanged += this.OffsetYSlider_ValueChanged;
+            }
+
+            float previewBoardX = this._previewBoard.LocalPosition.X;
+            float presetSectionBottom = 0;
+
+            // preset section
+            {
+                float exampleBoardBottom = this._previewBoard.LocalPosition.Y + this._previewBoard.Height;
+                float presetSectionY = exampleBoardBottom + borderWidth / 2;
+                {
+                    float scale_new = 4f;
+                    float scale_save = 3f;
+                    float scale_delete = 0.75f;
+                    float scale_prev = 4f;
+                    float scale_next = 4f;
+                    Vector2 size_new = new(10 * scale_new);
+                    Vector2 size_save = new(16 * scale_save);
+                    Vector2 size_delete = new(64 * scale_delete);
+                    Vector2 size_prev = new Vector2(12, 11) * scale_prev;
+                    Vector2 size_next = new Vector2(12, 11) * scale_next;
+                    float presetSectionMaxHeight = new[] { size_new, size_save, size_delete, size_prev, size_next }.Max(v => v.Y);
+                    this._label_currentPreset = new Label();
+                    this._label_currentPreset.LocalPosition = new Vector2(previewBoardX, presetSectionY);
+
+                    this._button_delete = new TextureButton(
+                        Game1.mouseCursors, new Rectangle(192, 256, 64, 64), scale_delete);
+                    this._button_delete.ToolTipText = I18n.Ui_Tooltip_DelPreset();
+                    this._button_delete.LocalPosition = new Vector2(
+                        this._previewBoard.LocalPosition.X + this._previewBoard.Width - size_delete.X,
+                        presetSectionY + presetSectionMaxHeight / 2 - size_delete.Y / 2);
+                    this._button_delete.ClickSound = "trashcan";
+
+                    this._button_save = new TextureButton(
+                        Game1.mouseCursors, new Rectangle(274, 284, 16, 16), scale_save);
+                    this._button_save.ToolTipText = I18n.Ui_Tooltip_SavePreset();
+                    this._button_save.LocalPosition = new Vector2(
+                        this._button_delete.LocalPosition.X - borderWidth / 3 - size_save.X,
+                        presetSectionY + presetSectionMaxHeight / 2 - size_save.Y / 2);
+                    this._button_save.ClickSound = "newRecipe";
+
+                    this._button_new = new TextureButton(
+                        Game1.mouseCursors, new Rectangle(0, 428, 10, 10), scale_new);
+                    this._button_new.ToolTipText = I18n.Ui_Tooltip_NewPreset();
+                    this._button_new.LocalPosition = new Vector2(
+                        this._button_save.LocalPosition.X - borderWidth / 3 - size_new.X,
+                        presetSectionY + presetSectionMaxHeight / 2 - size_new.Y / 2);
+                    this._button_new.ClickSound = "coin";
+                    this._button_new.Click += this.NewPresetButtonClicked;
+
+                    this._button_nextPreset = new TextureButton(
+                        Game1.mouseCursors, new Rectangle(365, 495, 12, 11), scale_next);
+                    this._button_nextPreset.ToolTipText = I18n.Ui_Tooltip_NextPreset();
+                    this._button_nextPreset.LocalPosition = new Vector2(
+                        this._button_new.LocalPosition.X - borderWidth / 3 - size_next.X,
+                        presetSectionY + presetSectionMaxHeight / 2 - size_next.Y / 2);
+                    this._button_nextPreset.ClickSound = "smallSelect";
+
+                    this._button_prevPreset = new TextureButton(
+                        Game1.mouseCursors, new Rectangle(352, 495, 12, 11), scale_prev);
+                    this._button_prevPreset.ToolTipText = I18n.Ui_Tooltip_PrevPreset();
+                    this._button_prevPreset.LocalPosition = new Vector2(
+                        this._button_nextPreset.LocalPosition.X - borderWidth / 3 - size_prev.X,
+                        presetSectionY + presetSectionMaxHeight / 2 - size_prev.Y / 2);
+                    this._button_prevPreset.ClickSound = "smallSelect";
+
+                    presetSectionBottom = presetSectionY + presetSectionMaxHeight;
+                }
             }
 
             Checkbox enabledFontBox = new Checkbox();
@@ -363,7 +468,7 @@ namespace FontSettings.Framework.Menus
             this._box_enabledFont = new LabeledElement<Checkbox>(enabledFontBox);
             this._box_enabledFont.Text = I18n.OptionsPage_Enable();
 
-            int sliderLength = this._exampleBoard.Width / 3;
+            int sliderLength = this._previewBoard.Width / 3;
             var fontSizeSlider = new Slider<int>();
             fontSizeSlider.Length = sliderLength;
             fontSizeSlider.Interval = 1;
@@ -388,18 +493,18 @@ namespace FontSettings.Framework.Menus
             this._slider_lineSpacing = new LabeledElement<Slider<int>>(lineSpacingSlider);
             this._slider_lineSpacing.Text = I18n.OptionsPage_LineSpacing();
 
-            gap = (this.height - spaceToClearSideBorder - presetSectionBottom - this._box_enabledFont.Height - this._slider_fontSize.Height - this._slider_spacing.Height - this._slider_lineSpacing.Height) / 5;
-            this._box_enabledFont.LocalPosition = new Vector2(exampleBoardX, presetSectionBottom + gap);
-            this._slider_fontSize.LocalPosition = new Vector2(exampleBoardX, this._box_enabledFont.LocalPosition.Y + this._box_enabledFont.Height + gap);
-            this._slider_spacing.LocalPosition = new Vector2(exampleBoardX, this._slider_fontSize.LocalPosition.Y + this._slider_fontSize.Height + gap);
-            this._slider_lineSpacing.LocalPosition = new Vector2(exampleBoardX, this._slider_spacing.LocalPosition.Y + this._slider_spacing.Height + gap);
+            float gap = (this.height - spaceToClearSideBorder - presetSectionBottom - this._box_enabledFont.Height - this._slider_fontSize.Height - this._slider_spacing.Height - this._slider_lineSpacing.Height) / 5;
+            this._box_enabledFont.LocalPosition = new Vector2(previewBoardX, presetSectionBottom + gap);
+            this._slider_fontSize.LocalPosition = new Vector2(previewBoardX, this._box_enabledFont.LocalPosition.Y + this._box_enabledFont.Height + gap);
+            this._slider_spacing.LocalPosition = new Vector2(previewBoardX, this._slider_fontSize.LocalPosition.Y + this._slider_fontSize.Height + gap);
+            this._slider_lineSpacing.LocalPosition = new Vector2(previewBoardX, this._slider_spacing.LocalPosition.Y + this._slider_spacing.Height + gap);
 
             this._dropDown_font = new ComboBox();
-            this._dropDown_font.SettableWidth = this._exampleBoard.Width / 2;
+            this._dropDown_font.SettableWidth = this._previewBoard.Width / 2;
             this._dropDown_font.DisplayTextReslover = this.DisplayFontOnComboBox;
             this._dropDown_font.EqualityComparer = new FontEqualityComparer();
             this._dropDown_font.MaxDisplayRows = 6;
-            this._dropDown_font.LocalPosition = new Vector2(this._exampleBoard.LocalPosition.X + this._exampleBoard.Width - this._dropDown_font.Width, this._box_enabledFont.LocalPosition.Y);
+            this._dropDown_font.LocalPosition = new Vector2(this._previewBoard.LocalPosition.X + this._previewBoard.Width - this._dropDown_font.Width, this._box_enabledFont.LocalPosition.Y);
             this._dropDown_font.SelectionChanged += this.FontSelectionChanged;
 
             float refreshScale = 2.5f;
@@ -409,36 +514,33 @@ namespace FontSettings.Framework.Menus
             this._button_refresh.ToolTipText = I18n.Ui_Tooltip_RefreshFonts();
             this._button_refresh.AnimationDuration = 300;
             this._button_refresh.LocalPosition = new Vector2(this._dropDown_font.LocalPosition.X - borderWidth / 3 - refreshWidth, this._dropDown_font.LocalPosition.Y + this._dropDown_font.Height / 2 - refreshHeight / 2);
-            this._button_refresh.SettableWidth = refreshWidth;
-            this._button_refresh.SettableHeight = refreshHeight;
-            this._button_refresh.Click += (_, _) => Game1.playSound("trashcan");
+            this._button_refresh.ClickSound = "trashcan";
 
             this._button_ok = new TextureButton(
                 Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
             this._button_ok.Click += this.OkButtonClicked;
-            this._button_ok.SettableWidth = 64;
-            this._button_ok.SettableHeight = 64;
             this._button_ok.LocalPosition = new Vector2(
                 this.width - spaceToClearSideBorder - borderWidth - this._button_ok.Width,
                 this.height - spaceToClearSideBorder - borderWidth - this._button_ok.Height);
 
-            root.Add(
+            root.AddChildren(
                 this._button_prevFontType,
                 this._button_nextFontType,
                 this._label_title,
-                this._exampleBoard,
-                this._box_merge,
-                this._box_showBounds,
-                this._box_showText,
-                this._colorBlock_game,
-                this._label_game,
-                this._colorBlock_current,
-                this._label_current,
-                this._label_gameExample,
-                this._label_currentExample,
-                this._button_offsetTuning,
-                this._slider_charOffsetX,
-                this._slider_charOffsetY,
+                //this._previewBoard,
+                //this._box_merge,
+                //this._box_showBounds,
+                //this._box_showText,
+                //this._colorBlock_game,
+                //this._label_game,
+                //this._colorBlock_current,
+                //this._label_current,
+                //this._label_gameExample,
+                //this._label_currentExample,
+                //this._button_offsetTuning,
+                //this._slider_charOffsetX,
+                //this._slider_charOffsetY,
+
                 this._label_currentPreset,
                 this._button_prevPreset,
                 this._button_nextPreset,
@@ -594,34 +696,34 @@ namespace FontSettings.Framework.Menus
 
         private void UpdateExamplePositions()
         {
-            Rectangle exampleBounds;
-            if (this._viewModel.IsTuningCharOffset)
-                exampleBounds = new Rectangle(
-                    (int)(this._slider_charOffsetY.LocalPosition.X + this._slider_charOffsetY.Width + borderWidth / 2),
-                    (int)(this._slider_charOffsetX.LocalPosition.Y + this._slider_charOffsetX.Height + borderWidth / 3),
-                    (int)(this._colorBlock_game.LocalPosition.X - this._slider_charOffsetY.LocalPosition.X - this._slider_charOffsetY.Width - borderWidth),
-                    (int)(this._exampleBoard.LocalPosition.Y + this._exampleBoard.Height - this._slider_charOffsetX.LocalPosition.Y - this._slider_charOffsetX.Height - borderWidth / 3 * 2));
-            else
-            {
-                int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
-                exampleBounds = new Rectangle(
-                    (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
-                    (int)(this._exampleBoard.LocalPosition.Y + borderWidth / 3),
-                    (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
-                    this._exampleBoard.Height - borderWidth / 3 * 2);
-            }
+            //Rectangle exampleBounds;
+            //if (this._viewModel.IsTuningCharOffset)
+            //    exampleBounds = new Rectangle(
+            //        (int)(this._slider_charOffsetY.LocalPosition.X + this._slider_charOffsetY.Width + borderWidth / 2),
+            //        (int)(this._slider_charOffsetX.LocalPosition.Y + this._slider_charOffsetX.Height + borderWidth / 3),
+            //        (int)(this._colorBlock_game.LocalPosition.X - this._slider_charOffsetY.LocalPosition.X - this._slider_charOffsetY.Width - borderWidth),
+            //        (int)(this._previewBoard.LocalPosition.Y + this._previewBoard.Height - this._slider_charOffsetX.LocalPosition.Y - this._slider_charOffsetX.Height - borderWidth / 3 * 2));
+            //else
+            //{
+            //    int maxWidthInLeftThree = new[] { this._box_merge.Width, this._box_showBounds.Width, this._box_showText.Width }.Max();
+            //    exampleBounds = new Rectangle(
+            //        (int)(this._box_merge.LocalPosition.X + maxWidthInLeftThree + borderWidth / 2),
+            //        (int)(this._previewBoard.LocalPosition.Y + borderWidth / 3),
+            //        (int)(this._colorBlock_game.LocalPosition.X - borderWidth - this._box_merge.LocalPosition.X - maxWidthInLeftThree),
+            //        this._previewBoard.Height - borderWidth / 3 * 2);
+            //}
 
-            int maxWidth = Math.Max(this._label_gameExample.Width, this._label_currentExample.Width);
-            int maxHeight = Math.Max(this._label_gameExample.Height, this._label_currentExample.Height);
-            int centerX = exampleBounds.Center.X - maxWidth / 2;
-            int centerY = exampleBounds.Center.Y - maxHeight / 2;
-            if (this._viewModel.ExamplesMerged)
-                this._label_gameExample.LocalPosition = this._label_currentExample.LocalPosition = new Vector2(centerX, centerY);
-            else
-            {
-                this._label_gameExample.LocalPosition = new Vector2(centerX, exampleBounds.Y);
-                this._label_currentExample.LocalPosition = new Vector2(centerX, exampleBounds.Center.Y);
-            }
+            //int maxWidth = Math.Max(this._label_gameExample.Width, this._label_currentExample.Width);
+            //int maxHeight = Math.Max(this._label_gameExample.Height, this._label_currentExample.Height);
+            //int centerX = exampleBounds.Center.X - maxWidth / 2;
+            //int centerY = exampleBounds.Center.Y - maxHeight / 2;
+            //if (this._viewModel.ExamplesMerged)
+            //    this._label_gameExample.LocalPosition = this._label_currentExample.LocalPosition = new Vector2(centerX, centerY);
+            //else
+            //{
+            //    this._label_gameExample.LocalPosition = new Vector2(centerX, exampleBounds.Y);
+            //    this._label_currentExample.LocalPosition = new Vector2(centerX, exampleBounds.Center.Y);
+            //}
         }
 
         private string DisplayFontOnComboBox(object[] source, object item)

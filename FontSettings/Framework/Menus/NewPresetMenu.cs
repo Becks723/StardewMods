@@ -77,7 +77,7 @@ namespace FontSettings.Framework.Menus
             this._button_ok.LocalPosition = new Vector2(this._button_cancel.LocalPosition.X - 2 - this._button_ok.Width, this._button_cancel.LocalPosition.Y);
             this._button_ok.Click += this.OnOKClicked;
 
-            root.Add(
+            root.AddChildren(
                 this._background,
                 this._label_title,
                 this._textbox_name,
