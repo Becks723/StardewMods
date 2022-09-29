@@ -1,17 +1,19 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewValleyUI;
 using StardewValleyUI.Controls;
 
 namespace FontSettings.Framework.Menus
 {
     internal class ToggleTextureButton : TextureButton
     {
-        private bool _isToggled;
+        private static readonly UIPropertyInfo IsToggledProperty
+            = new UIPropertyInfo(nameof(IsToggled), typeof(bool), typeof(ToggleTextureButton), false);
         public bool IsToggled
         {
-            get => this._isToggled;
-            set => this.SetField(ref this._isToggled, value);
+            get { return GetValue<bool>(IsToggledProperty); }
+            set { SetValue(IsToggledProperty, value); }
         }
 
         public ToggleTextureButton(Texture2D texture, Rectangle? sourceRectangle, float scale = 1f)

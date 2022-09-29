@@ -6,13 +6,20 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
+using StardewValleyUI;
 using StardewValleyUI.Controls;
 
 namespace FontSettings.Framework.Menus
 {
     internal class FontExampleLabel : Label
     {
-        public new ISpriteFont Font { get; set; }
+        private readonly static UIPropertyInfo SpriteFontProperty
+            = new UIPropertyInfo(nameof(Font), typeof(ISpriteFont), typeof(FontExampleLabel), null, affectsMeasure: true);
+        public new ISpriteFont Font
+        {
+            get { return this.GetValue<ISpriteFont>(SpriteFontProperty); }
+            set { this.SetValue(SpriteFontProperty, value); }
+        }
 
         public bool ShowText { get; set; } = true;
 
