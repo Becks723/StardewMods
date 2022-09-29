@@ -173,7 +173,6 @@ namespace FontSettings.Framework.Menus
 
         private void OnNameChanged(object sender, EventArgs e)
         {
-            this._viewModel.Name = this._textbox.Text;
             this._viewModel.CheckNameValid();
         }
 
