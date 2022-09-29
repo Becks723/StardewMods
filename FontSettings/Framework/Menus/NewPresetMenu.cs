@@ -108,64 +108,6 @@ namespace FontSettings.Framework.Menus
             context.SetContent(grid);
         }
 
-        protected override void ResetComponents(RootElement root, IBindingContext context)
-        {
-            { /*
-            root.LocalPosition = new Vector2(this.xPositionOnScreen, this.yPositionOnScreen);
-
-            this._background = new TextureBox();
-            this._background.LocalPosition = Vector2.Zero;
-            this._background.SettableWidth = this.width;
-            this._background.SettableHeight = this.height;
-            this._background.Kind = TextureBoxes.ThickBorder;
-            this._background.Scale = 4f;
-            this._background.DrawShadow = false;
-
-            Thickness margin = new Thickness(borderWidth / 2) + this._background.BorderThickness;
-
-            this._label_title = new Label();
-            this._label_title.Text = I18n.Ui_NewPresetMenu_Title();
-            this._label_title.Font = FontType.SpriteText;
-            this._label_title.LocalPosition = new Vector2(this.width / 2 - this._label_title.Width / 2, margin.Top);
-
-            this._label_invalidNameMessage = new Label();
-            this._label_invalidNameMessage.Font = FontType.SmallFont;
-            this._label_invalidNameMessage.Forground = Color.Red;
-            this._label_invalidNameMessage.LocalPosition = new Vector2(margin.Left, this.height - margin.Bottom - this._label_invalidNameMessage.Height);
-
-            this._textbox_name = new Textbox();
-            this._textbox_name.LocalPosition = new Vector2(margin.Left, this._label_invalidNameMessage.LocalPosition.Y - 4 - this._textbox_name.Height);
-            this._textbox_name.SettableWidth = this.width - (int)margin.Left - (int)margin.Right;
-            this._textbox_name.TextChanged += this.OnNameChanged;
-
-            this._button_cancel = new TextureButton(Game1.mouseCursors, new Rectangle(192, 256, 64, 64));
-            this._button_cancel.SettableWidth = 64;
-            this._button_cancel.SettableHeight = 64;
-            this._button_cancel.LocalPosition = new Vector2(this.width - this._button_cancel.Width, this.height + 8);
-            this._button_cancel.Click += this.OnCancelClicked;
-
-            this._button_ok = new TextureButton(Game1.mouseCursors, new Rectangle(128, 256, 64, 64));
-            this._button_ok.SettableWidth = 64;
-            this._button_ok.SettableHeight = 64;
-            this._button_ok.LocalPosition = new Vector2(this._button_cancel.LocalPosition.X - 2 - this._button_ok.Width, this._button_cancel.LocalPosition.Y);
-            this._button_ok.Click += this.OnOKClicked;
-
-            root.Add(
-                this._background,
-                this._label_title,
-                this._textbox_name,
-                this._label_invalidNameMessage,
-                this._button_ok,
-                this._button_cancel);
-
-            context
-                .AddBinding(() => this._viewModel.Name, () => this._textbox_name.String, BindingMode.OneWayReversed)
-                .AddBinding(() => this._viewModel.InvalidNameMessage, () => this._label_invalidNameMessage.Text, BindingMode.OneWay)
-                .AddBinding(() => this._viewModel.CanOk, () => this._button_ok.GreyedOut, BindingMode.OneWay, new TrueFalseConverter())
-                .AddBinding(() => this._viewModel.IsFinished, () => this.IsFinished, BindingMode.OneWay);*/
-            }
-        }
-
         protected override bool CanClose()
         {
             return !this._textbox.Focused;
