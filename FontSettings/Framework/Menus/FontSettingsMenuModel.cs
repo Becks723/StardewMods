@@ -521,7 +521,7 @@ namespace FontSettings.Framework.Menus
             this.MoveToPrevPreset = new DelegateCommand(this.PreviousPreset);
             this.MoveToNextPreset = new DelegateCommand(this.NextPreset);
             this.SaveCurrentPreset = new DelegateCommand(this._SaveCurrentPreset);
-            //this.SaveCurrentAsNewPreset = new DelegateCommand(this._SaveCurrentAsNewPreset);
+            this.SaveCurrentAsNewPreset = new DelegateCommand<Func<IOverlayMenu>>(this._SaveCurrentAsNewPreset);
             this.DeleteCurrentPreset = new DelegateCommand(this._DeleteCurrentPreset);
             this.RefreshFonts = new DelegateCommand(this.RefreshAllFonts);
         }
@@ -554,7 +554,23 @@ namespace FontSettings.Framework.Menus
                 this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);
         }
 
-        public void _SaveCurrentAsNewPreset(string newPresetName)
+        private void _SaveCurrentAsNewPreset(Func<IOverlayMenu> createOverlay)
+        {
+            if (createOverlay == null) return;
+
+            var overlay = createOverlay();
+            if (overlay != null)
+            {
+                overlay.Open();
+                overlay.Closed += (s, e) =>
+                {
+                    if (e.Parameter is string presetName)
+                        this._SaveCurrentAsNewPreset(presetName);
+                };
+            }
+        }
+
+        private void _SaveCurrentAsNewPreset(string newPresetName)
         {
             this.PresetViewModel(this.CurrentFontType).SaveCurrentAsNewPreset(newPresetName,
                 this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);

@@ -9,35 +9,108 @@ using StardewValleyUI.Menus;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class NewPresetMenu : BaseMenu<NewPresetMenuModel>
+    internal class NewPresetMenu : BaseMenu<NewPresetMenuModel>, IOverlayMenu
     {
         private readonly NewPresetMenuModel _viewModel;
+        private readonly Action<NewPresetMenu> _onOpened;
+        private readonly Action<NewPresetMenu> _onClosed;
+        private Textbox _textbox;
 
-        private TextureBox _background;
-        private Label _label_title;
-        private Textbox _textbox_name;
-        private TextureButton _button_ok;
-        private TextureButton _button_cancel;
-        private Label _label_invalidNameMessage;
+        public event EventHandler<OverlayMenuClosedEventArgs> Closed;
 
-        protected override bool ManualInitializeComponents => true;
-
-        public bool IsFinished { get; set; }
-
-        public event EventHandler<string> Accepted;
-
-        public NewPresetMenu(FontPresetManager presetManager, int x, int y, int width, int height)
-            : base(x, y, width, height)
+        public NewPresetMenu(FontPresetManager presetManager, Action<NewPresetMenu> onOpened, Action<NewPresetMenu> onClosed)
         {
+            this._onOpened = onOpened;
+            this._onClosed = onClosed;
+
             this.ResetComponents();
 
             this._viewModel = new NewPresetMenuModel(presetManager);
-            this._viewModel.Accepted += (_, _) => this.RaisedAccepted(this._viewModel.Name);
             this.DataContext = this._viewModel;
+        }
+
+        protected override void ResetComponents(MenuInitializationContext context)
+        {
+            this.width = 400 + borderWidth;
+            this.height = 300 + borderWidth;
+
+            context
+                .PositionMode(PositionMode.Auto)
+                .Aligns(HorizontalAlignment.Center, VerticalAlignment.Center);
+
+            Grid grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            {
+                var backgroundBox = new TextureBox();
+                backgroundBox.Kind = TextureBoxes.ThickBorder;
+                backgroundBox.Scale = 4f;
+                backgroundBox.DrawShadow = false;
+                backgroundBox.Padding += new Thickness(borderWidth / 2);
+                grid.Children.Add(backgroundBox);
+                grid.SetRow(backgroundBox, 0);
+                {
+                    Grid mainGrid = new Grid();
+                    mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                    mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                    mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                    backgroundBox.Content = mainGrid;
+                    {
+                        var titleLabel = new Label();
+                        titleLabel.Text = I18n.Ui_NewPresetMenu_Title();
+                        titleLabel.Font = FontType.SpriteText;
+                        titleLabel.HorizontalAlignment = HorizontalAlignment.Center;
+                        titleLabel.VerticalAlignment = VerticalAlignment.Top;
+                        mainGrid.Children.Add(titleLabel);
+                        mainGrid.SetRow(titleLabel, 0);
+
+                        var textbox = this._textbox = new Textbox();
+                        textbox.TextChanged += this.OnNameChanged;
+                        context.OneWayBinds(() => textbox.String, () => this._viewModel.Name);
+                        mainGrid.Children.Add(textbox);
+                        mainGrid.SetRow(textbox, 1);
+
+                        var invalidMsgLabel = new Label();
+                        invalidMsgLabel.Font = FontType.SmallFont;
+                        invalidMsgLabel.Forground = Color.Red;
+                        context.OneWayBinds(() => this._viewModel.InvalidNameMessage, () => invalidMsgLabel.Text);
+                        mainGrid.Children.Add(invalidMsgLabel);
+                        mainGrid.SetRow(invalidMsgLabel, 2);
+                    }
+                }
+
+                Grid buttonsGrid = new Grid();
+                buttonsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
+                buttonsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                buttonsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                buttonsGrid.Margin = new Thickness(0, borderWidth / 5, 0, 0);
+                grid.Children.Add(buttonsGrid);
+                grid.SetRow(buttonsGrid, 1);
+                {
+                    var okButton = new TextureButton(Game1.mouseCursors, new Rectangle(128, 256, 64, 64));
+                    okButton.Click += (_, _) => Game1.playSound("money");
+                    okButton.Margin = new Thickness(0, 0, borderWidth / 5, 0);
+                    context.OneWayBinds(() => this._viewModel.OkCommand, () => okButton.Command);
+                    context.OneWayBinds(() => this, () => okButton.CommandParameter);
+                    context.OneWayBinds(() => this._viewModel.CanOk, () => okButton.GreyedOut, new TrueFalseConverter());
+                    buttonsGrid.Children.Add(okButton);
+                    buttonsGrid.SetColumn(okButton, 1);
+
+                    var cancelButton = new TextureButton(Game1.mouseCursors, new Rectangle(192, 256, 64, 64));
+                    cancelButton.Click += (_, _) => Game1.playSound("bigDeSelect");
+                    cancelButton.Margin = new Thickness(0, 0, 0, 0);
+                    context.OneWayBinds(() => this._viewModel.CancelCommand, () => cancelButton.Command);
+                    context.OneWayBinds(() => this, () => cancelButton.CommandParameter);
+                    buttonsGrid.Children.Add(cancelButton);
+                    buttonsGrid.SetColumn(cancelButton, 2);
+                }
+            }
+            context.SetContent(grid);
         }
 
         protected override void ResetComponents(RootElement root, IBindingContext context)
         {
+            { /*
             root.LocalPosition = new Vector2(this.xPositionOnScreen, this.yPositionOnScreen);
 
             this._background = new TextureBox();
@@ -89,47 +162,36 @@ namespace FontSettings.Framework.Menus
                 .AddBinding(() => this._viewModel.Name, () => this._textbox_name.String, BindingMode.OneWayReversed)
                 .AddBinding(() => this._viewModel.InvalidNameMessage, () => this._label_invalidNameMessage.Text, BindingMode.OneWay)
                 .AddBinding(() => this._viewModel.CanOk, () => this._button_ok.GreyedOut, BindingMode.OneWay, new TrueFalseConverter())
-                .AddBinding(() => this._viewModel.IsFinished, () => this.IsFinished, BindingMode.OneWay);
-        }
-
-        public override void update(GameTime time)
-        {
-            base.update(time);
-
-            // 错误信息标签的内容改变，标签的高度也会变。所以每次刷新时更新相关的UI位置。
-            Thickness margin = new Thickness(borderWidth / 2) + this._background.BorderThickness;
-            this._label_invalidNameMessage.LocalPosition = new Vector2(margin.Left, this.height - margin.Bottom - this._label_invalidNameMessage.Height);
-            this._textbox_name.LocalPosition = new Vector2(margin.Left, this._label_invalidNameMessage.LocalPosition.Y - 4 - this._textbox_name.Height);
+                .AddBinding(() => this._viewModel.IsFinished, () => this.IsFinished, BindingMode.OneWay);*/
+            }
         }
 
         protected override bool CanClose()
         {
-            return !this._textbox_name.Focused;
+            return !this._textbox.Focused;
         }
 
         private void OnNameChanged(object sender, EventArgs e)
         {
-            this._viewModel.Name = this._textbox_name.String;
+            this._viewModel.Name = this._textbox.String;
             this._viewModel.CheckNameValid();
         }
 
-        private void OnOKClicked(object sender, EventArgs e)
+        private void RaiseClosed(object? parameter)
         {
-            Game1.playSound("money");
-
-            this._viewModel.OnOk();
+            Closed?.Invoke(this, new OverlayMenuClosedEventArgs(parameter));
         }
 
-        private void OnCancelClicked(object sender, EventArgs e)
+        void IOverlayMenu.Open()
         {
-            Game1.playSound("bigDeSelect");
-
-            this._viewModel.OnCancel();
+            this._onOpened(this);
         }
 
-        protected virtual void RaisedAccepted(string presetName)
+        void IOverlayMenu.Close(object? parameter)
         {
-            Accepted?.Invoke(this, presetName);
+            this.RaiseClosed(parameter);
+
+            this._onClosed(this);
         }
     }
 }

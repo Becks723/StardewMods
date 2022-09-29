@@ -339,7 +339,8 @@ namespace FontSettings.Framework.Menus
                         newPresetButton.ToolTipText = I18n.Ui_Tooltip_NewPreset();
                         newPresetButton.Click += (_, _) => Game1.playSound("coin");
                         context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
-                        //context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => newPresetButton.Command);  // TODO
+                        context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
+                        context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
                         presetGrid.Children.Add(newPresetButton);
                         presetGrid.SetColumn(newPresetButton, 3);
 
@@ -866,7 +867,9 @@ namespace FontSettings.Framework.Menus
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            this._newPresetMenu?.Dispose();
+
+            if (this._isNewPresetMenu)
+                this._newPresetMenu.Dispose();
         }
 
         public override void update(GameTime time)
@@ -875,16 +878,6 @@ namespace FontSettings.Framework.Menus
                 base.update(time);
             else
             {
-                this._newPresetMenu ??= this.CreateNewPresetMenu();
-
-                if (this._newPresetMenu.IsFinished)
-                {
-                    this._newPresetMenu.Dispose();
-                    this._newPresetMenu = null;
-                    this._isNewPresetMenu = false;
-                    return;
-                }
-
                 this._newPresetMenu.update(time);
             }
         }
@@ -911,7 +904,6 @@ namespace FontSettings.Framework.Menus
             if (this._isNewPresetMenu)
             {
                 b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
-                this._newPresetMenu ??= this.CreateNewPresetMenu();
                 this._newPresetMenu.draw(b);
             }
         }
@@ -922,7 +914,6 @@ namespace FontSettings.Framework.Menus
 
             if (this._isNewPresetMenu)
             {
-                this._newPresetMenu ??= this.CreateNewPresetMenu();
                 this._newPresetMenu.receiveKeyPress(key);
             }
         }
@@ -932,10 +923,7 @@ namespace FontSettings.Framework.Menus
             if (!this._isNewPresetMenu)
                 return true;
             else
-            {
-                this._newPresetMenu ??= this.CreateNewPresetMenu();
                 return this._newPresetMenu.readyToClose();
-            }
         }
 
         private string DisplayFontOnComboBox(object[] source, object item)
@@ -950,13 +938,24 @@ namespace FontSettings.Framework.Menus
 
         private NewPresetMenu CreateNewPresetMenu()
         {
+            void OnMenuOpened(NewPresetMenu menu)
+            {
+                this._isNewPresetMenu = true;
+                this._newPresetMenu = menu;
+            }
+
+            void OnMenuClosed(NewPresetMenu menu)
+            {
+                menu.Dispose();
+
+                this._isNewPresetMenu = false;
+                this._newPresetMenu = null;
+            }
+
             var result = new NewPresetMenu(
                 this._presetManager,
-                this.xPositionOnScreen + this.width / 4,
-                this.yPositionOnScreen + this.height / 3,
-                this.width / 2,
-                this.height / 3);
-            result.Accepted += (_, name) => this._viewModel._SaveCurrentAsNewPreset(name);
+                OnMenuOpened,
+                OnMenuClosed);
 
             return result;
         }
@@ -969,6 +968,7 @@ namespace FontSettings.Framework.Menus
             if (instance == null) return;
 
             this._isNewPresetMenu = instance._isNewPresetMenu;
+            this._newPresetMenu = instance._newPresetMenu;
         }
     }
 }
