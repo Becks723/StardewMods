@@ -14,7 +14,7 @@ using StardewValleyUI.Mvvm;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontSettingsMenuModel : ViewModel
+    internal class FontSettingsMenuModel : MenuModelBase
     {
         private static FontSettingsMenuModel _instance;
 

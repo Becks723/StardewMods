@@ -9,7 +9,7 @@ using StardewValleyUI.Mvvm;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class NewPresetMenuModel : ViewModel
+    internal class NewPresetMenuModel : MenuModelBase
     {
         private readonly FontPresetManager _presetManager;
 
