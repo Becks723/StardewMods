@@ -116,7 +116,7 @@ namespace FontSettings.Framework.Menus
             prevFontButton.VerticalAlignment = VerticalAlignment.Center;
             prevFontButton.Margin = new Thickness(0, 0, 48, 0);
             context.OneWayBinds(() => this._viewModel.MoveToPrevFont, () => prevFontButton.Command);
-            prevFontButton.Click += (_, _) => Game1.playSound("smallSelect");
+            prevFontButton.ClickSound = "smallSelect";
             grid.Children.Add(prevFontButton);
             grid.SetColumn(prevFontButton, 0);
 
@@ -126,7 +126,7 @@ namespace FontSettings.Framework.Menus
             nextFontButton.VerticalAlignment = VerticalAlignment.Center;
             nextFontButton.Margin = new Thickness(48, 0, 0, 0);
             context.OneWayBinds(() => this._viewModel.MoveToNextFont, () => nextFontButton.Command);
-            nextFontButton.Click += (_, _) => Game1.playSound("smallSelect");
+            nextFontButton.ClickSound = "smallSelect";
             grid.Children.Add(nextFontButton);
             grid.SetColumn(nextFontButton, 2);
 
@@ -176,7 +176,7 @@ namespace FontSettings.Framework.Menus
                                 var toggleOffsetButton = new ToggleTextureButton(
                                     Game1.mouseCursors, new Rectangle(257, 284, 16, 16), 3f);
                                 toggleOffsetButton.ToolTipText = I18n.Ui_Tooltip_ToggleCharOffsetTuning();
-                                toggleOffsetButton.Click += (_, _) => Game1.playSound("smallSelect");
+                                toggleOffsetButton.ClickSound = "smallSelect";
                                 context.TwoWayBinds(() => this._viewModel.IsTuningCharOffset, () => toggleOffsetButton.IsToggled);
                                 previewMainGrid.Children.Add(toggleOffsetButton);
                                 previewMainGrid.SetColumn(toggleOffsetButton, 0);
@@ -315,7 +315,7 @@ namespace FontSettings.Framework.Menus
                         prevPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                         prevPresetButton.VerticalAlignment = VerticalAlignment.Center;
                         prevPresetButton.ToolTipText = I18n.Ui_Tooltip_PrevPreset();
-                        prevPresetButton.Click += (_, _) => Game1.playSound("smallSelect");
+                        prevPresetButton.ClickSound = "smallSelect";
                         context.OneWayBinds(() => this._viewModel.MoveToPrevPreset, () => prevPresetButton.Command);
                         presetGrid.Children.Add(prevPresetButton);
                         presetGrid.SetColumn(prevPresetButton, 1);
@@ -326,7 +326,7 @@ namespace FontSettings.Framework.Menus
                         nextPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                         nextPresetButton.VerticalAlignment = VerticalAlignment.Center;
                         nextPresetButton.ToolTipText = I18n.Ui_Tooltip_NextPreset();
-                        nextPresetButton.Click += (_, _) => Game1.playSound("smallSelect");
+                        nextPresetButton.ClickSound = "smallSelect";
                         context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => nextPresetButton.Command);
                         presetGrid.Children.Add(nextPresetButton);
                         presetGrid.SetColumn(nextPresetButton, 2);
@@ -337,7 +337,7 @@ namespace FontSettings.Framework.Menus
                         newPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                         newPresetButton.VerticalAlignment = VerticalAlignment.Center;
                         newPresetButton.ToolTipText = I18n.Ui_Tooltip_NewPreset();
-                        newPresetButton.Click += (_, _) => Game1.playSound("coin");
+                        newPresetButton.ClickSound = "coin";
                         context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
                         context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
                         context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
@@ -350,7 +350,7 @@ namespace FontSettings.Framework.Menus
                         savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                         savePresetButton.VerticalAlignment = VerticalAlignment.Center;
                         savePresetButton.ToolTipText = I18n.Ui_Tooltip_SavePreset();
-                        savePresetButton.Click += (_, _) => Game1.playSound("newRecipe");
+                        savePresetButton.ClickSound = "newRecipe";
                         context.OneWayBinds(() => this._viewModel.CanSaveCurrentPreset, () => savePresetButton.GreyedOut, new TrueFalseConverter());
                         context.OneWayBinds(() => this._viewModel.SaveCurrentPreset, () => savePresetButton.Command);
                         presetGrid.Children.Add(savePresetButton);
@@ -362,7 +362,7 @@ namespace FontSettings.Framework.Menus
                         deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                         deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
                         deletePresetButton.ToolTipText = I18n.Ui_Tooltip_DelPreset();
-                        deletePresetButton.Click += (_, _) => Game1.playSound("trashcan");
+                        deletePresetButton.ClickSound = "trashcan";
                         context.OneWayBinds(() => this._viewModel.CanDeleteCurrentPreset, () => deletePresetButton.GreyedOut, new TrueFalseConverter());
                         context.OneWayBinds(() => this._viewModel.DeleteCurrentPreset, () => deletePresetButton.Command);
                         presetGrid.Children.Add(deletePresetButton);
@@ -492,7 +492,7 @@ namespace FontSettings.Framework.Menus
                                 refreshButton.ToolTipText = I18n.Ui_Tooltip_RefreshFonts();
                                 refreshButton.AnimationDuration = 300;
                                 refreshButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                refreshButton.Click += (_, _) => Game1.playSound("trashcan");
+                                refreshButton.ClickSound = "trashcan";
                                 context.OneWayBinds(() => this._viewModel.RefreshFonts, () => refreshButton.Command);
                                 rightTopGrid.Children.Add(refreshButton);
                                 rightTopGrid.SetColumn(refreshButton, 0);

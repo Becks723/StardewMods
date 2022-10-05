@@ -88,7 +88,7 @@ namespace FontSettings.Framework.Menus
                 grid.SetRow(buttonsGrid, 1);
                 {
                     var okButton = new TextureButton(Game1.mouseCursors, new Rectangle(128, 256, 64, 64));
-                    okButton.Click += (_, _) => Game1.playSound("money");
+                    okButton.ClickSound = "money";
                     okButton.Margin = new Thickness(0, 0, borderWidth / 5, 0);
                     context.OneWayBinds(() => this._viewModel.OkCommand, () => okButton.Command);
                     context.OneWayBinds(() => this, () => okButton.CommandParameter);
@@ -97,7 +97,7 @@ namespace FontSettings.Framework.Menus
                     buttonsGrid.SetColumn(okButton, 1);
 
                     var cancelButton = new TextureButton(Game1.mouseCursors, new Rectangle(192, 256, 64, 64));
-                    cancelButton.Click += (_, _) => Game1.playSound("bigDeSelect");
+                    cancelButton.ClickSound = "bigDeSelect";
                     cancelButton.Margin = new Thickness(0, 0, 0, 0);
                     context.OneWayBinds(() => this._viewModel.CancelCommand, () => cancelButton.Command);
                     context.OneWayBinds(() => this, () => cancelButton.CommandParameter);
