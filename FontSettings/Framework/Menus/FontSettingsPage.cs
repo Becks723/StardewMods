@@ -186,7 +186,7 @@ namespace FontSettings.Framework.Menus
                                 xOffsetSlider.Orientation = Orientation.Horizontal;
                                 xOffsetSlider.VerticalAlignment = VerticalAlignment.Center;
                                 xOffsetSlider.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
-                                xOffsetSlider.SettableHeight = 24;
+                                xOffsetSlider.SuggestedHeight = 24;
                                 xOffsetSlider.Interval = 0.5f;
                                 xOffsetSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                 xOffsetSlider.ValueChanged += this.UpdateExampleCurrent;
@@ -201,7 +201,7 @@ namespace FontSettings.Framework.Menus
                                 yOffsetSlider.Orientation = Orientation.Vertical;
                                 yOffsetSlider.HorizontalAlignment = HorizontalAlignment.Center;
                                 yOffsetSlider.Margin = new Thickness(0, borderWidth / 3, 0, 0);
-                                yOffsetSlider.SettableWidth = 24;
+                                yOffsetSlider.SuggestedWidth = 24;
                                 yOffsetSlider.Interval = 0.5f;
                                 yOffsetSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                 yOffsetSlider.ValueChanged += this.UpdateExampleCurrent;
@@ -412,7 +412,7 @@ namespace FontSettings.Framework.Menus
                                 var slider = new Slider();
                                 slider.Interval = 1;
                                 slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SettableWidth = 300;
+                                slider.SuggestedWidth = 300;
                                 slider.ValueChanged += this.UpdateExampleCurrent;
                                 context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
                                 context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
@@ -436,7 +436,7 @@ namespace FontSettings.Framework.Menus
                                 var slider = new Slider();
                                 slider.Interval = 1;
                                 slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SettableWidth = 300;
+                                slider.SuggestedWidth = 300;
                                 slider.ValueChanged += this.UpdateExampleCurrent;
                                 context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
                                 context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
@@ -460,7 +460,7 @@ namespace FontSettings.Framework.Menus
                                 var slider = new Slider();
                                 slider.Interval = 1;
                                 slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SettableWidth = 300;
+                                slider.SuggestedWidth = 300;
                                 slider.ValueChanged += this.UpdateExampleCurrent;
                                 context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
                                 context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);

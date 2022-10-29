@@ -106,10 +106,6 @@ namespace FontSettings.Framework.Menus
             private readonly FontExampleLabel _vanilla;
             private readonly FontExampleLabel _current;
 
-            public override int Width => Math.Max(this._vanilla.Width, this._current.Width);
-
-            public override int Height => Math.Max(this._vanilla.Height, this._current.Height);
-
             public MergedFontExampleLabels(FontExampleLabel vanilla, FontExampleLabel current)
             {
                 this._vanilla = vanilla;
@@ -117,6 +113,16 @@ namespace FontSettings.Framework.Menus
 
                 this.Children.Add(vanilla);
                 this.Children.Add(current);
+            }
+
+            protected override Vector2 MeasureOverride(Vector2 availableSize)
+            {
+                var vSize = this._vanilla.Measure(availableSize);
+                var cSize = this._current.Measure(availableSize);
+
+                return new Vector2(
+                    Math.Max(vSize.X, cSize.X),
+                    Math.Max(vSize.Y, cSize.Y));
             }
 
             protected override void ArrangeOverride(Vector2 availableSize)

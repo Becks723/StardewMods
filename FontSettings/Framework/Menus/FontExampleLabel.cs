@@ -27,28 +27,6 @@ namespace FontSettings.Framework.Menus
 
         public Color BoundsColor { get; set; }
 
-        public override int Width
-        {
-            get
-            {
-                if (this.Font == null)
-                    return 0;
-                string text = this.Text ?? string.Empty;
-                return (int)this.Font.MeasureString(text).X;
-            }
-        }
-
-        public override int Height
-        {
-            get
-            {
-                if (this.Font == null)
-                    return 0;
-                string text = this.Text ?? string.Empty;
-                return (int)this.Font.MeasureString(text).Y;
-            }
-        }
-
         protected override void DrawOverride(SpriteBatch b)
         {
             if (this.Font != null)
@@ -63,6 +41,19 @@ namespace FontSettings.Framework.Menus
                 if (this.ShowText)
                     this.Font.Draw(b, text, this.Position, this.Forground);
             }
+        }
+
+        protected override Vector2 MeasureOverride(Vector2 availableSize)
+        {
+            Vector2 measureSize = Vector2.Zero;
+            var font = this.Font;
+
+            if (font == null)
+                return measureSize;
+
+            string text = this.Text ?? string.Empty;
+            measureSize = font.MeasureString(text);
+            return measureSize;
         }
     }
 }
