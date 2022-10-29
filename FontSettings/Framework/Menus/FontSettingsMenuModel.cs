@@ -590,10 +590,9 @@ namespace FontSettings.Framework.Menus
 
             // 检查重新扫描后，之前选中的还在不在。
             bool match = false;
-            var comparer = new FontEqualityComparer();
             foreach (FontModel font in this.AllFonts)
             {
-                if (comparer.Equals(font, lastFont))
+                if (font == lastFont)
                 {
                     match = true;
                     break;

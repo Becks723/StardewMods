@@ -12,18 +12,18 @@ namespace FontSettings.Framework.Menus
 {
     internal class FontExampleBorder : TextureBox
     {
-        public override void Draw(SpriteBatch b)
-        {
-            Rectangle scissor = new Rectangle(
-                (int)(this.Position.X),
-                (int)(this.Position.Y),
-                (int)(this.ActualWidth),
-                (int)(this.ActualHeight));
+        //protected override void DrawOverride(SpriteBatch b)
+        //{
+        //    Rectangle scissor = new Rectangle(
+        //        (int)(this.Position.X),
+        //        (int)(this.Position.Y),
+        //        (int)(this.ActualWidth),
+        //        (int)(this.ActualHeight));
 
-            b.InNewScissoredState(scissor, Vector2.Zero, () =>
-            {
-                base.Draw(b);
-            });
-        }
+        //    b.InNewScissoredState(scissor, Vector2.Zero, () =>
+        //    {
+        //        base.Draw(b);
+        //    });
+        //}
     }
 }

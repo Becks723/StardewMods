@@ -28,10 +28,8 @@ namespace FontSettings.Framework.Menus
         {
         }
 
-        public override void Update(GameTime gameTime)
+        protected override void UpdateOverride(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             if (this._isAnimating)
             {
                 this._angle += this.GetAngleDeltaPerUpdate();
@@ -43,7 +41,7 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        public override void Draw(SpriteBatch b)
+        protected override void DrawOverride(SpriteBatch b)
         {
             if (this.Texture != null)
             {

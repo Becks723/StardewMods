@@ -49,7 +49,7 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        public override void Draw(SpriteBatch b)
+        protected override void DrawOverride(SpriteBatch b)
         {
             if (this.Font != null)
             {

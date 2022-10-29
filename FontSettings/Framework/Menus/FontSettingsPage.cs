@@ -186,7 +186,7 @@ namespace FontSettings.Framework.Menus
                                 xOffsetSlider.Orientation = Orientation.Horizontal;
                                 xOffsetSlider.VerticalAlignment = VerticalAlignment.Center;
                                 xOffsetSlider.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
-                                xOffsetSlider.BarThickness = 24;
+                                xOffsetSlider.SettableHeight = 24;
                                 xOffsetSlider.Interval = 0.5f;
                                 xOffsetSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                 xOffsetSlider.ValueChanged += this.UpdateExampleCurrent;
@@ -201,7 +201,7 @@ namespace FontSettings.Framework.Menus
                                 yOffsetSlider.Orientation = Orientation.Vertical;
                                 yOffsetSlider.HorizontalAlignment = HorizontalAlignment.Center;
                                 yOffsetSlider.Margin = new Thickness(0, borderWidth / 3, 0, 0);
-                                yOffsetSlider.BarThickness = 24;
+                                yOffsetSlider.SettableWidth = 24;
                                 yOffsetSlider.Interval = 0.5f;
                                 yOffsetSlider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                 yOffsetSlider.ValueChanged += this.UpdateExampleCurrent;
@@ -241,7 +241,7 @@ namespace FontSettings.Framework.Menus
                                 mergeOption.Margin = new Thickness(0, 0, 0, borderWidth / 3);
                                 previewOptionsStack.Children.Add(mergeOption);
                                 {
-                                    var checkbox = new Checkbox();
+                                    var checkbox = new CheckBox();
                                     context.TwoWayBinds(() => this._viewModel.ExamplesMerged, () => checkbox.IsChecked);
 
                                     var label = new Label();
@@ -258,7 +258,7 @@ namespace FontSettings.Framework.Menus
                                 showBoundsOption.Margin = new Thickness(0, 0, 0, borderWidth / 3);
                                 previewOptionsStack.Children.Add(showBoundsOption);
                                 {
-                                    var checkbox = new Checkbox();
+                                    var checkbox = new CheckBox();
                                     context.TwoWayBinds(() => this._viewModel.ShowExampleBounds, () => checkbox.IsChecked);
 
                                     var label = new Label();
@@ -275,7 +275,7 @@ namespace FontSettings.Framework.Menus
                                 showTextOption.Margin = new Thickness(0, 0, 0, borderWidth / 3);
                                 previewOptionsStack.Children.Add(showTextOption);
                                 {
-                                    var checkbox = new Checkbox();
+                                    var checkbox = new CheckBox();
                                     context.TwoWayBinds(() => this._viewModel.ShowExampleText, () => checkbox.IsChecked);
 
                                     var label = new Label();
@@ -389,7 +389,7 @@ namespace FontSettings.Framework.Menus
                             leftGrid.Children.Add(enableOption);
                             leftGrid.SetRow(enableOption, 0);
                             {
-                                var checkbox = new Checkbox();
+                                var checkbox = new CheckBox();
                                 checkbox.Checked += this.UpdateExampleCurrent;
                                 checkbox.Unchecked += this.UpdateExampleCurrent;
                                 context.TwoWayBinds(() => this._viewModel.FontEnabled, () => checkbox.IsChecked);
@@ -412,7 +412,7 @@ namespace FontSettings.Framework.Menus
                                 var slider = new Slider();
                                 slider.Interval = 1;
                                 slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.BarLength = 300;
+                                slider.SettableWidth = 300;
                                 slider.ValueChanged += this.UpdateExampleCurrent;
                                 context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
                                 context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
@@ -436,7 +436,7 @@ namespace FontSettings.Framework.Menus
                                 var slider = new Slider();
                                 slider.Interval = 1;
                                 slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.BarLength = 300;
+                                slider.SettableWidth = 300;
                                 slider.ValueChanged += this.UpdateExampleCurrent;
                                 context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
                                 context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
@@ -460,7 +460,7 @@ namespace FontSettings.Framework.Menus
                                 var slider = new Slider();
                                 slider.Interval = 1;
                                 slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.BarLength = 300;
+                                slider.SettableWidth = 300;
                                 slider.ValueChanged += this.UpdateExampleCurrent;
                                 context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
                                 context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
@@ -497,17 +497,15 @@ namespace FontSettings.Framework.Menus
                                 rightTopGrid.Children.Add(refreshButton);
                                 rightTopGrid.SetColumn(refreshButton, 0);
 
-                                var fontDropDown = new ComboBox();
-                                fontDropDown.SettableWidth = 400;
-                                fontDropDown.VerticalAlignment = VerticalAlignment.Center;
-                                fontDropDown.DisplayTextReslover = this.DisplayFontOnComboBox;
-                                fontDropDown.EqualityComparer = new FontEqualityComparer();
-                                fontDropDown.MaxDisplayRows = 6;
-                                context.OneWayBinds(() => this._viewModel.AllFonts, () => fontDropDown.ItemsSource);
-                                context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontDropDown.SelectedItem);
-                                fontDropDown.SelectionChanged += this.UpdateExampleCurrent;
-                                rightTopGrid.Children.Add(fontDropDown);
-                                rightTopGrid.SetColumn(fontDropDown, 1);
+                                //var fontDropDown = new ComboBox();
+                                //fontDropDown.SettableWidth = 400;
+                                //fontDropDown.VerticalAlignment = VerticalAlignment.Center;
+                                //fontDropDown.ItemAppearance = Appearance.DataMember<FontModel, string>(font => DisplayFontOnComboBox(font));
+                                //context.OneWayBinds(() => this._viewModel.AllFonts, () => fontDropDown.ItemsSource);
+                                //context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontDropDown.SelectedItem);
+                                ////fontDropDown.SelectionChanged += this.UpdateExampleCurrent;
+                                //rightTopGrid.Children.Add(fontDropDown);
+                                //rightTopGrid.SetColumn(fontDropDown, 1);
                             }
 
                             var okButton = new TextureButton(
@@ -586,6 +584,17 @@ namespace FontSettings.Framework.Menus
                 return true;
             else
                 return this._newPresetMenu.readyToClose();
+        }
+
+        private string DisplayFontOnComboBox(FontModel? font)
+        {
+            if (font == null)
+                return string.Empty;
+
+            if (font.FullPath == null)
+                return I18n.OptionsPage_Font_KeepOrig();
+            else
+                return $"{font.FamilyName} ({font.SubfamilyName})";
         }
 
         private string DisplayFontOnComboBox(object[] source, object item)
