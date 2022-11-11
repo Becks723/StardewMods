@@ -51,9 +51,8 @@ namespace FontSettings.Framework.Menus
             if (newValue)
             {
                 var border = new FontExampleBorder();
-                border.Kind = TextureBoxes.Patterns;
+                border.Box = TextureBoxes.Patterns;
                 border.DrawShadow = false;
-                border.Scale = 4f;
                 this.Children.Add(border);
                 {
                     this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -64,7 +63,7 @@ namespace FontSettings.Framework.Menus
                     var examples = new MergedFontExampleLabels(this.VanillaFontExample, this.CurrentFontExample);
                     examples.HorizontalAlignment = HorizontalAlignment.Center;
                     examples.VerticalAlignment = VerticalAlignment.Center;
-                    border.Content = examples;
+                    border.Child = examples;
                 }
             }
             else
@@ -73,29 +72,27 @@ namespace FontSettings.Framework.Menus
                 this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
                 {
                     var vanillaBorder = new FontExampleBorder();
-                    vanillaBorder.Kind = TextureBoxes.Patterns;
+                    vanillaBorder.Box = TextureBoxes.Patterns;
                     vanillaBorder.DrawShadow = false;
-                    vanillaBorder.Scale = 4f;
                     vanillaBorder.Margin = new Thickness(0, 0, this._borderWidth / 6, 0);
                     this.Children.Add(vanillaBorder);
                     this.SetColumn(vanillaBorder, 0);
                     {
                         this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Center;
                         this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Center;
-                        vanillaBorder.Content = this.VanillaFontExample;
+                        vanillaBorder.Child = this.VanillaFontExample;
                     }
 
                     var currentBorder = new FontExampleBorder();
-                    currentBorder.Kind = TextureBoxes.Patterns;
+                    currentBorder.Box = TextureBoxes.Patterns;
                     currentBorder.DrawShadow = false;
-                    currentBorder.Scale = 4f;
                     currentBorder.Margin = new Thickness(this._borderWidth / 6, 0, 0, 0);
                     this.Children.Add(currentBorder);
                     this.SetColumn(currentBorder, 1);
                     {
                         this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Center;
                         this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Center;
-                        currentBorder.Content = this.CurrentFontExample;
+                        currentBorder.Child = this.CurrentFontExample;
                     }
                 }
             }

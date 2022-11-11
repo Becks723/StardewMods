@@ -26,7 +26,7 @@ namespace FontSettings.Framework.Menus
         private readonly bool _isStandalone;
         private readonly FontSettingsMenuModel _viewModel;
 
-        private TextureBox _previewBoard;
+        private TextureBoxBorder _previewBoard;
 
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
@@ -59,7 +59,7 @@ namespace FontSettings.Framework.Menus
             const string ID = "BeneathThePlass.StarrySkyInterfaceCP";
             if (registry.IsLoaded(ID))
             {
-                this._previewBoard.Kind = TextureBoxes.Default;  // 解决方法：将背景框改成默认款。
+                this._previewBoard.Box = TextureBoxes.Default;  // 解决方法：将背景框改成默认款。
             }
 
             return this;
@@ -99,15 +99,11 @@ namespace FontSettings.Framework.Menus
 
         protected override void ResetComponents(MenuInitializationContext context)
         {
-            context
-                .PositionMode(PositionMode.Auto)
-                .Aligns(HorizontalAlignment.Center, VerticalAlignment.Center);
-            this.width = -1;
-            this.height = 600 + IClickableMenu.borderWidth * 2 + 64;
-
             Grid grid = new Grid();
+            grid.SuggestedWidth = 1000;
+            grid.SuggestedHeight = 600;
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(800 + IClickableMenu.borderWidth * 2) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace /*new GridLength(800 + IClickableMenu.borderWidth * 2)*/ });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             var prevFontButton = new TextureButton(
@@ -130,7 +126,7 @@ namespace FontSettings.Framework.Menus
             grid.Children.Add(nextFontButton);
             grid.SetColumn(nextFontButton, 2);
 
-            var mainBorder = new TextureBox();
+            var mainBorder = new TextureBoxBorder();
             mainBorder.DrawShadow = false;
             mainBorder.Padding += new Thickness(borderWidth / 2);
             grid.Children.Add(mainBorder);
@@ -141,7 +137,7 @@ namespace FontSettings.Framework.Menus
                 mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
                 mainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                 mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
-                mainBorder.Content = mainGrid;
+                mainBorder.Child = mainGrid;
                 {
                     var titleLabel = new Label();
                     titleLabel.Font = FontType.SpriteText;
@@ -152,8 +148,8 @@ namespace FontSettings.Framework.Menus
                     mainGrid.Children.Add(titleLabel);
                     mainGrid.SetRow(titleLabel, 0);
 
-                    var previewBorder = this._previewBoard = new TextureBox();
-                    previewBorder.Kind = TextureBoxes.DefaultBorderless;
+                    var previewBorder = this._previewBoard = new TextureBoxBorder();
+                    previewBorder.Box = TextureBoxes.DefaultBorderless;
                     previewBorder.DrawShadow = false;
                     previewBorder.Padding += new Thickness(borderWidth / 3);
                     mainGrid.Children.Add(previewBorder);
@@ -163,7 +159,7 @@ namespace FontSettings.Framework.Menus
                         previewGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
                         previewGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(borderWidth / 2) });
                         previewGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                        previewBorder.Content = previewGrid;
+                        previewBorder.Child = previewGrid;
                         {
                             Grid previewMainGrid = new Grid();
                             previewMainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -497,15 +493,15 @@ namespace FontSettings.Framework.Menus
                                 rightTopGrid.Children.Add(refreshButton);
                                 rightTopGrid.SetColumn(refreshButton, 0);
 
-                                //var fontDropDown = new ComboBox();
-                                //fontDropDown.SettableWidth = 400;
-                                //fontDropDown.VerticalAlignment = VerticalAlignment.Center;
-                                //fontDropDown.ItemAppearance = Appearance.DataMember<FontModel, string>(font => DisplayFontOnComboBox(font));
-                                //context.OneWayBinds(() => this._viewModel.AllFonts, () => fontDropDown.ItemsSource);
-                                //context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontDropDown.SelectedItem);
-                                ////fontDropDown.SelectionChanged += this.UpdateExampleCurrent;
-                                //rightTopGrid.Children.Add(fontDropDown);
-                                //rightTopGrid.SetColumn(fontDropDown, 1);
+                                var fontDropDown = new ComboBox();
+                                fontDropDown.SuggestedWidth = 400;
+                                fontDropDown.VerticalAlignment = VerticalAlignment.Center;
+                                fontDropDown.ItemAppearance = Appearance.ForData(new FontAppearance());
+                                context.OneWayBinds(() => this._viewModel.AllFonts, () => fontDropDown.ItemsSource);
+                                context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontDropDown.SelectedItem);
+                                //fontDropDown.SelectionChanged += this.UpdateExampleCurrent;
+                                rightTopGrid.Children.Add(fontDropDown);
+                                rightTopGrid.SetColumn(fontDropDown, 1);
                             }
 
                             var okButton = new TextureButton(
@@ -521,7 +517,7 @@ namespace FontSettings.Framework.Menus
                 }
             }
 
-            context.SetContent(grid);
+            context.SetRootElement(grid);
         }
 
         protected override void Dispose(bool disposing)
@@ -640,6 +636,29 @@ namespace FontSettings.Framework.Menus
 
             this._isNewPresetMenu = instance._isNewPresetMenu;
             this._newPresetMenu = instance._newPresetMenu;
+        }
+
+        private class FontAppearance : DataAppearanceBuilder<FontModel>
+        {
+            protected override Element Build(AppearanceBuildContext<FontModel> context)
+            {
+                FontModel? font = context.Target;
+
+                Label l = new Label();
+                l.Text = GetText(font);
+                return l;
+            }
+
+            private string GetText(FontModel? font)
+            {
+                if (font == null)
+                    return string.Empty;
+
+                if (font.FullPath == null)
+                    return I18n.OptionsPage_Font_KeepOrig();
+                else
+                    return $"{font.FamilyName} ({font.SubfamilyName})";
+            }
         }
     }
 }

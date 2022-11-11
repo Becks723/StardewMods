@@ -10,7 +10,7 @@ using StardewValleyUI.Controls;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontExampleBorder : TextureBox
+    internal class FontExampleBorder : TextureBoxBorder
     {
         //protected override void DrawOverride(SpriteBatch b)
         //{

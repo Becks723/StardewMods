@@ -31,20 +31,14 @@ namespace FontSettings.Framework.Menus
 
         protected override void ResetComponents(MenuInitializationContext context)
         {
-            this.width = 400 + borderWidth;
-            this.height = 300 + borderWidth;
-
-            context
-                .PositionMode(PositionMode.Auto)
-                .Aligns(HorizontalAlignment.Center, VerticalAlignment.Center);
-
             Grid grid = new Grid();
+            grid.SuggestedWidth = 400 + borderWidth;
+            grid.SuggestedHeight = 300 + borderWidth;
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             {
-                var backgroundBox = new TextureBox();
-                backgroundBox.Kind = TextureBoxes.ThickBorder;
-                backgroundBox.Scale = 4f;
+                var backgroundBox = new TextureBoxBorder();
+                backgroundBox.Box = TextureBoxes.ThickBorder;
                 backgroundBox.DrawShadow = false;
                 backgroundBox.Padding += new Thickness(borderWidth / 2);
                 grid.Children.Add(backgroundBox);
@@ -54,7 +48,7 @@ namespace FontSettings.Framework.Menus
                     mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
                     mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
                     mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
-                    backgroundBox.Content = mainGrid;
+                    backgroundBox.Child = mainGrid;
                     {
                         var titleLabel = new Label();
                         titleLabel.Text = I18n.Ui_NewPresetMenu_Title();
@@ -105,7 +99,7 @@ namespace FontSettings.Framework.Menus
                     buttonsGrid.SetColumn(cancelButton, 2);
                 }
             }
-            context.SetContent(grid);
+            context.SetRootElement(grid);
         }
 
         protected override bool CanClose()
