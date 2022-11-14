@@ -381,6 +381,7 @@ namespace FontSettings.Framework.Menus
                         {
                             var enableOption = new StackContainer();
                             enableOption.Orientation = Orientation.Horizontal;
+                            enableOption.HorizontalAlignment = HorizontalAlignment.Left;
                             enableOption.VerticalAlignment = VerticalAlignment.Center;
                             leftGrid.Children.Add(enableOption);
                             leftGrid.SetRow(enableOption, 0);
@@ -401,6 +402,7 @@ namespace FontSettings.Framework.Menus
 
                             var fontSizeOption = new StackContainer();
                             fontSizeOption.Orientation = Orientation.Horizontal;
+                            fontSizeOption.HorizontalAlignment = HorizontalAlignment.Left;
                             fontSizeOption.VerticalAlignment = VerticalAlignment.Center;
                             leftGrid.Children.Add(fontSizeOption);
                             leftGrid.SetRow(fontSizeOption, 1);
@@ -425,6 +427,7 @@ namespace FontSettings.Framework.Menus
 
                             var spacingOption = new StackContainer();
                             spacingOption.Orientation = Orientation.Horizontal;
+                            spacingOption.HorizontalAlignment = HorizontalAlignment.Left;
                             spacingOption.VerticalAlignment = VerticalAlignment.Center;
                             leftGrid.Children.Add(spacingOption);
                             leftGrid.SetRow(spacingOption, 2);
@@ -449,6 +452,7 @@ namespace FontSettings.Framework.Menus
 
                             var lineSpacingOption = new StackContainer();
                             lineSpacingOption.Orientation = Orientation.Horizontal;
+                            lineSpacingOption.HorizontalAlignment = HorizontalAlignment.Left;
                             lineSpacingOption.VerticalAlignment = VerticalAlignment.Center;
                             leftGrid.Children.Add(lineSpacingOption);
                             leftGrid.SetRow(lineSpacingOption, 3);
@@ -646,6 +650,8 @@ namespace FontSettings.Framework.Menus
 
                 Label l = new Label();
                 l.Text = GetText(font);
+                l.HorizontalAlignment = HorizontalAlignment.Left;
+                l.VerticalAlignment = VerticalAlignment.Center;
                 return l;
             }
 
