@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using StardewModdingAPI;
 
-namespace FixFloorPlacement
+namespace StaircasePlacementFix
 {
     internal class ModEntry : Mod
     {
@@ -9,7 +9,7 @@ namespace FixFloorPlacement
         {
             Harmony harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                new ObjectPatcher()
+                new MainPatcher()
                     .Patch(harmony, this.Monitor);
             }
         }
