@@ -1,4 +1,9 @@
-﻿using HarmonyLib;
+﻿#if NET452
+using System.Linq;
+using Harmony;
+#elif NET5_0_OR_GREATER
+using HarmonyLib;
+#endif
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
@@ -10,7 +15,13 @@ namespace StaircasePlacementFix
     {
         private static IMonitor _monitor;
 
-        public void Patch(Harmony harmony, IMonitor monitor)
+        public void Patch(
+#if NET452
+            HarmonyInstance
+#elif NET5_0_OR_GREATER
+            Harmony
+#endif
+            harmony, IMonitor monitor)
         {
             _monitor = monitor;
 
@@ -34,7 +45,15 @@ namespace StaircasePlacementFix
                 && mineShaft.isTileOccupiedByFarmer(tilePosition) == null
                 /*&& __instance.doesTileHaveProperty((int)currentPoint.X, (int)currentPoint.Y, "Type", "Back") != null
                 && __instance.doesTileHaveProperty((int)currentPoint.X, (int)currentPoint.Y, "Type", "Back").Equals("Stone")*/
-                && (mineShaft.doesTileHaveProperty((int)tilePosition.X, (int)tilePosition.Y, "Type", "Back") is "Stone" or "Dirt" or "Wood" || IsSpecialPlaceableTile(mineShaft.getTileIndexAt((int)tilePosition.X, (int)tilePosition.Y, "Back"))))
+                && (
+#if NET452
+                    Matches(
+                        mineShaft.doesTileHaveProperty((int)tilePosition.X, (int)tilePosition.Y, "Type", "Back"),
+                        "Stone", "Dirt", "Wood")
+#elif NET5_0_OR_GREATER
+                    mineShaft.doesTileHaveProperty((int)tilePosition.X, (int)tilePosition.Y, "Type", "Back") is "Stone" or "Dirt" or "Wood"
+#endif
+                    || IsSpecialPlaceableTile(mineShaft.getTileIndexAt((int)tilePosition.X, (int)tilePosition.Y, "Back"))))
             {
                 LogPlacement(true, tilePosition, mineShaft.mapPath.Value);
                 mineShaft.createLadderAt(tilePosition, sound);
@@ -71,9 +90,17 @@ namespace StaircasePlacementFix
         /// <summary>见Maps/Mines/mine.png，用Tiled地图编辑器打开，显示在Tilesets页，打开Properties菜单，点击每个图块就可以查看<paramref name="tileIndex"/>值。</summary>
         private static bool IsSpecialPlaceableTile(int tileIndex)
         {
-            return tileIndex is
+            return
+#if NET452
+                   Matches(
+                tileIndex,
+                1, 2, 3, 17, 18, 19, 33, 34, 35,
+                149, 150, 151, 152);
+#elif NET5_0_OR_GREATER
+                   tileIndex is
                 1 or 2 or 3 or 17 or 18 or 19 or 33 or 34 or 35  // 3x3的卵石地块
                 or 149 or 150 or 151 or 152;                     // 4个普通地块和泥土地块的交界处
+#endif
         }
 
         private static void LogPlacement(bool success, Vector2 tilePosition, string location)
@@ -81,5 +108,12 @@ namespace StaircasePlacementFix
             string successPrefix = success ? "成功" : "未能";
             _monitor.Log($"{successPrefix}放置楼梯！位置：({tilePosition.X}, {tilePosition.Y})；地点：{location}。");
         }
+
+#if NET452
+        private static bool Matches<T>(T value, params T[] predicates)
+        {
+            return predicates.Contains(value);
+        }
+#endif
     }
 }

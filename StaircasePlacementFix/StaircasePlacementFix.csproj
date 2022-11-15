@@ -1,11 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="..\_build\smapi.targets" />
-
 	<PropertyGroup>
 		<Version>1.0.1</Version>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFrameworks>net5;net452</TargetFrameworks>
 	</PropertyGroup>
 
+	<!--配置net452的游戏路径-->
+	<PropertyGroup>
+		<GamePath Condition=" '$(TargetFramework)' == 'net452' ">D:\Stardew Valley\Versions\1.4.5</GamePath>
+	</PropertyGroup>
+	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+		<PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="3.3.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net5' ">
+		<PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.0.0" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<EnableModZip>false</EnableModZip>
+		<EnableHarmony>true</EnableHarmony>
+	</PropertyGroup>
+	
 	<ItemGroup>
 		<None Update="说明.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
