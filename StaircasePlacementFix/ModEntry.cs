@@ -1,4 +1,8 @@
-﻿using HarmonyLib;
+﻿#if NET452
+using Harmony;
+#elif NET5_0_OR_GREATER
+using HarmonyLib;
+#endif
 using StardewModdingAPI;
 
 namespace StaircasePlacementFix
@@ -7,7 +11,13 @@ namespace StaircasePlacementFix
     {
         public override void Entry(IModHelper helper)
         {
-            Harmony harmony = new Harmony(this.ModManifest.UniqueID);
+            var harmony =
+#if NET452
+            HarmonyInstance.Create
+#elif NET5_0_OR_GREATER
+            new Harmony
+#endif
+            (this.ModManifest.UniqueID);
             {
                 new MainPatcher()
                     .Patch(harmony, this.Monitor);
