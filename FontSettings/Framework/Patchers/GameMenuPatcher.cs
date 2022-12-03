@@ -20,19 +20,13 @@ namespace FontSettings.Framework.Patchers
 
         private static IModHelper _helper;
         private static ModConfig _config;
-        private static FontManager _fontManager;
-        private static GameFontChanger _fontChanger;
-        private static FontPresetManager _presetManager;
-        private static Action<ModConfig> _saveConfig;
+        private static Action<ModConfig> _saveModConfig;
 
-        public void AddFontSettingsPage(IModHelper helper, Harmony harmony, ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
+        public void AddFontSettingsPage(IModHelper helper, Harmony harmony, ModConfig config, Action<ModConfig> saveModConfig)
         {
             _helper = helper;
             _config = config;
-            _fontManager = fontManager;
-            _fontChanger = fontChanger;
-            _presetManager = presetManager;
-            _saveConfig = saveConfig;
+            _saveModConfig = saveModConfig;
 
             harmony.Patch(
                 original: AccessTools.Constructor(typeof(GameMenu), new Type[] { typeof(bool) }),
@@ -66,8 +60,8 @@ namespace FontSettings.Framework.Patchers
                 tryDefaultIfNoDownNeighborExists = true,
                 fullyImmutable = true
             });
-            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _presetManager, _saveConfig, null)
-            );
+            __instance.pages.Add(
+                new FontSettingsObsoletePage(_config, _saveModConfig, __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height));
         }
 
         private static void GameMenu_getTabNumberFromName_Postfix(string name, ref int __result)

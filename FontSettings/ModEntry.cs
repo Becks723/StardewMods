@@ -79,11 +79,7 @@ namespace FontSettings
                     .Patch(Harmony, this.Monitor);
 
                 new GameMenuPatcher()
-                    .AddFontSettingsPage(helper, Harmony, this._config, this._fontManager, this._fontChanger, this._presetManager, config =>
-                    {
-                        this.SaveConfig(config);
-                        this.SaveFontSettings(config.Fonts);
-                    });
+                    .AddFontSettingsPage(helper, Harmony, this._config, this.SaveConfig);
 
                 new FontShadowPatcher(this._config)
                     .Patch(Harmony, this.Monitor);
