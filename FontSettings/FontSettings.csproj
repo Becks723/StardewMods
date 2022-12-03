@@ -12,6 +12,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>
 		<BundleExtraAssemblies>ThirdParty</BundleExtraAssemblies>
+		<IgnoreModFilePaths>assets/preserved.png</IgnoreModFilePaths>
 	</PropertyGroup>
 
 	<ItemGroup>

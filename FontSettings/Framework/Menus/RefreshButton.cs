@@ -11,8 +11,6 @@ namespace FontSettings.Framework.Menus
 {
     internal class RefreshButton : TextureButton
     {
-        private static readonly Lazy<Texture2D> _refreshTexture = new(LoadRefreshTexture);
-
         private bool _isAnimating;
 
         private double _angle;
@@ -24,7 +22,7 @@ namespace FontSettings.Framework.Menus
         public int RotationAngle { get; set; } = 180;
 
         public RefreshButton(float scale)
-            : base(_refreshTexture.Value, null, scale)
+            : base(Textures.Icons, new Rectangle(16, 0, 16, 16), scale)
         {
         }
 
@@ -73,11 +71,6 @@ namespace FontSettings.Framework.Menus
         {
             double unit = Math.PI / 180;
             return (float)(unit * angle);
-        }
-
-        private static Texture2D LoadRefreshTexture()
-        {
-            return Textures.Refresh;
         }
     }
 }

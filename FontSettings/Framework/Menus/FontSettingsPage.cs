@@ -440,8 +440,7 @@ namespace FontSettings.Framework.Menus
                                 //presetGrid.SetColumn(newPresetButton, 3);
 
                                 var savePresetButton = new TextureButton(
-                                    /*Game1.mouseCursors, new Rectangle(274, 284, 16, 16), 3f*/
-                                    this._icons, new Rectangle(96, 0, 16, 16), 4f);
+                                    this._icons, new Rectangle(64, 0, 16, 16), 4f);
                                 savePresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
                                 savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                 savePresetButton.VerticalAlignment = VerticalAlignment.Center;
@@ -453,8 +452,7 @@ namespace FontSettings.Framework.Menus
                                 presetGrid.SetColumn(savePresetButton, 3);
 
                                 var deletePresetButton = new TextureButton(
-                                    /*Game1.mouseCursors, new Rectangle(192, 256, 64, 64), 0.75f*/
-                                    Game1.mouseCursors, new Rectangle(323, 433, 9, 10), 4f);
+                                    this._icons, new Rectangle(80, 0, 16, 16), 4f);
                                 deletePresetButton.Margin = new Thickness(0, 0, 0, 0);
                                 deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                 deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
@@ -514,8 +512,8 @@ namespace FontSettings.Framework.Menus
                         previewGrid.SetRow(optionsStack, 1);
                         {
                             var mergeButton = new ToggleTextureButton(
-                                onTexture: this._icons, onSourceRectangle: new(0, 0, 16, 16), onScale: 4f,
-                                offTexture: this._icons, offSourceRectangle: new(16, 0, 16, 16), offScale: 4f);
+                                onTexture: this._icons, onSourceRectangle: new(32, 0, 16, 16), onScale: 4f,
+                                offTexture: this._icons, offSourceRectangle: new(48, 0, 16, 16), offScale: 4f);
                             mergeButton.ClickSound = "coin";
                             mergeButton.ToolTip = I18n.OptionsPage_MergeExamples();
                             context.TwoWayBinds(() => this._viewModel.ExamplesMerged, () => mergeButton.IsToggled);

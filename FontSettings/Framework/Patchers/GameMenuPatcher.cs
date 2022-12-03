@@ -17,7 +17,6 @@ namespace FontSettings.Framework.Patchers
     internal class GameMenuPatcher
     {
         private const string _fontTabName = "font";
-        private static readonly Lazy<Texture2D> _fontTab = new(() => Textures.FontTab);
 
         private static IModHelper _helper;
         private static ModConfig _config;
@@ -154,11 +153,10 @@ namespace FontSettings.Framework.Patchers
                             0.0001f);
 
                         // 内容
-                        const int index = 3;
                         b.Draw(
-                            _fontTab.Value,
+                            Textures.Icons,
                             new Vector2(tab.bounds.X, tab.bounds.Y + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)),
-                            new Rectangle(index * 16, 0, 16, 16),
+                            new Rectangle(0, 0, 16, 16),
                             Color.White,
                             0f,
                             Vector2.Zero,
