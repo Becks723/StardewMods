@@ -338,19 +338,12 @@ namespace FontSettings
 
         private void OpenFontSettingsMenu()
         {
-            int width = 800 + IClickableMenu.borderWidth * 2;
-            int height = 600 + IClickableMenu.borderWidth * 2 + 64;
             Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, this._fontChanger, this._presetManager, config =>
             {
                 this.SaveConfig(config);
                 this.SaveFontSettings(config.Fonts);
             },
-            Game1.uiViewport.Width / 2 - width / 2,
-            Game1.uiViewport.Height / 2 - height / 2,
-            width,
-            height,
-            isStandalone: true)
-                .FixConflictWithStarrySkyInterface(this.Helper.ModRegistry);
+            this.Helper.ModRegistry);
         }
     }
 }

@@ -21,5 +21,8 @@ namespace FontSettings.Framework
 
         public static Texture2D Refresh
             => _modContent.Load<Texture2D>("assets/刷新.png");
+
+        public static Texture2D Icons
+            => _modContent.Load<Texture2D>("assets/icons.png");
     }
 }

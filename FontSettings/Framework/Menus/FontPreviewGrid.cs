@@ -7,12 +7,13 @@ using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
+using StardewValleyUI.Controls.Primitives;
 
 namespace FontSettings.Framework.Menus
 {
     internal class FontPreviewGrid : Grid
     {
-        private readonly int _borderWidth;
+        private readonly TextureBox _box;
 
         private static readonly UIPropertyInfo IsMergedProperty
             = new UIPropertyInfo(nameof(IsMerged), typeof(bool), typeof(FontPreviewGrid), false, OnIsMergedChanged);
@@ -29,70 +30,121 @@ namespace FontSettings.Framework.Menus
             grid.OnIsMergedChanged((bool)e.OldValue, (bool)e.NewValue);
         }
 
+        public Orientation Orientation { get; set; } = Orientation.Vertical;
+
         public FontExampleLabel VanillaFontExample { get; }
 
         public FontExampleLabel CurrentFontExample { get; }
 
-        public FontPreviewGrid(int borderWidth)
+        public FontPreviewGrid(TextureBox box)
         {
+            this._box = box;
+
             this.VanillaFontExample = new FontExampleLabel() { Forground = Color.Gray * 0.67f };
             this.CurrentFontExample = new FontExampleLabel() { Forground = Game1.textColor };
-
-            this._borderWidth = borderWidth;
 
             this.OnIsMergedChanged(true, false);
         }
 
         private void OnIsMergedChanged(bool oldValue, bool newValue)
         {
-            this.ColumnDefinitions.Clear();
+            bool horiz = this.Orientation == Orientation.Horizontal;
+            if (horiz)
+                this.ColumnDefinitions.Clear();
+            else
+                this.RowDefinitions.Clear();
             this.Children.Clear();
 
             if (newValue)
             {
-                var border = new FontExampleBorder();
-                border.Box = TextureBoxes.Patterns;
+                var border = new TextureBoxBorder();
+                border.Box = _box;
                 border.DrawShadow = false;
                 this.Children.Add(border);
                 {
-                    this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
-                    this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Stretch;
-                    this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
-                    this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+                    Grid grid = new Grid();
+                    border.Child = grid;
+                    {
+                        var titleLabel = new Label();
+                        titleLabel.Text = "合并后"; // TODO
+                        titleLabel.Font = FontType.SpriteText;
+                        titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
+                        titleLabel.VerticalAlignment = VerticalAlignment.Top;  // TODO: 没有指定Left、Top时，仍然处于左上角。优化布局。
+                        grid.Children.Add(titleLabel);
 
-                    var examples = new MergedFontExampleLabels(this.VanillaFontExample, this.CurrentFontExample);
-                    examples.HorizontalAlignment = HorizontalAlignment.Center;
-                    examples.VerticalAlignment = VerticalAlignment.Center;
-                    border.Child = examples;
+                        this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
+                        this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+                        this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
+                        this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+
+                        var examples = new MergedFontExampleLabels(this.VanillaFontExample, this.CurrentFontExample);
+                        examples.HorizontalAlignment = HorizontalAlignment.Center;
+                        examples.VerticalAlignment = VerticalAlignment.Center;
+                        grid.Children.Add(examples);
+                    }
                 }
             }
             else
             {
-                this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
-                this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
+                if (horiz)
                 {
-                    var vanillaBorder = new FontExampleBorder();
-                    vanillaBorder.Box = TextureBoxes.Patterns;
+                    this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
+                    this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
+                }
+                else
+                {
+                    this.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                    this.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                }
+                {
+                    var vanillaBorder = new TextureBoxBorder();
+                    vanillaBorder.Box = _box;
                     vanillaBorder.DrawShadow = false;
-                    vanillaBorder.Margin = new Thickness(0, 0, this._borderWidth / 6, 0);
                     this.Children.Add(vanillaBorder);
-                    this.SetColumn(vanillaBorder, 0);
+                    if (horiz)
+                        this.SetColumn(vanillaBorder, 0);
+                    else
+                        this.SetRow(vanillaBorder, 0);
                     {
-                        this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Center;
-                        this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Center;
-                        vanillaBorder.Child = this.VanillaFontExample;
+                        Grid grid = new Grid();
+                        vanillaBorder.Child = grid;
+                        {
+                            var titleLabel = new Label();
+                            titleLabel.Text = I18n.OptionsPage_OriginalExample();
+                            titleLabel.Font = FontType.SpriteText;
+                            titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
+                            titleLabel.VerticalAlignment = VerticalAlignment.Top;
+                            grid.Children.Add(titleLabel);
+
+                            this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Center;
+                            this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Center;
+                            grid.Children.Add(this.VanillaFontExample);
+                        }
                     }
 
-                    var currentBorder = new FontExampleBorder();
-                    currentBorder.Box = TextureBoxes.Patterns;
+                    var currentBorder = new TextureBoxBorder();
+                    currentBorder.Box = _box;
                     currentBorder.DrawShadow = false;
-                    currentBorder.Margin = new Thickness(this._borderWidth / 6, 0, 0, 0);
                     this.Children.Add(currentBorder);
-                    this.SetColumn(currentBorder, 1);
+                    if (horiz)
+                        this.SetColumn(currentBorder, 1);
+                    else
+                        this.SetRow(currentBorder, 1);
                     {
-                        this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Center;
-                        this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Center;
-                        currentBorder.Child = this.CurrentFontExample;
+                        Grid grid = new Grid();
+                        currentBorder.Child = grid;
+                        {
+                            var titleLabel = new Label();
+                            titleLabel.Text = I18n.OptionsPage_CustomExample();
+                            titleLabel.Font = FontType.SpriteText;
+                            titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
+                            titleLabel.VerticalAlignment = VerticalAlignment.Top;
+                            grid.Children.Add(titleLabel);
+
+                            this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Center;
+                            this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Center;
+                            grid.Children.Add(this.CurrentFontExample);
+                        }
                     }
                 }
             }

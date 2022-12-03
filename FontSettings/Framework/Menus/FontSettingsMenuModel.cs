@@ -448,12 +448,6 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
-        public event EventHandler TitleChanged;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
-
-        public event EventHandler ExampleVanillaUpdated;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
-
-        public event EventHandler ExampleCurrentUpdated;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
-
         public ICommand MoveToPrevFont { get; }
 
         public ICommand MoveToNextFont { get; }
@@ -654,8 +648,6 @@ namespace FontSettings.Framework.Menus
             else
                 this.ExampleVanillaFont = new XNASpriteFont(
                     this._fontManager.GetBuiltInSpriteFont(this.CurrentFontType));
-
-            ExampleVanillaUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         public void UpdateExampleCurrent()
@@ -669,15 +661,12 @@ namespace FontSettings.Framework.Menus
                 this.LineSpacing,
                 new Microsoft.Xna.Framework.Vector2(this.CharOffsetX, this.CharOffsetY),
                 this.ExampleText);
-
-            ExampleCurrentUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnFontTypeChanged(GameFontType newFontType)
         {
             // 更新标题。
             this.Title = newFontType.LocalizedName();
-            TitleChanged?.Invoke(this, EventArgs.Empty);
 
             // 更新各个属性。
             FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,

@@ -67,9 +67,7 @@ namespace FontSettings.Framework.Patchers
                 tryDefaultIfNoDownNeighborExists = true,
                 fullyImmutable = true
             });
-            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _presetManager, _saveConfig,
-                __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height + 64)
-                .FixConflictWithStarrySkyInterface(_helper.ModRegistry)
+            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _presetManager, _saveConfig, null)
             );
         }
 
@@ -80,7 +78,7 @@ namespace FontSettings.Framework.Patchers
         }
 
         private static bool GameMenu_draw_Prefix(GameMenu __instance, SpriteBatch b)
-        {            
+        {
             // 如果禁用了游戏菜单内设置字体，直接返回，执行原函数。
             if (!_config.FontSettingsInGameMenu)
                 return true;
