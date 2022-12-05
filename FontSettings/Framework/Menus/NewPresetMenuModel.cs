@@ -3,22 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using StardewModdingAPI.Utilities;
+using StardewValleyUI.Mvvm;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class NewPresetMenuModel : ViewModel
+    internal class NewPresetMenuModel : MenuModelBase
     {
         private readonly FontPresetManager _presetManager;
-
-        public event EventHandler Accepted;
-
-        private bool _isFinished;
-        public bool IsFinished
-        {
-            get => this._isFinished;
-            private set => this.SetField(ref this._isFinished, value);
-        }
 
         public string Name { get; set; }
 
@@ -36,23 +29,26 @@ namespace FontSettings.Framework.Menus
             private set => this.SetField(ref this._invalidNameMessage, value);
         }
 
+        public ICommand OkCommand { get; }
+
+        public ICommand CancelCommand { get; }
+
         public NewPresetMenuModel(FontPresetManager presetManager)
         {
             this._presetManager = presetManager;
+
+            this.OkCommand = new DelegateCommand<IOverlayMenu>(this.Ok);
+            this.CancelCommand = new DelegateCommand<IOverlayMenu>(this.Cancel);
         }
 
-        public void OnOk()
+        private void Ok(IOverlayMenu overlay)
         {
-            if (this.CanOk)
-            {
-                this.IsFinished = true;
-                Accepted?.Invoke(this, EventArgs.Empty);
-            }
+            overlay?.Close(this.Name);
         }
 
-        public void OnCancel()
+        private void Cancel(IOverlayMenu overlay)
         {
-            this.IsFinished = true;
+            overlay?.Close(null);
         }
 
         public void CheckNameValid()

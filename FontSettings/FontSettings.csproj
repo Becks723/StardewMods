@@ -11,7 +11,12 @@
 		<TargetFramework>net5.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>
+	</PropertyGroup>
+
+	<!--smapi specific-->
+	<PropertyGroup>
 		<BundleExtraAssemblies>ThirdParty</BundleExtraAssemblies>
+		<IgnoreModFilePaths>assets/preserved.png</IgnoreModFilePaths>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,15 +28,20 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>fontbm\win\%(FileName)%(Extension)</TargetPath>
 		</ContentWithTargetPath>-->
-		<Compile Remove="Framework\GameFontChanger2.cs" />
-		<Compile Remove="Framework\Legacy\Menus\OptionsPageWithFont.cs" />
-		
-		<None Include="Framework\GameFontChanger2.cs" />
-		<None Include="Framework\Legacy\Menus\OptionsPageWithFont.cs" />
-		
+
 		<None Update="说明.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+
+	<!--ignored files-->
+	<ItemGroup>
+		<Compile Remove="Framework\Legacy\Menus\*.cs"/>
+		<None Include="Framework\Legacy\Menus\*.cs"/>
+
+		<Compile Remove="Framework\GameFontChanger2.cs" />
+		<None Include="Framework\GameFontChanger2.cs" />
+	</ItemGroup>
+
 
 </Project>

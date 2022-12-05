@@ -14,7 +14,7 @@ using StardewValleyUI.Mvvm;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontSettingsMenuModel : ViewModel
+    internal class FontSettingsMenuModel : MenuModelBase
     {
         private static FontSettingsMenuModel _instance;
 
@@ -448,12 +448,6 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
-        public event EventHandler TitleChanged;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
-
-        public event EventHandler ExampleVanillaUpdated;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
-
-        public event EventHandler ExampleCurrentUpdated;  // TODO: 该事件仅通知VIew更新一些UI控件的位置。等UI自动排版完成后去掉。
-
         public ICommand MoveToPrevFont { get; }
 
         public ICommand MoveToNextFont { get; }
@@ -521,7 +515,7 @@ namespace FontSettings.Framework.Menus
             this.MoveToPrevPreset = new DelegateCommand(this.PreviousPreset);
             this.MoveToNextPreset = new DelegateCommand(this.NextPreset);
             this.SaveCurrentPreset = new DelegateCommand(this._SaveCurrentPreset);
-            //this.SaveCurrentAsNewPreset = new DelegateCommand(this._SaveCurrentAsNewPreset);
+            this.SaveCurrentAsNewPreset = new DelegateCommand<Func<IOverlayMenu>>(this._SaveCurrentAsNewPreset);
             this.DeleteCurrentPreset = new DelegateCommand(this._DeleteCurrentPreset);
             this.RefreshFonts = new DelegateCommand(this.RefreshAllFonts);
         }
@@ -554,7 +548,23 @@ namespace FontSettings.Framework.Menus
                 this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);
         }
 
-        public void _SaveCurrentAsNewPreset(string newPresetName)
+        private void _SaveCurrentAsNewPreset(Func<IOverlayMenu> createOverlay)
+        {
+            if (createOverlay == null) return;
+
+            var overlay = createOverlay();
+            if (overlay != null)
+            {
+                overlay.Open();
+                overlay.Closed += (s, e) =>
+                {
+                    if (e.Parameter is string presetName)
+                        this._SaveCurrentAsNewPreset(presetName);
+                };
+            }
+        }
+
+        private void _SaveCurrentAsNewPreset(string newPresetName)
         {
             this.PresetViewModel(this.CurrentFontType).SaveCurrentAsNewPreset(newPresetName,
                 this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);
@@ -574,10 +584,9 @@ namespace FontSettings.Framework.Menus
 
             // 检查重新扫描后，之前选中的还在不在。
             bool match = false;
-            var comparer = new FontEqualityComparer();
             foreach (FontModel font in this.AllFonts)
             {
-                if (comparer.Equals(font, lastFont))
+                if (font == lastFont)
                 {
                     match = true;
                     break;
@@ -639,8 +648,6 @@ namespace FontSettings.Framework.Menus
             else
                 this.ExampleVanillaFont = new XNASpriteFont(
                     this._fontManager.GetBuiltInSpriteFont(this.CurrentFontType));
-
-            ExampleVanillaUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         public void UpdateExampleCurrent()
@@ -654,15 +661,12 @@ namespace FontSettings.Framework.Menus
                 this.LineSpacing,
                 new Microsoft.Xna.Framework.Vector2(this.CharOffsetX, this.CharOffsetY),
                 this.ExampleText);
-
-            ExampleCurrentUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnFontTypeChanged(GameFontType newFontType)
         {
             // 更新标题。
             this.Title = newFontType.LocalizedName();
-            TitleChanged?.Invoke(this, EventArgs.Empty);
 
             // 更新各个属性。
             FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,

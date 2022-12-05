@@ -17,23 +17,16 @@ namespace FontSettings.Framework.Patchers
     internal class GameMenuPatcher
     {
         private const string _fontTabName = "font";
-        private static readonly Lazy<Texture2D> _fontTab = new(() => Textures.FontTab);
 
         private static IModHelper _helper;
         private static ModConfig _config;
-        private static FontManager _fontManager;
-        private static GameFontChanger _fontChanger;
-        private static FontPresetManager _presetManager;
-        private static Action<ModConfig> _saveConfig;
+        private static Action<ModConfig> _saveModConfig;
 
-        public void AddFontSettingsPage(IModHelper helper, Harmony harmony, ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
+        public void AddFontSettingsPage(IModHelper helper, Harmony harmony, ModConfig config, Action<ModConfig> saveModConfig)
         {
             _helper = helper;
             _config = config;
-            _fontManager = fontManager;
-            _fontChanger = fontChanger;
-            _presetManager = presetManager;
-            _saveConfig = saveConfig;
+            _saveModConfig = saveModConfig;
 
             harmony.Patch(
                 original: AccessTools.Constructor(typeof(GameMenu), new Type[] { typeof(bool) }),
@@ -67,10 +60,8 @@ namespace FontSettings.Framework.Patchers
                 tryDefaultIfNoDownNeighborExists = true,
                 fullyImmutable = true
             });
-            __instance.pages.Add(new FontSettingsPage(_config, _fontManager, _fontChanger, _presetManager, _saveConfig,
-                __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height + 64)
-                .FixConflictWithStarrySkyInterface(_helper.ModRegistry)
-            );
+            __instance.pages.Add(
+                new FontSettingsObsoletePage(_config, _saveModConfig, __instance.xPositionOnScreen, __instance.yPositionOnScreen, __instance.width, __instance.height));
         }
 
         private static void GameMenu_getTabNumberFromName_Postfix(string name, ref int __result)
@@ -80,7 +71,7 @@ namespace FontSettings.Framework.Patchers
         }
 
         private static bool GameMenu_draw_Prefix(GameMenu __instance, SpriteBatch b)
-        {            
+        {
             // 如果禁用了游戏菜单内设置字体，直接返回，执行原函数。
             if (!_config.FontSettingsInGameMenu)
                 return true;
@@ -156,11 +147,10 @@ namespace FontSettings.Framework.Patchers
                             0.0001f);
 
                         // 内容
-                        const int index = 3;
                         b.Draw(
-                            _fontTab.Value,
+                            Textures.Icons,
                             new Vector2(tab.bounds.X, tab.bounds.Y + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)),
-                            new Rectangle(index * 16, 0, 16, 16),
+                            new Rectangle(0, 0, 16, 16),
                             Color.White,
                             0f,
                             Vector2.Zero,

@@ -6,13 +6,20 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
+using StardewValleyUI;
 using StardewValleyUI.Controls;
 
 namespace FontSettings.Framework.Menus
 {
     internal class FontExampleLabel : Label
     {
-        public new ISpriteFont Font { get; set; }
+        private readonly static UIPropertyInfo SpriteFontProperty
+            = new UIPropertyInfo(nameof(Font), typeof(ISpriteFont), typeof(FontExampleLabel), null, affectsMeasure: true);
+        public new ISpriteFont Font
+        {
+            get { return this.GetValue<ISpriteFont>(SpriteFontProperty); }
+            set { this.SetValue(SpriteFontProperty, value); }
+        }
 
         public bool ShowText { get; set; } = true;
 
@@ -20,29 +27,7 @@ namespace FontSettings.Framework.Menus
 
         public Color BoundsColor { get; set; } = Color.Transparent;
 
-        public override int Width
-        {
-            get
-            {
-                if (this.Font == null)
-                    return 0;
-                string text = this.Text ?? string.Empty;
-                return (int)this.Font.MeasureString(text).X;
-            }
-        }
-
-        public override int Height
-        {
-            get
-            {
-                if (this.Font == null)
-                    return 0;
-                string text = this.Text ?? string.Empty;
-                return (int)this.Font.MeasureString(text).Y;
-            }
-        }
-
-        public override void Draw(SpriteBatch b)
+        protected override void DrawOverride(SpriteBatch b)
         {
             if (this.Font != null)
             {
@@ -56,6 +41,19 @@ namespace FontSettings.Framework.Menus
                 if (this.ShowText)
                     this.Font.Draw(b, text, this.Position, this.Forground);
             }
+        }
+
+        protected override Vector2 MeasureOverride(Vector2 availableSize)
+        {
+            Vector2 measureSize = Vector2.Zero;
+            var font = this.Font;
+
+            if (font == null)
+                return measureSize;
+
+            string text = this.Text ?? string.Empty;
+            measureSize = font.MeasureString(text);
+            return measureSize;
         }
     }
 }

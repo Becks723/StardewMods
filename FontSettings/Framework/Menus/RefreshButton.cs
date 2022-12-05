@@ -11,8 +11,6 @@ namespace FontSettings.Framework.Menus
 {
     internal class RefreshButton : TextureButton
     {
-        private static readonly Lazy<Texture2D> _refreshTexture = new(LoadRefreshTexture);
-
         private bool _isAnimating;
 
         private double _angle;
@@ -24,14 +22,12 @@ namespace FontSettings.Framework.Menus
         public int RotationAngle { get; set; } = 180;
 
         public RefreshButton(float scale)
-            : base(_refreshTexture.Value, null, scale)
+            : base(Textures.Icons, new Rectangle(16, 0, 16, 16), scale)
         {
         }
 
-        public override void Update(GameTime gameTime)
+        protected override void UpdateOverride(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             if (this._isAnimating)
             {
                 this._angle += this.GetAngleDeltaPerUpdate();
@@ -43,7 +39,7 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        public override void Draw(SpriteBatch b)
+        protected override void DrawOverride(SpriteBatch b)
         {
             if (this.Texture != null)
             {
@@ -75,11 +71,6 @@ namespace FontSettings.Framework.Menus
         {
             double unit = Math.PI / 180;
             return (float)(unit * angle);
-        }
-
-        private static Texture2D LoadRefreshTexture()
-        {
-            return Textures.Refresh;
         }
     }
 }
