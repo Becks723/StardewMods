@@ -91,7 +91,7 @@ namespace FontSettings.Framework.Menus
                     titleLabel.Font = FontType.SpriteText;
                     titleLabel.HorizontalAlignment = HorizontalAlignment.Center;
                     titleLabel.VerticalAlignment = VerticalAlignment.Center;
-                    titleLabel.Text = "字体设置";  // TODO
+                    titleLabel.Text = I18n.Ui_MainMenu_Title();
                     titleBorder.Child = titleLabel;
                 }
 
@@ -198,27 +198,15 @@ namespace FontSettings.Framework.Menus
                                     Game1.mouseCursors, new Rectangle(240, 192, 16, 16), 3f);
                                 helpButton.VerticalAlignment = VerticalAlignment.Center;
                                 helpButton.Margin = new Thickness(0, 0, 0, 0);
+                                helpButton.ToolTip = this.GetFontTypeHelpText();
                                 fontTypeGrid.Children.Add(helpButton);
                                 fontTypeGrid.SetColumn(helpButton, 3);
-                                {
-                                    var border = new TextureBoxBorder();
-                                    border.AutoPadding = true;
-                                    border.DrawShadow = true;
-                                    border.MaxWidth = 800;
-                                    helpButton.ToolTip = border;
-                                    {
-                                        Label label = new Label();
-                                        label.Text = this.GetFontTypeHelpText();
-                                        label.Wrapping = TextWrapping.Enable;
-                                        border.Child = label;
-                                    }
-                                }
                             }
 
                             // general
                             var generalSection = new Label();
                             generalSection.Font = FontType.SpriteText;
-                            generalSection.Text = "常规";  // TODO
+                            generalSection.Text = I18n.Ui_MainMenu_Section_General();
                             generalSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
                             stack.Children.Add(generalSection);
 
@@ -235,7 +223,7 @@ namespace FontSettings.Framework.Menus
 
                                 var label = new Label();
                                 label.Font = FontType.SmallFont;
-                                label.Text = I18n.OptionsPage_Enable();
+                                label.Text = I18n.Ui_MainMenu_Enable();
                                 label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                 enableOption.Children.Add(checkbox);
@@ -269,7 +257,7 @@ namespace FontSettings.Framework.Menus
 
                                 var label = new Label();
                                 label.Font = FontType.SmallFont;
-                                label.Text = I18n.OptionsPage_FontSize();
+                                label.Text = I18n.Ui_MainMenu_FontSize();
                                 label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                 fontSizeOption.Children.Add(slider);
@@ -293,7 +281,7 @@ namespace FontSettings.Framework.Menus
 
                                 var label = new Label();
                                 label.Font = FontType.SmallFont;
-                                label.Text = I18n.OptionsPage_Spacing();
+                                label.Text = I18n.Ui_MainMenu_Spacing();
                                 label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                 spacingOption.Children.Add(slider);
@@ -317,7 +305,7 @@ namespace FontSettings.Framework.Menus
 
                                 var label = new Label();
                                 label.Font = FontType.SmallFont;
-                                label.Text = I18n.OptionsPage_LineSpacing();
+                                label.Text = I18n.Ui_MainMenu_LineSpacing();
                                 label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                 lineSpacingOption.Children.Add(slider);
@@ -341,7 +329,7 @@ namespace FontSettings.Framework.Menus
 
                                 var label = new Label();
                                 label.Font = FontType.SmallFont;
-                                label.Text = "X偏移量";  // TODO
+                                label.Text = I18n.Ui_MainMenu_XOffset();
                                 label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                 xOffsetOption.Children.Add(slider);
@@ -365,7 +353,7 @@ namespace FontSettings.Framework.Menus
 
                                 var label = new Label();
                                 label.Font = FontType.SmallFont;
-                                label.Text = "Y偏移量";  // TODO
+                                label.Text = I18n.Ui_MainMenu_YOffset();
                                 label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                 yOffsetOption.Children.Add(slider);
@@ -382,7 +370,7 @@ namespace FontSettings.Framework.Menus
                             // preset
                             var presetSection = new Label();
                             presetSection.Font = FontType.SpriteText;
-                            presetSection.Text = "预设";  // TODO
+                            presetSection.Text = I18n.Ui_MainMenu_Section_Preset();
                             presetSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
                             stack.Children.Add(presetSection);
 
@@ -400,7 +388,7 @@ namespace FontSettings.Framework.Menus
                                 prevPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
                                 prevPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                 prevPresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                prevPresetButton.ToolTip = I18n.Ui_Tooltip_PrevPreset();
+                                prevPresetButton.ToolTip = I18n.Ui_MainMenu_PrevPreset();
                                 prevPresetButton.ClickSound = "smallSelect";
                                 context.OneWayBinds(() => this._viewModel.MoveToPrevPreset, () => prevPresetButton.Command);
                                 presetGrid.Children.Add(prevPresetButton);
@@ -420,31 +408,18 @@ namespace FontSettings.Framework.Menus
                                 nextPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
                                 nextPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                 nextPresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                nextPresetButton.ToolTip = I18n.Ui_Tooltip_NextPreset();
+                                nextPresetButton.ToolTip = I18n.Ui_MainMenu_NextPreset();
                                 nextPresetButton.ClickSound = "smallSelect";
                                 context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => nextPresetButton.Command);
                                 presetGrid.Children.Add(nextPresetButton);
                                 presetGrid.SetColumn(nextPresetButton, 2);
-
-                                //var newPresetButton = new TextureButton(
-                                //    Game1.mouseCursors, new Rectangle(0, 428, 10, 10), 4f);
-                                //newPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                //newPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                //newPresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                //newPresetButton.ToolTip = I18n.Ui_Tooltip_NewPreset();
-                                //newPresetButton.ClickSound = "coin";
-                                //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
-                                //context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
-                                //context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
-                                //presetGrid.Children.Add(newPresetButton);
-                                //presetGrid.SetColumn(newPresetButton, 3);
 
                                 var savePresetButton = new TextureButton(
                                     this._icons, new Rectangle(64, 0, 16, 16), 4f);
                                 savePresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
                                 savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                 savePresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                savePresetButton.ToolTip = I18n.Ui_Tooltip_SavePreset();
+                                savePresetButton.ToolTip = I18n.Ui_MainMenu_SavePreset();
                                 savePresetButton.ClickSound = "newRecipe";
                                 context.OneWayBinds(() => this._viewModel.CanSaveCurrentPreset, () => savePresetButton.GreyedOut, new TrueFalseConverter());
                                 context.OneWayBinds(() => this._viewModel.SaveCurrentPreset, () => savePresetButton.Command);
@@ -456,7 +431,7 @@ namespace FontSettings.Framework.Menus
                                 deletePresetButton.Margin = new Thickness(0, 0, 0, 0);
                                 deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                 deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                deletePresetButton.ToolTip = I18n.Ui_Tooltip_DelPreset();
+                                deletePresetButton.ToolTip = I18n.Ui_MainMenu_DelPreset();
                                 deletePresetButton.ClickSound = "trashcan";
                                 context.OneWayBinds(() => this._viewModel.CanDeleteCurrentPreset, () => deletePresetButton.GreyedOut, new TrueFalseConverter());
                                 context.OneWayBinds(() => this._viewModel.DeleteCurrentPreset, () => deletePresetButton.Command);
@@ -477,7 +452,7 @@ namespace FontSettings.Framework.Menus
                                 Label label = new Label();
                                 label.HorizontalAlignment = HorizontalAlignment.Center;
                                 label.VerticalAlignment = VerticalAlignment.Center;
-                                label.Text = I18n.Ui_Tooltip_NewPreset();
+                                label.Text = I18n.Ui_MainMenu_NewPreset();
                                 newPresetButton.Content = label;
                             }
                         }
@@ -515,7 +490,6 @@ namespace FontSettings.Framework.Menus
                                 onTexture: this._icons, onSourceRectangle: new(32, 0, 16, 16), onScale: 4f,
                                 offTexture: this._icons, offSourceRectangle: new(48, 0, 16, 16), offScale: 4f);
                             mergeButton.ClickSound = "coin";
-                            mergeButton.ToolTip = I18n.OptionsPage_MergeExamples();
                             context.TwoWayBinds(() => this._viewModel.ExamplesMerged, () => mergeButton.IsToggled);
                             optionsStack.Children.Add(mergeButton);
 
@@ -598,27 +572,6 @@ namespace FontSettings.Framework.Menus
                 return this._newPresetMenu.readyToClose();
         }
 
-        private string DisplayFontOnComboBox(FontModel? font)
-        {
-            if (font == null)
-                return string.Empty;
-
-            if (font.FullPath == null)
-                return I18n.OptionsPage_Font_KeepOrig();
-            else
-                return $"{font.FamilyName} ({font.SubfamilyName})";
-        }
-
-        private string DisplayFontOnComboBox(object[] source, object item)
-        {
-            FontModel font = item as FontModel;
-
-            if (font.FullPath == null)
-                return I18n.OptionsPage_Font_KeepOrig();
-            else
-                return $"{font.FamilyName} ({font.SubfamilyName})";
-        }
-
         private NewPresetMenu CreateNewPresetMenu()
         {
             void OnMenuOpened(NewPresetMenu menu)
@@ -643,18 +596,17 @@ namespace FontSettings.Framework.Menus
             return result;
         }
 
-        private string GetFontTypeHelpText()  // TODO: i18n
+        private string GetFontTypeHelpText()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("星露谷物语的字体大致分为三类：小字体、中字体、对话字体。你可以全部设置，也可以只设置其中的几个。点击左右箭头切换当前设置的字体类型。");
+            sb.Append(I18n.Ui_MainMenu_FontTypeHelp_Paragraph());
 
             var lang = FontHelpers.GetCurrentLanguage();
             if (FontHelpers.IsLatinLanguage(lang))
             {
+                sb.AppendLine();
                 sb.AppendLine()
-                    .AppendLine()
-                    .AppendLine("Latin Language:")
-                    .Append($"For those languages only contains latin characters (current {lang.Locale}), they just use game's default font as Dialogue Font. But the default font is hardcoded in a spritesheet, so you cannot set Dialogue Font.");
+                    .Append(I18n.Ui_MainMenu_FontTypeHelp_LatinLang_Paragraph(lang.Locale));
             }
 
             return sb.ToString();
@@ -685,6 +637,8 @@ namespace FontSettings.Framework.Menus
 
                 Label l = new Label();
                 l.Text = this.GetText(font);
+                l.Font = FontType.SmallFont;
+                l.Margin = new Thickness(4, 0, 0, 0);
                 l.HorizontalAlignment = HorizontalAlignment.Left;
                 l.VerticalAlignment = VerticalAlignment.Center;
                 return l;
@@ -696,7 +650,7 @@ namespace FontSettings.Framework.Menus
                     return string.Empty;
 
                 if (font.FullPath == null)
-                    return I18n.OptionsPage_Font_KeepOrig();
+                    return I18n.Ui_MainMenu_Font_KeepOrig();
                 else
                     return $"{font.FamilyName} ({font.SubfamilyName})";
             }

@@ -105,7 +105,7 @@ namespace FontSettings.Framework.Menus
                         stack.Children.Add(titleLabel);
 
                         var nameLabel = new Label();
-                        nameLabel.Text = "名称";
+                        nameLabel.Text = I18n.Ui_NewPresetMenu_Name();
                         nameLabel.Font = FontType.DialogueFont;
                         nameLabel.HorizontalAlignment = HorizontalAlignment.Left;
                         nameLabel.Margin = new Thickness(0, 0, 0, borderWidth / 6);

@@ -49,7 +49,7 @@ namespace FontSettings.Framework.Menus
                     {
                         Label boxLabel = new Label();
                         boxLabel.Font = FontType.DialogueFont;
-                        boxLabel.Text = "No longer show this tab";  // TODO: i18n
+                        boxLabel.Text = I18n.Ui_ObsoletePage_HideThisTab();
                         checkBox.Content = boxLabel;
                     }
                 }
@@ -58,11 +58,9 @@ namespace FontSettings.Framework.Menus
             context.SetRootElement(border);
         }
 
-        private string GetText(string hotkey)  // TODO: i18n
+        private string GetText(string hotkey)
         {
-            return $"Font Settings menu is no longer being embedded into game menu."
-                + $"\nTry to press '{hotkey}' instead to open a standalone one."
-                + $"\n(This tab will retire in future releases.)";
+            return I18n.Ui_ObsoletePage_Paragraph(hotkey);
         }
 
         private class StringFormatter : BindingConverter<string, string>

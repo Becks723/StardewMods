@@ -66,10 +66,9 @@ namespace FontSettings.Framework.Menus
                     border.Child = grid;
                     {
                         var titleLabel = new Label();
-                        titleLabel.Text = "合并后"; // TODO
                         titleLabel.Font = FontType.SpriteText;
                         titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
-                        titleLabel.VerticalAlignment = VerticalAlignment.Top;  // TODO: 没有指定Left、Top时，仍然处于左上角。优化布局。
+                        titleLabel.VerticalAlignment = VerticalAlignment.Top;
                         grid.Children.Add(titleLabel);
 
                         this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -110,7 +109,7 @@ namespace FontSettings.Framework.Menus
                         vanillaBorder.Child = grid;
                         {
                             var titleLabel = new Label();
-                            titleLabel.Text = I18n.OptionsPage_OriginalExample();
+                            titleLabel.Text = I18n.Ui_MainMenu_VanillaExample();
                             titleLabel.Font = FontType.SpriteText;
                             titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
                             titleLabel.VerticalAlignment = VerticalAlignment.Top;
@@ -135,7 +134,7 @@ namespace FontSettings.Framework.Menus
                         currentBorder.Child = grid;
                         {
                             var titleLabel = new Label();
-                            titleLabel.Text = I18n.OptionsPage_CustomExample();
+                            titleLabel.Text = I18n.Ui_MainMenu_CurrentExample();
                             titleLabel.Font = FontType.SpriteText;
                             titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
                             titleLabel.VerticalAlignment = VerticalAlignment.Top;
