@@ -23,12 +23,6 @@ namespace FontSettings.Framework
                     get: () => this.Config.OpenFontSettingsMenu,
                     set: val => this.Config.OpenFontSettingsMenu = val
                 )
-                .AddCheckbox(
-                    name: I18n.Config_FontSettingsInGameMenu,
-                    tooltip: I18n.Config_FontSettingsInGameMenu_Description,
-                    get: () => this.Config.FontSettingsInGameMenu,
-                    set: val => this.Config.FontSettingsInGameMenu = val
-                )
 
                 // diable font shadow
                 .AddCheckbox(
