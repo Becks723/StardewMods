@@ -334,12 +334,7 @@ namespace FontSettings
 
         private void OpenFontSettingsMenu()
         {
-            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, this._fontChanger, this._presetManager, config =>
-            {
-                this.SaveConfig(config);
-                this.SaveFontSettings(config.Fonts);
-            },
-            this.Helper.ModRegistry);
+            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, this._fontChanger, this._presetManager, this.SaveFontSettings, this.Helper.ModRegistry);
         }
     }
 }

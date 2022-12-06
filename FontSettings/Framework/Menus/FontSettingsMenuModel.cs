@@ -31,7 +31,7 @@ namespace FontSettings.Framework.Menus
         private readonly FontManager _fontManager;
         private readonly GameFontChanger _fontChanger;
         private readonly FontPresetManager _presetManager;
-        private readonly Action<ModConfig> _saveConfig;
+        private readonly Action<FontConfigs> _saveFontSettings;
         private readonly ExampleFonts _exampleFonts;
 
         #region CurrentFontType Property
@@ -464,14 +464,14 @@ namespace FontSettings.Framework.Menus
 
         public ICommand RefreshFonts { get; }
 
-        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig)
+        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings)
         {
             _instance = this;
             this._config = config;
             this._fontManager = fontManager;
             this._fontChanger = fontChanger;
             this._presetManager = presetManager;
-            this._saveConfig = saveConfig;
+            this._saveFontSettings = saveFontSettings;
             this._exampleFonts = new ExampleFonts(fontManager);
 
             // 初始化子ViewModel。
@@ -604,7 +604,8 @@ namespace FontSettings.Framework.Menus
 
         public async Task<(GameFontType fontType, bool success)> TryGenerateFont()
         {
-            FontConfig config = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
+            FontConfigs fontSettings = this._config.Fonts;
+            FontConfig config = fontSettings.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
                 FontHelpers.GetCurrentLocale(), this.CurrentFontType);
 
             FontConfig tempConfig = new FontConfig();
@@ -635,7 +636,7 @@ namespace FontSettings.Framework.Menus
                 if (success)
                 {
                     tempConfig.CopyTo(config);
-                    this._saveConfig(this._config);
+                    this._saveFontSettings(fontSettings);
                 }
                 return (fontType, success);
             });

@@ -29,7 +29,7 @@ namespace FontSettings.Framework.Menus
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
-        public FontSettingsPage(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<ModConfig> saveConfig, IModRegistry registry)
+        public FontSettingsPage(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, IModRegistry registry)
         {
             this._presetManager = presetManager;
             this._registry = registry;
@@ -37,7 +37,7 @@ namespace FontSettings.Framework.Menus
 
             this.ResetComponents();
 
-            this._viewModel = new FontSettingsMenuModel(config, fontManager, fontChanger, presetManager, saveConfig);
+            this._viewModel = new FontSettingsMenuModel(config, fontManager, fontChanger, presetManager, saveFontSettings);
             this.DataContext = this._viewModel;
         }
 
