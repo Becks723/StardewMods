@@ -621,22 +621,24 @@ namespace FontSettings.Framework.Menus
             tempConfig.CharOffsetY = this.CharOffsetY;
 
             var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保异步前后是同一个字体。
-            _isGeneratingFont[fontType] = true;
-            this.RaisePropertyChanged(nameof(this.IsGeneratingFont));
-            this.RaisePropertyChanged(nameof(this.CanGenerateFont));
+            this.UpdateIsGeneratingFont(fontType, true);
 
             return await this._fontChanger.ReplaceOriginalOrRemainAsync(tempConfig).ContinueWith(task =>
             {
-                _isGeneratingFont[fontType] = false;
-                _instance.RaisePropertyChanged(nameof(this.IsGeneratingFont));
-                _instance.RaisePropertyChanged(nameof(this.CanGenerateFont));
+                // 外面的this 和 ContinueWith中的this 不一定是同一个实例。
+                // 如：用户关闭了菜单，那么this为null；用户关闭又打开了菜单，那么this为另一个实例。
+                // 在这里需要保证不为null，因此使用静态的_instance字段代替this。
+                var instance = _instance;
+
+                instance.UpdateIsGeneratingFont(fontType, false);
 
                 bool success = task.Result;
+
                 // 如果成功，更新配置值。
                 if (success)
                 {
                     tempConfig.CopyTo(config);
-                    this._saveFontSettings(fontSettings);
+                    instance._saveFontSettings(fontSettings);
                 }
                 return (fontType, success);
             });
@@ -834,6 +836,14 @@ namespace FontSettings.Framework.Menus
             };
 
             return this._presetViewModels[key];
+        }
+
+        private void UpdateIsGeneratingFont(GameFontType fontType, bool isGeneratingFont)
+        {
+            _isGeneratingFont[fontType] = isGeneratingFont;
+
+            this.RaisePropertyChanged(nameof(this.IsGeneratingFont));
+            this.RaisePropertyChanged(nameof(this.CanGenerateFont));
         }
 
         private void RegisterCallbackToStageValues()
