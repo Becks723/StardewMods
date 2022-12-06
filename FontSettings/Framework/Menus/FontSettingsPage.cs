@@ -534,6 +534,7 @@ namespace FontSettings.Framework.Menus
 
         public override void draw(SpriteBatch b)
         {
+            b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
             base.draw(b);
 
 #if DEBUG
