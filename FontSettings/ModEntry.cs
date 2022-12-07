@@ -22,9 +22,6 @@ namespace FontSettings
     {
         private readonly string _globalFontDataKey = "font-data";
 
-        /// <summary>记录不同语言下字体信息是否已经缓存了。</summary>
-        private readonly Dictionary<LanguageInfo, bool> _cacheTable = new();
-
         private readonly MigrateTo_0_2_0 _0_2_0_Migration = new();
 
         private ModConfig _config;
@@ -61,15 +58,6 @@ namespace FontSettings
             this._fontChanger = new(this._fontManager);
             this._presetManager = new(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"), "System");
 
-            foreach (LocalizedContentManager.LanguageCode code in Enum.GetValues<LocalizedContentManager.LanguageCode>())
-            {
-                if (code is LocalizedContentManager.LanguageCode.mod)
-                    continue;
-
-                LanguageInfo langInfo = new LanguageInfo(code, FontHelpers.GetLocale(code));
-                this._cacheTable[langInfo] = false;
-            }
-
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
                 new Game1Patcher(this._config, this._fontManager, this._fontChanger)
@@ -90,7 +78,7 @@ namespace FontSettings
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
 
-            this.RecordFontData(LocalizedContentManager.LanguageCode.en, null);
+            this.RecordFontData(LocalizedContentManager.LanguageCode.en, string.Empty);
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -175,51 +163,53 @@ namespace FontSettings
 
         private void RecordFontData(LocalizedContentManager.LanguageCode languageCode, string locale)
         {
-            if (languageCode is LocalizedContentManager.LanguageCode.en && string.IsNullOrEmpty(locale))
-                locale = "en";
+            string DisplayLanguage()
+            {
+                if (languageCode is LocalizedContentManager.LanguageCode.en && locale == string.Empty)
+                    return "en";
+                return locale;
+            }
+
             LanguageInfo langInfo = new LanguageInfo(languageCode, locale);
+            string langStr = DisplayLanguage();
 
-            // 记录mod语言。
-            bool isCached = false;
-            if (languageCode is LocalizedContentManager.LanguageCode.mod &&
-                !this._cacheTable.TryGetValue(langInfo, out isCached))
+            if (this.HasCached(langInfo))
             {
-                this._cacheTable[langInfo] = false;
+                this.Monitor.Log($"无需记录{langStr}语言下的游戏字体数据！");
             }
-
-            if (isCached)
+            else
             {
-                this.Monitor.Log($"无需记录{locale}语言下的游戏字体数据！");
-                return;
+                this.Monitor.Log($"正在记录{langStr}语言下的游戏字体数据……");
+
+                this.Helper.Events.Content.AssetRequested -= this.OnAssetRequested;
+
+                SpriteFont smallFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SmallFont");
+                SpriteFont dialogueFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SpriteFont1");
+                GameBitmapSpriteFont spriteText = this.LoadGameBmFont(this.Helper, languageCode);
+
+                this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;  // 这条必须在InvalidateCache之前，我也不知道为什么。TODO
+
+                // 记录内置字体。
+                this._fontManager.RecordBuiltInSpriteFont(GameFontType.SmallFont, smallFont);
+                this._fontManager.RecordBuiltInSpriteFont(GameFontType.DialogueFont, dialogueFont);
+                this._fontManager.RecordBuiltInBmFont(spriteText);
+
+                // 记录字符范围，加载字体要用。
+                CharRangeSource.RecordBuiltInCharRange(smallFont);
+
+                string LocalizedAssetName(string assetName)
+                {
+                    string result = assetName;
+                    if (locale != string.Empty)
+                        result += $".{locale}";
+                    return result;
+                }
+                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
+                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
+
+                this.Monitor.Log($"已完成记录{langStr}语言下的游戏字体数据！");
+                this.SetHasCached(langInfo);
             }
-
-            this.Monitor.Log($"正在记录{locale}语言下的游戏字体数据……", LogLevel.Debug);
-
-            this.Helper.Events.Content.AssetRequested -= this.OnAssetRequested;
-
-            SpriteFont smallFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SmallFont");
-            SpriteFont dialogueFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SpriteFont1");
-            GameBitmapSpriteFont spriteText = this.LoadGameBmFont(this.Helper, languageCode);
-
-            this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;  // 这条必须在InvalidateCache之前，我也不知道为什么。TODO
-
-            // 记录内置字体。
-            this._fontManager.RecordBuiltInSpriteFont(GameFontType.SmallFont, smallFont);
-            this._fontManager.RecordBuiltInSpriteFont(GameFontType.DialogueFont, dialogueFont);
-            this._fontManager.RecordBuiltInBmFont(spriteText);
-
-            // 记录字符范围，加载字体要用。
-            CharRangeSource.RecordBuiltInCharRange(smallFont);
-
-            //if (locale != "en")  // 如果是英文原版，InvalidateCache后会自动重新加载，导致this.OnAssetRequested误触发，所以不需要InvalidateCache。 TODO: 为啥有时候不是英文也会触发this.OnAssetRequested？
-            //{
-            string LocalizedAssetName(string assetName) => locale != "en" ? $"{assetName}.{locale}" : assetName;
-            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
-            this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
-            //}
-
-            this.Monitor.Log($"已完成记录{locale}语言下的游戏字体数据！", LogLevel.Debug);
-            this._cacheTable[langInfo] = true;
         }
 
         private GameBitmapSpriteFont LoadGameBmFont(IModHelper helper, LocalizedContentManager.LanguageCode languageCode)
@@ -256,6 +246,23 @@ namespace FontSettings
             }
 
             return null;
+        }
+
+        /// <summary>记录不同语言下字体信息是否已经缓存了。</summary>
+        private readonly IDictionary<LanguageInfo, bool> _cacheTable = new Dictionary<LanguageInfo, bool>();
+        private bool HasCached(LanguageInfo lang)
+        {
+            // 如果不存在此键，创建并返回false。
+            if (this._cacheTable.TryGetValue(lang, out bool cached))
+                return cached;
+
+            this._cacheTable.Add(lang, false);
+            return false;
+        }
+        private void SetHasCached(LanguageInfo lang)
+        {
+            if (this._cacheTable.ContainsKey(lang))
+                this._cacheTable[lang] = true;
         }
 
         private FontConfigs ReadFontSettings()
