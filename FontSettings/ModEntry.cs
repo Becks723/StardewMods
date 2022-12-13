@@ -32,6 +32,8 @@ namespace FontSettings
 
         private FontPresetManager _presetManager;
 
+        private LocalizedContentManager _vanillaContentManager;
+
         internal static IModHelper ModHelper { get; private set; }
 
         internal static Harmony Harmony { get; private set; }
@@ -57,6 +59,7 @@ namespace FontSettings
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
             this._presetManager = new(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"), "System");
+            this._vanillaContentManager = new LocalizedContentManager(GameRunner.instance.Content.ServiceProvider, GameRunner.instance.Content.RootDirectory);
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
@@ -181,13 +184,9 @@ namespace FontSettings
             {
                 this.Monitor.Log($"正在记录{langStr}语言下的游戏字体数据……");
 
-                this.Helper.Events.Content.AssetRequested -= this.OnAssetRequested;
-
-                SpriteFont smallFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SmallFont");
-                SpriteFont dialogueFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SpriteFont1");
-                GameBitmapSpriteFont spriteText = this.LoadGameBmFont(this.Helper, languageCode);
-
-                this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;  // 这条必须在InvalidateCache之前，我也不知道为什么。TODO
+                SpriteFont smallFont = this._vanillaContentManager.Load<SpriteFont>("Fonts/SmallFont");
+                SpriteFont dialogueFont = this._vanillaContentManager.Load<SpriteFont>("Fonts/SpriteFont1");
+                GameBitmapSpriteFont spriteText = this.LoadGameBmFont(languageCode);
 
                 // 记录内置字体。
                 this._fontManager.RecordBuiltInSpriteFont(GameFontType.SmallFont, smallFont);
@@ -197,22 +196,12 @@ namespace FontSettings
                 // 记录字符范围，加载字体要用。
                 CharRangeSource.RecordBuiltInCharRange(smallFont);
 
-                string LocalizedAssetName(string assetName)
-                {
-                    string result = assetName;
-                    if (locale != string.Empty)
-                        result += $".{locale}";
-                    return result;
-                }
-                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SmallFont"));
-                this.Helper.GameContent.InvalidateCache(LocalizedAssetName("Fonts/SpriteFont1"));
-
                 this.Monitor.Log($"已完成记录{langStr}语言下的游戏字体数据！");
                 this.SetHasCached(langInfo);
             }
         }
 
-        private GameBitmapSpriteFont LoadGameBmFont(IModHelper helper, LocalizedContentManager.LanguageCode languageCode)
+        private GameBitmapSpriteFont LoadGameBmFont(LocalizedContentManager.LanguageCode languageCode)
         {
             string fntPath = languageCode switch
             {
@@ -227,14 +216,14 @@ namespace FontSettings
 
             if (fntPath != null)
             {
-                FontFile fontFile = FontLoader.Parse(helper.GameContent.Load<XmlSource>(fntPath).Source);
-                helper.GameContent.InvalidateCache(fntPath);
+                var contentManager = this._vanillaContentManager;
+
+                FontFile fontFile = FontLoader.Parse(contentManager.Load<XmlSource>(fntPath).Source);
                 List<Texture2D> pages = new List<Texture2D>(fontFile.Pages.Count);
                 foreach (FontPage fontPage in fontFile.Pages)
                 {
                     string assetName = $"Fonts/{fontPage.File}";
-                    pages.Add(helper.GameContent.Load<Texture2D>(assetName));
-                    helper.GameContent.InvalidateCache(assetName);
+                    pages.Add(contentManager.Load<Texture2D>(assetName));
                 }
 
                 return new GameBitmapSpriteFont()
