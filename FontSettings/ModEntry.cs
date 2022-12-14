@@ -30,6 +30,8 @@ namespace FontSettings
 
         private GameFontChanger _fontChanger;
 
+        private GameFontChangerImpl _fontChangerImpl;
+
         private FontPresetManager _presetManager;
 
         private LocalizedContentManager _vanillaContentManager;
@@ -58,6 +60,7 @@ namespace FontSettings
             this.CheckConfigValid(this._config);
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
+            this._fontChangerImpl = new GameFontChangerImpl(helper, this._config);
             this._presetManager = new(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"), "System");
             this._vanillaContentManager = new LocalizedContentManager(GameRunner.instance.Content.ServiceProvider, GameRunner.instance.Content.RootDirectory);
 
@@ -66,8 +69,8 @@ namespace FontSettings
                 new Game1Patcher(this._config, this._fontManager, this._fontChanger)
                     .Patch(Harmony, this.Monitor);
 
-                new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
-                    .Patch(Harmony, this.Monitor);
+                //new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
+                //    .Patch(Harmony, this.Monitor);
 
                 new GameMenuPatcher()
                     .AddFontSettingsPage(helper, Harmony, this._config, this.SaveConfig);
@@ -81,7 +84,7 @@ namespace FontSettings
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
 
-            this.RecordFontData(LocalizedContentManager.LanguageCode.en, string.Empty);
+            this.OnLocaleChanged(LocalizedContentManager.LanguageCode.en, string.Empty);
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -106,55 +109,21 @@ namespace FontSettings
 
         private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
         {
-            // 记录字体数据。
-            this.RecordFontData(e.NewLanguage, e.NewLocale);
+            this.OnLocaleChanged(e.NewLanguage, e.NewLocale);
         }
 
-        private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
+        private void OnLocaleChanged(LocalizedContentManager.LanguageCode newLangugage, string newLocale)
         {
-            void ReplaceSpriteFont(GameFontType fontType)
-            {
-                FontConfig config = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                    FontHelpers.GetCurrentLocale(), fontType);
+            // 记录字体数据。
+            this.RecordFontData(newLangugage, newLocale);
 
-                if (!config.Enabled)
-                    return;
-                else if (config.FontFilePath is null)
-                    e.Edit(asset =>
+            foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
                     {
-                        SpriteFontGenerator.EditExisting(
-                            existingFont: asset.GetData<SpriteFont>(),
-                            overridePixelHeight: config.FontSize,
-                            overrideCharRange: config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.GetLanguage()),
-                            overrideSpacing: config.Spacing,
-                            overrideLineSpacing: config.LineSpacing,
-                            extraCharOffsetX: config.CharOffsetX,
-                            extraCharOffsetY: config.CharOffsetY
-                        );
-                    });
-                else
-                    e.LoadFrom(() =>
+                if (this._config.Fonts.TryGetFontConfig(LocalizedContentManager.CurrentLanguageCode,
+                    FontHelpers.GetCurrentLocale(), fontType, out FontConfig config))
                     {
-                        return SpriteFontGenerator.FromTtf(
-                            ttfPath: InstalledFonts.GetFullPath(config.FontFilePath),
-                            fontIndex: config.FontIndex,
-                            fontPixelHeight: config.FontSize,
-                            characterRanges: config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.GetLanguage()),
-                            spacing: config.Spacing,
-                            lineSpacing: config.LineSpacing,
-                            charOffsetX: config.CharOffsetX,
-                            charOffsetY: config.CharOffsetY
-                        );
-                    }, AssetLoadPriority.High);
+                    this._fontChangerImpl.ChangeGameFont(config);
             }
-
-            if (e.NameWithoutLocale.IsEquivalentTo("Fonts/SmallFont"))
-            {
-                ReplaceSpriteFont(GameFontType.SmallFont);
-            }
-            else if (e.NameWithoutLocale.IsEquivalentTo("Fonts/SpriteFont1"))
-            {
-                ReplaceSpriteFont(GameFontType.DialogueFont);
             }
         }
 
@@ -330,7 +299,7 @@ namespace FontSettings
 
         private void OpenFontSettingsMenu()
         {
-            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, this._fontChanger, this._presetManager, this.SaveFontSettings, this.Helper.ModRegistry);
+            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, this._fontChangerImpl, this._presetManager, this.SaveFontSettings, this.Helper.ModRegistry);
         }
     }
 }

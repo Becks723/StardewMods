@@ -10,16 +10,11 @@ namespace FontSettings.Framework
     {
         public FontConfig GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
         {
-            if (code is StardewValley.LocalizedContentManager.LanguageCode.en && string.IsNullOrEmpty(locale))
-                locale = "en";
+            FontConfig? got = this.GetFontConfig(code, locale, inGameType);
 
-            FontConfig result = (from font in this
-                                 where font.Lang == code && font.Locale == locale && font.InGameType == inGameType
-                                 select font)
-                                 .FirstOrDefault();
-            if (result == null)
+            if (got == null)
             {
-                result = new FontConfig
+                got = new FontConfig
                 {
                     Enabled = false,
                     Lang = code,
@@ -29,10 +24,37 @@ namespace FontSettings.Framework
                     Spacing = 0,
                     LineSpacing = 24
                 };
-                this.Add(result);
+                this.Add(got);
             }
 
-            return result;
+            return got;
+        }
+
+        public FontConfig? GetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
+        {
+            if (code is StardewValley.LocalizedContentManager.LanguageCode.en && string.IsNullOrEmpty(locale))
+                locale = "en";
+
+            return (from font in this
+                    where font.Lang == code && font.Locale == locale && font.InGameType == inGameType
+                    select font)
+                    .FirstOrDefault();
+        }
+
+        public bool TryGetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, out FontConfig? fontConfig)
+        {
+            FontConfig? got = this.GetFontConfig(code, locale, inGameType);
+
+            if (got != null)
+            {
+                fontConfig = got;
+                return true;
+            }
+            else
+            {
+                fontConfig = null;
+                return false;
+            }
         }
     }
 }

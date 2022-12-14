@@ -171,7 +171,7 @@ namespace FontSettings.Framework
                         FontFile = fontFile,
                         Pages = new List<Texture2D>(pages),
                         LanguageCode = StardewValley.LocalizedContentManager.CurrentLanguageCode,
-                        FontPixelZoom = 1f
+                        //FontPixelZoom = 1f
                     };
                     return bmFont;
                 }

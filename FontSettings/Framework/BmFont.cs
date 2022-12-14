@@ -40,7 +40,7 @@ namespace BmFontCS
                 Size[] pageSizes = ArrangeGlyphs(glyphs, settings);
                 Page[] pgs = this.RenderGlyphsToPages(glyphs, pageSizes, settings);
 
-                fontFile = this.GetFontInfo(fontFilePath, settings, pgs.Length, glyphs, settings.Spacing.Horizontal);
+                fontFile = this.GetFontInfo(fontFilePath, settings, pgs, glyphs, settings.Spacing.Horizontal);
                 pages = pgs.Select(pg =>
                 {
                     Texture2D texture = new Texture2D(Game1.graphics.GraphicsDevice, pg.Width, pg.Height);
@@ -92,7 +92,7 @@ namespace BmFontCS
 
         }
 
-        private FontFile GetFontInfo(string fontFilePath, BmFontSettings settings, int pages, Glyph[] glyphs, int spacing)
+        private FontFile GetFontInfo(string fontFilePath, BmFontSettings settings, Page[] pages, Glyph[] glyphs, int spacing)
         {
             return new FontFile
             {
@@ -117,14 +117,18 @@ namespace BmFontCS
                     Base = (int)Math.Round(this._ascender),
                     ScaleW = settings.TextureSize.Width,
                     ScaleH = settings.TextureSize.Height,
-                    Pages = pages,
+                    Pages = pages.Length,
                     Packed = 0,         // TODO
                     AlphaChannel = 0,   // TODO
                     RedChannel = 4,     // TODO
                     GreenChannel = 4,   // TODO
                     BlueChannel = 4,    // TODO
                 },
-                Pages = new List<FontPage>(pages),
+                Pages = new List<FontPage>(pages.Select(page => new FontPage
+                {
+                    ID = page.Id,
+                    File = page.Name
+                })),
                 Chars = new List<FontChar>(glyphs.Select(glyph => new FontChar
                 {
                     ID = glyph.Id,
@@ -167,8 +171,9 @@ namespace BmFontCS
                 {
                     Width = pages[i].Width,
                     Height = pages[i].Height,
+                    Buffer = buffer,
                     Id = i,
-                    Buffer = buffer
+                    Name = $"{settings.Name}_{i}"
                 });
             }
 
@@ -336,6 +341,7 @@ namespace BmFontCS
             public int Height;
             public byte[] Buffer;
             public int Id;
+            public string Name;
         }
     }
 
@@ -352,6 +358,8 @@ namespace BmFontCS
         public DataFormat DataFormat { get; set; } = DataFormat.Xml;
         public Padding Padding { get; set; } = new Padding(0, 0, 0, 0);
         public Spacing Spacing { get; set; } = new Spacing(1, 1);
+        /// <summary>Name of the font file (.fnt), if exported. Also base name of pages.</summary>
+        public string Name { get; set; } = Guid.NewGuid().ToString().Substring(0, 8);
     }
 
     public struct UnicodeRange

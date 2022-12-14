@@ -29,7 +29,7 @@ namespace FontSettings.Framework.Menus
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
-        public FontSettingsPage(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, IModRegistry registry)
+        public FontSettingsPage(ModConfig config, FontManager fontManager, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, IModRegistry registry)
         {
             this._presetManager = presetManager;
             this._registry = registry;

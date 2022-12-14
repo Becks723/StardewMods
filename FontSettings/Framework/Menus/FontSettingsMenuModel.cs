@@ -29,7 +29,7 @@ namespace FontSettings.Framework.Menus
         private readonly Dictionary<FontPresetFontType, FontPresetViewModel> _presetViewModels = new();
         private readonly ModConfig _config;
         private readonly FontManager _fontManager;
-        private readonly GameFontChanger _fontChanger;
+        private readonly IAsyncGameFontChanger _fontChanger;
         private readonly FontPresetManager _presetManager;
         private readonly Action<FontConfigs> _saveFontSettings;
         private readonly ExampleFonts _exampleFonts;
@@ -464,7 +464,7 @@ namespace FontSettings.Framework.Menus
 
         public ICommand RefreshFonts { get; }
 
-        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, GameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings)
+        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings)
         {
             _instance = this;
             this._config = config;
@@ -623,7 +623,7 @@ namespace FontSettings.Framework.Menus
             var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保异步前后是同一个字体。
             this.UpdateIsGeneratingFont(fontType, true);
 
-            return await this._fontChanger.ReplaceOriginalOrRemainAsync(tempConfig).ContinueWith(task =>
+            return await this._fontChanger.ChangeGameFontAsync(tempConfig).ContinueWith(task =>
             {
                 // 外面的this 和 ContinueWith中的this 不一定是同一个实例。
                 // 如：用户关闭了菜单，那么this为null；用户关闭又打开了菜单，那么this为另一个实例。
