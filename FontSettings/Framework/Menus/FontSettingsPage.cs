@@ -465,11 +465,10 @@ namespace FontSettings.Framework.Menus
                     mainGrid.Children.Add(previewGrid);
                     mainGrid.SetColumn(previewGrid, 0);
                     {
-                        var realPreviewGrid = new FontPreviewGrid(this.DefaultBorderless(whenStarrySkyInterface: TextureBoxes.Default));
-                        realPreviewGrid.Orientation = Orientation.Vertical;
-                        context.OneWayBinds(() => this._viewModel.ExamplesMerged, () => realPreviewGrid.IsMerged);
-                        var vanillaTextLabel = realPreviewGrid.VanillaFontExample;
-                        var currentTextLabel = realPreviewGrid.CurrentFontExample;
+                        var previewControl = new FontPreviewControl(this.DefaultBorderless(whenStarrySkyInterface: TextureBoxes.Default));
+                        context.OneWayBinds(() => this._viewModel.ExamplesMerged, () => previewControl.IsComparing);
+                        var vanillaTextLabel = previewControl.VanillaFontExample;
+                        var currentTextLabel = previewControl.CurrentFontExample;
                         context.OneWayBinds(() => this._viewModel.ShowExampleBounds, () => vanillaTextLabel.ShowBounds);
                         context.OneWayBinds(() => this._viewModel.ShowExampleBounds, () => currentTextLabel.ShowBounds);
                         context.OneWayBinds(() => this._viewModel.ShowExampleText, () => vanillaTextLabel.ShowText);
@@ -478,8 +477,8 @@ namespace FontSettings.Framework.Menus
                         context.OneWayBinds(() => this._viewModel.ExampleText, () => currentTextLabel.Text);
                         context.OneWayBinds(() => this._viewModel.ExampleVanillaFont, () => vanillaTextLabel.Font);
                         context.OneWayBinds(() => this._viewModel.ExampleCurrentFont, () => currentTextLabel.Font);
-                        previewGrid.Children.Add(realPreviewGrid);
-                        previewGrid.SetRow(realPreviewGrid, 0);
+                        previewGrid.Children.Add(previewControl);
+                        previewGrid.SetRow(previewControl, 0);
 
                         var optionsStack = new StackContainer();
                         optionsStack.Orientation = Orientation.Horizontal;
@@ -487,8 +486,8 @@ namespace FontSettings.Framework.Menus
                         previewGrid.SetRow(optionsStack, 1);
                         {
                             var mergeButton = new ToggleTextureButton(
-                                onTexture: this._icons, onSourceRectangle: new(32, 0, 16, 16), onScale: 4f,
-                                offTexture: this._icons, offSourceRectangle: new(48, 0, 16, 16), offScale: 4f);
+                                onTexture: this._icons, onSourceRectangle: new(48, 0, 16, 16), onScale: 4f,
+                                offTexture: this._icons, offSourceRectangle: new(32, 0, 16, 16), offScale: 4f);
                             mergeButton.ClickSound = "coin";
                             context.TwoWayBinds(() => this._viewModel.ExamplesMerged, () => mergeButton.IsToggled);
                             optionsStack.Children.Add(mergeButton);
