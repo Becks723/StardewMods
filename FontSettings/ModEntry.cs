@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using BmFont;
 using FontSettings.Framework;
+using FontSettings.Framework.FontGenerators;
 using FontSettings.Framework.FontInfomation;
 using FontSettings.Framework.Menus;
 using FontSettings.Framework.Migrations;
@@ -307,7 +308,11 @@ namespace FontSettings
 
         private void OpenFontSettingsMenu()
         {
-            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, this._fontChangerImpl, this._presetManager, this.SaveFontSettings, this.Helper.ModRegistry);
+            var gen = new SampleFontGenerator(this._fontManager);
+            IFontGenerator sampleFontGenerator = gen;
+            IAsyncFontGenerator sampleAsyncFontGenerator = gen;
+
+            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, sampleFontGenerator, sampleAsyncFontGenerator, this._fontChangerImpl, this._presetManager, this.SaveFontSettings, this.Helper.ModRegistry);
         }
     }
 }

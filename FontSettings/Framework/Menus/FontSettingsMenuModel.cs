@@ -29,10 +29,11 @@ namespace FontSettings.Framework.Menus
         private readonly Dictionary<FontPresetFontType, FontPresetViewModel> _presetViewModels = new();
         private readonly ModConfig _config;
         private readonly FontManager _fontManager;
+        private readonly IFontGenerator _sampleFontGenerator;
+        private readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
         private readonly IAsyncGameFontChanger _fontChanger;
         private readonly FontPresetManager _presetManager;
         private readonly Action<FontConfigs> _saveFontSettings;
-        private readonly ExampleFonts _exampleFonts;
 
         #region CurrentFontType Property
 
@@ -500,15 +501,16 @@ namespace FontSettings.Framework.Menus
 
         public ICommand RefreshFonts { get; }
 
-        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings)
+        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings)
         {
             _instance = this;
             this._config = config;
             this._fontManager = fontManager;
+            this._sampleFontGenerator = sampleFontGenerator;
+            this._sampleAsyncFontGenerator = sampleAsyncFontGenerator;
             this._fontChanger = fontChanger;
             this._presetManager = presetManager;
             this._saveFontSettings = saveFontSettings;
-            this._exampleFonts = new ExampleFonts(fontManager);
 
             // 初始化子ViewModel。
             var presetFontTypes = new[] { FontPresetFontType.Small, FontPresetFontType.Medium, FontPresetFontType.Dialogue };
@@ -694,16 +696,20 @@ namespace FontSettings.Framework.Menus
 
         public void UpdateExampleCurrent()
         {
-            this.ExampleCurrentFont = this._exampleFonts.ResetThenGet(this.CurrentFontType,
-                this.FontEnabled,
-                this.FontFilePath,
-                this.FontIndex,
-                this.FontSize,
-                (int)this.Spacing,
-                this.LineSpacing,
-                new Microsoft.Xna.Framework.Vector2(this.CharOffsetX, this.CharOffsetY),
-                this.PixelZoom,
-                this.ExampleText);
+            var param = new SampleFontGeneratorParameter(
+                Enabled: this.FontEnabled,
+                FontFilePath: InstalledFonts.GetFullPath(this.FontFilePath),
+                FontSize: this.FontSize,
+                Spacing: this.Spacing,
+                LineSpacing: this.LineSpacing,
+                SampleText: this.ExampleText,
+                FontType: this.CurrentFontType,
+                Language: FontHelpers.GetCurrentLanguage(),
+                PixelZoom: this.PixelZoom,
+                FontIndex: this.FontIndex,
+                CharOffsetX: this.CharOffsetX,
+                CharOffsetY: this.CharOffsetY);
+            this.ExampleCurrentFont = this._sampleFontGenerator.GenerateFont(param);
         }
 
         private void OnFontTypeChanged(GameFontType newFontType)
