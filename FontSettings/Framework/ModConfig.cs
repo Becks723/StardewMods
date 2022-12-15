@@ -29,6 +29,10 @@ namespace FontSettings.Framework
 
         public int MaxCharOffsetY { get; set; } = 10;
 
+        public float MinPixelZoom { get; set; } = 0.1f;
+
+        public float MaxPixelZoom { get; set; } = 5f;
+
         public bool DisableTextShadow { get; set; } = false;
 
         public KeybindList OpenFontSettingsMenu { get; set; } = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");

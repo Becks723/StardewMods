@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,6 +40,43 @@ namespace FontSettings.Framework.Menus
 
             this._viewModel = new FontSettingsMenuModel(config, fontManager, fontChanger, presetManager, saveFontSettings);
             this.DataContext = this._viewModel;
+            this._viewModel.PropertyChanged += this.OnPropertyChanged;
+        }
+
+        private void OnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FontSettingsMenuModel.CurrentFontType))
+            {
+                this.TogglePixelZoomOption(this._viewModel.CurrentFontType == GameFontType.SpriteText);
+            }
+        }
+
+        private Container _container;
+        private Element _pixelZoomOption;
+        private int _index;
+        private void TogglePixelZoomOption(bool on)
+        {
+            var container = this._container;
+            var option = this._pixelZoomOption;
+            if (container == null) throw new InvalidOperationException();
+            if (option == null) throw new InvalidOperationException();
+
+            if (on)
+            {
+                if (!container.Children.Contains(option))
+                    container.Children.Insert(this._index, option);
+            }
+            else
+            {
+                container.Children.Remove(option);
+            }
+        }
+
+        protected override void OnDataContextChanged(ValueChangedEventArgs e)
+        {
+            base.OnDataContextChanged(e);
+
+            this.TogglePixelZoomOption(this._viewModel.CurrentFontType == GameFontType.SpriteText);
         }
 
         private void UpdateExampleCurrent(object sender, EventArgs e)
@@ -101,361 +139,404 @@ namespace FontSettings.Framework.Menus
                 rootGrid.Children.Add(mainGrid);
                 rootGrid.SetRow(mainGrid, 1);
                 {
-                    var scrollViewer = new ScrollViewer();
-                    scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-                    scrollViewer.Appearance = Appearance.ForControl<ScrollViewer>(ctx =>
+                    Grid settingsGrid = new Grid();
+                    settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
+                    settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    mainGrid.Children.Add(settingsGrid);
+                    mainGrid.SetColumn(settingsGrid, 1);
                     {
-                        var context = ctx;
-                        var scrollViewer = context.Target;
-
-                        Grid grid = new Grid();
-                        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
-                        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
-                        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                        var scrollViewer = new ScrollViewer();
+                        scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                        scrollViewer.Appearance = Appearance.ForControl<ScrollViewer>(ctx =>
                         {
-                            // added.
-                            var backgroundBorder = new TextureBoxBorder();
-                            backgroundBorder.Box = TextureBoxes.ThickBorder;
-                            backgroundBorder.DrawShadow = false;
-                            grid.Children.Add(backgroundBorder);
-                            grid.SetColumn(backgroundBorder, 0);
-                            grid.SetRow(backgroundBorder, 0);
+                            var context = ctx;
+                            var scrollViewer = context.Target;
+
+                            Grid grid = new Grid();
+                            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
+                            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
+                            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                             {
-                                var contentPresenter = new ScrollContentPresenter();
-                                context.DefinePart("PART_CONTENT", contentPresenter);
-                                context.DefinePart("PART_ContentPresenter", contentPresenter);
-                                backgroundBorder.Child = contentPresenter;
+                                // added.
+                                var backgroundBorder = new TextureBoxBorder();
+                                backgroundBorder.Box = TextureBoxes.ThickBorder;
+                                backgroundBorder.DrawShadow = false;
+                                grid.Children.Add(backgroundBorder);
+                                grid.SetColumn(backgroundBorder, 0);
+                                grid.SetRow(backgroundBorder, 0);
+                                {
+                                    var contentPresenter = new ScrollContentPresenter();
+                                    context.DefinePart("PART_CONTENT", contentPresenter);
+                                    context.DefinePart("PART_ContentPresenter", contentPresenter);
+                                    backgroundBorder.Child = contentPresenter;
+                                }
+
+                                ScrollBar vertiScrollBar = new ScrollBar();
+                                vertiScrollBar.Orientation = Orientation.Vertical;
+                                context.OneWayBinds(() => scrollViewer.ActualVerticalScrollBarVisibility, () => vertiScrollBar.Visibility);
+                                context.OneWayBinds(() => scrollViewer.VerticalOffset, () => vertiScrollBar.Value);
+                                context.OneWayBinds(() => scrollViewer.ScrollableHeight, () => vertiScrollBar.Maximum);
+                                context.OneWayBinds(() => scrollViewer.ViewportHeight, () => vertiScrollBar.Viewport);
+                                context.DefinePart("PART_VSCROLLBAR", vertiScrollBar);
+                                grid.Children.Add(vertiScrollBar);
+                                grid.SetColumn(vertiScrollBar, 1);
+                                grid.SetRow(vertiScrollBar, 0);
+
+                                ScrollBar horizScrollBar = new ScrollBar();
+                                horizScrollBar.Orientation = Orientation.Horizontal;
+                                context.OneWayBinds(() => scrollViewer.ActualHorizontalScrollBarVisibility, () => horizScrollBar.Visibility);
+                                context.OneWayBinds(() => scrollViewer.HorizontalOffset, () => horizScrollBar.Value);
+                                context.OneWayBinds(() => scrollViewer.ScrollableWidth, () => horizScrollBar.Maximum);
+                                context.OneWayBinds(() => scrollViewer.ViewportWidth, () => horizScrollBar.Viewport);
+                                context.DefinePart("PART_HSCROLLBAR", horizScrollBar);
+                                grid.Children.Add(horizScrollBar);
+                                grid.SetColumn(horizScrollBar, 0);
+                                grid.SetRow(horizScrollBar, 1);
                             }
-
-                            ScrollBar vertiScrollBar = new ScrollBar();
-                            vertiScrollBar.Orientation = Orientation.Vertical;
-                            context.OneWayBinds(() => scrollViewer.ActualVerticalScrollBarVisibility, () => vertiScrollBar.Visibility);
-                            context.OneWayBinds(() => scrollViewer.VerticalOffset, () => vertiScrollBar.Value);
-                            context.OneWayBinds(() => scrollViewer.ScrollableHeight, () => vertiScrollBar.Maximum);
-                            context.OneWayBinds(() => scrollViewer.ViewportHeight, () => vertiScrollBar.Viewport);
-                            context.DefinePart("PART_VSCROLLBAR", vertiScrollBar);
-                            grid.Children.Add(vertiScrollBar);
-                            grid.SetColumn(vertiScrollBar, 1);
-                            grid.SetRow(vertiScrollBar, 0);
-
-                            ScrollBar horizScrollBar = new ScrollBar();
-                            horizScrollBar.Orientation = Orientation.Horizontal;
-                            context.OneWayBinds(() => scrollViewer.ActualHorizontalScrollBarVisibility, () => horizScrollBar.Visibility);
-                            context.OneWayBinds(() => scrollViewer.HorizontalOffset, () => horizScrollBar.Value);
-                            context.OneWayBinds(() => scrollViewer.ScrollableWidth, () => horizScrollBar.Maximum);
-                            context.OneWayBinds(() => scrollViewer.ViewportWidth, () => horizScrollBar.Viewport);
-                            context.DefinePart("PART_HSCROLLBAR", horizScrollBar);
-                            grid.Children.Add(horizScrollBar);
-                            grid.SetColumn(horizScrollBar, 0);
-                            grid.SetRow(horizScrollBar, 1);
-                        }
-                        return grid;
-                    });
-                    mainGrid.Children.Add(scrollViewer);
-                    mainGrid.SetColumn(scrollViewer, 1);
-                    {
-                        var stack = new StackContainer();
-                        stack.Orientation = Orientation.Vertical;
-                        stack.Margin = new Thickness(borderWidth / 2);
-                        scrollViewer.Content = stack;
+                            return grid;
+                        });
+                        settingsGrid.Children.Add(scrollViewer);
+                        settingsGrid.SetRow(scrollViewer, 0);
                         {
-                            Grid fontTypeGrid = new Grid();
-                            fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
-                            fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            stack.Children.Add(fontTypeGrid);
+                            var stack = new StackContainer();
+                            stack.Orientation = Orientation.Vertical;
+                            stack.Margin = new Thickness(borderWidth / 2);
+                            scrollViewer.Content = stack;
                             {
-                                var prevFontButton = new TextureButton(
-                                    Game1.mouseCursors, new(352, 495, 12, 11), 4f);
-                                context.OneWayBinds(() => this._viewModel.MoveToPrevFont, () => prevFontButton.Command);
-                                prevFontButton.VerticalAlignment = VerticalAlignment.Center;
-                                prevFontButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                prevFontButton.ClickSound = "smallSelect";
-                                fontTypeGrid.Children.Add(prevFontButton);
-                                fontTypeGrid.SetColumn(prevFontButton, 0);
+                                Grid fontTypeGrid = new Grid();
+                                fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
+                                fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                fontTypeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                stack.Children.Add(fontTypeGrid);
+                                {
+                                    var prevFontButton = new TextureButton(
+                                        Game1.mouseCursors, new(352, 495, 12, 11), 4f);
+                                    context.OneWayBinds(() => this._viewModel.MoveToPrevFont, () => prevFontButton.Command);
+                                    prevFontButton.VerticalAlignment = VerticalAlignment.Center;
+                                    prevFontButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                    prevFontButton.ClickSound = "smallSelect";
+                                    fontTypeGrid.Children.Add(prevFontButton);
+                                    fontTypeGrid.SetColumn(prevFontButton, 0);
 
-                                var fontTypeLabel = new Label();
-                                fontTypeLabel.Font = FontType.SpriteText;
-                                fontTypeLabel.HorizontalAlignment = HorizontalAlignment.Center;
-                                fontTypeLabel.VerticalAlignment = VerticalAlignment.Center;
-                                fontTypeLabel.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                context.OneWayBinds(() => this._viewModel.Title, () => fontTypeLabel.Text);
-                                fontTypeGrid.Children.Add(fontTypeLabel);
-                                fontTypeGrid.SetColumn(fontTypeLabel, 1);
+                                    var fontTypeLabel = new Label();
+                                    fontTypeLabel.Font = FontType.SpriteText;
+                                    fontTypeLabel.HorizontalAlignment = HorizontalAlignment.Center;
+                                    fontTypeLabel.VerticalAlignment = VerticalAlignment.Center;
+                                    fontTypeLabel.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                    context.OneWayBinds(() => this._viewModel.Title, () => fontTypeLabel.Text);
+                                    fontTypeGrid.Children.Add(fontTypeLabel);
+                                    fontTypeGrid.SetColumn(fontTypeLabel, 1);
 
-                                var nextFontButton = new TextureButton(
-                                    Game1.mouseCursors, new(365, 495, 12, 11), 4f);
-                                context.OneWayBinds(() => this._viewModel.MoveToNextFont, () => nextFontButton.Command);
-                                nextFontButton.VerticalAlignment = VerticalAlignment.Center;
-                                nextFontButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                nextFontButton.ClickSound = "smallSelect";
-                                fontTypeGrid.Children.Add(nextFontButton);
-                                fontTypeGrid.SetColumn(nextFontButton, 2);
+                                    var nextFontButton = new TextureButton(
+                                        Game1.mouseCursors, new(365, 495, 12, 11), 4f);
+                                    context.OneWayBinds(() => this._viewModel.MoveToNextFont, () => nextFontButton.Command);
+                                    nextFontButton.VerticalAlignment = VerticalAlignment.Center;
+                                    nextFontButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                    nextFontButton.ClickSound = "smallSelect";
+                                    fontTypeGrid.Children.Add(nextFontButton);
+                                    fontTypeGrid.SetColumn(nextFontButton, 2);
 
-                                var helpButton = new TextureButton(
-                                    Game1.mouseCursors, new Rectangle(240, 192, 16, 16), 3f);
-                                helpButton.VerticalAlignment = VerticalAlignment.Center;
-                                helpButton.Margin = new Thickness(0, 0, 0, 0);
-                                helpButton.ToolTip = this.GetFontTypeHelpText();
-                                fontTypeGrid.Children.Add(helpButton);
-                                fontTypeGrid.SetColumn(helpButton, 3);
-                            }
+                                    var helpButton = new TextureButton(
+                                        Game1.mouseCursors, new Rectangle(240, 192, 16, 16), 3f);
+                                    helpButton.VerticalAlignment = VerticalAlignment.Center;
+                                    helpButton.Margin = new Thickness(0, 0, 0, 0);
+                                    helpButton.ToolTip = this.GetFontTypeHelpText();
+                                    fontTypeGrid.Children.Add(helpButton);
+                                    fontTypeGrid.SetColumn(helpButton, 3);
+                                }
 
-                            // general
-                            var generalSection = new Label();
-                            generalSection.Font = FontType.SpriteText;
-                            generalSection.Text = I18n.Ui_MainMenu_Section_General();
-                            generalSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
-                            stack.Children.Add(generalSection);
+                                // general
+                                var generalSection = new Label();
+                                generalSection.Font = FontType.SpriteText;
+                                generalSection.Text = I18n.Ui_MainMenu_Section_General();
+                                generalSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
+                                stack.Children.Add(generalSection);
 
-                            var enableOption = new StackContainer();
-                            enableOption.Orientation = Orientation.Horizontal;
-                            enableOption.HorizontalAlignment = HorizontalAlignment.Left;
-                            enableOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            stack.Children.Add(enableOption);
-                            {
-                                var checkbox = new CheckBox();
-                                checkbox.Checked += this.UpdateExampleCurrent;
-                                checkbox.Unchecked += this.UpdateExampleCurrent;
-                                context.TwoWayBinds(() => this._viewModel.FontEnabled, () => checkbox.IsChecked);
+                                var enableOption = new StackContainer();
+                                enableOption.Orientation = Orientation.Horizontal;
+                                enableOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                enableOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                stack.Children.Add(enableOption);
+                                {
+                                    var checkbox = new CheckBox();
+                                    checkbox.Checked += this.UpdateExampleCurrent;
+                                    checkbox.Unchecked += this.UpdateExampleCurrent;
+                                    context.TwoWayBinds(() => this._viewModel.FontEnabled, () => checkbox.IsChecked);
 
-                                var label = new Label();
-                                label.Font = FontType.SmallFont;
-                                label.Text = I18n.Ui_MainMenu_Enable();
-                                label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_Enable();
+                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
-                                enableOption.Children.Add(checkbox);
-                                enableOption.Children.Add(label);
-                            }
+                                    enableOption.Children.Add(checkbox);
+                                    enableOption.Children.Add(label);
+                                }
 
-                            var fontComboBox = new ComboBox();
-                            fontComboBox.SuggestedWidth = 400;
-                            fontComboBox.HorizontalAlignment = HorizontalAlignment.Left;
-                            fontComboBox.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
-                            context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
-                            context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
-                            fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
-                            stack.Children.Add(fontComboBox);
+                                var fontComboBox = new ComboBox();
+                                fontComboBox.SuggestedWidth = 400;
+                                fontComboBox.HorizontalAlignment = HorizontalAlignment.Left;
+                                fontComboBox.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
+                                context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
+                                context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
+                                fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
+                                stack.Children.Add(fontComboBox);
 
-                            var fontSizeOption = new StackContainer();
-                            fontSizeOption.Orientation = Orientation.Horizontal;
-                            fontSizeOption.HorizontalAlignment = HorizontalAlignment.Left;
-                            fontSizeOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            stack.Children.Add(fontSizeOption);
-                            {
-                                var slider = new Slider();
-                                slider.Interval = 1;
-                                slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SuggestedWidth = 300;
-                                slider.ValueChanged += this.UpdateExampleCurrent;
-                                context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
-                                context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
-                                context.OneWayBinds(() => this._viewModel.MaxFontSize, () => slider.Maximum);
+                                var fontSizeOption = new StackContainer();
+                                fontSizeOption.Orientation = Orientation.Horizontal;
+                                fontSizeOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                fontSizeOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                stack.Children.Add(fontSizeOption);
+                                {
+                                    var slider = new Slider();
+                                    slider.Interval = 1;
+                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                    slider.SuggestedWidth = 300;
+                                    slider.ValueChanged += this.UpdateExampleCurrent;
+                                    context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
+                                    context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
+                                    context.OneWayBinds(() => this._viewModel.MaxFontSize, () => slider.Maximum);
 
-                                var label = new Label();
-                                label.Font = FontType.SmallFont;
-                                label.Text = I18n.Ui_MainMenu_FontSize();
-                                label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_FontSize();
+                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
-                                fontSizeOption.Children.Add(slider);
-                                fontSizeOption.Children.Add(label);
-                            }
+                                    fontSizeOption.Children.Add(slider);
+                                    fontSizeOption.Children.Add(label);
+                                }
 
-                            var spacingOption = new StackContainer();
-                            spacingOption.Orientation = Orientation.Horizontal;
-                            spacingOption.HorizontalAlignment = HorizontalAlignment.Left;
-                            spacingOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            stack.Children.Add(spacingOption);
-                            {
-                                var slider = new Slider();
-                                slider.Interval = 1;
-                                slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SuggestedWidth = 300;
-                                slider.ValueChanged += this.UpdateExampleCurrent;
-                                context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
-                                context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
-                                context.OneWayBinds(() => this._viewModel.MaxSpacing, () => slider.Maximum);
+                                // advanced
+                                var advancedSection = new Label();
+                                advancedSection.Font = FontType.SpriteText;
+                                advancedSection.Text = /*I18n.Ui_MainMenu_Section_General()*/"高级";  // TODO:i18n
+                                advancedSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
+                                stack.Children.Add(advancedSection);
 
-                                var label = new Label();
-                                label.Font = FontType.SmallFont;
-                                label.Text = I18n.Ui_MainMenu_Spacing();
-                                label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                var spacingOption = new StackContainer();
+                                spacingOption.Orientation = Orientation.Horizontal;
+                                spacingOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                spacingOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                stack.Children.Add(spacingOption);
+                                {
+                                    var slider = new Slider();
+                                    slider.Interval = 1;
+                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                    slider.SuggestedWidth = 300;
+                                    slider.ValueChanged += this.UpdateExampleCurrent;
+                                    context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
+                                    context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
+                                    context.OneWayBinds(() => this._viewModel.MaxSpacing, () => slider.Maximum);
 
-                                spacingOption.Children.Add(slider);
-                                spacingOption.Children.Add(label);
-                            }
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_Spacing();
+                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
-                            var lineSpacingOption = new StackContainer();
-                            lineSpacingOption.Orientation = Orientation.Horizontal;
-                            lineSpacingOption.HorizontalAlignment = HorizontalAlignment.Left;
-                            lineSpacingOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            stack.Children.Add(lineSpacingOption);
-                            {
-                                var slider = new Slider();
-                                slider.Interval = 1;
-                                slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SuggestedWidth = 300;
-                                slider.ValueChanged += this.UpdateExampleCurrent;
-                                context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
-                                context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
-                                context.OneWayBinds(() => this._viewModel.MaxLineSpacing, () => slider.Maximum);
+                                    spacingOption.Children.Add(slider);
+                                    spacingOption.Children.Add(label);
+                                }
 
-                                var label = new Label();
-                                label.Font = FontType.SmallFont;
-                                label.Text = I18n.Ui_MainMenu_LineSpacing();
-                                label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                var lineSpacingOption = new StackContainer();
+                                lineSpacingOption.Orientation = Orientation.Horizontal;
+                                lineSpacingOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                lineSpacingOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                stack.Children.Add(lineSpacingOption);
+                                {
+                                    var slider = new Slider();
+                                    slider.Interval = 1;
+                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                    slider.SuggestedWidth = 300;
+                                    slider.ValueChanged += this.UpdateExampleCurrent;
+                                    context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
+                                    context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
+                                    context.OneWayBinds(() => this._viewModel.MaxLineSpacing, () => slider.Maximum);
 
-                                lineSpacingOption.Children.Add(slider);
-                                lineSpacingOption.Children.Add(label);
-                            }
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_LineSpacing();
+                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
-                            var xOffsetOption = new StackContainer();
-                            xOffsetOption.Orientation = Orientation.Horizontal;
-                            xOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
-                            xOffsetOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            stack.Children.Add(xOffsetOption);
-                            {
-                                var slider = new Slider();
-                                slider.Interval = 0.5f;
-                                slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SuggestedWidth = 300;
-                                slider.ValueChanged += this.UpdateExampleCurrent;
-                                context.TwoWayBinds(() => this._viewModel.CharOffsetX, () => slider.Value);
-                                context.OneWayBinds(() => this._viewModel.MinCharOffsetX, () => slider.Minimum);
-                                context.OneWayBinds(() => this._viewModel.MaxCharOffsetX, () => slider.Maximum);
+                                    lineSpacingOption.Children.Add(slider);
+                                    lineSpacingOption.Children.Add(label);
+                                }
 
-                                var label = new Label();
-                                label.Font = FontType.SmallFont;
-                                label.Text = I18n.Ui_MainMenu_XOffset();
-                                label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                var xOffsetOption = new StackContainer();
+                                xOffsetOption.Orientation = Orientation.Horizontal;
+                                xOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                xOffsetOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                stack.Children.Add(xOffsetOption);
+                                {
+                                    var slider = new Slider();
+                                    slider.Interval = 0.5f;
+                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                    slider.SuggestedWidth = 300;
+                                    slider.ValueChanged += this.UpdateExampleCurrent;
+                                    context.TwoWayBinds(() => this._viewModel.CharOffsetX, () => slider.Value);
+                                    context.OneWayBinds(() => this._viewModel.MinCharOffsetX, () => slider.Minimum);
+                                    context.OneWayBinds(() => this._viewModel.MaxCharOffsetX, () => slider.Maximum);
 
-                                xOffsetOption.Children.Add(slider);
-                                xOffsetOption.Children.Add(label);
-                            }
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_XOffset();
+                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
-                            var yOffsetOption = new StackContainer();
-                            yOffsetOption.Orientation = Orientation.Horizontal;
-                            yOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
-                            yOffsetOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            stack.Children.Add(yOffsetOption);
-                            {
-                                var slider = new Slider();
-                                slider.Interval = 0.5f;
-                                slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                slider.SuggestedWidth = 300;
-                                slider.ValueChanged += this.UpdateExampleCurrent;
-                                context.TwoWayBinds(() => this._viewModel.CharOffsetY, () => slider.Value);
-                                context.OneWayBinds(() => this._viewModel.MinCharOffsetY, () => slider.Minimum);
-                                context.OneWayBinds(() => this._viewModel.MaxCharOffsetY, () => slider.Maximum);
+                                    xOffsetOption.Children.Add(slider);
+                                    xOffsetOption.Children.Add(label);
+                                }
 
-                                var label = new Label();
-                                label.Font = FontType.SmallFont;
-                                label.Text = I18n.Ui_MainMenu_YOffset();
-                                label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                var yOffsetOption = new StackContainer();
+                                yOffsetOption.Orientation = Orientation.Horizontal;
+                                yOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                yOffsetOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                stack.Children.Add(yOffsetOption);
+                                {
+                                    var slider = new Slider();
+                                    slider.Interval = 0.5f;
+                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                    slider.SuggestedWidth = 300;
+                                    slider.ValueChanged += this.UpdateExampleCurrent;
+                                    context.TwoWayBinds(() => this._viewModel.CharOffsetY, () => slider.Value);
+                                    context.OneWayBinds(() => this._viewModel.MinCharOffsetY, () => slider.Minimum);
+                                    context.OneWayBinds(() => this._viewModel.MaxCharOffsetY, () => slider.Maximum);
 
-                                yOffsetOption.Children.Add(slider);
-                                yOffsetOption.Children.Add(label);
-                            }
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_YOffset();
+                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
-                            var okButton = new TextureButton(
-                                Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
-                            okButton.HorizontalAlignment = HorizontalAlignment.Right;
-                            context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
-                            okButton.Click += this.OkButtonClicked;
-                            stack.Children.Add(okButton);
+                                    yOffsetOption.Children.Add(slider);
+                                    yOffsetOption.Children.Add(label);
+                                }
 
-                            // preset
-                            var presetSection = new Label();
-                            presetSection.Font = FontType.SpriteText;
-                            presetSection.Text = I18n.Ui_MainMenu_Section_Preset();
-                            presetSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
-                            stack.Children.Add(presetSection);
+                                var pixelZoomOption = new StackContainer();
+                                pixelZoomOption.Orientation = Orientation.Horizontal;
+                                pixelZoomOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                pixelZoomOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                {
+                                    var slider = new Slider();
+                                    slider.Interval = 0.1f;
+                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                    slider.SuggestedWidth = 300;
+                                    slider.ValueChanged += this.UpdateExampleCurrent;
+                                    context.TwoWayBinds(() => this._viewModel.PixelZoom, () => slider.Value);
+                                    context.OneWayBinds(() => this._viewModel.MinPixelZoom, () => slider.Minimum);
+                                    context.OneWayBinds(() => this._viewModel.MaxPixelZoom, () => slider.Maximum);
 
-                            Grid presetGrid = new Grid();
-                            presetGrid.Margin = new Thickness(0, 0, 0, borderWidth / 2);
-                            presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
-                            presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            stack.Children.Add(presetGrid);
-                            {
-                                var prevPresetButton = new TextureButton(
-                                    Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f);
-                                prevPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                prevPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                prevPresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                prevPresetButton.ToolTip = I18n.Ui_MainMenu_PrevPreset();
-                                prevPresetButton.ClickSound = "smallSelect";
-                                context.OneWayBinds(() => this._viewModel.MoveToPrevPreset, () => prevPresetButton.Command);
-                                presetGrid.Children.Add(prevPresetButton);
-                                presetGrid.SetColumn(prevPresetButton, 0);
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = "缩放比例";
+                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
-                                var label = new Label();
-                                label.Font = FontType.DialogueFont;
-                                label.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                label.HorizontalAlignment = HorizontalAlignment.Left;
-                                label.VerticalAlignment = VerticalAlignment.Center;
-                                context.OneWayBinds(() => this._viewModel.CurrentPresetName, () => label.Text);
-                                presetGrid.Children.Add(label);
-                                presetGrid.SetColumn(label, 1);
+                                    pixelZoomOption.Children.Add(slider);
+                                    pixelZoomOption.Children.Add(label);
+                                }
 
-                                var nextPresetButton = new TextureButton(
-                                    Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);
-                                nextPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                nextPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                nextPresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                nextPresetButton.ToolTip = I18n.Ui_MainMenu_NextPreset();
-                                nextPresetButton.ClickSound = "smallSelect";
-                                context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => nextPresetButton.Command);
-                                presetGrid.Children.Add(nextPresetButton);
-                                presetGrid.SetColumn(nextPresetButton, 2);
+                                this._container = stack;
+                                this._pixelZoomOption = pixelZoomOption;
+                                this._index = stack.Children.Count;
 
-                                var savePresetButton = new TextureButton(
-                                    this._icons, new Rectangle(64, 0, 16, 16), 4f);
-                                savePresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                savePresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                savePresetButton.ToolTip = I18n.Ui_MainMenu_SavePreset();
-                                savePresetButton.ClickSound = "newRecipe";
-                                context.OneWayBinds(() => this._viewModel.CanSaveCurrentPreset, () => savePresetButton.GreyedOut, new TrueFalseConverter());
-                                context.OneWayBinds(() => this._viewModel.SaveCurrentPreset, () => savePresetButton.Command);
-                                presetGrid.Children.Add(savePresetButton);
-                                presetGrid.SetColumn(savePresetButton, 3);
+                                // preset
+                                var presetSection = new Label();
+                                presetSection.Font = FontType.SpriteText;
+                                presetSection.Text = I18n.Ui_MainMenu_Section_Preset();
+                                presetSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
+                                stack.Children.Add(presetSection);
 
-                                var deletePresetButton = new TextureButton(
-                                    this._icons, new Rectangle(80, 0, 16, 16), 4f);
-                                deletePresetButton.Margin = new Thickness(0, 0, 0, 0);
-                                deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                deletePresetButton.ToolTip = I18n.Ui_MainMenu_DelPreset();
-                                deletePresetButton.ClickSound = "trashcan";
-                                context.OneWayBinds(() => this._viewModel.CanDeleteCurrentPreset, () => deletePresetButton.GreyedOut, new TrueFalseConverter());
-                                context.OneWayBinds(() => this._viewModel.DeleteCurrentPreset, () => deletePresetButton.Command);
-                                presetGrid.Children.Add(deletePresetButton);
-                                presetGrid.SetColumn(deletePresetButton, 4);
-                            }
+                                Grid presetGrid = new Grid();
+                                presetGrid.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
+                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                stack.Children.Add(presetGrid);
+                                {
+                                    var prevPresetButton = new TextureButton(
+                                        Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f);
+                                    prevPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                    prevPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                    prevPresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                    prevPresetButton.ToolTip = I18n.Ui_MainMenu_PrevPreset();
+                                    prevPresetButton.ClickSound = "smallSelect";
+                                    context.OneWayBinds(() => this._viewModel.MoveToPrevPreset, () => prevPresetButton.Command);
+                                    presetGrid.Children.Add(prevPresetButton);
+                                    presetGrid.SetColumn(prevPresetButton, 0);
 
-                            Button newPresetButton = new Button();
-                            newPresetButton.MinWidth = 200;
-                            newPresetButton.MinHeight = 68;
-                            newPresetButton.HorizontalAlignment = HorizontalAlignment.Left;
-                            newPresetButton.ClickSound = "coin";
-                            //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
-                            context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
-                            context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
-                            stack.Children.Add(newPresetButton);
-                            {
-                                Label label = new Label();
-                                label.HorizontalAlignment = HorizontalAlignment.Center;
-                                label.VerticalAlignment = VerticalAlignment.Center;
-                                label.Text = I18n.Ui_MainMenu_NewPreset();
-                                newPresetButton.Content = label;
+                                    var label = new Label();
+                                    label.Font = FontType.DialogueFont;
+                                    label.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                    label.HorizontalAlignment = HorizontalAlignment.Left;
+                                    label.VerticalAlignment = VerticalAlignment.Center;
+                                    context.OneWayBinds(() => this._viewModel.CurrentPresetName, () => label.Text);
+                                    presetGrid.Children.Add(label);
+                                    presetGrid.SetColumn(label, 1);
+
+                                    var nextPresetButton = new TextureButton(
+                                        Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);
+                                    nextPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                    nextPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                    nextPresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                    nextPresetButton.ToolTip = I18n.Ui_MainMenu_NextPreset();
+                                    nextPresetButton.ClickSound = "smallSelect";
+                                    context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => nextPresetButton.Command);
+                                    presetGrid.Children.Add(nextPresetButton);
+                                    presetGrid.SetColumn(nextPresetButton, 2);
+
+                                    var savePresetButton = new TextureButton(
+                                        this._icons, new Rectangle(64, 0, 16, 16), 4f);
+                                    savePresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                    savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                    savePresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                    savePresetButton.ToolTip = I18n.Ui_MainMenu_SavePreset();
+                                    savePresetButton.ClickSound = "newRecipe";
+                                    context.OneWayBinds(() => this._viewModel.CanSaveCurrentPreset, () => savePresetButton.GreyedOut, new TrueFalseConverter());
+                                    context.OneWayBinds(() => this._viewModel.SaveCurrentPreset, () => savePresetButton.Command);
+                                    presetGrid.Children.Add(savePresetButton);
+                                    presetGrid.SetColumn(savePresetButton, 3);
+
+                                    var deletePresetButton = new TextureButton(
+                                        this._icons, new Rectangle(80, 0, 16, 16), 4f);
+                                    deletePresetButton.Margin = new Thickness(0, 0, 0, 0);
+                                    deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                    deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                    deletePresetButton.ToolTip = I18n.Ui_MainMenu_DelPreset();
+                                    deletePresetButton.ClickSound = "trashcan";
+                                    context.OneWayBinds(() => this._viewModel.CanDeleteCurrentPreset, () => deletePresetButton.GreyedOut, new TrueFalseConverter());
+                                    context.OneWayBinds(() => this._viewModel.DeleteCurrentPreset, () => deletePresetButton.Command);
+                                    presetGrid.Children.Add(deletePresetButton);
+                                    presetGrid.SetColumn(deletePresetButton, 4);
+                                }
+
+                                Button newPresetButton = new Button();
+                                newPresetButton.MinWidth = 200;
+                                newPresetButton.MinHeight = 68;
+                                newPresetButton.HorizontalAlignment = HorizontalAlignment.Left;
+                                newPresetButton.ClickSound = "coin";
+                                //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
+                                context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
+                                context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
+                                stack.Children.Add(newPresetButton);
+                                {
+                                    Label label = new Label();
+                                    label.HorizontalAlignment = HorizontalAlignment.Center;
+                                    label.VerticalAlignment = VerticalAlignment.Center;
+                                    label.Text = I18n.Ui_MainMenu_NewPreset();
+                                    newPresetButton.Content = label;
+                                }
                             }
                         }
+
+                        var okButton = new TextureButton(
+                            Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
+                        okButton.HorizontalAlignment = HorizontalAlignment.Right;
+                        okButton.VerticalAlignment = VerticalAlignment.Center;
+                        context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
+                        okButton.Click += this.OkButtonClicked;
+                        settingsGrid.Children.Add(okButton);
+                        settingsGrid.SetRow(okButton, 1);
                     }
 
                     Grid previewGrid = new Grid();

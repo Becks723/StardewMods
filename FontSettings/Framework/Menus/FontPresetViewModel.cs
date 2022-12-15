@@ -51,12 +51,12 @@ namespace FontSettings.Framework.Menus
             this.RaisePresetChanged(EventArgs.Empty);
         }
 
-        public void SaveCurrentPreset(string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY)
+        public void SaveCurrentPreset(string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY, float pixelZoom)
         {
-            this._presetManager.EditPreset(this.CurrentPreset, fontFileName, fontIndex, fontSize, spacing, lineSpacing, offsetX, offsetY);
+            this._presetManager.EditPreset(this.CurrentPreset, fontFileName, fontIndex, fontSize, spacing, lineSpacing, offsetX, offsetY, pixelZoom);
         }
 
-        public void SaveCurrentAsNewPreset(string presetName, string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY)
+        public void SaveCurrentAsNewPreset(string presetName, string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY, float pixelZoom)
         {
             FontPreset newPreset = new FontPreset
             {
@@ -73,7 +73,8 @@ namespace FontSettings.Framework.Menus
                 CharOffsetY = offsetY,
                 FontType = _targetFontType,
                 Lang = StardewValley.LocalizedContentManager.CurrentLanguageCode,
-                Locale = FontHelpers.GetCurrentLocale()
+                Locale = FontHelpers.GetCurrentLocale(),
+                PixelZoom = pixelZoom
             };
             this._presetManager.AddPreset(newPreset);
         }

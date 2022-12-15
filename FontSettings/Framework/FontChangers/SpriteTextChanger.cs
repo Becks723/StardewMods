@@ -119,7 +119,7 @@ namespace FontSettings.Framework.FontChangers
                         content.InvalidateCache(this.LocalizeBaseAssetName(pageName));
                     }
 
-                    this.PropagateBmFont();
+                    this.PropagateBmFont(this._data.Font.PixelZoom);
 
                     return true;
                 }
@@ -188,7 +188,7 @@ namespace FontSettings.Framework.FontChangers
                         content.InvalidateCache(this.LocalizeBaseAssetName(pageName));
                     }
 
-                    this.PropagateBmFont();
+                    this.PropagateBmFont(this._data.Font.PixelZoom);
                 }
 
                 return success;
@@ -199,7 +199,7 @@ namespace FontSettings.Framework.FontChangers
             }
         }
 
-        void PropagateBmFont()
+        void PropagateBmFont(float pixelZoom)
         {
             // 此方法必须在 !LocalizedContentManager.CurrentLanguageLatin 下运行。
             FontFile fontFile;
@@ -212,7 +212,7 @@ namespace FontSettings.Framework.FontChangers
 
             string fontFileName = GetFontFileAssetName();
             fontFile = loadFont(fontFileName);
-            fontPixelZoom = GetFontPixelZoom();
+            fontPixelZoom = pixelZoom > 0f ? pixelZoom : GetFontPixelZoom();
             foreach (FontChar current in fontFile.Chars)
             {
                 char key = (char)current.ID;
@@ -286,7 +286,7 @@ namespace FontSettings.Framework.FontChangers
                 charOffsetX: config.CharOffsetX,
                 charOffsetY: config.CharOffsetY);
 
-            return new BmFontData(fontFile, pages);
+            return new BmFontData(fontFile, pages, config.PixelZoom);
         }
 
         private static string GetFontFileAssetName()
@@ -335,7 +335,7 @@ namespace FontSettings.Framework.FontChangers
             }
         }
 
-        private record BmFontData(FontFile FontFile, Texture2D[] Pages) : IDisposable
+        private record BmFontData(FontFile FontFile, Texture2D[] Pages, float PixelZoom) : IDisposable
         {
             public void Dispose()
             {

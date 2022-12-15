@@ -295,6 +295,14 @@ namespace FontSettings
                 ILog.Warn(WarnMessage("行间距", config.MaxLineSpacing, config.MinLineSpacing));
                 config.MaxLineSpacing = 100;
             }
+
+            // pixel zoom
+            if (config.MaxPixelZoom < config.MinPixelZoom)
+            {
+                ILog.Warn(WarnMessage("缩放比例", config.MaxPixelZoom, config.MinPixelZoom));
+                config.MaxPixelZoom = 5f;
+                config.MinPixelZoom = 0.1f;
+            }
         }
 
         private void OpenFontSettingsMenu()

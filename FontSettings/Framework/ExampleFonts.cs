@@ -37,16 +37,16 @@ namespace FontSettings.Framework
         }
 
         /// <summary>如果值存在，直接返回现有值；否则重新赋值。</summary>
-        public ISpriteFont Get(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, string chars)
+        public ISpriteFont Get(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, float pixelZoom, string chars)
         {
             ISpriteFont oldValue = this.Get(fontType);
             if (oldValue != null)
                 return oldValue;
 
-            return this.ResetThenGet(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, chars);
+            return this.ResetThenGet(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, pixelZoom, chars);
         }
 
-        public ISpriteFont ResetThenGet(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, string chars)
+        public ISpriteFont ResetThenGet(GameFontType fontType, bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, float pixelZoom, string chars)
         {
             this.Dispose(fontType);
 
@@ -58,7 +58,7 @@ namespace FontSettings.Framework
                     newValue = this.InternalCreateSpriteFont(fontType, enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, chars);
                     break;
                 case GameFontType.SpriteText:
-                    newValue = this.InternalCreateBmFont(enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, chars);
+                    newValue = this.InternalCreateBmFont(enabled, fontFilePath, fontIndex, fontSize, spacing, lineSpacing, charOffset, pixelZoom, chars);
                     break;
                 default:
                     throw new NotSupportedException();
@@ -126,7 +126,7 @@ namespace FontSettings.Framework
             return new XNASpriteFont(spriteFont);
         }
 
-        private ISpriteFont InternalCreateBmFont(bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, string text)
+        private ISpriteFont InternalCreateBmFont(bool enabled, string fontFilePath, int fontIndex, float fontSize, int spacing, int lineSpacing, Vector2 charOffset, float pixelZoom, string text)
         {
             if (StardewValley.LocalizedContentManager.CurrentLanguageLatin || !enabled)
                 return this._fontManager.GetBuiltInBmFont();
@@ -144,7 +144,7 @@ namespace FontSettings.Framework
                     Pages = new List<Texture2D>(builtIn.Pages),
                     CharacterMap = builtIn.CharacterMap,
                     LanguageCode = builtIn.LanguageCode,
-                    FontPixelZoom = builtIn.FontPixelZoom,
+                    FontPixelZoom = pixelZoom,
                 };
             }
             else
@@ -171,7 +171,7 @@ namespace FontSettings.Framework
                         FontFile = fontFile,
                         Pages = new List<Texture2D>(pages),
                         LanguageCode = StardewValley.LocalizedContentManager.CurrentLanguageCode,
-                        //FontPixelZoom = 1f
+                        FontPixelZoom = pixelZoom
                     };
                     return bmFont;
                 }

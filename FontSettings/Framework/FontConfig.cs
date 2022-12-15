@@ -11,6 +11,9 @@ namespace FontSettings.Framework
         /// <summary>字符在纵轴上的偏移量。</summary>
         public float CharOffsetY { get; set; }
 
+        /// <summary>缩放倍数。仅当<see cref="InGameType"/>为<see cref="GameFontType.SpriteText"/>时用到。对应<see cref="StardewValley.BellsAndWhistles.SpriteText.fontPixelZoom"/>字段。</summary>
+        public float PixelZoom { get; set; }
+
         internal void CopyTo(FontConfig other)
         {
             if (other is null) throw new ArgumentNullException(nameof(other));
@@ -30,6 +33,7 @@ namespace FontSettings.Framework
             other.CharacterRanges = this.CharacterRanges?.AsEnumerable();
             other.CharOffsetX = this.CharOffsetX;
             other.CharOffsetY = this.CharOffsetY;
+            other.PixelZoom = this.PixelZoom;
         }
     }
 }

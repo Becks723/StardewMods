@@ -230,6 +230,18 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
+        #region PixelZoom Property
+
+        private float _pixelZoom;
+
+        public float PixelZoom
+        {
+            get => this._pixelZoom;
+            set => this.SetField(ref this._pixelZoom, value);
+        }
+
+        #endregion
+
         public string? FontFilePath => InstalledFonts.SimplifyPath(this.CurrentFont.FullPath);
 
         public int FontIndex => this.CurrentFont.FontIndex;
@@ -448,6 +460,30 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
+        #region MinPixelZoom Property
+
+        private float _minPixelZoom;
+
+        public float MinPixelZoom
+        {
+            get => this._minPixelZoom;
+            set => this.SetField(ref this._minPixelZoom, value);
+        }
+
+        #endregion
+
+        #region MaxPixelZoom Property
+
+        private float _maxPixelZoom;
+
+        public float MaxPixelZoom
+        {
+            get => this._maxPixelZoom;
+            set => this.SetField(ref this._maxPixelZoom, value);
+        }
+
+        #endregion
+
         public ICommand MoveToPrevFont { get; }
 
         public ICommand MoveToNextFont { get; }
@@ -508,6 +544,8 @@ namespace FontSettings.Framework.Menus
             this.MaxSpacing = this._config.MaxSpacing;
             this.MinLineSpacing = this._config.MinLineSpacing;
             this.MaxLineSpacing = this._config.MaxLineSpacing;
+            this.MinPixelZoom = this._config.MinPixelZoom;
+            this.MaxPixelZoom = this._config.MaxPixelZoom;
 
             // 初始化命令。
             this.MoveToPrevFont = new DelegateCommand(this.PreviousFontType);
@@ -545,7 +583,7 @@ namespace FontSettings.Framework.Menus
         private void _SaveCurrentPreset()
         {
             this.PresetViewModel(this.CurrentFontType).SaveCurrentPreset(
-                this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);
+                this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY, this.PixelZoom);
         }
 
         private void _SaveCurrentAsNewPreset(Func<IOverlayMenu> createOverlay)
@@ -567,7 +605,7 @@ namespace FontSettings.Framework.Menus
         private void _SaveCurrentAsNewPreset(string newPresetName)
         {
             this.PresetViewModel(this.CurrentFontType).SaveCurrentAsNewPreset(newPresetName,
-                this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY);
+                this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY, this.PixelZoom);
         }
 
         private void _DeleteCurrentPreset()
@@ -619,6 +657,7 @@ namespace FontSettings.Framework.Menus
             tempConfig.LineSpacing = this.LineSpacing;
             tempConfig.CharOffsetX = this.CharOffsetX;
             tempConfig.CharOffsetY = this.CharOffsetY;
+            tempConfig.PixelZoom = this.PixelZoom;
 
             var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保异步前后是同一个字体。
             this.UpdateIsGeneratingFont(fontType, true);
@@ -663,6 +702,7 @@ namespace FontSettings.Framework.Menus
                 (int)this.Spacing,
                 this.LineSpacing,
                 new Microsoft.Xna.Framework.Vector2(this.CharOffsetX, this.CharOffsetY),
+                this.PixelZoom,
                 this.ExampleText);
         }
 
@@ -681,6 +721,7 @@ namespace FontSettings.Framework.Menus
             this.CharOffsetX = fontConfig.CharOffsetX;
             this.CharOffsetY = fontConfig.CharOffsetY;
             this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
+            this.PixelZoom = fontConfig.PixelZoom;
 
             // 更新预设。
             this.OnPresetChanged(null, EventArgs.Empty);
@@ -717,6 +758,7 @@ namespace FontSettings.Framework.Menus
                 this.CharOffsetX = fontConfig.CharOffsetX;
                 this.CharOffsetY = fontConfig.CharOffsetY;
                 this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
+                this.PixelZoom = fontConfig.PixelZoom;
 
                 this.UpdateExampleCurrent();
                 return;
@@ -735,6 +777,7 @@ namespace FontSettings.Framework.Menus
                 this.CharOffsetX = newPreset.CharOffsetX;
                 this.CharOffsetY = newPreset.CharOffsetY;
                 this.CurrentFont = fontMatched;
+                this.PixelZoom = newPreset.PixelZoom;
 
                 this.UpdateExampleCurrent();
             }

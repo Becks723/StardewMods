@@ -131,7 +131,7 @@ namespace FontSettings.Framework
         }
 
         public void EditPreset(FontPreset preset,
-            string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY)
+            string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY, float pixelZoom)
         {
             this.AssertNotNull(preset, nameof(preset));
             this.AssertNoInvalidChar(preset.Name, nameof(preset));
@@ -143,6 +143,7 @@ namespace FontSettings.Framework
             preset.LineSpacing = lineSpacing;
             preset.CharOffsetX = offsetX;
             preset.CharOffsetY = offsetY;
+            preset.PixelZoom = pixelZoom;
 
             this.WriteToFile(preset);
         }

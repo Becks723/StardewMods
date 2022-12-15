@@ -30,5 +30,7 @@ namespace FontSettings.Framework
         public float CharOffsetX { get; set; }
 
         public float CharOffsetY { get; set; }
+
+        public float PixelZoom { get; set; }
     }
 }
