@@ -16,10 +16,13 @@
   "ui.main-menu.font.keep-orig": "Keep Original",
   "ui.main-menu.refresh-fonts": "Refresh Font List",
   "ui.main-menu.font-size": "Font Size",
+
+  "ui.main-menu.section.advanced": "Advanced",
   "ui.main-menu.spacing": "Spacing",
   "ui.main-menu.line-spacing": "Line Spacing",
   "ui.main-menu.x-offset": "X-offset",
   "ui.main-menu.y-offset": "Y-offset",
+  "ui.main-menu.pixel-zoom": "Pixel Zoom",
   "ui.main-menu.vanilla-example": "Vanilla",
   "ui.main-menu.current-example": "Current",
 

@@ -15,10 +15,13 @@
   "ui.main-menu.font.keep-orig": "保持原版",
   "ui.main-menu.refresh-fonts": "刷新字体列表",
   "ui.main-menu.font-size": "大小",
+
+  "ui.main-menu.section.advanced": "高级",
   "ui.main-menu.spacing": "字间距",
   "ui.main-menu.line-spacing": "行间距",
   "ui.main-menu.x-offset": "X轴偏移量",
   "ui.main-menu.y-offset": "Y轴偏移量",
+  "ui.main-menu.pixel-zoom": "缩放比例",
   "ui.main-menu.vanilla-example": "原版",
   "ui.main-menu.current-example": "当前",
 

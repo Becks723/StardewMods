@@ -311,7 +311,7 @@ namespace FontSettings.Framework.Menus
                                 // advanced
                                 var advancedSection = new Label();
                                 advancedSection.Font = FontType.SpriteText;
-                                advancedSection.Text = /*I18n.Ui_MainMenu_Section_General()*/"高级";  // TODO:i18n
+                                advancedSection.Text = I18n.Ui_MainMenu_Section_Advanced();
                                 advancedSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
                                 stack.Children.Add(advancedSection);
 
@@ -427,7 +427,7 @@ namespace FontSettings.Framework.Menus
 
                                     var label = new Label();
                                     label.Font = FontType.SmallFont;
-                                    label.Text = "缩放比例";
+                                    label.Text = I18n.Ui_MainMenu_PixelZoom();
                                     label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                     pixelZoomOption.Children.Add(slider);
