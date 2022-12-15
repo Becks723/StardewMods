@@ -125,6 +125,28 @@ namespace FontSettings.Framework
                     max: -5,
                     min: -25,
                     interval: 1
+                )
+
+                // max pixel zoom
+                .AddSlider(
+                    name: I18n.Config_MaxPixelZoom,
+                    tooltip: I18n.Config_MaxPixelZoom_Description,
+                    get: () => this.Config.MaxPixelZoom,
+                    set: val => this.Config.MaxPixelZoom = val,
+                    max: 10,
+                    min: 3,
+                    interval: 1
+                )
+
+                // min pixel zoom
+                .AddSlider(
+                    name: I18n.Config_MinPixelZoom,
+                    tooltip: I18n.Config_MinPixelZoom_Description,
+                    get: () => this.Config.MinPixelZoom,
+                    set: val => this.Config.MinPixelZoom = val,
+                    max: 3,
+                    min: 0.1f,
+                    interval: 0.1f
                 );
         }
 
