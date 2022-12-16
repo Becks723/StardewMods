@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FontSettings.Framework.FontInfomation;
@@ -710,6 +711,62 @@ namespace FontSettings.Framework.Menus
                 CharOffsetX: this.CharOffsetX,
                 CharOffsetY: this.CharOffsetY);
             this.ExampleCurrentFont = this._sampleFontGenerator.GenerateFont(param);
+        }
+
+        private bool _isUpdatingExampleCurrent;
+        private CancellationTokenSource _tokenSource;
+        public async Task UpdateExampleCurrentAsync()
+        {
+            var param = new SampleFontGeneratorParameter(
+                Enabled: this.FontEnabled,
+                FontFilePath: InstalledFonts.GetFullPath(this.FontFilePath),
+                FontSize: this.FontSize,
+                Spacing: this.Spacing,
+                LineSpacing: this.LineSpacing,
+                SampleText: this.ExampleText,
+                FontType: this.CurrentFontType,
+                Language: FontHelpers.GetCurrentLanguage(),
+                PixelZoom: this.PixelZoom,
+                FontIndex: this.FontIndex,
+                CharOffsetX: this.CharOffsetX,
+                CharOffsetY: this.CharOffsetY);
+
+            if (this._isUpdatingExampleCurrent)
+            {
+                this._tokenSource.Cancel();
+                this._tokenSource.Dispose();
+            }
+
+            await this.RestartUpdateExampleCurrent(param);
+        }
+
+        private async Task RestartUpdateExampleCurrent(SampleFontGeneratorParameter param)
+        {
+            this._tokenSource = new CancellationTokenSource();
+            var token = this._tokenSource.Token;
+
+            var lastExampleCurrentFont = this.ExampleCurrentFont;
+            this._isUpdatingExampleCurrent = true;
+            try
+            {
+                this.ExampleCurrentFont = await this._sampleAsyncFontGenerator.GenerateFontAsync(param, token);
+                ILog.Trace("Sample: Set");
+            }
+            catch (OperationCanceledException)
+            {
+                ILog.Trace("Sample: Cancelled");
+                this.ExampleCurrentFont = lastExampleCurrentFont;
+            }
+            catch (Exception ex)
+            {
+                ILog.Trace($"Sample: {ex.Message}\n{ex.StackTrace}");
+                this.ExampleCurrentFont = lastExampleCurrentFont;
+            }
+            finally
+            {
+                this._isUpdatingExampleCurrent = false;
+                this._tokenSource.Dispose();
+            }
         }
 
         private void OnFontTypeChanged(GameFontType newFontType)

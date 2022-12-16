@@ -79,9 +79,9 @@ namespace FontSettings.Framework.Menus
             this.TogglePixelZoomOption(this._viewModel.CurrentFontType == GameFontType.SpriteText);
         }
 
-        private void UpdateExampleCurrent(object sender, EventArgs e)
+        private async void UpdateExampleCurrent(object sender, EventArgs e)
         {
-            this._viewModel.UpdateExampleCurrent();
+            await this._viewModel.UpdateExampleCurrentAsync();
         }
 
         private async void OkButtonClicked(object sender, EventArgs e)

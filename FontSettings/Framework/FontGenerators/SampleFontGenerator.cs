@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using BmFont;
 using Microsoft.Xna.Framework.Graphics;
@@ -30,6 +31,22 @@ namespace FontSettings.Framework.FontGenerators
         protected override async Task<ISpriteFont> GenerateFontAsyncCore(SampleFontGeneratorParameter param)
         {
             return await Task.Run(() => this.GenerateFontCore(param));
+        }
+
+        protected override async Task<ISpriteFont> GenerateFontAsyncCore(SampleFontGeneratorParameter param, CancellationToken token)
+        {
+            // 开始异步，让它先跑着。
+            var task = Task.Run(() => this.GenerateFontCore(param));
+
+            // 在跑异步的期间，每隔100毫秒检查是否传入了取消请求，如果有，调ThrowIfCancellationRequested。
+            while (!task.IsCompleted)
+            {
+                token.ThrowIfCancellationRequested();
+                await Task.Delay(100, token);
+            }
+
+            // 到这里异步已经跑完了，也过了可取消的界限，返回异步的值。
+            return await task;
         }
 
         private ISpriteFont SpriteFont(SampleFontGeneratorParameter param)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FontSettings.Framework.FontGenerators
@@ -23,8 +24,19 @@ namespace FontSettings.Framework.FontGenerators
             return await this.GenerateFontAsyncCore(tParam);
         }
 
+        public async Task<ISpriteFont> GenerateFontAsync(FontGeneratorParameter param, CancellationToken cancellationToken)
+        {
+            TParameter tParam = this.CastParameterType(param);
+
+            return await this.GenerateFontAsyncCore(tParam, cancellationToken);
+        }
+
         protected abstract ISpriteFont GenerateFontCore(TParameter param);
         protected abstract Task<ISpriteFont> GenerateFontAsyncCore(TParameter param);
+        protected virtual async Task<ISpriteFont> GenerateFontAsyncCore(TParameter param, CancellationToken cancellationToken)
+        {
+            return await this.GenerateFontAsyncCore(param);
+        }
 
         private TParameter CastParameterType(FontGeneratorParameter param, string message = null)
         {
@@ -38,5 +50,6 @@ namespace FontSettings.Framework.FontGenerators
                     throw new InvalidCastException();
             }
         }
+
     }
 }

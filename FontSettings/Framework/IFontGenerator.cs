@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FontSettings.Framework
@@ -14,6 +15,8 @@ namespace FontSettings.Framework
     internal interface IAsyncFontGenerator
     {
         Task<ISpriteFont> GenerateFontAsync(FontGeneratorParameter param);
+
+        Task<ISpriteFont> GenerateFontAsync(FontGeneratorParameter param, CancellationToken cancellationToken);
     }
 
     internal abstract record FontGeneratorParameter(
