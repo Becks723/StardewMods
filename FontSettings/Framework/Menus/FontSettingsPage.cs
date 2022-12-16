@@ -199,6 +199,9 @@ namespace FontSettings.Framework.Menus
                         settingsGrid.Children.Add(scrollViewer);
                         settingsGrid.SetRow(scrollViewer, 0);
                         {
+                            float sectionSpacing = borderWidth * 1.5f;
+                            float optionSpacing = borderWidth / 2;
+
                             var stack = new StackContainer();
                             stack.Orientation = Orientation.Vertical;
                             stack.Margin = new Thickness(borderWidth / 2);
@@ -251,13 +254,13 @@ namespace FontSettings.Framework.Menus
                                 var generalSection = new Label();
                                 generalSection.Font = FontType.SpriteText;
                                 generalSection.Text = I18n.Ui_MainMenu_Section_General();
-                                generalSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
+                                generalSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
                                 stack.Children.Add(generalSection);
 
                                 var enableOption = new StackContainer();
                                 enableOption.Orientation = Orientation.Horizontal;
                                 enableOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                enableOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                enableOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 stack.Children.Add(enableOption);
                                 {
                                     var checkbox = new CheckBox();
@@ -277,7 +280,7 @@ namespace FontSettings.Framework.Menus
                                 var fontComboBox = new ComboBox();
                                 fontComboBox.SuggestedWidth = 400;
                                 fontComboBox.HorizontalAlignment = HorizontalAlignment.Left;
-                                fontComboBox.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                fontComboBox.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
                                 context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
                                 context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
@@ -287,7 +290,7 @@ namespace FontSettings.Framework.Menus
                                 var fontSizeOption = new StackContainer();
                                 fontSizeOption.Orientation = Orientation.Horizontal;
                                 fontSizeOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                fontSizeOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                fontSizeOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 stack.Children.Add(fontSizeOption);
                                 {
                                     var slider = new Slider();
@@ -312,13 +315,13 @@ namespace FontSettings.Framework.Menus
                                 var advancedSection = new Label();
                                 advancedSection.Font = FontType.SpriteText;
                                 advancedSection.Text = I18n.Ui_MainMenu_Section_Advanced();
-                                advancedSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
+                                advancedSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
                                 stack.Children.Add(advancedSection);
 
                                 var spacingOption = new StackContainer();
                                 spacingOption.Orientation = Orientation.Horizontal;
                                 spacingOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                spacingOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                spacingOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 stack.Children.Add(spacingOption);
                                 {
                                     var slider = new Slider();
@@ -342,7 +345,7 @@ namespace FontSettings.Framework.Menus
                                 var lineSpacingOption = new StackContainer();
                                 lineSpacingOption.Orientation = Orientation.Horizontal;
                                 lineSpacingOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                lineSpacingOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                lineSpacingOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 stack.Children.Add(lineSpacingOption);
                                 {
                                     var slider = new Slider();
@@ -366,7 +369,7 @@ namespace FontSettings.Framework.Menus
                                 var xOffsetOption = new StackContainer();
                                 xOffsetOption.Orientation = Orientation.Horizontal;
                                 xOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                xOffsetOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                xOffsetOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 stack.Children.Add(xOffsetOption);
                                 {
                                     var slider = new Slider();
@@ -390,7 +393,7 @@ namespace FontSettings.Framework.Menus
                                 var yOffsetOption = new StackContainer();
                                 yOffsetOption.Orientation = Orientation.Horizontal;
                                 yOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                yOffsetOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                yOffsetOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 stack.Children.Add(yOffsetOption);
                                 {
                                     var slider = new Slider();
@@ -414,7 +417,7 @@ namespace FontSettings.Framework.Menus
                                 var pixelZoomOption = new StackContainer();
                                 pixelZoomOption.Orientation = Orientation.Horizontal;
                                 pixelZoomOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                pixelZoomOption.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                pixelZoomOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 {
                                     var slider = new Slider();
                                     slider.Interval = 0.1f;
@@ -442,11 +445,11 @@ namespace FontSettings.Framework.Menus
                                 var presetSection = new Label();
                                 presetSection.Font = FontType.SpriteText;
                                 presetSection.Text = I18n.Ui_MainMenu_Section_Preset();
-                                presetSection.Margin = new Thickness(0, borderWidth / 2, 0, borderWidth / 2);
+                                presetSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
                                 stack.Children.Add(presetSection);
 
                                 Grid presetGrid = new Grid();
-                                presetGrid.Margin = new Thickness(0, 0, 0, borderWidth / 2);
+                                presetGrid.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                                 presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
                                 presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -514,6 +517,7 @@ namespace FontSettings.Framework.Menus
                                 newPresetButton.MinWidth = 200;
                                 newPresetButton.MinHeight = 68;
                                 newPresetButton.HorizontalAlignment = HorizontalAlignment.Left;
+                                newPresetButton.Margin = new Thickness(0, optionSpacing, 0, 0);
                                 newPresetButton.ClickSound = "coin";
                                 //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
                                 context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
