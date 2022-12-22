@@ -31,7 +31,7 @@ namespace FontSettings.Framework.Menus
         {
             if (this.Font != null)
             {
-                string text = this.Text ?? string.Empty;
+                string text = this.TextForDraw;
 
                 // 先画背景
                 if (this.ShowBounds)
@@ -43,17 +43,14 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        protected override Vector2 MeasureOverride(Vector2 availableSize)
+        protected override Vector2 MeasureString(string? s)
         {
-            Vector2 measureSize = Vector2.Zero;
             var font = this.Font;
 
             if (font == null)
-                return measureSize;
+                return Vector2.Zero;
 
-            string text = this.Text ?? string.Empty;
-            measureSize = font.MeasureString(text);
-            return measureSize;
+            return font.MeasureString(s ?? string.Empty);
         }
     }
 }
