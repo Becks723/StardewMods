@@ -199,12 +199,12 @@ namespace FontSettings.Framework.Menus
                         settingsGrid.Children.Add(scrollViewer);
                         settingsGrid.SetRow(scrollViewer, 0);
                         {
-                            float sectionSpacing = borderWidth * 1.5f;
+                            float frameSpacing = borderWidth / 2;
                             float optionSpacing = borderWidth / 2;
 
                             var stack = new StackContainer();
                             stack.Orientation = Orientation.Vertical;
-                            stack.Margin = new Thickness(borderWidth / 2);
+                            stack.Margin = new Thickness(frameSpacing);
                             scrollViewer.Content = stack;
                             {
                                 Grid fontTypeGrid = new Grid();
@@ -250,288 +250,324 @@ namespace FontSettings.Framework.Menus
                                     fontTypeGrid.SetColumn(helpButton, 3);
                                 }
 
-                                // general
-                                var generalSection = new Label();
-                                generalSection.Font = FontType.SpriteText;
-                                generalSection.Text = I18n.Ui_MainMenu_Section_General();
-                                generalSection.HorizontalAlignment = HorizontalAlignment.Left;
-                                generalSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
-                                stack.Children.Add(generalSection);
-
-                                var enableOption = new StackContainer();
-                                enableOption.Orientation = Orientation.Horizontal;
-                                enableOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                enableOption.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                stack.Children.Add(enableOption);
+                                float sectionPadding = borderWidth / 3;
+                                Border SectionBorder()
                                 {
-                                    var checkbox = new CheckBox();
-                                    checkbox.Checked += this.UpdateExampleCurrent;
-                                    checkbox.Unchecked += this.UpdateExampleCurrent;
-                                    context.TwoWayBinds(() => this._viewModel.FontEnabled, () => checkbox.IsChecked);
-
-                                    var label = new Label();
-                                    label.Font = FontType.SmallFont;
-                                    label.Text = I18n.Ui_MainMenu_Enable();
-                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
-
-                                    enableOption.Children.Add(checkbox);
-                                    enableOption.Children.Add(label);
+                                    var border = new TextureBoxBorder();
+                                    border.Box = TextureBox.From(this._icons, new Rectangle(96, 0, 3, 3), 1f, Thickness.One);
+                                    border.Padding += new Thickness(sectionPadding);
+                                    return border;
                                 }
 
-                                var fontComboBox = new ComboBox();
-                                fontComboBox.SuggestedWidth = 400;
-                                fontComboBox.HorizontalAlignment = HorizontalAlignment.Left;
-                                fontComboBox.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
-                                context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
-                                context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
-                                fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
-                                stack.Children.Add(fontComboBox);
-
-                                var fontSizeOption = new StackContainer();
-                                fontSizeOption.Orientation = Orientation.Horizontal;
-                                fontSizeOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                fontSizeOption.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                stack.Children.Add(fontSizeOption);
+                                // general
+                                var generalBorder = SectionBorder();
+                                generalBorder.Margin = new Thickness(0, frameSpacing, 0, 0);
+                                stack.Children.Add(generalBorder);
                                 {
-                                    var slider = new Slider();
-                                    slider.Interval = 1;
-                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                    slider.SuggestedWidth = 300;
-                                    slider.ValueChanged += this.UpdateExampleCurrent;
-                                    context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
-                                    context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
-                                    context.OneWayBinds(() => this._viewModel.MaxFontSize, () => slider.Maximum);
+                                    var gStack = new StackContainer();
+                                    gStack.Orientation = Orientation.Vertical;
+                                    generalBorder.Child = gStack;
+                                    {
+                                        var generalSection = new Label();
+                                        generalSection.Font = FontType.SpriteText;
+                                        generalSection.Text = I18n.Ui_MainMenu_Section_General();
+                                        generalSection.HorizontalAlignment = HorizontalAlignment.Left;
+                                        gStack.Children.Add(generalSection);
 
-                                    var label = new Label();
-                                    label.Font = FontType.SmallFont;
-                                    label.Text = I18n.Ui_MainMenu_FontSize();
-                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                        var enableOption = new StackContainer();
+                                        enableOption.Orientation = Orientation.Horizontal;
+                                        enableOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        enableOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        gStack.Children.Add(enableOption);
+                                        {
+                                            var checkbox = new CheckBox();
+                                            checkbox.Checked += this.UpdateExampleCurrent;
+                                            checkbox.Unchecked += this.UpdateExampleCurrent;
+                                            context.TwoWayBinds(() => this._viewModel.FontEnabled, () => checkbox.IsChecked);
 
-                                    fontSizeOption.Children.Add(slider);
-                                    fontSizeOption.Children.Add(label);
+                                            var label = new Label();
+                                            label.Font = FontType.SmallFont;
+                                            label.Text = I18n.Ui_MainMenu_Enable();
+                                            label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
+                                            enableOption.Children.Add(checkbox);
+                                            enableOption.Children.Add(label);
+                                        }
+
+                                        var fontComboBox = new ComboBox();
+                                        fontComboBox.SuggestedWidth = 400;
+                                        fontComboBox.HorizontalAlignment = HorizontalAlignment.Left;
+                                        fontComboBox.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
+                                        context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
+                                        context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
+                                        fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
+                                        gStack.Children.Add(fontComboBox);
+
+                                        var fontSizeOption = new StackContainer();
+                                        fontSizeOption.Orientation = Orientation.Horizontal;
+                                        fontSizeOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        fontSizeOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        gStack.Children.Add(fontSizeOption);
+                                        {
+                                            var slider = new Slider();
+                                            slider.Interval = 1;
+                                            slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                            slider.SuggestedWidth = 300;
+                                            slider.ValueChanged += this.UpdateExampleCurrent;
+                                            context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
+                                            context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
+                                            context.OneWayBinds(() => this._viewModel.MaxFontSize, () => slider.Maximum);
+
+                                            var label = new Label();
+                                            label.Font = FontType.SmallFont;
+                                            label.Text = I18n.Ui_MainMenu_FontSize();
+                                            label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
+                                            fontSizeOption.Children.Add(slider);
+                                            fontSizeOption.Children.Add(label);
+                                        }
+                                    }
                                 }
 
                                 // advanced
-                                var advancedSection = new Label();
-                                advancedSection.Font = FontType.SpriteText;
-                                advancedSection.Text = I18n.Ui_MainMenu_Section_Advanced();
-                                advancedSection.HorizontalAlignment = HorizontalAlignment.Left;
-                                advancedSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
-                                stack.Children.Add(advancedSection);
-
-                                var spacingOption = new StackContainer();
-                                spacingOption.Orientation = Orientation.Horizontal;
-                                spacingOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                spacingOption.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                stack.Children.Add(spacingOption);
+                                var advancedBorder = SectionBorder();
+                                advancedBorder.Margin = new Thickness(0, frameSpacing, 0, 0);
+                                stack.Children.Add(advancedBorder);
                                 {
-                                    var slider = new Slider();
-                                    slider.Interval = 1;
-                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                    slider.SuggestedWidth = 300;
-                                    slider.ValueChanged += this.UpdateExampleCurrent;
-                                    context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
-                                    context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
-                                    context.OneWayBinds(() => this._viewModel.MaxSpacing, () => slider.Maximum);
+                                    var aStack = new StackContainer();
+                                    aStack.Orientation = Orientation.Vertical;
+                                    advancedBorder.Child = aStack;
+                                    {
+                                        var advancedSection = new Label();
+                                        advancedSection.Font = FontType.SpriteText;
+                                        advancedSection.Text = I18n.Ui_MainMenu_Section_Advanced();
+                                        advancedSection.HorizontalAlignment = HorizontalAlignment.Left;
+                                        aStack.Children.Add(advancedSection);
 
-                                    var label = new Label();
-                                    label.Font = FontType.SmallFont;
-                                    label.Text = I18n.Ui_MainMenu_Spacing();
-                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+                                        var spacingOption = new StackContainer();
+                                        spacingOption.Orientation = Orientation.Horizontal;
+                                        spacingOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        spacingOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        aStack.Children.Add(spacingOption);
+                                        {
+                                            var slider = new Slider();
+                                            slider.Interval = 1;
+                                            slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                            slider.SuggestedWidth = 300;
+                                            slider.ValueChanged += this.UpdateExampleCurrent;
+                                            context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
+                                            context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
+                                            context.OneWayBinds(() => this._viewModel.MaxSpacing, () => slider.Maximum);
 
-                                    spacingOption.Children.Add(slider);
-                                    spacingOption.Children.Add(label);
+                                            var label = new Label();
+                                            label.Font = FontType.SmallFont;
+                                            label.Text = I18n.Ui_MainMenu_Spacing();
+                                            label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
+                                            spacingOption.Children.Add(slider);
+                                            spacingOption.Children.Add(label);
+                                        }
+
+                                        var lineSpacingOption = new StackContainer();
+                                        lineSpacingOption.Orientation = Orientation.Horizontal;
+                                        lineSpacingOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        lineSpacingOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        aStack.Children.Add(lineSpacingOption);
+                                        {
+                                            var slider = new Slider();
+                                            slider.Interval = 1;
+                                            slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                            slider.SuggestedWidth = 300;
+                                            slider.ValueChanged += this.UpdateExampleCurrent;
+                                            context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
+                                            context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
+                                            context.OneWayBinds(() => this._viewModel.MaxLineSpacing, () => slider.Maximum);
+
+                                            var label = new Label();
+                                            label.Font = FontType.SmallFont;
+                                            label.Text = I18n.Ui_MainMenu_LineSpacing();
+                                            label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
+                                            lineSpacingOption.Children.Add(slider);
+                                            lineSpacingOption.Children.Add(label);
+                                        }
+
+                                        var xOffsetOption = new StackContainer();
+                                        xOffsetOption.Orientation = Orientation.Horizontal;
+                                        xOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        xOffsetOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        aStack.Children.Add(xOffsetOption);
+                                        {
+                                            var slider = new Slider();
+                                            slider.Interval = 0.5f;
+                                            slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                            slider.SuggestedWidth = 300;
+                                            slider.ValueChanged += this.UpdateExampleCurrent;
+                                            context.TwoWayBinds(() => this._viewModel.CharOffsetX, () => slider.Value);
+                                            context.OneWayBinds(() => this._viewModel.MinCharOffsetX, () => slider.Minimum);
+                                            context.OneWayBinds(() => this._viewModel.MaxCharOffsetX, () => slider.Maximum);
+
+                                            var label = new Label();
+                                            label.Font = FontType.SmallFont;
+                                            label.Text = I18n.Ui_MainMenu_XOffset();
+                                            label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
+                                            xOffsetOption.Children.Add(slider);
+                                            xOffsetOption.Children.Add(label);
+                                        }
+
+                                        var yOffsetOption = new StackContainer();
+                                        yOffsetOption.Orientation = Orientation.Horizontal;
+                                        yOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        yOffsetOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        aStack.Children.Add(yOffsetOption);
+                                        {
+                                            var slider = new Slider();
+                                            slider.Interval = 0.5f;
+                                            slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                            slider.SuggestedWidth = 300;
+                                            slider.ValueChanged += this.UpdateExampleCurrent;
+                                            context.TwoWayBinds(() => this._viewModel.CharOffsetY, () => slider.Value);
+                                            context.OneWayBinds(() => this._viewModel.MinCharOffsetY, () => slider.Minimum);
+                                            context.OneWayBinds(() => this._viewModel.MaxCharOffsetY, () => slider.Maximum);
+
+                                            var label = new Label();
+                                            label.Font = FontType.SmallFont;
+                                            label.Text = I18n.Ui_MainMenu_YOffset();
+                                            label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
+                                            yOffsetOption.Children.Add(slider);
+                                            yOffsetOption.Children.Add(label);
+                                        }
+
+                                        var pixelZoomOption = new StackContainer();
+                                        pixelZoomOption.Orientation = Orientation.Horizontal;
+                                        pixelZoomOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        pixelZoomOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        {
+                                            var slider = new Slider();
+                                            slider.Interval = 0.1f;
+                                            slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
+                                            slider.SuggestedWidth = 300;
+                                            slider.ValueChanged += this.UpdateExampleCurrent;
+                                            context.TwoWayBinds(() => this._viewModel.PixelZoom, () => slider.Value);
+                                            context.OneWayBinds(() => this._viewModel.MinPixelZoom, () => slider.Minimum);
+                                            context.OneWayBinds(() => this._viewModel.MaxPixelZoom, () => slider.Maximum);
+
+                                            var label = new Label();
+                                            label.Font = FontType.SmallFont;
+                                            label.Text = I18n.Ui_MainMenu_PixelZoom();
+                                            label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
+                                            pixelZoomOption.Children.Add(slider);
+                                            pixelZoomOption.Children.Add(label);
+                                        }
+
+                                        this._container = aStack;
+                                        this._pixelZoomOption = pixelZoomOption;
+                                        this._index = aStack.Children.Count;
+                                    }
                                 }
-
-                                var lineSpacingOption = new StackContainer();
-                                lineSpacingOption.Orientation = Orientation.Horizontal;
-                                lineSpacingOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                lineSpacingOption.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                stack.Children.Add(lineSpacingOption);
-                                {
-                                    var slider = new Slider();
-                                    slider.Interval = 1;
-                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                    slider.SuggestedWidth = 300;
-                                    slider.ValueChanged += this.UpdateExampleCurrent;
-                                    context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
-                                    context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
-                                    context.OneWayBinds(() => this._viewModel.MaxLineSpacing, () => slider.Maximum);
-
-                                    var label = new Label();
-                                    label.Font = FontType.SmallFont;
-                                    label.Text = I18n.Ui_MainMenu_LineSpacing();
-                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
-
-                                    lineSpacingOption.Children.Add(slider);
-                                    lineSpacingOption.Children.Add(label);
-                                }
-
-                                var xOffsetOption = new StackContainer();
-                                xOffsetOption.Orientation = Orientation.Horizontal;
-                                xOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                xOffsetOption.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                stack.Children.Add(xOffsetOption);
-                                {
-                                    var slider = new Slider();
-                                    slider.Interval = 0.5f;
-                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                    slider.SuggestedWidth = 300;
-                                    slider.ValueChanged += this.UpdateExampleCurrent;
-                                    context.TwoWayBinds(() => this._viewModel.CharOffsetX, () => slider.Value);
-                                    context.OneWayBinds(() => this._viewModel.MinCharOffsetX, () => slider.Minimum);
-                                    context.OneWayBinds(() => this._viewModel.MaxCharOffsetX, () => slider.Maximum);
-
-                                    var label = new Label();
-                                    label.Font = FontType.SmallFont;
-                                    label.Text = I18n.Ui_MainMenu_XOffset();
-                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
-
-                                    xOffsetOption.Children.Add(slider);
-                                    xOffsetOption.Children.Add(label);
-                                }
-
-                                var yOffsetOption = new StackContainer();
-                                yOffsetOption.Orientation = Orientation.Horizontal;
-                                yOffsetOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                yOffsetOption.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                stack.Children.Add(yOffsetOption);
-                                {
-                                    var slider = new Slider();
-                                    slider.Interval = 0.5f;
-                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                    slider.SuggestedWidth = 300;
-                                    slider.ValueChanged += this.UpdateExampleCurrent;
-                                    context.TwoWayBinds(() => this._viewModel.CharOffsetY, () => slider.Value);
-                                    context.OneWayBinds(() => this._viewModel.MinCharOffsetY, () => slider.Minimum);
-                                    context.OneWayBinds(() => this._viewModel.MaxCharOffsetY, () => slider.Maximum);
-
-                                    var label = new Label();
-                                    label.Font = FontType.SmallFont;
-                                    label.Text = I18n.Ui_MainMenu_YOffset();
-                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
-
-                                    yOffsetOption.Children.Add(slider);
-                                    yOffsetOption.Children.Add(label);
-                                }
-
-                                var pixelZoomOption = new StackContainer();
-                                pixelZoomOption.Orientation = Orientation.Horizontal;
-                                pixelZoomOption.HorizontalAlignment = HorizontalAlignment.Left;
-                                pixelZoomOption.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                {
-                                    var slider = new Slider();
-                                    slider.Interval = 0.1f;
-                                    slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
-                                    slider.SuggestedWidth = 300;
-                                    slider.ValueChanged += this.UpdateExampleCurrent;
-                                    context.TwoWayBinds(() => this._viewModel.PixelZoom, () => slider.Value);
-                                    context.OneWayBinds(() => this._viewModel.MinPixelZoom, () => slider.Minimum);
-                                    context.OneWayBinds(() => this._viewModel.MaxPixelZoom, () => slider.Maximum);
-
-                                    var label = new Label();
-                                    label.Font = FontType.SmallFont;
-                                    label.Text = I18n.Ui_MainMenu_PixelZoom();
-                                    label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
-
-                                    pixelZoomOption.Children.Add(slider);
-                                    pixelZoomOption.Children.Add(label);
-                                }
-
-                                this._container = stack;
-                                this._pixelZoomOption = pixelZoomOption;
-                                this._index = stack.Children.Count;
 
                                 // preset
-                                var presetSection = new Label();
-                                presetSection.Font = FontType.SpriteText;
-                                presetSection.Text = I18n.Ui_MainMenu_Section_Preset();
-                                presetSection.HorizontalAlignment = HorizontalAlignment.Left;
-                                presetSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
-                                stack.Children.Add(presetSection);
-
-                                Grid presetGrid = new Grid();
-                                presetGrid.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
-                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                                presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                                stack.Children.Add(presetGrid);
+                                var presetBorder = SectionBorder();
+                                presetBorder.Margin = new Thickness(0, frameSpacing, 0, 0);
+                                stack.Children.Add(presetBorder);
                                 {
-                                    var prevPresetButton = new TextureButton(
-                                        Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f);
-                                    prevPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                    prevPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                    prevPresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                    prevPresetButton.ToolTip = I18n.Ui_MainMenu_PrevPreset();
-                                    prevPresetButton.ClickSound = "smallSelect";
-                                    context.OneWayBinds(() => this._viewModel.MoveToPrevPreset, () => prevPresetButton.Command);
-                                    presetGrid.Children.Add(prevPresetButton);
-                                    presetGrid.SetColumn(prevPresetButton, 0);
+                                    var pStack = new StackContainer();
+                                    pStack.Orientation = Orientation.Vertical;
+                                    presetBorder.Child = pStack;
+                                    {
+                                        var presetSection = new Label();
+                                        presetSection.Font = FontType.SpriteText;
+                                        presetSection.Text = I18n.Ui_MainMenu_Section_Preset();
+                                        presetSection.HorizontalAlignment = HorizontalAlignment.Left;
+                                        pStack.Children.Add(presetSection);
 
-                                    var label = new Label();
-                                    label.Font = FontType.DialogueFont;
-                                    label.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                    label.HorizontalAlignment = HorizontalAlignment.Left;
-                                    label.VerticalAlignment = VerticalAlignment.Center;
-                                    context.OneWayBinds(() => this._viewModel.CurrentPresetName, () => label.Text);
-                                    presetGrid.Children.Add(label);
-                                    presetGrid.SetColumn(label, 1);
+                                        Grid presetGrid = new Grid();
+                                        presetGrid.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                        presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
+                                        presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                        presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                        presetGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                                        pStack.Children.Add(presetGrid);
+                                        {
+                                            var prevPresetButton = new TextureButton(
+                                                Game1.mouseCursors, new Rectangle(352, 495, 12, 11), 4f);
+                                            prevPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                            prevPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                            prevPresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                            prevPresetButton.ToolTip = I18n.Ui_MainMenu_PrevPreset();
+                                            prevPresetButton.ClickSound = "smallSelect";
+                                            context.OneWayBinds(() => this._viewModel.MoveToPrevPreset, () => prevPresetButton.Command);
+                                            presetGrid.Children.Add(prevPresetButton);
+                                            presetGrid.SetColumn(prevPresetButton, 0);
 
-                                    var nextPresetButton = new TextureButton(
-                                        Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);
-                                    nextPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                    nextPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                    nextPresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                    nextPresetButton.ToolTip = I18n.Ui_MainMenu_NextPreset();
-                                    nextPresetButton.ClickSound = "smallSelect";
-                                    context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => nextPresetButton.Command);
-                                    presetGrid.Children.Add(nextPresetButton);
-                                    presetGrid.SetColumn(nextPresetButton, 2);
+                                            var label = new Label();
+                                            label.Font = FontType.DialogueFont;
+                                            label.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                            label.HorizontalAlignment = HorizontalAlignment.Left;
+                                            label.VerticalAlignment = VerticalAlignment.Center;
+                                            context.OneWayBinds(() => this._viewModel.CurrentPresetName, () => label.Text);
+                                            presetGrid.Children.Add(label);
+                                            presetGrid.SetColumn(label, 1);
 
-                                    var savePresetButton = new TextureButton(
-                                        this._icons, new Rectangle(64, 0, 16, 16), 4f);
-                                    savePresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                    savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                    savePresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                    savePresetButton.ToolTip = I18n.Ui_MainMenu_SavePreset();
-                                    savePresetButton.ClickSound = "newRecipe";
-                                    context.OneWayBinds(() => this._viewModel.CanSaveCurrentPreset, () => savePresetButton.GreyedOut, new TrueFalseConverter());
-                                    context.OneWayBinds(() => this._viewModel.SaveCurrentPreset, () => savePresetButton.Command);
-                                    presetGrid.Children.Add(savePresetButton);
-                                    presetGrid.SetColumn(savePresetButton, 3);
+                                            var nextPresetButton = new TextureButton(
+                                                Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);
+                                            nextPresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                            nextPresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                            nextPresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                            nextPresetButton.ToolTip = I18n.Ui_MainMenu_NextPreset();
+                                            nextPresetButton.ClickSound = "smallSelect";
+                                            context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => nextPresetButton.Command);
+                                            presetGrid.Children.Add(nextPresetButton);
+                                            presetGrid.SetColumn(nextPresetButton, 2);
 
-                                    var deletePresetButton = new TextureButton(
-                                        this._icons, new Rectangle(80, 0, 16, 16), 4f);
-                                    deletePresetButton.Margin = new Thickness(0, 0, 0, 0);
-                                    deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
-                                    deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
-                                    deletePresetButton.ToolTip = I18n.Ui_MainMenu_DelPreset();
-                                    deletePresetButton.ClickSound = "trashcan";
-                                    context.OneWayBinds(() => this._viewModel.CanDeleteCurrentPreset, () => deletePresetButton.GreyedOut, new TrueFalseConverter());
-                                    context.OneWayBinds(() => this._viewModel.DeleteCurrentPreset, () => deletePresetButton.Command);
-                                    presetGrid.Children.Add(deletePresetButton);
-                                    presetGrid.SetColumn(deletePresetButton, 4);
-                                }
+                                            var savePresetButton = new TextureButton(
+                                                this._icons, new Rectangle(64, 0, 16, 16), 4f);
+                                            savePresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                            savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                            savePresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                            savePresetButton.ToolTip = I18n.Ui_MainMenu_SavePreset();
+                                            savePresetButton.ClickSound = "newRecipe";
+                                            context.OneWayBinds(() => this._viewModel.CanSaveCurrentPreset, () => savePresetButton.GreyedOut, new TrueFalseConverter());
+                                            context.OneWayBinds(() => this._viewModel.SaveCurrentPreset, () => savePresetButton.Command);
+                                            presetGrid.Children.Add(savePresetButton);
+                                            presetGrid.SetColumn(savePresetButton, 3);
 
-                                Button newPresetButton = new Button();
-                                newPresetButton.MinWidth = 200;
-                                newPresetButton.MinHeight = 68;
-                                newPresetButton.HorizontalAlignment = HorizontalAlignment.Left;
-                                newPresetButton.Margin = new Thickness(0, optionSpacing, 0, 0);
-                                newPresetButton.ClickSound = "coin";
-                                //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
-                                context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
-                                context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
-                                stack.Children.Add(newPresetButton);
-                                {
-                                    Label label = new Label();
-                                    label.HorizontalAlignment = HorizontalAlignment.Center;
-                                    label.VerticalAlignment = VerticalAlignment.Center;
-                                    label.Text = I18n.Ui_MainMenu_NewPreset();
-                                    newPresetButton.Content = label;
+                                            var deletePresetButton = new TextureButton(
+                                                this._icons, new Rectangle(80, 0, 16, 16), 4f);
+                                            deletePresetButton.Margin = new Thickness(0, 0, 0, 0);
+                                            deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
+                                            deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
+                                            deletePresetButton.ToolTip = I18n.Ui_MainMenu_DelPreset();
+                                            deletePresetButton.ClickSound = "trashcan";
+                                            context.OneWayBinds(() => this._viewModel.CanDeleteCurrentPreset, () => deletePresetButton.GreyedOut, new TrueFalseConverter());
+                                            context.OneWayBinds(() => this._viewModel.DeleteCurrentPreset, () => deletePresetButton.Command);
+                                            presetGrid.Children.Add(deletePresetButton);
+                                            presetGrid.SetColumn(deletePresetButton, 4);
+                                        }
+
+                                        Button newPresetButton = new Button();
+                                        newPresetButton.MinWidth = 200;
+                                        newPresetButton.MinHeight = 68;
+                                        newPresetButton.HorizontalAlignment = HorizontalAlignment.Left;
+                                        newPresetButton.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        newPresetButton.ClickSound = "coin";
+                                        //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
+                                        context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
+                                        context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
+                                        pStack.Children.Add(newPresetButton);
+                                        {
+                                            Label label = new Label();
+                                            label.HorizontalAlignment = HorizontalAlignment.Center;
+                                            label.VerticalAlignment = VerticalAlignment.Center;
+                                            label.Text = I18n.Ui_MainMenu_NewPreset();
+                                            newPresetButton.Content = label;
+                                        }
+                                    }
                                 }
                             }
                         }
