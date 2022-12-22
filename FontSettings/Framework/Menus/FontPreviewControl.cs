@@ -152,15 +152,17 @@ namespace FontSettings.Framework.Menus
                 return measureSize;
             }
 
-            protected override void ArrangeOverride(Vector2 availableSize)
+            protected override Vector2 ArrangeOverride(Vector2 availableSize)
             {
                 foreach (Element child in this.Children)
                 {
                     if (child == null)
                         continue;
 
-                    child.Arrange(Vector2.Zero, availableSize);
+                    child.Arrange(new RectangleF( Vector2.Zero, availableSize));
                 }
+
+                return availableSize;
             }
         }
     }

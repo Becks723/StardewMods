@@ -173,10 +173,12 @@ namespace FontSettings.Framework.Menus
                     Math.Max(vSize.Y, cSize.Y));
             }
 
-            protected override void ArrangeOverride(Vector2 availableSize)
+            protected override Vector2 ArrangeOverride(Vector2 availableSize)
             {
-                this._vanilla.Arrange(Vector2.Zero, availableSize);
-                this._current.Arrange(Vector2.Zero, availableSize);
+                var finalRect = new RectangleF(Vector2.Zero, availableSize);
+                this._vanilla.Arrange(finalRect);
+                this._current.Arrange(finalRect);
+                return availableSize;
             }
         }
     }
