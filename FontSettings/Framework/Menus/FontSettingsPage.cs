@@ -254,6 +254,7 @@ namespace FontSettings.Framework.Menus
                                 var generalSection = new Label();
                                 generalSection.Font = FontType.SpriteText;
                                 generalSection.Text = I18n.Ui_MainMenu_Section_General();
+                                generalSection.HorizontalAlignment = HorizontalAlignment.Left;
                                 generalSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
                                 stack.Children.Add(generalSection);
 
@@ -315,6 +316,7 @@ namespace FontSettings.Framework.Menus
                                 var advancedSection = new Label();
                                 advancedSection.Font = FontType.SpriteText;
                                 advancedSection.Text = I18n.Ui_MainMenu_Section_Advanced();
+                                advancedSection.HorizontalAlignment = HorizontalAlignment.Left;
                                 advancedSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
                                 stack.Children.Add(advancedSection);
 
@@ -445,6 +447,7 @@ namespace FontSettings.Framework.Menus
                                 var presetSection = new Label();
                                 presetSection.Font = FontType.SpriteText;
                                 presetSection.Text = I18n.Ui_MainMenu_Section_Preset();
+                                presetSection.HorizontalAlignment = HorizontalAlignment.Left;
                                 presetSection.Margin = new Thickness(0, sectionSpacing, 0, 0);
                                 stack.Children.Add(presetSection);
 
