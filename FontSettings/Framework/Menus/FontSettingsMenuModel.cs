@@ -799,7 +799,10 @@ namespace FontSettings.Framework.Menus
             FontPreset? newPreset = this.PresetViewModel(this.CurrentFontType).CurrentPreset;
 
             // 更新预设名字。
-            this.CurrentPresetName = newPreset?.Name;
+            if (newPreset == null)
+                this.CurrentPresetName = "-";
+            else
+                this.CurrentPresetName = newPreset.Name;
 
             // 更新几个状态：是否能保存、另存为、删除该预设。
             this.CanSaveCurrentPreset = this.CanSavePreset(newPreset);

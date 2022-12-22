@@ -508,7 +508,7 @@ namespace FontSettings.Framework.Menus
                                             var label = new Label();
                                             label.Font = FontType.DialogueFont;
                                             label.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                            label.HorizontalAlignment = HorizontalAlignment.Left;
+                                            label.HorizontalAlignment = HorizontalAlignment.Center;
                                             label.VerticalAlignment = VerticalAlignment.Center;
                                             context.OneWayBinds(() => this._viewModel.CurrentPresetName, () => label.Text);
                                             presetGrid.Children.Add(label);
