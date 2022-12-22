@@ -547,14 +547,13 @@ namespace FontSettings.Framework.Menus
                     }
 
                     Grid previewGrid = new Grid();
-                    previewGrid.Margin = new Thickness(borderWidth / 2);
                     previewGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
                     previewGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                     mainGrid.Children.Add(previewGrid);
                     mainGrid.SetColumn(previewGrid, 0);
                     {
-                        var previewControl = new FontPreviewControl(this.DefaultBorderless(whenStarrySkyInterface: TextureBoxes.Default));
-                        context.OneWayBinds(() => this._viewModel.ExamplesMerged, () => previewControl.IsComparing);
+                        var previewControl = new FontPreviewGrid(this.DefaultBorderless(whenStarrySkyInterface: TextureBoxes.Default));
+                        context.OneWayBinds(() => this._viewModel.ExamplesMerged, () => previewControl.IsMerged);
                         var vanillaTextLabel = previewControl.VanillaFontExample;
                         var currentTextLabel = previewControl.CurrentFontExample;
                         context.OneWayBinds(() => this._viewModel.ShowExampleBounds, () => vanillaTextLabel.ShowBounds);
@@ -574,8 +573,8 @@ namespace FontSettings.Framework.Menus
                         previewGrid.SetRow(optionsStack, 1);
                         {
                             var mergeButton = new ToggleTextureButton(
-                                onTexture: this._icons, onSourceRectangle: new(48, 0, 16, 16), onScale: 4f,
-                                offTexture: this._icons, offSourceRectangle: new(32, 0, 16, 16), offScale: 4f);
+                                onTexture: this._icons, onSourceRectangle: new(32, 0, 16, 16), onScale: 4f,
+                                offTexture: this._icons, offSourceRectangle: new(48, 0, 16, 16), offScale: 4f);
                             mergeButton.ClickSound = "coin";
                             context.TwoWayBinds(() => this._viewModel.ExamplesMerged, () => mergeButton.IsToggled);
                             optionsStack.Children.Add(mergeButton);

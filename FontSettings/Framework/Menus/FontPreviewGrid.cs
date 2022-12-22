@@ -40,8 +40,16 @@ namespace FontSettings.Framework.Menus
         {
             this._box = box;
 
-            this.VanillaFontExample = new FontExampleLabel() { Forground = Color.Gray * 0.67f };
-            this.CurrentFontExample = new FontExampleLabel() { Forground = Game1.textColor };
+            this.VanillaFontExample = new FontExampleLabel()
+            {
+                Forground = Color.Gray * 0.67f,
+                Wrapping = TextWrapping.Enable
+            };
+            this.CurrentFontExample = new FontExampleLabel()
+            {
+                Forground = Game1.textColor,
+                Wrapping = TextWrapping.Enable
+            };
 
             this.OnIsMergedChanged(true, false);
         }
@@ -49,37 +57,33 @@ namespace FontSettings.Framework.Menus
         private void OnIsMergedChanged(bool oldValue, bool newValue)
         {
             bool horiz = this.Orientation == Orientation.Horizontal;
+
+            this.Children.Clear();  // 务必先于清空row/column。
             if (horiz)
                 this.ColumnDefinitions.Clear();
             else
                 this.RowDefinitions.Clear();
-            this.Children.Clear();
 
             if (newValue)
             {
                 var border = new TextureBoxBorder();
-                border.Box = _box;
+                border.Box = this._box;
                 border.DrawShadow = false;
+                border.Padding += new Thickness(8);
                 this.Children.Add(border);
                 {
-                    Grid grid = new Grid();
-                    border.Child = grid;
+                    ScrollViewer view = new ScrollViewer();
+                    view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                    view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                    border.Child = view;
                     {
-                        var titleLabel = new Label();
-                        titleLabel.Font = FontType.SpriteText;
-                        titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
-                        titleLabel.VerticalAlignment = VerticalAlignment.Top;
-                        grid.Children.Add(titleLabel);
-
-                        this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
-                        this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Stretch;
-                        this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
-                        this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Stretch;
-
                         var examples = new MergedFontExampleLabels(this.VanillaFontExample, this.CurrentFontExample);
-                        examples.HorizontalAlignment = HorizontalAlignment.Center;
-                        examples.VerticalAlignment = VerticalAlignment.Center;
-                        grid.Children.Add(examples);
+                        this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Left;
+                        this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Top;
+                        this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Left;
+                        this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Top;
+
+                        view.Content = examples;
                     }
                 }
             }
@@ -97,52 +101,44 @@ namespace FontSettings.Framework.Menus
                 }
                 {
                     var vanillaBorder = new TextureBoxBorder();
-                    vanillaBorder.Box = _box;
+                    vanillaBorder.Box = this._box;
                     vanillaBorder.DrawShadow = false;
+                    vanillaBorder.Padding += new Thickness(8);
                     this.Children.Add(vanillaBorder);
                     if (horiz)
                         this.SetColumn(vanillaBorder, 0);
                     else
                         this.SetRow(vanillaBorder, 0);
                     {
-                        Grid grid = new Grid();
-                        vanillaBorder.Child = grid;
+                        ScrollViewer view = new ScrollViewer();
+                        view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                        view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                        vanillaBorder.Child = view;
                         {
-                            var titleLabel = new Label();
-                            titleLabel.Text = I18n.Ui_MainMenu_VanillaExample();
-                            titleLabel.Font = FontType.SpriteText;
-                            titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
-                            titleLabel.VerticalAlignment = VerticalAlignment.Top;
-                            grid.Children.Add(titleLabel);
-
-                            this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Center;
-                            this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Center;
-                            grid.Children.Add(this.VanillaFontExample);
+                            this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
+                            this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+                            view.Content = this.VanillaFontExample;
                         }
                     }
 
                     var currentBorder = new TextureBoxBorder();
-                    currentBorder.Box = _box;
+                    currentBorder.Box = this._box;
                     currentBorder.DrawShadow = false;
+                    currentBorder.Padding += new Thickness(8);
                     this.Children.Add(currentBorder);
                     if (horiz)
                         this.SetColumn(currentBorder, 1);
                     else
                         this.SetRow(currentBorder, 1);
                     {
-                        Grid grid = new Grid();
-                        currentBorder.Child = grid;
+                        ScrollViewer view = new ScrollViewer();
+                        view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                        view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                        currentBorder.Child = view;
                         {
-                            var titleLabel = new Label();
-                            titleLabel.Text = I18n.Ui_MainMenu_CurrentExample();
-                            titleLabel.Font = FontType.SpriteText;
-                            titleLabel.HorizontalAlignment = HorizontalAlignment.Left;
-                            titleLabel.VerticalAlignment = VerticalAlignment.Top;
-                            grid.Children.Add(titleLabel);
-
-                            this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Center;
-                            this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Center;
-                            grid.Children.Add(this.CurrentFontExample);
+                            this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
+                            this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+                            view.Content = this.CurrentFontExample;
                         }
                     }
                 }
