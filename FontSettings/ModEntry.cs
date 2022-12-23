@@ -24,6 +24,7 @@ namespace FontSettings
         private readonly string _globalFontDataKey = "font-data";
 
         private readonly MigrateTo_0_2_0 _0_2_0_Migration = new();
+        private readonly MigrateTo_0_6_0 _0_6_0_Migration = new();
 
         private ModConfig _config;
 
@@ -59,6 +60,8 @@ namespace FontSettings
                 this._config.Fonts = this.ReadFontSettings();
             }
             this.CheckConfigValid(this._config);
+            this._0_6_0_Migration.Apply(helper, this.ModManifest, this._config.Fonts, this.SaveFontSettings);
+
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
             this._fontChangerImpl = new GameFontChangerImpl(helper, this._config);
@@ -80,7 +83,6 @@ namespace FontSettings
                     .Patch(Harmony, this.Monitor);
             }
 
-            helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
@@ -119,12 +121,12 @@ namespace FontSettings
             this.RecordFontData(newLangugage, newLocale);
 
             foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
-                    {
+            {
                 if (this._config.Fonts.TryGetFontConfig(LocalizedContentManager.CurrentLanguageCode,
                     FontHelpers.GetCurrentLocale(), fontType, out FontConfig config))
-                    {
+                {
                     this._fontChangerImpl.ChangeGameFont(config);
-            }
+                }
             }
         }
 
