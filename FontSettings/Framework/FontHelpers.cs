@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using StardewValley;
 using StardewValley.GameData;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FontSettings.Framework
 {
@@ -143,6 +144,75 @@ namespace FontSettings.Framework
                     }
                 }
             }
+        }
+
+        public static string WrapString(string? text, float constrain, ISpriteFont? font)
+        {
+            if (font == null)
+                return string.Empty;
+
+            string newLine = font.LineBreak;
+            float measureString(string s) => font.MeasureString(s).X;
+            return WrapString(text, constrain, measureString, newLine);
+        }
+
+        public static string WrapString(string? text, float constrain, Func<string?, float> measureString, string newLine)
+        {
+            // Copied from Game1.parseText
+            if (text == null)
+            {
+                return "";
+            }
+            string line = string.Empty;
+            string returnString = string.Empty;
+            if (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ja
+                || LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.zh
+                || LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.th)
+            {
+                string text2 = text;
+                for (int i = 0; i < text2.Length; i++)
+                {
+                    char c = text2[i];
+                    if (measureString(line + c.ToString()) > constrain || c.Equals(newLine))
+                    {
+                        returnString = returnString + line + newLine;
+                        line = string.Empty;
+                    }
+                    if (!c.Equals(newLine))
+                    {
+                        line += c.ToString();
+                    }
+                }
+                return returnString + line;
+            }
+
+            string[] array = text.Split(' ');
+            foreach (string word in array)
+            {
+                try
+                {
+                    if (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.fr && word.StartsWith("\n-"))
+                    {
+                        returnString = returnString + line + newLine;
+                        line = string.Empty;
+                    }
+                    if (measureString(line + word) > constrain || word.Equals(newLine))
+                    {
+                        returnString = returnString + line + newLine;
+                        line = string.Empty;
+                    }
+                    if (!word.Equals(newLine))
+                    {
+                        line = line + word + " ";
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception measuring string: " + e);
+                }
+            }
+            return returnString + line;
+
         }
     }
 }

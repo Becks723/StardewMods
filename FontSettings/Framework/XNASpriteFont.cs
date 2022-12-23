@@ -18,6 +18,8 @@ namespace FontSettings.Framework
 
         public bool IsDisposed => this._disposed;
 
+        string ISpriteFont.LineBreak => Environment.NewLine;
+
         public XNASpriteFont(SpriteFont innerFont)
         {
             this.InnerFont = innerFont ?? throw new ArgumentNullException(nameof(innerFont));

@@ -52,5 +52,10 @@ namespace FontSettings.Framework.Menus
 
             return font.MeasureString(s ?? string.Empty);
         }
+
+        protected override string WrapString(string text, float constrain, Func<string, float> measureString)
+        {
+            return FontHelpers.WrapString(text, constrain, this.Font);
+        }
     }
 }

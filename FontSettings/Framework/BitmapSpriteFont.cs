@@ -19,6 +19,8 @@ namespace FontSettings.Framework
 
         public bool IsDisposed => this._disposed;
 
+        string ISpriteFont.LineBreak => "^";
+
         public void Dispose()
         {
             if (!this._disposed)
