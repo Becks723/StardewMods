@@ -14,6 +14,7 @@ namespace FontSettings.Framework.Menus
     internal class FontPreviewGrid : Grid
     {
         private readonly TextureBox _box;
+        private readonly float _padding;
 
         private static readonly UIPropertyInfo IsMergedProperty
             = new UIPropertyInfo(nameof(IsMerged), typeof(bool), typeof(FontPreviewGrid), false, OnIsMergedChanged);
@@ -36,9 +37,10 @@ namespace FontSettings.Framework.Menus
 
         public FontExampleLabel CurrentFontExample { get; }
 
-        public FontPreviewGrid(TextureBox box)
+        public FontPreviewGrid(TextureBox box = null, float padding = 8)
         {
-            this._box = box;
+            this._box = box ?? TextureBoxes.Default;
+            this._padding = padding;
 
             this.VanillaFontExample = new FontExampleLabel()
             {
@@ -69,7 +71,7 @@ namespace FontSettings.Framework.Menus
                 var border = new TextureBoxBorder();
                 border.Box = this._box;
                 border.DrawShadow = false;
-                border.Padding += new Thickness(8);
+                border.Padding += new Thickness(_padding);
                 this.Children.Add(border);
                 {
                     ScrollViewer view = new ScrollViewer();
@@ -103,7 +105,7 @@ namespace FontSettings.Framework.Menus
                     var vanillaBorder = new TextureBoxBorder();
                     vanillaBorder.Box = this._box;
                     vanillaBorder.DrawShadow = false;
-                    vanillaBorder.Padding += new Thickness(8);
+                    vanillaBorder.Padding += new Thickness(_padding);
                     this.Children.Add(vanillaBorder);
                     if (horiz)
                         this.SetColumn(vanillaBorder, 0);
@@ -124,7 +126,7 @@ namespace FontSettings.Framework.Menus
                     var currentBorder = new TextureBoxBorder();
                     currentBorder.Box = this._box;
                     currentBorder.DrawShadow = false;
-                    currentBorder.Padding += new Thickness(8);
+                    currentBorder.Padding += new Thickness(_padding);
                     this.Children.Add(currentBorder);
                     if (horiz)
                         this.SetColumn(currentBorder, 1);

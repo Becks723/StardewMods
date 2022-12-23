@@ -588,7 +588,7 @@ namespace FontSettings.Framework.Menus
                     mainGrid.Children.Add(previewGrid);
                     mainGrid.SetColumn(previewGrid, 0);
                     {
-                        var previewControl = new FontPreviewGrid(this.DefaultBorderless(whenStarrySkyInterface: TextureBoxes.Default));
+                        var previewControl = new FontPreviewGrid(TextureBoxes.Default, 8);
                         context.OneWayBinds(() => this._viewModel.ExamplesMerged, () => previewControl.IsMerged);
                         var vanillaTextLabel = previewControl.VanillaFontExample;
                         var currentTextLabel = previewControl.CurrentFontExample;
