@@ -163,6 +163,17 @@ namespace FontSettings.Framework
             return invalidType == null;
         }
 
+        internal void EditPreset(FontPreset preset, Action<FontPreset> editor)
+        {
+            this.AssertNotNull(preset, nameof(preset));
+            this.AssertNoInvalidChar(preset.Name, nameof(preset));
+            this.AssertNotNull(editor, nameof(editor));
+
+            editor(preset);
+
+            this.WriteToFile(preset);
+        }
+
         private void WriteToFile(FontPreset preset)  // 名称必须合法。
         {
             string json = JsonConvert.SerializeObject(preset, GetJsonSerializeSettings());

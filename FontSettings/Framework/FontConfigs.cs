@@ -32,9 +32,6 @@ namespace FontSettings.Framework
 
         public FontConfig? GetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
         {
-            if (code is StardewValley.LocalizedContentManager.LanguageCode.en && string.IsNullOrEmpty(locale))
-                locale = "en";
-
             return (from font in this
                     where font.Lang == code && font.Locale == locale && font.InGameType == inGameType
                     select font)

@@ -60,7 +60,6 @@ namespace FontSettings
                 this._config.Fonts = this.ReadFontSettings();
             }
             this.CheckConfigValid(this._config);
-            this._0_6_0_Migration.Apply(helper, this.ModManifest, this._config.Fonts, this.SaveFontSettings);
             this._config.Sample = this.ReadSampleData();
 
             this._fontManager = new(helper.ModContent);
@@ -68,6 +67,8 @@ namespace FontSettings
             this._fontChangerImpl = new GameFontChangerImpl(helper, this._config);
             this._presetManager = new(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"), "System");
             this._vanillaContentManager = new LocalizedContentManager(GameRunner.instance.Content.ServiceProvider, GameRunner.instance.Content.RootDirectory);
+
+            this._0_6_0_Migration.Apply(helper, this.ModManifest, this._config.Fonts, this.SaveFontSettings, this._presetManager);
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {

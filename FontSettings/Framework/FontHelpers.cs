@@ -99,7 +99,7 @@ namespace FontSettings.Framework
         {
             switch (languageCode)
             {
-                case LocalizedContentManager.LanguageCode.en: return "en";
+                case LocalizedContentManager.LanguageCode.en: return string.Empty;
                 case LocalizedContentManager.LanguageCode.ja: return "ja-JP";
                 case LocalizedContentManager.LanguageCode.ru: return "ru-RU";
                 case LocalizedContentManager.LanguageCode.zh: return "zh-CN";
