@@ -9,6 +9,8 @@ namespace FontSettings.Framework
 
         internal FontConfigs Fonts { get; set; }  // 这个不要储存在config.json里，故设为internal。
 
+        internal SampleData Sample { get; set; }  // 同上
+
         internal int MinFontSize { get; } = 1;  // 只读属性pulic的话会显示在json文件里。
 
         public int MaxFontSize { get; set; } = 100;

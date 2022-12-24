@@ -112,9 +112,20 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
-        public string? ExampleText => this.CurrentFontType is GameFontType.SpriteText
-            ? this._config.ExampleText?.Replace('\n', '^')
-            : this._config.ExampleText;
+        public string? ExampleText
+        {
+            get
+            {
+                string text = this._config.ExampleText;
+
+                if (string.IsNullOrWhiteSpace(text))
+                    text = this._config.Sample.GetTextForCurrentLangauge();
+
+                return this.CurrentFontType is GameFontType.SpriteText
+                    ? text?.Replace('\n', '^')
+                    : text;
+            }
+        }
 
         #region ExampleCurrentFont Property
 

@@ -61,6 +61,7 @@ namespace FontSettings
             }
             this.CheckConfigValid(this._config);
             this._0_6_0_Migration.Apply(helper, this.ModManifest, this._config.Fonts, this.SaveFontSettings);
+            this._config.Sample = this.ReadSampleData();
 
             this._fontManager = new(helper.ModContent);
             this._fontChanger = new(this._fontManager);
@@ -236,6 +237,18 @@ namespace FontSettings
             }
 
             return fonts;
+        }
+
+        private SampleData ReadSampleData()
+        {
+            const string path = "assets/sample.json";
+            var sample = this.Helper.Data.ReadJsonFile<SampleData>(path);
+            if (sample == null)
+            {
+                this.Monitor.Log($"Missing file: {path}. Please download the mod again to restore the file.");
+                sample = new SampleData();
+            }
+            return sample;
         }
 
         private void SaveConfig(ModConfig config)

@@ -1,0 +1,18 @@
+{
+  "Texts": [
+    {
+      "Key": {
+        "Code": "en",
+        "Locale": ""
+      },
+      "Value": "Stardew Valley is an open-ended country-life RPG! You’ve inherited your grandfather’s old farm plot in Stardew Valley. Armed with hand-me-down tools and a few coins, you set out to begin your new life. Can you learn to live off the land and turn these overgrown fields into a thriving home?"
+    },
+    {
+      "Key": {
+        "Code": "zh",
+        "Locale": "zh-CN"
+      },
+      "Value": "星露谷物语是一个牧场类的RPG游戏。你继承了爷爷在星露谷的农场，但是你手头上只有最基础的农具和少许的金钱，你得靠此开始你的新生活。你能把这片杂草丛生的田地变成一个繁荣的家园吗？"
+    }
+  ]
+}
