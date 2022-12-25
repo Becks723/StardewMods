@@ -30,8 +30,6 @@ namespace FontSettings
 
         private FontManager _fontManager;
 
-        private GameFontChanger _fontChanger;
-
         private GameFontChangerImpl _fontChangerImpl;
 
         private FontPresetManager _presetManager;
@@ -63,7 +61,6 @@ namespace FontSettings
             this._config.Sample = this.ReadSampleData();
 
             this._fontManager = new(helper.ModContent);
-            this._fontChanger = new(this._fontManager);
             this._fontChangerImpl = new GameFontChangerImpl(helper, this._config);
             this._presetManager = new(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"), "System");
             this._vanillaContentManager = new LocalizedContentManager(GameRunner.instance.Content.ServiceProvider, GameRunner.instance.Content.RootDirectory);
@@ -72,12 +69,6 @@ namespace FontSettings
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                new Game1Patcher(this._config, this._fontManager, this._fontChanger)
-                    .Patch(Harmony, this.Monitor);
-
-                //new SpriteTextPatcher(this._config, this._fontManager, this._fontChanger)
-                //    .Patch(Harmony, this.Monitor);
-
                 new GameMenuPatcher()
                     .AddFontSettingsPage(helper, Harmony, this._config, this.SaveConfig);
 
