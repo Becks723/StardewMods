@@ -708,9 +708,13 @@ namespace FontSettings.Framework.Menus
 
         public void UpdateExampleCurrent()
         {
+            string fontPath = this.FontFilePath != null 
+                ? InstalledFonts.GetFullPath(this.FontFilePath)
+                : null;
+
             var param = new SampleFontGeneratorParameter(
                 Enabled: this.FontEnabled,
-                FontFilePath: InstalledFonts.GetFullPath(this.FontFilePath),
+                FontFilePath: fontPath,
                 FontSize: this.FontSize,
                 Spacing: this.Spacing,
                 LineSpacing: this.LineSpacing,
@@ -728,9 +732,12 @@ namespace FontSettings.Framework.Menus
         private CancellationTokenSource _tokenSource;
         public async Task UpdateExampleCurrentAsync()
         {
+            string fontPath = this.FontFilePath != null
+                ? InstalledFonts.GetFullPath(this.FontFilePath)
+                : null;
             var param = new SampleFontGeneratorParameter(
                 Enabled: this.FontEnabled,
-                FontFilePath: InstalledFonts.GetFullPath(this.FontFilePath),
+                FontFilePath: fontPath,
                 FontSize: this.FontSize,
                 Spacing: this.Spacing,
                 LineSpacing: this.LineSpacing,
