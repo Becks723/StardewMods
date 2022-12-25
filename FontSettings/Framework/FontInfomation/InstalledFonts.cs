@@ -49,7 +49,7 @@ namespace FontSettings.Framework.FontInfomation
             if (TryGetFullPath(simplifiedPath, out string fullPath))
                 return fullPath;
 
-            throw new FileNotFoundException();
+            throw new FileNotFoundException($"Unable to find the font '{simplifiedPath}' on your computer.");
         }
 
         public static bool TryGetFullPath(string simplifiedPath, out string fullPath)
