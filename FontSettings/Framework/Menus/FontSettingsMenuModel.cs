@@ -548,6 +548,10 @@ namespace FontSettings.Framework.Menus
             foreach (var pair in this._presetViewModels)
                 pair.Value.CurrentPreset = _stagedValues.Presets[pair.Key];
 
+            // 部分语言不支持SpriteText，重置当前字体类型。
+            if (LocalizedContentManager.CurrentLanguageLatin && this.CurrentFontType == GameFontType.SpriteText)
+                this.CurrentFontType = GameFontType.SmallFont;
+
             this.AllFonts = new ObservableCollection<FontModel>(this.LoadAllFonts());
             this.OnFontTypeChanged(this.CurrentFontType);
 
