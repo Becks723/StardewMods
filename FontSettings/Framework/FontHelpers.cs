@@ -81,6 +81,34 @@ namespace FontSettings.Framework
                 or LocalizedContentManager.LanguageCode.hu;
         }
 
+        public static float GetDefaultFontPixelZoom()
+        {
+            var code = LocalizedContentManager.CurrentLanguageCode;
+            if (code != LocalizedContentManager.LanguageCode.mod)
+                return GetDefaultFontPixelZoom(code);
+            else
+                return GetDefaultFontPixelZoom(LocalizedContentManager.CurrentModLanguage);
+        }
+
+        public static float GetDefaultFontPixelZoom(LocalizedContentManager.LanguageCode code)
+        {
+            return code switch
+            {
+                LocalizedContentManager.LanguageCode.ja => 1.75f,
+                LocalizedContentManager.LanguageCode.ru => 3f,
+                LocalizedContentManager.LanguageCode.zh => 1.5f,
+                LocalizedContentManager.LanguageCode.th => 1.5f,
+                LocalizedContentManager.LanguageCode.ko => 1.5f,
+                not LocalizedContentManager.LanguageCode.mod => 3f,
+                LocalizedContentManager.LanguageCode.mod => throw new NotSupportedException($"Not for mod language. Use the overload method instead.")
+            };
+        }
+
+        public static float GetDefaultFontPixelZoom(ModLanguage modLanguage)
+        {
+            return modLanguage.FontPixelZoom;
+        }
+
         public static LanguageInfo GetCurrentLanguage()
         {
             return new LanguageInfo(LocalizedContentManager.CurrentLanguageCode, GetCurrentLocale());

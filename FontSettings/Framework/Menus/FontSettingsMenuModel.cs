@@ -711,7 +711,7 @@ namespace FontSettings.Framework.Menus
 
         public void UpdateExampleCurrent()
         {
-            string fontPath = this.FontFilePath != null 
+            string fontPath = this.FontFilePath != null
                 ? InstalledFonts.GetFullPath(this.FontFilePath)
                 : null;
 
@@ -797,7 +797,7 @@ namespace FontSettings.Framework.Menus
 
             // 更新各个属性。
             FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                FontHelpers.GetCurrentLocale(), newFontType);
+                FontHelpers.GetCurrentLocale(), newFontType, this.DefaultFontConfig);
             this.FontEnabled = fontConfig.Enabled;
             this.FontSize = fontConfig.FontSize;
             this.Spacing = fontConfig.Spacing;
@@ -837,7 +837,7 @@ namespace FontSettings.Framework.Menus
                 this.IsCurrentPresetValid = true;
 
                 FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                    FontHelpers.GetCurrentLocale(), this.CurrentFontType);
+                    FontHelpers.GetCurrentLocale(), this.CurrentFontType, this.DefaultFontConfig);
                 this.FontEnabled = fontConfig.Enabled;
                 this.FontSize = fontConfig.FontSize;
                 this.Spacing = fontConfig.Spacing;
@@ -868,6 +868,27 @@ namespace FontSettings.Framework.Menus
 
                 this.UpdateExampleCurrent();
             }
+        }
+
+        private FontConfig DefaultFontConfig()
+        {
+            return this.DefaultFontConfig(this.CurrentFontType, FontHelpers.GetCurrentLanguage());
+        }
+
+        private FontConfig DefaultFontConfig(GameFontType fontType, LanguageInfo language)
+        {
+            var font = new FontConfig();
+            font.Enabled = true;
+            font.InGameType = fontType;
+            font.Lang = language.Code;
+            font.Locale = language.Locale;
+            font.FontFilePath = null;
+            font.FontSize = 26;
+            font.Spacing = 0;
+            font.LineSpacing = 26;
+            if (fontType == GameFontType.SpriteText)
+                font.PixelZoom = FontHelpers.GetDefaultFontPixelZoom();
+            return font;
         }
 
         private IEnumerable<FontModel> LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。

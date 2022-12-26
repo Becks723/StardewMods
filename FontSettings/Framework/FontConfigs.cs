@@ -8,26 +8,27 @@ namespace FontSettings.Framework
 {
     internal class FontConfigs : List<FontConfig>
     {
+        public FontConfig GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, Func<FontConfig> createFontConfig)
+        {
+            if (this.TryGetFontConfig(code, locale, inGameType, out var got))
+                return got;
+
+            got = createFontConfig();
+            this.Add(got);
+            return got;
+        }
+
         public FontConfig GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
         {
-            FontConfig? got = this.GetFontConfig(code, locale, inGameType);
-
-            if (got == null)
+            return this.GetOrCreateFontConfig(code, locale, inGameType, () =>
             {
-                got = new FontConfig
+                return new FontConfig
                 {
-                    Enabled = false,
                     Lang = code,
                     Locale = locale,
-                    InGameType = inGameType,
-                    FontSize = 24,
-                    Spacing = 0,
-                    LineSpacing = 24
+                    InGameType = inGameType
                 };
-                this.Add(got);
-            }
-
-            return got;
+            });
         }
 
         public FontConfig? GetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
