@@ -121,6 +121,9 @@ namespace FontSettings.Framework.Menus
                 if (string.IsNullOrWhiteSpace(text))
                     text = this._config.Sample.GetTextForCurrentLangauge();
 
+                if (string.IsNullOrWhiteSpace(text))
+                    text = this._config.Sample.GetTextForLangauge(FontHelpers.EnLanguage);
+
                 return this.CurrentFontType is GameFontType.SpriteText
                     ? text?.Replace('\n', '^')
                     : text;

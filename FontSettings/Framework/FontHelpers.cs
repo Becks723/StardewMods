@@ -121,6 +121,13 @@ namespace FontSettings.Framework
             return modLanguage?.LanguageCode;
         }
 
+        public static LanguageInfo GetLanguage(LocalizedContentManager.LanguageCode code)
+        {
+            return new LanguageInfo(code, GetLocale(code));
+        }
+
+        public static LanguageInfo EnLanguage => GetLanguage(LocalizedContentManager.LanguageCode.en);
+
         /// <summary>
         /// 
         /// </summary>

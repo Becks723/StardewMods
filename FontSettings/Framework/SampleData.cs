@@ -16,7 +16,7 @@ namespace FontSettings.Framework
                 FontHelpers.GetCurrentLanguage(), throwIfKeyNotFound);
         }
 
-        public string? GetTextForLangauge(LanguageInfo key, bool throwIfKeyNotFound)
+        public string? GetTextForLangauge(LanguageInfo key, bool throwIfKeyNotFound = false)
         {
             foreach (var entry in this.Texts)
             {
