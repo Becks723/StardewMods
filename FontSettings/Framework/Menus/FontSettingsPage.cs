@@ -25,7 +25,12 @@ namespace FontSettings.Framework.Menus
         private readonly FontPresetManager _presetManager;
         private readonly IModRegistry _registry;
         private readonly FontSettingsMenuModel _viewModel;
-        private readonly Texture2D _icons;
+
+        private readonly Texture2D _save;
+        private readonly Texture2D _delete;
+        private readonly Texture2D _sectionBox;
+        private readonly Texture2D _previewNormal;
+        private readonly Texture2D _previewCompare;
 
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
@@ -34,7 +39,12 @@ namespace FontSettings.Framework.Menus
         {
             this._presetManager = presetManager;
             this._registry = registry;
-            this._icons = Textures.Icons;
+
+            this._save = Textures.Save;
+            this._delete = Textures.Delete;
+            this._sectionBox = Textures.SectionBox;
+            this._previewNormal = Textures.FontPreviewNormal;
+            this._previewCompare = Textures.FontPreviewCompare;
 
             this.ResetComponents();
 
@@ -254,7 +264,7 @@ namespace FontSettings.Framework.Menus
                                 Border SectionBorder()
                                 {
                                     var border = new TextureBoxBorder();
-                                    border.Box = TextureBox.From(this._icons, new Rectangle(96, 0, 3, 3), 1f, Thickness.One);
+                                    border.Box = TextureBox.From(this._sectionBox, new Rectangle(0, 0, 3, 3), 1f, Thickness.One);
                                     border.Padding += new Thickness(sectionPadding);
                                     return border;
                                 }
@@ -526,7 +536,7 @@ namespace FontSettings.Framework.Menus
                                             presetGrid.SetColumn(nextPresetButton, 2);
 
                                             var savePresetButton = new TextureButton(
-                                                this._icons, new Rectangle(64, 0, 16, 16), 4f);
+                                                this._save, null, 4f);
                                             savePresetButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
                                             savePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                             savePresetButton.VerticalAlignment = VerticalAlignment.Center;
@@ -538,7 +548,7 @@ namespace FontSettings.Framework.Menus
                                             presetGrid.SetColumn(savePresetButton, 3);
 
                                             var deletePresetButton = new TextureButton(
-                                                this._icons, new Rectangle(80, 0, 16, 16), 4f);
+                                                this._delete, null, 4f);
                                             deletePresetButton.Margin = new Thickness(0, 0, 0, 0);
                                             deletePresetButton.HorizontalAlignment = HorizontalAlignment.Center;
                                             deletePresetButton.VerticalAlignment = VerticalAlignment.Center;
@@ -614,20 +624,15 @@ namespace FontSettings.Framework.Menus
                                     switch (mode)
                                     {
                                         case PreviewMode.Normal:
-                                            button.Texture = this._icons;
-                                            button.SourceRectangle = new Rectangle(32, 0, 16, 16);
+                                            button.Texture = this._previewNormal;
+                                            button.SourceRectangle = null;
                                             button.Scale = 4f;
                                             break;
 
                                         case PreviewMode.Compare:
-                                            button.Texture = this._icons;
-                                            button.SourceRectangle = new Rectangle(48, 0, 16, 16);
-                                            button.Scale = 4f;
-                                            break;
-
                                         case PreviewMode.PreciseCompare:
-                                            button.Texture = this._icons;
-                                            button.SourceRectangle = new Rectangle(48, 0, 16, 16);
+                                            button.Texture = this._previewCompare;
+                                            button.SourceRectangle = null;
                                             button.Scale = 4f;
                                             break;
                                     }

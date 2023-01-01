@@ -148,9 +148,9 @@ namespace FontSettings.Framework.Patchers
 
                         // 内容
                         b.Draw(
-                            Textures.Icons,
+                            Textures.FontTab,
                             new Vector2(tab.bounds.X, tab.bounds.Y + (__instance.currentTab == __instance.getTabNumberFromName(tab.name) ? 8 : 0)),
-                            new Rectangle(0, 0, 16, 16),
+                            null,
                             Color.White,
                             0f,
                             Vector2.Zero,

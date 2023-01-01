@@ -16,7 +16,17 @@ namespace FontSettings.Framework
             _modContent = modContent;
         }
 
-        public static Texture2D Icons
-            => _modContent.Load<Texture2D>("assets/icons.png");
+        public static Texture2D FontTab => LoadTexture("assets/font-tab.png");
+        public static Texture2D Refresh => LoadTexture("assets/refresh.png");
+        public static Texture2D Save => LoadTexture("assets/save.png");
+        public static Texture2D Delete => LoadTexture("assets/delete.png");
+        public static Texture2D FontPreviewNormal => LoadTexture("assets/font-preview-normal.png");
+        public static Texture2D FontPreviewCompare => LoadTexture("assets/font-preview-compare.png");
+        public static Texture2D SectionBox => LoadTexture("assets/section-box.png");
+
+        private static Texture2D LoadTexture(string relativePath)
+        {
+            return _modContent.Load<Texture2D>(relativePath);
+        }
     }
 }

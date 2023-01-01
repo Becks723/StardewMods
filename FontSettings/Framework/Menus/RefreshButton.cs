@@ -22,7 +22,7 @@ namespace FontSettings.Framework.Menus
         public int RotationAngle { get; set; } = 180;
 
         public RefreshButton(float scale)
-            : base(Textures.Icons, new Rectangle(16, 0, 16, 16), scale)
+            : base(Textures.Refresh, null, scale)
         {
         }
 
