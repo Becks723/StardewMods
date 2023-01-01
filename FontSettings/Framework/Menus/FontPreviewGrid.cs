@@ -16,19 +16,19 @@ namespace FontSettings.Framework.Menus
         private readonly TextureBox _box;
         private readonly float _padding;
 
-        private static readonly UIPropertyInfo IsMergedProperty
-            = new UIPropertyInfo(nameof(IsMerged), typeof(bool), typeof(FontPreviewGrid), false, OnIsMergedChanged);
-        public bool IsMerged
+        private static readonly UIPropertyInfo ModeProperty
+            = new UIPropertyInfo(nameof(Mode), typeof(PreviewMode), typeof(FontPreviewGrid), PreviewMode.Normal, OnModeChanged);
+        public PreviewMode Mode
         {
-            get { return this.GetValue<bool>(IsMergedProperty); }
-            set { this.SetValue(IsMergedProperty, value); }
+            get { return this.GetValue<PreviewMode>(ModeProperty); }
+            set { this.SetValue(ModeProperty, value); }
         }
 
-        private static void OnIsMergedChanged(object sender, UIPropertyChangedEventArgs e)
+        private static void OnModeChanged(object sender, UIPropertyChangedEventArgs e)
         {
             var grid = sender as FontPreviewGrid;
 
-            grid.OnIsMergedChanged((bool)e.OldValue, (bool)e.NewValue);
+            grid.OnModeChanged((PreviewMode)e.OldValue, (PreviewMode)e.NewValue);
         }
 
         public Orientation Orientation { get; set; } = Orientation.Vertical;
@@ -53,10 +53,10 @@ namespace FontSettings.Framework.Menus
                 Wrapping = TextWrapping.Enable
             };
 
-            this.OnIsMergedChanged(true, false);
+            this.OnModeChanged(PreviewMode.Normal, PreviewMode.Normal);
         }
 
-        private void OnIsMergedChanged(bool oldValue, bool newValue)
+        private void OnModeChanged(PreviewMode oldValue, PreviewMode newValue)
         {
             bool horiz = this.Orientation == Orientation.Horizontal;
 
@@ -66,83 +66,125 @@ namespace FontSettings.Framework.Menus
             else
                 this.RowDefinitions.Clear();
 
-            if (newValue)
+            switch (newValue)
             {
-                var border = new TextureBoxBorder();
-                border.Box = this._box;
-                border.DrawShadow = false;
-                border.Padding += new Thickness(_padding);
-                this.Children.Add(border);
+                case PreviewMode.Normal:
+                    this.ChangeToNormal();
+                    break;
+
+                case PreviewMode.Compare:
+                    this.ChangeToCompare();
+                    break;
+
+                case PreviewMode.PreciseCompare:
+                    this.ChangeToPreciseCompare();
+                    break;
+            }
+        }
+
+        private void ChangeToNormal()
+        {
+            bool horiz = this.Orientation == Orientation.Horizontal;
+
+            var border = new TextureBoxBorder();
+            border.Box = this._box;
+            border.DrawShadow = false;
+            border.Padding += new Thickness(this._padding);
+            this.Children.Add(border);
+            {
+                ScrollViewer view = new ScrollViewer();
+                view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                border.Child = view;
+                {
+                    this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
+                    this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+                    view.Content = this.CurrentFontExample;
+                }
+            }
+        }
+
+        private void ChangeToCompare()
+        {
+            bool horiz = this.Orientation == Orientation.Horizontal;
+
+            if (horiz)
+            {
+                this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
+                this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
+            }
+            else
+            {
+                this.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                this.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+            }
+            {
+                var vanillaBorder = new TextureBoxBorder();
+                vanillaBorder.Box = this._box;
+                vanillaBorder.DrawShadow = false;
+                vanillaBorder.Padding += new Thickness(this._padding);
+                this.Children.Add(vanillaBorder);
+                if (horiz)
+                    this.SetColumn(vanillaBorder, 0);
+                else
+                    this.SetRow(vanillaBorder, 0);
                 {
                     ScrollViewer view = new ScrollViewer();
                     view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
                     view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-                    border.Child = view;
+                    vanillaBorder.Child = view;
                     {
-                        var examples = new MergedFontExampleLabels(this.VanillaFontExample, this.CurrentFontExample);
-                        this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Left;
-                        this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Top;
-                        this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Left;
-                        this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Top;
+                        this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
+                        this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+                        view.Content = this.VanillaFontExample;
+                    }
+                }
 
-                        view.Content = examples;
+                var currentBorder = new TextureBoxBorder();
+                currentBorder.Box = this._box;
+                currentBorder.DrawShadow = false;
+                currentBorder.Padding += new Thickness(this._padding);
+                this.Children.Add(currentBorder);
+                if (horiz)
+                    this.SetColumn(currentBorder, 1);
+                else
+                    this.SetRow(currentBorder, 1);
+                {
+                    ScrollViewer view = new ScrollViewer();
+                    view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                    view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                    currentBorder.Child = view;
+                    {
+                        this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
+                        this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Stretch;
+                        view.Content = this.CurrentFontExample;
                     }
                 }
             }
-            else
-            {
-                if (horiz)
-                {
-                    this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
-                    this.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnit.Percent) });
-                }
-                else
-                {
-                    this.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
-                    this.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
-                }
-                {
-                    var vanillaBorder = new TextureBoxBorder();
-                    vanillaBorder.Box = this._box;
-                    vanillaBorder.DrawShadow = false;
-                    vanillaBorder.Padding += new Thickness(_padding);
-                    this.Children.Add(vanillaBorder);
-                    if (horiz)
-                        this.SetColumn(vanillaBorder, 0);
-                    else
-                        this.SetRow(vanillaBorder, 0);
-                    {
-                        ScrollViewer view = new ScrollViewer();
-                        view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
-                        view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-                        vanillaBorder.Child = view;
-                        {
-                            this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
-                            this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Stretch;
-                            view.Content = this.VanillaFontExample;
-                        }
-                    }
+        }
 
-                    var currentBorder = new TextureBoxBorder();
-                    currentBorder.Box = this._box;
-                    currentBorder.DrawShadow = false;
-                    currentBorder.Padding += new Thickness(_padding);
-                    this.Children.Add(currentBorder);
-                    if (horiz)
-                        this.SetColumn(currentBorder, 1);
-                    else
-                        this.SetRow(currentBorder, 1);
-                    {
-                        ScrollViewer view = new ScrollViewer();
-                        view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
-                        view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-                        currentBorder.Child = view;
-                        {
-                            this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
-                            this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Stretch;
-                            view.Content = this.CurrentFontExample;
-                        }
-                    }
+        private void ChangeToPreciseCompare()
+        {
+            bool horiz = this.Orientation == Orientation.Horizontal;
+
+            var border = new TextureBoxBorder();
+            border.Box = this._box;
+            border.DrawShadow = false;
+            border.Padding += new Thickness(this._padding);
+            this.Children.Add(border);
+            {
+                ScrollViewer view = new ScrollViewer();
+                view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
+                view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                border.Child = view;
+                {
+                    var examples = new MergedFontExampleLabels(this.VanillaFontExample, this.CurrentFontExample);
+                    this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Left;
+                    this.VanillaFontExample.VerticalAlignment = VerticalAlignment.Top;
+                    this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Left;
+                    this.CurrentFontExample.VerticalAlignment = VerticalAlignment.Top;
+
+                    view.Content = examples;
                 }
             }
         }

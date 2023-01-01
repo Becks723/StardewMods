@@ -87,5 +87,17 @@ namespace FontSettings.Framework
                 }))
             };
         }
+
+        public static TEnum Next<TEnum>(this TEnum value)
+            where TEnum : struct, Enum
+        {
+            var values = Enum.GetValues<TEnum>();
+            int index = Array.IndexOf(values, value);
+
+            int next = index + 1;
+            if (next == values.Length)
+                next = 0;
+            return values[next];
+        }
     }
 }

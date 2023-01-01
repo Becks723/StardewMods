@@ -64,14 +64,14 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
-        #region ExamplesMerged Property
+        #region PreviewMode Property
 
-        private bool _exmaplesMerged;
+        private PreviewMode _previewMode;
 
-        public bool ExamplesMerged
+        public PreviewMode PreviewMode
         {
-            get => this._exmaplesMerged;
-            set => this.SetField(ref this._exmaplesMerged, value);
+            get => this._previewMode;
+            set => this.SetField(ref this._previewMode, value);
         }
 
         #endregion
@@ -541,7 +541,7 @@ namespace FontSettings.Framework.Menus
 
             // 填入之前记录的属性值。
             this.CurrentFontType = _stagedValues.FontType;
-            this.ExamplesMerged = _stagedValues.ExamplesMerged;
+            this.PreviewMode = _stagedValues.PreviewMode;
             this.ShowExampleBounds = _stagedValues.ShowBounds;
             this.ShowExampleText = _stagedValues.ShowText;
             this.IsTuningCharOffset = _stagedValues.OffsetTuning;
@@ -1011,8 +1011,8 @@ namespace FontSettings.Framework.Menus
                         _stagedValues.FontType = this.CurrentFontType;
                         break;
 
-                    case nameof(this.ExamplesMerged):
-                        _stagedValues.ExamplesMerged = this.ExamplesMerged;
+                    case nameof(this.PreviewMode):
+                        _stagedValues.PreviewMode = this.PreviewMode;
                         break;
 
                     case nameof(this.ShowExampleBounds):
@@ -1044,6 +1044,7 @@ namespace FontSettings.Framework.Menus
         private class StagedValues
         {
             public GameFontType FontType { get; set; } = GameFontType.SmallFont;
+            public PreviewMode PreviewMode { get; set; } = PreviewMode.Normal;
             public bool ExamplesMerged { get; set; } = false;
             public bool ShowBounds { get; set; } = false;
             public bool ShowText { get; set; } = true;

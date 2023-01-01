@@ -589,7 +589,7 @@ namespace FontSettings.Framework.Menus
                     mainGrid.SetColumn(previewGrid, 0);
                     {
                         var previewControl = new FontPreviewGrid(TextureBoxes.Default, 8);
-                        context.OneWayBinds(() => this._viewModel.ExamplesMerged, () => previewControl.IsMerged);
+                        context.OneWayBinds(() => this._viewModel.PreviewMode, () => previewControl.Mode);
                         var vanillaTextLabel = previewControl.VanillaFontExample;
                         var currentTextLabel = previewControl.CurrentFontExample;
                         context.OneWayBinds(() => this._viewModel.ShowExampleBounds, () => vanillaTextLabel.ShowBounds);
@@ -608,12 +608,33 @@ namespace FontSettings.Framework.Menus
                         previewGrid.Children.Add(optionsStack);
                         previewGrid.SetRow(optionsStack, 1);
                         {
-                            var mergeButton = new ToggleTextureButton(
-                                onTexture: this._icons, onSourceRectangle: new(32, 0, 16, 16), onScale: 4f,
-                                offTexture: this._icons, offSourceRectangle: new(48, 0, 16, 16), offScale: 4f);
-                            mergeButton.ClickSound = "coin";
-                            context.TwoWayBinds(() => this._viewModel.ExamplesMerged, () => mergeButton.IsToggled);
-                            optionsStack.Children.Add(mergeButton);
+                            var previewButton = new SwitchTextureButton<PreviewMode>(
+                                (mode, button) =>
+                                {
+                                    switch (mode)
+                                    {
+                                        case PreviewMode.Normal:
+                                            button.Texture = this._icons;
+                                            button.SourceRectangle = new Rectangle(32, 0, 16, 16);
+                                            button.Scale = 4f;
+                                            break;
+
+                                        case PreviewMode.Compare:
+                                            button.Texture = this._icons;
+                                            button.SourceRectangle = new Rectangle(48, 0, 16, 16);
+                                            button.Scale = 4f;
+                                            break;
+
+                                        case PreviewMode.PreciseCompare:
+                                            button.Texture = this._icons;
+                                            button.SourceRectangle = new Rectangle(48, 0, 16, 16);
+                                            button.Scale = 4f;
+                                            break;
+                                    }
+                                });
+                            previewButton.ClickSound = "coin";
+                            context.TwoWayBinds(() => this._viewModel.PreviewMode, () => previewButton.Flag);
+                            optionsStack.Children.Add(previewButton);
 
                             //var showBoundsButton = new ToggleTextureButton(
                             //    onTexture: this._icons, onSourceRectangle: new(64, 0, 16, 16), onScale: 4f,
