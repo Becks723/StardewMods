@@ -119,7 +119,7 @@ namespace FontSettings.Framework
             int? paddingUp = null, int? paddingLeft = null, int? paddingDown = null, int? paddingRight = null,
             int? spacingHoriz = null, int? spacingVert = null)
         {
-            string finalFontFile = fontFilePath?? throw new ArgumentNullException(nameof(fontFilePath));
+            string finalFontFile = fontFilePath ?? throw new ArgumentNullException(nameof(fontFilePath));
             int finalFontIndex = fontIndex ?? DefaultFontIndex;
             int finalFontSize = fontSize ?? DefaultFontSize;
             string finalOutputName = outputName ?? $"{Path.GetFileNameWithoutExtension(fontFilePath)}-{finalFontSize}px-{DateTime.Now:HH-mm-ss}";
@@ -137,6 +137,18 @@ namespace FontSettings.Framework
                 finalCharRanges, finalCharsFiles,
                 finalPaddingUp, finalPaddingRight, finalPaddingDown, finalPaddingLeft,
                 finalSpacingHoriz, finalSpacingVert);
+        }
+
+        // TODO: 支持size和charRange: 这两项需要重新生成图片，不像下面的只需简单地修改属性。
+        public static void EditExisting(FontFile existingFont,
+            float? overrideSpacing = null,
+            float? overrideLineSpacing = null,
+            float extraCharOffsetX = 0,
+            float extraCharOffsetY = 0)
+        {
+            // line spacing.
+            if (overrideLineSpacing != null)
+                existingFont.Common.LineHeight = (int)overrideLineSpacing.Value;
         }
     }
 }

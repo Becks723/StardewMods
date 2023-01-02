@@ -43,6 +43,17 @@ namespace FontSettings.Framework.FontChangers
                     case EditMode.DoNothing:
                         break;
 
+                    case EditMode.Edit:
+                        if (e.NameWithoutLocale.IsEquivalentTo(GetFontFileAssetName()))
+                        {
+                            e.Edit(asset =>
+                            {
+                                FontFile fontFile = FontLoader.Parse(asset.GetData<XmlSource>().Source);
+                                EditBmFont(fontFile, data.Config);
+                            });
+                        }
+                        break;
+
                     case EditMode.Replace:
                         FontFile fontFile = data.Font.FontFile;
                         Texture2D[] pages = data.Font.Pages;
@@ -241,10 +252,16 @@ namespace FontSettings.Framework.FontChangers
             }
 
             if (!config.Enabled)
-                goto doNothing;
+            {
+                data = new BmFontEditData(config, EditMode.DoNothing, null);
+                return false;  // 第三个参数为null时必须返回false。
+            }
 
             if (config.FontFilePath is null)
-                goto doNothing;  // TODO
+            {
+                data = new BmFontEditData(config, EditMode.Edit, new BmFontData(null, null, GetFontPixelZoom()));
+                return true;
+            }
 
             BmFontData font;
             try
@@ -287,6 +304,16 @@ namespace FontSettings.Framework.FontChangers
                 charOffsetY: config.CharOffsetY);
 
             return new BmFontData(fontFile, pages, config.PixelZoom);
+        }
+
+        private static void EditBmFont(FontFile fontFile, FontConfig config)
+        {
+            BmFontGenerator.EditExisting(
+                existingFont: fontFile,
+                overrideSpacing: config.Spacing,
+                overrideLineSpacing: config.LineSpacing,
+                extraCharOffsetX: config.CharOffsetX,
+                extraCharOffsetY: config.CharOffsetY);
         }
 
         private static string GetFontFileAssetName()
@@ -347,6 +374,7 @@ namespace FontSettings.Framework.FontChangers
         private enum EditMode
         {
             DoNothing,
+            Edit,
             Replace
         }
     }
