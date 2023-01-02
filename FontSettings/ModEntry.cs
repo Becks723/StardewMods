@@ -111,7 +111,7 @@ namespace FontSettings
         private void OnLocaleChanged(LocalizedContentManager.LanguageCode newLangugage, string newLocale)
         {
             // 记录字体数据。
-            this.RecordFontData(newLangugage, newLocale);
+            this.RecordFontData(newLangugage, newLocale, LocalizedContentManager.CurrentModLanguage);
 
             foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
             {
@@ -129,7 +129,7 @@ namespace FontSettings
             this._fontManager.Dispose();
         }
 
-        private void RecordFontData(LocalizedContentManager.LanguageCode languageCode, string locale)
+        private void RecordFontData(LocalizedContentManager.LanguageCode languageCode, string locale, ModLanguage modLanguage)
         {
             string DisplayLanguage()
             {
@@ -149,9 +149,11 @@ namespace FontSettings
             {
                 this.Monitor.Log($"正在记录{langStr}语言下的游戏字体数据……");
 
-                SpriteFont smallFont = this._vanillaContentManager.Load<SpriteFont>("Fonts/SmallFont");
-                SpriteFont dialogueFont = this._vanillaContentManager.Load<SpriteFont>("Fonts/SpriteFont1");
-                GameBitmapSpriteFont spriteText = this.LoadGameBmFont(languageCode);
+                SpriteFont smallFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SmallFont");
+                SpriteFont dialogueFont = this.Helper.GameContent.Load<SpriteFont>("Fonts/SpriteFont1");
+                GameBitmapSpriteFont spriteText = languageCode != LocalizedContentManager.LanguageCode.mod
+                    ? this.LoadGameBmFont(languageCode)
+                    : this.LoadModBmFont(modLanguage);
 
                 // 记录内置字体。
                 this._fontManager.RecordBuiltInSpriteFont(GameFontType.SmallFont, smallFont);
@@ -175,13 +177,12 @@ namespace FontSettings
                 LocalizedContentManager.LanguageCode.zh => "Fonts/Chinese",
                 LocalizedContentManager.LanguageCode.th => "Fonts/Thai",
                 LocalizedContentManager.LanguageCode.ko => "Fonts/Korean",
-                LocalizedContentManager.LanguageCode.mod when !LocalizedContentManager.CurrentModLanguage.UseLatinFont => LocalizedContentManager.CurrentModLanguage.FontFile,
                 _ => null
             };
 
             if (fntPath != null)
             {
-                var contentManager = this._vanillaContentManager;
+                var contentManager = this.Helper.GameContent;
 
                 FontFile fontFile = FontLoader.Parse(contentManager.Load<XmlSource>(fntPath).Source);
                 List<Texture2D> pages = new List<Texture2D>(fontFile.Pages.Count);
@@ -196,6 +197,39 @@ namespace FontSettings
                     FontFile = fontFile,
                     Pages = pages,
                     LanguageCode = languageCode
+                };
+            }
+
+            return null;
+        }
+
+        private GameBitmapSpriteFont LoadModBmFont(ModLanguage modLanguage)
+        {
+            string fontFile;
+            {
+                if (!modLanguage.UseLatinFont)
+                    fontFile = modLanguage.FontFile;
+                else
+                    fontFile = null;
+            }
+
+            if (fontFile != null)
+            {
+                var contentManager = this.Helper.GameContent;
+
+                FontFile font = FontLoader.Parse(contentManager.Load<XmlSource>(fontFile).Source);
+                List<Texture2D> pages = new List<Texture2D>(font.Pages.Count);
+                foreach (FontPage fontPage in font.Pages)
+                {
+                    string assetName = $"Fonts/{fontPage.File}";
+                    pages.Add(contentManager.Load<Texture2D>(assetName));
+                }
+
+                return new GameBitmapSpriteFont()
+                {
+                    FontFile = font,
+                    Pages = pages,
+                    LanguageCode = LocalizedContentManager.LanguageCode.mod
                 };
             }
 
