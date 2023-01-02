@@ -39,6 +39,17 @@ namespace FontSettings.Framework
                     set: val => this.Config.ExampleText = ParseBackExampleText(val)
                 )
 
+                // min font size
+                .AddSlider(
+                    name: I18n.Config_MinFontSize,
+                    tooltip: I18n.Config_MinFontSize_Description,
+                    get: () => this.Config.MinFontSize,
+                    set: val => this.Config.MinFontSize = val,
+                    max: 30,
+                    min: 1,
+                    interval: 1
+                )
+
                 // max font size
                 .AddSlider(
                     name: I18n.Config_MaxFontSize,
@@ -47,17 +58,6 @@ namespace FontSettings.Framework
                     set: val => this.Config.MaxFontSize = val,
                     max: 150,
                     min: 50,
-                    interval: 1
-                )
-
-                // max spacing
-                .AddSlider(
-                    name: I18n.Config_MaxSpacing,
-                    tooltip: I18n.Config_MaxSpacing_Description,
-                    get: () => this.Config.MaxSpacing,
-                    set: val => this.Config.MaxSpacing = val,
-                    max: 20,
-                    min: 5,
                     interval: 1
                 )
 
@@ -72,6 +72,28 @@ namespace FontSettings.Framework
                     interval: 1
                 )
 
+                // max spacing
+                .AddSlider(
+                    name: I18n.Config_MaxSpacing,
+                    tooltip: I18n.Config_MaxSpacing_Description,
+                    get: () => this.Config.MaxSpacing,
+                    set: val => this.Config.MaxSpacing = val,
+                    max: 20,
+                    min: 5,
+                    interval: 1
+                )
+
+                // min line spacing
+                .AddSlider(
+                    name: I18n.Config_MinLineSpacing,
+                    tooltip: I18n.Config_MinLineSpacing_Description,
+                    get: () => this.Config.MinLineSpacing,
+                    set: val => this.Config.MinLineSpacing = val,
+                    max: 30,
+                    min: 1,
+                    interval: 1
+                )
+
                 // max line spacing
                 .AddSlider(
                     name: I18n.Config_MaxLineSpacing,
@@ -80,17 +102,6 @@ namespace FontSettings.Framework
                     set: val => this.Config.MaxLineSpacing = val,
                     max: 150,
                     min: 50,
-                    interval: 1
-                )
-
-                // max x offset
-                .AddSlider(
-                    name: I18n.Config_MaxOffsetX,
-                    tooltip: I18n.Config_MaxOffsetX_Description,
-                    get: () => this.Config.MaxCharOffsetX,
-                    set: val => this.Config.MaxCharOffsetX = val,
-                    max: 25,
-                    min: 5,
                     interval: 1
                 )
 
@@ -105,12 +116,12 @@ namespace FontSettings.Framework
                     interval: 1
                 )
 
-                // max y offset
+                // max x offset
                 .AddSlider(
-                    name: I18n.Config_MaxOffsetY,
-                    tooltip: I18n.Config_MaxOffsetY_Description,
-                    get: () => this.Config.MaxCharOffsetY,
-                    set: val => this.Config.MaxCharOffsetY = val,
+                    name: I18n.Config_MaxOffsetX,
+                    tooltip: I18n.Config_MaxOffsetX_Description,
+                    get: () => this.Config.MaxCharOffsetX,
+                    set: val => this.Config.MaxCharOffsetX = val,
                     max: 25,
                     min: 5,
                     interval: 1
@@ -127,14 +138,14 @@ namespace FontSettings.Framework
                     interval: 1
                 )
 
-                // max pixel zoom
+                // max y offset
                 .AddSlider(
-                    name: I18n.Config_MaxPixelZoom,
-                    tooltip: I18n.Config_MaxPixelZoom_Description,
-                    get: () => this.Config.MaxPixelZoom,
-                    set: val => this.Config.MaxPixelZoom = val,
-                    max: 10,
-                    min: 3,
+                    name: I18n.Config_MaxOffsetY,
+                    tooltip: I18n.Config_MaxOffsetY_Description,
+                    get: () => this.Config.MaxCharOffsetY,
+                    set: val => this.Config.MaxCharOffsetY = val,
+                    max: 25,
+                    min: 5,
                     interval: 1
                 )
 
@@ -147,6 +158,17 @@ namespace FontSettings.Framework
                     max: 3,
                     min: 0.1f,
                     interval: 0.1f
+                )
+
+                // max pixel zoom
+                .AddSlider(
+                    name: I18n.Config_MaxPixelZoom,
+                    tooltip: I18n.Config_MaxPixelZoom_Description,
+                    get: () => this.Config.MaxPixelZoom,
+                    set: val => this.Config.MaxPixelZoom = val,
+                    max: 10,
+                    min: 3,
+                    interval: 1
                 );
         }
 
