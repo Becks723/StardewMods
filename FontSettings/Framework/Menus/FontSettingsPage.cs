@@ -693,7 +693,8 @@ namespace FontSettings.Framework.Menus
                 + $"Font: {this._viewModel.FontFilePath}\n"
                 + $"Font index: {this._viewModel.FontIndex}\n"
                 + $"Offset-x: {this._viewModel.CharOffsetX}\n"
-                + $"Offset-y: {this._viewModel.CharOffsetY}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
+                + $"Offset-y: {this._viewModel.CharOffsetY}\n"
+                + $"Pixel Zoom: {this._viewModel.PixelZoom}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif
 
             if (this._isNewPresetMenu)
