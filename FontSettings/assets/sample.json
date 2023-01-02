@@ -1,4 +1,10 @@
 {
+  /*
+  * These are text for sample. Each entry for a language. All of the built in langauges have already been included.
+  * If you want to add more language, please contact mod author.
+  * 
+  * (All texts come from https://stardewvalleywiki.com/Stardew_Valley_Wiki. See the About paragraph below)
+  */
   "Texts": [
     {
       "Key": {
