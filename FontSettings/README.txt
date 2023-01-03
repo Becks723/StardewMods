@@ -9,7 +9,7 @@ Installation:
 
 
 Compatibility:
-	Lastest version (0.6.0) works with Windows, MacOS, Linux.
+	Lastest version (0.6.1) works with Windows, MacOS, Linux.
 
 
 Usage:
