@@ -15,7 +15,7 @@ namespace FontSettings.Framework.FontChangers
         {
             string code = string.Empty;
             string locale = FontHelpers.GetCurrentLocale();
-            if (locale != "en")
+            if (locale != string.Empty)
                 code = $".{locale}";
 
             return baseName + code;

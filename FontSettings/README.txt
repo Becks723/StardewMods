@@ -65,3 +65,8 @@ Configure:
 	- MinPixelZoom			    Min value of the pixel zoom option, default 0.5.
     - MaxPixelZoom			    Max value of the pixel zoom option, default 5.
     - FontSettingsInGameMenu    Legacy option, don't touch it.
+
+
+Release Notes:
+0.6.1 - 2023-01-03
+- Hotfix: In English no effect changing fonts.
