@@ -9,7 +9,7 @@ Installation:
 
 
 Compatibility:
-	Lastest version (0.6.1) works with Windows, MacOS, Linux.
+	Lastest version works with Windows, MacOS, Linux.
 
 
 Usage:
@@ -68,5 +68,8 @@ Configure:
 
 
 Release Notes:
+0.6.2 - 2023-01-05
+- Fix a bug where Dialogue font failed to set when 'Enabled' is not checked.
+
 0.6.1 - 2023-01-03
 - Hotfix: In English no effect changing fonts.
