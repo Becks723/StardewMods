@@ -130,7 +130,7 @@ namespace FontSettings.Framework.FontChangers
                         content.InvalidateCache(this.LocalizeBaseAssetName(pageName));
                     }
 
-                    this.PropagateBmFont(this._data.Font.PixelZoom);
+                    this.PropagateBmFont(this._data.Font?.PixelZoom);
 
                     return true;
                 }
@@ -199,7 +199,7 @@ namespace FontSettings.Framework.FontChangers
                         content.InvalidateCache(this.LocalizeBaseAssetName(pageName));
                     }
 
-                    this.PropagateBmFont(this._data.Font.PixelZoom);
+                    this.PropagateBmFont(this._data.Font?.PixelZoom);
                 }
 
                 return success;
@@ -210,7 +210,7 @@ namespace FontSettings.Framework.FontChangers
             }
         }
 
-        void PropagateBmFont(float pixelZoom)
+        void PropagateBmFont(float? customPixelZoom)
         {
             // 此方法必须在 !LocalizedContentManager.CurrentLanguageLatin 下运行。
             FontFile fontFile;
@@ -223,7 +223,7 @@ namespace FontSettings.Framework.FontChangers
 
             string fontFileName = GetFontFileAssetName();
             fontFile = loadFont(fontFileName);
-            fontPixelZoom = pixelZoom > 0f ? pixelZoom : GetFontPixelZoom();
+            fontPixelZoom = customPixelZoom != null ? customPixelZoom.Value : GetFontPixelZoom();
             foreach (FontChar current in fontFile.Chars)
             {
                 char key = (char)current.ID;
@@ -254,7 +254,7 @@ namespace FontSettings.Framework.FontChangers
             if (!config.Enabled)
             {
                 data = new BmFontEditData(config, EditMode.DoNothing, null);
-                return false;  // 第三个参数为null时必须返回false。
+                return true;
             }
 
             if (config.FontFilePath is null)
