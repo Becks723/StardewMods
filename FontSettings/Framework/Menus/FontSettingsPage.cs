@@ -271,6 +271,15 @@ namespace FontSettings.Framework.Menus
                                     return border;
                                 }
 
+                                Label SliderValueLabel(Slider slider)
+                                {
+                                    Label valuelabel = new Label();
+                                    valuelabel.Font = FontType.DialogueFont;
+                                    valuelabel.MinWidth = FontHelper.MeasureString(FontType.DialogueFont, "999").X;
+                                    context.OneWayBinds(() => slider.Value, () => valuelabel.Text, new ToStringConverter<float>());
+                                    return valuelabel;
+                                }
+
                                 // general
                                 var generalBorder = SectionBorder();
                                 generalBorder.Margin = new Thickness(0, frameSpacing, 0, 0);
@@ -312,12 +321,12 @@ namespace FontSettings.Framework.Menus
                                         fontOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                         gStack.Children.Add(fontOption);
                                         {
-                                        var fontComboBox = new ComboBox();
-                                        fontComboBox.SuggestedWidth = 400;
-                                        fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
-                                        context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
-                                        context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
-                                        fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
+                                            var fontComboBox = new ComboBox();
+                                            fontComboBox.SuggestedWidth = 400;
+                                            fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
+                                            context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
+                                            context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
+                                            fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
 
                                             //var refreshButton = new RefreshButton(2.5f);
                                             //refreshButton.AnimationDuration = 300;
@@ -346,12 +355,16 @@ namespace FontSettings.Framework.Menus
                                             context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxFontSize, () => slider.Maximum);
 
+                                            Label valuelabel = SliderValueLabel(slider);
+                                            valuelabel.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
                                             var label = new Label();
                                             label.Font = FontType.SmallFont;
                                             label.Text = I18n.Ui_MainMenu_FontSize();
                                             label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                             fontSizeOption.Children.Add(slider);
+                                            fontSizeOption.Children.Add(valuelabel);
                                             fontSizeOption.Children.Add(label);
                                         }
                                     }
@@ -387,12 +400,16 @@ namespace FontSettings.Framework.Menus
                                             context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxSpacing, () => slider.Maximum);
 
+                                            Label valuelabel = SliderValueLabel(slider);
+                                            valuelabel.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
                                             var label = new Label();
                                             label.Font = FontType.SmallFont;
                                             label.Text = I18n.Ui_MainMenu_Spacing();
                                             label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                             spacingOption.Children.Add(slider);
+                                            spacingOption.Children.Add(valuelabel);
                                             spacingOption.Children.Add(label);
                                         }
 
@@ -411,12 +428,16 @@ namespace FontSettings.Framework.Menus
                                             context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxLineSpacing, () => slider.Maximum);
 
+                                            Label valuelabel = SliderValueLabel(slider);
+                                            valuelabel.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
                                             var label = new Label();
                                             label.Font = FontType.SmallFont;
                                             label.Text = I18n.Ui_MainMenu_LineSpacing();
                                             label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                             lineSpacingOption.Children.Add(slider);
+                                            lineSpacingOption.Children.Add(valuelabel);
                                             lineSpacingOption.Children.Add(label);
                                         }
 
@@ -435,12 +456,16 @@ namespace FontSettings.Framework.Menus
                                             context.OneWayBinds(() => this._viewModel.MinCharOffsetX, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxCharOffsetX, () => slider.Maximum);
 
+                                            Label valuelabel = SliderValueLabel(slider);
+                                            valuelabel.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
                                             var label = new Label();
                                             label.Font = FontType.SmallFont;
                                             label.Text = I18n.Ui_MainMenu_XOffset();
                                             label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                             xOffsetOption.Children.Add(slider);
+                                            xOffsetOption.Children.Add(valuelabel);
                                             xOffsetOption.Children.Add(label);
                                         }
 
@@ -459,12 +484,16 @@ namespace FontSettings.Framework.Menus
                                             context.OneWayBinds(() => this._viewModel.MinCharOffsetY, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxCharOffsetY, () => slider.Maximum);
 
+                                            Label valuelabel = SliderValueLabel(slider);
+                                            valuelabel.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
                                             var label = new Label();
                                             label.Font = FontType.SmallFont;
                                             label.Text = I18n.Ui_MainMenu_YOffset();
                                             label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                             yOffsetOption.Children.Add(slider);
+                                            yOffsetOption.Children.Add(valuelabel);
                                             yOffsetOption.Children.Add(label);
                                         }
 
@@ -482,12 +511,16 @@ namespace FontSettings.Framework.Menus
                                             context.OneWayBinds(() => this._viewModel.MinPixelZoom, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxPixelZoom, () => slider.Maximum);
 
+                                            Label valuelabel = SliderValueLabel(slider);
+                                            valuelabel.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
+
                                             var label = new Label();
                                             label.Font = FontType.SmallFont;
                                             label.Text = I18n.Ui_MainMenu_PixelZoom();
                                             label.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                             pixelZoomOption.Children.Add(slider);
+                                            pixelZoomOption.Children.Add(valuelabel);
                                             pixelZoomOption.Children.Add(label);
                                         }
 
