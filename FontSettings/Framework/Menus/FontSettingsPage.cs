@@ -31,6 +31,7 @@ namespace FontSettings.Framework.Menus
         private readonly Texture2D _sectionBox;
         private readonly Texture2D _previewNormal;
         private readonly Texture2D _previewCompare;
+        private readonly Texture2D _refresh;
 
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
@@ -45,6 +46,7 @@ namespace FontSettings.Framework.Menus
             this._sectionBox = Textures.SectionBox;
             this._previewNormal = Textures.FontPreviewNormal;
             this._previewCompare = Textures.FontPreviewCompare;
+            this._refresh = Textures.Refresh;
 
             this.ResetComponents();
 
@@ -304,15 +306,30 @@ namespace FontSettings.Framework.Menus
                                             enableOption.Children.Add(label);
                                         }
 
+                                        var fontOption = new StackContainer();
+                                        fontOption.Orientation = Orientation.Horizontal;
+                                        fontOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                        fontOption.Margin = new Thickness(0, optionSpacing, 0, 0);
+                                        gStack.Children.Add(fontOption);
+                                        {
                                         var fontComboBox = new ComboBox();
                                         fontComboBox.SuggestedWidth = 400;
-                                        fontComboBox.HorizontalAlignment = HorizontalAlignment.Left;
-                                        fontComboBox.Margin = new Thickness(0, optionSpacing, 0, 0);
                                         fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
                                         context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
                                         context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
                                         fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
-                                        gStack.Children.Add(fontComboBox);
+
+                                            //var refreshButton = new RefreshButton(2.5f);
+                                            //refreshButton.AnimationDuration = 300;
+                                            var refreshButton = new TextureButton(this._refresh, null, 2.5f);
+                                            refreshButton.ClickSound = "trashcan";
+                                            refreshButton.Margin = new Thickness(optionSpacing, 0, 0, 0);
+                                            refreshButton.ToolTip = I18n.Ui_MainMenu_RefreshFonts();
+                                            context.OneWayBinds(() => this._viewModel.RefreshFonts, () => refreshButton.Command);
+
+                                            fontOption.Children.Add(fontComboBox);
+                                            fontOption.Children.Add(refreshButton);
+                                        }
 
                                         var fontSizeOption = new StackContainer();
                                         fontSizeOption.Orientation = Orientation.Horizontal;
