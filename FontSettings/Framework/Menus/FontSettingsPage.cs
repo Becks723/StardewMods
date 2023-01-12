@@ -276,7 +276,7 @@ namespace FontSettings.Framework.Menus
                                     Label valuelabel = new Label();
                                     valuelabel.Font = FontType.DialogueFont;
                                     valuelabel.MinWidth = FontHelper.MeasureString(FontType.DialogueFont, "999").X;
-                                    context.OneWayBinds(() => slider.Value, () => valuelabel.Text, new ToStringConverter<float>());
+                                    context.OneWayBinds(() => slider.Value, () => valuelabel.Text, new ToStringConverter<float>(val => val % 1 == 0 ? val.ToString() : val.ToString("N1")));
                                     return valuelabel;
                                 }
 
