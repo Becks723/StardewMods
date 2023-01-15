@@ -23,13 +23,16 @@ namespace FontSettings.Framework.FontChangers
         private readonly ModConfig _config;
         private readonly IGameContentHelper _gameContent;
 
+        private readonly Func<LanguageInfo, GameFontType, string> _getVanillaFontFile;
+
         BmFontEditData _data;
 
-        public SpriteTextChanger(IModHelper helper, ModConfig config)
+        public SpriteTextChanger(IModHelper helper, ModConfig config, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
         {
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
 
             this._config = config;
+            this._getVanillaFontFile = getVanillaFontFile;
             this._gameContent = helper.GameContent;
         }
 
@@ -240,7 +243,7 @@ namespace FontSettings.Framework.FontChangers
             SpriteText.fontPixelZoom = fontPixelZoom;
         }
 
-        static bool TryResolveFontConfig(FontConfig config, out BmFontEditData data, out Exception ex)
+        bool TryResolveFontConfig(FontConfig config, out BmFontEditData data, out Exception ex)
         {
             data = null;
             ex = null;
@@ -257,16 +260,24 @@ namespace FontSettings.Framework.FontChangers
                 return true;
             }
 
-            if (config.FontFilePath is null)
+            FontConfig copy = new FontConfig();
+            config.CopyTo(copy);
+
+            bool isAbsolutePath = false;
+            copy.FontFilePath ??= this.GetVanillaFontFile(copy);
+            if (copy.FontFilePath != null)
+                isAbsolutePath = true;
+
+            if (copy.FontFilePath is null)
             {
-                data = new BmFontEditData(config, EditMode.Edit, new BmFontData(null, null, GetFontPixelZoom()));
+                data = new BmFontEditData(copy, EditMode.Edit, new BmFontData(null, null, GetFontPixelZoom()));
                 return true;
             }
 
             BmFontData font;
             try
             {
-                font = GenerateBmFont(config);
+                font = GenerateBmFont(copy, isAbsolutePath);
             }
             catch (Exception exception)
             {
@@ -276,7 +287,7 @@ namespace FontSettings.Framework.FontChangers
 
             if (font != null)
             {
-                data = new BmFontEditData(config, EditMode.Replace, font);
+                data = new BmFontEditData(copy, EditMode.Replace, font);
                 return true;
             }
             else
@@ -289,9 +300,11 @@ namespace FontSettings.Framework.FontChangers
             return true;
         }
 
-        private static BmFontData GenerateBmFont(FontConfig config)
+        private static BmFontData GenerateBmFont(FontConfig config, bool isAbsolutePath)
         {
-            string fontFullPath = InstalledFonts.GetFullPath(config.FontFilePath);
+            string fontFullPath = isAbsolutePath
+                ? config.FontFilePath
+                : InstalledFonts.GetFullPath(config.FontFilePath);
             BmFontGenerator.GenerateIntoMemory(
                 fontFilePath: fontFullPath,
                 fontFile: out FontFile fontFile,
@@ -352,6 +365,11 @@ namespace FontSettings.Framework.FontChangers
 
             string xml = writer.ToString();
             return new XmlSource(xml);
+        }
+
+        private string GetVanillaFontFile(FontConfig font)
+        {
+            return this._getVanillaFontFile(new LanguageInfo(font.Lang, font.Locale), font.InGameType);
         }
 
         private record BmFontEditData(FontConfig Config, EditMode EditMode, BmFontData Font) : IDisposable

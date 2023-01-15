@@ -11,8 +11,8 @@ namespace FontSettings.Framework.FontChangers
     {
         protected override string AssetName => LocalizeBaseAssetName("Fonts/SpriteFont1");
 
-        public DialogueFontChanger(IModHelper helper, ModConfig config)
-            : base(helper, config)
+        public DialogueFontChanger(IModHelper helper, ModConfig config, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
+            : base(helper, config, getVanillaFontFile)
         {
         }
     }

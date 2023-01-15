@@ -18,17 +18,17 @@ namespace FontSettings.Framework
         private readonly IAsyncGameFontChanger _asyncDialogueFontChanger;
         private readonly IAsyncGameFontChanger _asyncSpriteTextChanger;
 
-        public GameFontChangerImpl(IModHelper helper, ModConfig config)
+        public GameFontChangerImpl(IModHelper helper, ModConfig config, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
         {
-            var smallFontChanger = new SmallFontChanger(helper, config);
+            var smallFontChanger = new SmallFontChanger(helper, config, getVanillaFontFile);
             this._smallFontChanger = smallFontChanger;
             this._asyncSmallFontChanger = smallFontChanger;
 
-            var dialogueFontChanger = new DialogueFontChanger(helper, config);
+            var dialogueFontChanger = new DialogueFontChanger(helper, config, getVanillaFontFile);
             this._dialogueFontChanger = dialogueFontChanger;
             this._asyncDialogueFontChanger = dialogueFontChanger;
 
-            var spriteTextChanger = new SpriteTextChanger(helper, config);
+            var spriteTextChanger = new SpriteTextChanger(helper, config, getVanillaFontFile);
             this._spriteTextChanger = spriteTextChanger;
             this._asyncSpriteTextChanger = spriteTextChanger;
         }

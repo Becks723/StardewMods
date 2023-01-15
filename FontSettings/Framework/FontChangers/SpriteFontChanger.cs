@@ -17,15 +17,18 @@ namespace FontSettings.Framework.FontChangers
         private readonly ModConfig _config;
         private readonly IGameContentHelper _gameContent;
 
+        private readonly Func<LanguageInfo, GameFontType, string> _getVanillaFontFile;
+
         private FontData _data;
 
         protected abstract string AssetName { get; }
 
-        public SpriteFontChanger(IModHelper helper, ModConfig config)
+        public SpriteFontChanger(IModHelper helper, ModConfig config, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
         {
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
 
             this._config = config;
+            this._getVanillaFontFile = getVanillaFontFile;
             this._gameContent = helper.GameContent;
         }
 
@@ -95,7 +98,7 @@ namespace FontSettings.Framework.FontChangers
                 bool success;
                 try
                 {
-                    this._data = ResolveFontConfig(font);
+                    this._data = this.ResolveFontConfig(font);
                     success = true;
                 }
                 catch (Exception ex)
@@ -157,7 +160,7 @@ namespace FontSettings.Framework.FontChangers
                 {
                     try
                     {
-                        this._data = ResolveFontConfig(font);
+                        this._data = this.ResolveFontConfig(font);
                         return true;
                     }
                     catch (Exception ex)
@@ -181,15 +184,23 @@ namespace FontSettings.Framework.FontChangers
             }
         }
 
-        static FontData ResolveFontConfig(FontConfig config)
+        FontData ResolveFontConfig(FontConfig config)
         {
             if (!config.Enabled)
                 return new FontData(config, EditMode.DoNothing, null);
 
-            if (config.FontFilePath is null)
+            FontConfig copy = new FontConfig();
+            config.CopyTo(copy);
+
+            bool isAbsolutePath = false;
+            copy.FontFilePath ??= this.GetVanillaFontFile(copy);
+            if (copy.FontFilePath != null)
+                isAbsolutePath = true;
+
+            if (copy.FontFilePath == null)
                 return new FontData(config, EditMode.Edit, null);
 
-            return new FontData(config, EditMode.Replace, CreateSpriteFont(config));
+            return new FontData(config, EditMode.Replace, CreateSpriteFont(copy, isAbsolutePath));
         }
 
         static void EditSpriteFont(SpriteFont existingFont, FontConfig config)
@@ -204,10 +215,13 @@ namespace FontSettings.Framework.FontChangers
                 extraCharOffsetY: config.CharOffsetY);
         }
 
-        static SpriteFont CreateSpriteFont(FontConfig config)
+        static SpriteFont CreateSpriteFont(FontConfig config, bool isAbsolutePath)
         {
+            string path = isAbsolutePath
+                ? config.FontFilePath
+                : InstalledFonts.GetFullPath(config.FontFilePath);
             return SpriteFontGenerator.FromTtf(
-                ttfPath: InstalledFonts.GetFullPath(config.FontFilePath),
+                ttfPath: path,
                 fontIndex: config.FontIndex,
                 fontPixelHeight: config.FontSize,
                 characterRanges: config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(config.GetLanguage()),
@@ -215,6 +229,11 @@ namespace FontSettings.Framework.FontChangers
                 lineSpacing: config.LineSpacing,
                 charOffsetX: config.CharOffsetX,
                 charOffsetY: config.CharOffsetY);
+        }
+
+        private string GetVanillaFontFile(FontConfig font)
+        {
+            return this._getVanillaFontFile(new LanguageInfo(font.Lang, font.Locale), font.InGameType);
         }
 
         private record FontData(FontConfig Config, EditMode EditMode, SpriteFont Font) : IDisposable

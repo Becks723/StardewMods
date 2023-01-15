@@ -11,8 +11,8 @@ namespace FontSettings.Framework.FontChangers
     {
         protected override string AssetName => LocalizeBaseAssetName("Fonts/SmallFont");
 
-        public SmallFontChanger(IModHelper helper, ModConfig config)
-            : base(helper, config)
+        public SmallFontChanger(IModHelper helper, ModConfig config, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
+            : base(helper, config, getVanillaFontFile)
         {
         }
     }
