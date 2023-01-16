@@ -68,6 +68,9 @@ Configure:
 
 
 Release Notes:
+0.6.3 - 2023-01-
+- Fix a bug where everytime game launches, 1. ExampleText gets cleared, 2. PixelZoom is set to 1.0.
+
 0.6.2 - 2023-01-05
 - Fix a bug where Dialogue font failed to set when 'Enabled' is not checked.
 

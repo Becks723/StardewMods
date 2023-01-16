@@ -15,6 +15,7 @@ namespace FontSettings.Framework.Migrations
     /// </summary>
     internal class MigrateTo_0_6_0
     {
+        private readonly string _migrationDataKey = "migration";
         private readonly ISemanticVersion _targetVersion = new SemanticVersion(0, 6, 0);
 
         public void Apply(IModHelper helper, IManifest manifest, FontConfigs fontSettings, Action<FontConfigs> writeFontSettings, ModConfig modConfig, Action<ModConfig> writeModConfig, FontPresetManager presetManager)
@@ -22,7 +23,7 @@ namespace FontSettings.Framework.Migrations
             if (manifest.Version.IsNewerThan(this._targetVersion)
              || manifest.Version.Equals(this._targetVersion))
             {
-                var data = this.ReadOrCreateMigrationData(helper, "migration");
+                var data = this.ReadOrCreateMigrationData(helper);
                 if (!data.HasMigratedTo_0_6_0)
                 {
                     // 一次性修改：
@@ -41,6 +42,7 @@ namespace FontSettings.Framework.Migrations
                     writeModConfig(modConfig);
 
                     data.HasMigratedTo_0_6_0 = true;
+                    this.WriteMigrationData(helper, data);
                 }
 
                 // 将本地存档（包括字体设置、预设）中LanguageCode.en时Locale由"en"改为string.Empty。
@@ -68,6 +70,16 @@ namespace FontSettings.Framework.Migrations
             }
         }
 
+        private MigrationData ReadOrCreateMigrationData(IModHelper helper)
+        {
+            return this.ReadOrCreateMigrationData(helper, this._migrationDataKey);
+        }
+
+        private void WriteMigrationData(IModHelper helper, MigrationData value)
+        {
+            this.WriteMigrationData(helper, this._migrationDataKey, value);
+        }
+
         private MigrationData ReadOrCreateMigrationData(IModHelper helper, string key)
         {
             var data = helper.Data.ReadGlobalData<MigrationData>(key);
@@ -77,6 +89,11 @@ namespace FontSettings.Framework.Migrations
                 helper.Data.WriteGlobalData(key, data);
             }
             return data;
+        }
+
+        private void WriteMigrationData(IModHelper helper, string key, MigrationData value)
+        {
+            helper.Data.WriteGlobalData(key, value);
         }
     }
 }
