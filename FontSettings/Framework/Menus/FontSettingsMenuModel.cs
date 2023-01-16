@@ -35,6 +35,7 @@ namespace FontSettings.Framework.Menus
         private readonly IAsyncGameFontChanger _fontChanger;
         private readonly FontPresetManager _presetManager;
         private readonly Action<FontConfigs> _saveFontSettings;
+        private readonly Func<LanguageInfo, GameFontType, string> _getVanillaFontFile;
 
         #region CurrentFontType Property
 
@@ -122,7 +123,7 @@ namespace FontSettings.Framework.Menus
                     text = this._config.Sample.GetTextForCurrentLangauge();
 
                 if (string.IsNullOrWhiteSpace(text))
-                    text = this._config.Sample.GetTextForLangauge(FontHelpers.EnLanguage);
+                    text = this._config.Sample.GetTextForLangauge(FontHelpers.LanguageEn);
 
                 return this.CurrentFontType is GameFontType.SpriteText
                     ? text?.Replace('\n', '^')
@@ -516,7 +517,7 @@ namespace FontSettings.Framework.Menus
 
         public ICommand RefreshFonts { get; }
 
-        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings)
+        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
         {
             _instance = this;
             this._config = config;
@@ -526,6 +527,7 @@ namespace FontSettings.Framework.Menus
             this._fontChanger = fontChanger;
             this._presetManager = presetManager;
             this._saveFontSettings = saveFontSettings;
+            this._getVanillaFontFile = getVanillaFontFile;
 
             // 初始化子ViewModel。
             var presetFontTypes = new[] { FontPresetFontType.Small, FontPresetFontType.Medium, FontPresetFontType.Dialogue };
@@ -715,10 +717,7 @@ namespace FontSettings.Framework.Menus
 
         public void UpdateExampleCurrent()
         {
-            string fontPath = this.FontFilePath != null
-                ? InstalledFonts.GetFullPath(this.FontFilePath)
-                : null;
-
+            string fontPath = this.GetFontFileFullPath(this.FontFilePath);
             var param = new SampleFontGeneratorParameter(
                 Enabled: this.FontEnabled,
                 FontFilePath: fontPath,
@@ -739,9 +738,7 @@ namespace FontSettings.Framework.Menus
         private CancellationTokenSource _tokenSource;
         public async Task UpdateExampleCurrentAsync()
         {
-            string fontPath = this.FontFilePath != null
-                ? InstalledFonts.GetFullPath(this.FontFilePath)
-                : null;
+            string fontPath = this.GetFontFileFullPath(this.FontFilePath);
             var param = new SampleFontGeneratorParameter(
                 Enabled: this.FontEnabled,
                 FontFilePath: fontPath,
@@ -914,6 +911,16 @@ namespace FontSettings.Framework.Menus
 
             return this.AllFonts.Where(f => f.FullPath == fullPath && f.FontIndex == fontIndex)
                 .FirstOrDefault();
+        }
+
+        private string? GetFontFileFullPath(string? fontFilePath)
+        {
+            if (fontFilePath == null)
+            {
+                return this._getVanillaFontFile(FontHelpers.GetCurrentLanguage(), this.CurrentFontType);
+            }
+
+            return InstalledFonts.GetFullPath(fontFilePath);
         }
 
         private bool IsPresetValid(FontPreset preset, out FontModel match, out string invalidMessage)

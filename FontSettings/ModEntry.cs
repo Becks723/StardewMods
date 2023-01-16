@@ -13,6 +13,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.GameData;
 using StardewValley.Menus;
@@ -22,6 +23,9 @@ namespace FontSettings
     internal class ModEntry : Mod
     {
         private readonly string _globalFontDataKey = "font-data";
+        private readonly string _const_fontPath_ja = "assets/fonts/sp-setofont/sp-setofont.ttf";
+        private readonly string _const_fontPath_ko = "assets/fonts/SDMiSaeng/SDMiSaeng.ttf";
+        private readonly string _const_fontPath_zh = "assets/fonts/NotoSansCJKsc-Bold/NotoSansCJKsc-Bold.otf";
 
         private readonly MigrateTo_0_2_0 _0_2_0_Migration = new();
         private readonly MigrateTo_0_6_0 _0_6_0_Migration = new();
@@ -35,6 +39,10 @@ namespace FontSettings
         private FontPresetManager _presetManager;
 
         private LocalizedContentManager _vanillaContentManager;
+
+        private string? _fontFullPath_ja;
+        private string? _fontFullPath_ko;
+        private string? _fontFullPath_zh;
 
         internal static IModHelper ModHelper { get; private set; }
 
@@ -60,8 +68,12 @@ namespace FontSettings
             this.CheckConfigValid(this._config);
             this._config.Sample = this.ReadSampleData();
 
+            this.AssertModFileExists(this._const_fontPath_ja, out this._fontFullPath_ja);
+            this.AssertModFileExists(this._const_fontPath_ko, out this._fontFullPath_ko);
+            this.AssertModFileExists(this._const_fontPath_zh, out this._fontFullPath_zh);
+
             this._fontManager = new(helper.ModContent);
-            this._fontChangerImpl = new GameFontChangerImpl(helper, this._config);
+            this._fontChangerImpl = new GameFontChangerImpl(helper, this._config, this.GetVanillaFontFile);
             this._presetManager = new(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"), "System");
             this._vanillaContentManager = new LocalizedContentManager(GameRunner.instance.Content.ServiceProvider, GameRunner.instance.Content.RootDirectory);
 
@@ -353,7 +365,51 @@ namespace FontSettings
             IFontGenerator sampleFontGenerator = gen;
             IAsyncFontGenerator sampleAsyncFontGenerator = gen;
 
-            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, sampleFontGenerator, sampleAsyncFontGenerator, this._fontChangerImpl, this._presetManager, this.SaveFontSettings, this.Helper.ModRegistry);
+            Game1.activeClickableMenu = new FontSettingsPage(this._config, this._fontManager, sampleFontGenerator, sampleAsyncFontGenerator, this._fontChangerImpl, this._presetManager, this.SaveFontSettings, this.Helper.ModRegistry, this.GetVanillaFontFile);
+        }
+
+        // returns null if not supported.
+        private string? GetVanillaFontFile(LanguageInfo lang, GameFontType fontType)
+        {
+            return (lang, fontType) switch
+            {
+                _ when lang == FontHelpers.LanguageJa => this._fontFullPath_ja,
+                _ when lang == FontHelpers.LanguageKo => this._fontFullPath_ko,
+                _ when lang == FontHelpers.LanguageZh => this._fontFullPath_zh,
+                _ => null,
+            };
+        }
+
+        private bool AssertModFileExists(string relativePath, out string? fullPath) // fullPath = null when returns false
+        {
+            fullPath = Path.Combine(this.Helper.DirectoryPath, relativePath);
+            fullPath = PathUtilities.NormalizePath(fullPath);
+
+            if (this.AssertModFileExists(fullPath))
+                return true;
+            else
+            {
+                fullPath = null;
+                return false;
+            }
+        }
+
+        private bool AssertModFileExists(string relativePath)
+        {
+            string fullPath = Path.Combine(this.Helper.DirectoryPath, relativePath);
+            fullPath = PathUtilities.NormalizePath(fullPath);
+
+            return this.AssertFileExists(fullPath, I18n.Misc_ModFileNotFound(relativePath));
+        }
+
+        private bool AssertFileExists(string filePath, string message)
+        {
+            if (!File.Exists(filePath))
+            {
+                this.Monitor.Log(message, LogLevel.Error);
+                return false;
+            }
+            return true;
         }
     }
 }

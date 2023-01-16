@@ -154,7 +154,19 @@ namespace FontSettings.Framework
             return new LanguageInfo(code, GetLocale(code));
         }
 
-        public static LanguageInfo EnLanguage => GetLanguage(LocalizedContentManager.LanguageCode.en);
+        public static LanguageInfo LanguageEn => GetLanguage(LocalizedContentManager.LanguageCode.en);
+        public static LanguageInfo LanguageJa => GetLanguage(LocalizedContentManager.LanguageCode.ja);
+        public static LanguageInfo LanguageRu => GetLanguage(LocalizedContentManager.LanguageCode.ru);
+        public static LanguageInfo LanguageZh => GetLanguage(LocalizedContentManager.LanguageCode.zh);
+        public static LanguageInfo LanguagePt => GetLanguage(LocalizedContentManager.LanguageCode.pt);
+        public static LanguageInfo LanguageEs => GetLanguage(LocalizedContentManager.LanguageCode.es);
+        public static LanguageInfo LanguageDe => GetLanguage(LocalizedContentManager.LanguageCode.de);
+        public static LanguageInfo LanguageTh => GetLanguage(LocalizedContentManager.LanguageCode.th);
+        public static LanguageInfo LanguageFr => GetLanguage(LocalizedContentManager.LanguageCode.fr);
+        public static LanguageInfo LanguageKo => GetLanguage(LocalizedContentManager.LanguageCode.ko);
+        public static LanguageInfo LanguageIt => GetLanguage(LocalizedContentManager.LanguageCode.it);
+        public static LanguageInfo LanguageTr => GetLanguage(LocalizedContentManager.LanguageCode.tr);
+        public static LanguageInfo LanguageHu => GetLanguage(LocalizedContentManager.LanguageCode.hu);
 
         /// <summary>
         /// 

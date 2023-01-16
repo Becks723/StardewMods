@@ -76,5 +76,7 @@
   "config.font-menu-key": "Open Font Menu",
   "config.font-menu-key.description": "Key-binding to open a font settings menu.",
   "config.font-settings-in-game-menu": "Font Page in Game Menu",
-  "config.font-settings-in-game-menu.description": "Whether to add a tab into the game menu to configure fonts."
+  "config.font-settings-in-game-menu.description": "Whether to add a tab into the game menu to configure fonts.",
+
+  "misc.mod-file-not-found": "Cannot find \"{{filePath}}\", which is a part of mod files. Download this mod again may fix the problem."
 }

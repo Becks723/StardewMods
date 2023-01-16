@@ -36,7 +36,7 @@ namespace FontSettings.Framework.Menus
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
-        public FontSettingsPage(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, IModRegistry registry)
+        public FontSettingsPage(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, IModRegistry registry, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
         {
             this._presetManager = presetManager;
             this._registry = registry;
@@ -50,7 +50,7 @@ namespace FontSettings.Framework.Menus
 
             this.ResetComponents();
 
-            this._viewModel = new FontSettingsMenuModel(config, fontManager, sampleFontGenerator, sampleAsyncFontGenerator, fontChanger, presetManager, saveFontSettings);
+            this._viewModel = new FontSettingsMenuModel(config, fontManager, sampleFontGenerator, sampleAsyncFontGenerator, fontChanger, presetManager, saveFontSettings, getVanillaFontFile);
             this.DataContext = this._viewModel;
             this._viewModel.PropertyChanged += this.OnPropertyChanged;
         }

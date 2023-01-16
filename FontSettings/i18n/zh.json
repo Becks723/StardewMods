@@ -75,5 +75,7 @@
   "config.font-menu-key": "字体菜单",
   "config.font-menu-key.description": "绑定打开字体菜单的按键。",
   "config.font-settings-in-game-menu": "在游戏内置菜单中设置字体",
-  "config.font-settings-in-game-menu.description": "是否在游戏内置菜单（点E或Esc）中添加一栏，用以设置字体。"
+  "config.font-settings-in-game-menu.description": "是否在游戏内置菜单（点E或Esc）中添加一栏，用以设置字体。",
+
+  "misc.mod-file-not-found": "未能找到指定的模组文件\"{{filePath}}\"，请重新下载此模组以找回。"
 }
