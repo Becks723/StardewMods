@@ -33,7 +33,7 @@ namespace FontSettings.Framework
             this._asyncSpriteTextChanger = spriteTextChanger;
         }
 
-        public bool ChangeGameFont(FontConfig font)
+        public IGameFontChangeResult ChangeGameFont(FontConfig font)
         {
             switch (font.InGameType)
             {
@@ -51,7 +51,7 @@ namespace FontSettings.Framework
             }
         }
 
-        public async Task<bool> ChangeGameFontAsync(FontConfig font)
+        public async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font)
         {
             switch (font.InGameType)
             {

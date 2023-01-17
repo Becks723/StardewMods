@@ -8,8 +8,8 @@ namespace FontSettings.Framework.FontChangers
 {
     internal abstract class BaseGameFontChanger : IGameFontChanger, IAsyncGameFontChanger
     {
-        public abstract bool ChangeGameFont(FontConfig font);
-        public abstract Task<bool> ChangeGameFontAsync(FontConfig font);
+        public abstract IGameFontChangeResult ChangeGameFont(FontConfig font);
+        public abstract Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font);
 
         protected string LocalizeBaseAssetName(string baseName)
         {
@@ -19,6 +19,16 @@ namespace FontSettings.Framework.FontChangers
                 code = $".{locale}";
 
             return baseName + code;
+        }
+
+        protected IGameFontChangeResult GetSuccessResult()
+        {
+            return new GameFontChangeResult(true, null);
+        }
+
+        protected IGameFontChangeResult GetErrorResult(Exception exception)
+        {
+            return new GameFontChangeResult(false, exception);
         }
     }
 }

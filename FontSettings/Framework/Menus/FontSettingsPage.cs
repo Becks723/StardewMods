@@ -100,8 +100,8 @@ namespace FontSettings.Framework.Menus
         {
             Game1.playSound("coin");
 
-            var (fontType, success) = await this._viewModel.TryGenerateFont();
-            if (success)
+            var (result, fontType) = await this._viewModel.ChangeFont();
+            if (result.IsSuccessful)
             {
                 Game1.playSound("money");
 
@@ -120,6 +120,10 @@ namespace FontSettings.Framework.Menus
                     ILog.Error(message);  // 写在日志中
                 else
                     Game1.addHUDMessage(new OverlayHUDMessage(message, HUDMessage.error_type));
+
+                // 日志记录错误信息。
+                string error = result.GetErrorMessage();
+                ILog.Error(error);
             }
         }
 

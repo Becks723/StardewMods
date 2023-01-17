@@ -663,7 +663,7 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        public async Task<(GameFontType fontType, bool success)> TryGenerateFont()
+        public async Task<FontChangeResult> ChangeFont()
         {
             FontConfigs fontSettings = this._config.Fonts;
             FontConfig config = fontSettings.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
@@ -694,17 +694,19 @@ namespace FontSettings.Framework.Menus
 
                 instance.UpdateIsGeneratingFont(fontType, false);
 
-                bool success = task.Result;
+                var result = task.Result;
 
                 // 如果成功，更新配置值。
-                if (success)
+                if (result.IsSuccessful)
                 {
                     tempConfig.CopyTo(config);
                     instance._saveFontSettings(fontSettings);
                 }
-                return (fontType, success);
+                return new FontChangeResult(result, fontType);
             });
         }
+
+        internal record FontChangeResult(IGameFontChangeResult InnerResult, GameFontType FontType);
 
         public void UpdateExampleVanilla()
         {

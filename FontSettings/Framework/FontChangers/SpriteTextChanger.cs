@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -114,33 +115,27 @@ namespace FontSettings.Framework.FontChangers
         //    }
         //}
 
-        public override bool ChangeGameFont(FontConfig font)
+        public override IGameFontChangeResult ChangeGameFont(FontConfig font)
         {
             try
             {
-                if (TryResolveFontConfig(font, out this._data, out Exception ex))
+                var result = this.ResolveFontConfig(font);
+                if (result.IsSuccessful)
                 {
-                    var content = this._gameContent;
-                    content.InvalidateCache(GetFontFileAssetName());
-                    content.InvalidateCache(this.LocalizeBaseAssetName(GetFontFileAssetName()));
+                    this._data = this.GetResolveData(result);
 
-                    var fontFile = SpriteTextFields.FontFile;
-                    foreach (FontPage page in fontFile?.Pages ?? Enumerable.Empty<FontPage>())
-                    {
-                        string pageName = $"Fonts/{page.File}";
+                    this.InvalidateAndPropagate(this._data);
 
-                        content.InvalidateCache(pageName);
-                        content.InvalidateCache(this.LocalizeBaseAssetName(pageName));
-                    }
-
-                    this.PropagateBmFont(this._data.Font?.PixelZoom);
-
-                    return true;
+                    return this.GetSuccessResult();
                 }
                 else
                 {
-                    return false;
+                    throw this.GetResolveException(result);
                 }
+            }
+            catch (Exception ex)
+            {
+                return this.GetErrorResult(ex);
             }
             finally
             {
@@ -182,35 +177,50 @@ namespace FontSettings.Framework.FontChangers
         //    return success;
         //}
 
-        public override async Task<bool> ChangeGameFontAsync(FontConfig font)
+        public override async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font)
         {
             try
             {
-                bool success = await Task.Run(() => TryResolveFontConfig(font, out this._data, out Exception ex));
-                if (success)
+                var result = await this.ResolveFontConfigAsync(font);
+                if (result.IsSuccessful)
                 {
-                    var content = this._gameContent;
-                    content.InvalidateCache(GetFontFileAssetName());
-                    content.InvalidateCache(this.LocalizeBaseAssetName(GetFontFileAssetName()));
+                    this._data = this.GetResolveData(result);
 
-                    var fontFile = SpriteTextFields.FontFile;
-                    foreach (FontPage page in fontFile?.Pages ?? Enumerable.Empty<FontPage>())
-                    {
-                        string pageName = $"Fonts/{page.File}";
+                    this.InvalidateAndPropagate(this._data);
 
-                        content.InvalidateCache(pageName);
-                        content.InvalidateCache(this.LocalizeBaseAssetName(pageName));
-                    }
-
-                    this.PropagateBmFont(this._data.Font?.PixelZoom);
+                    return this.GetSuccessResult();
                 }
-
-                return success;
+                else
+                {
+                    throw this.GetResolveException(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return this.GetErrorResult(ex);
             }
             finally
             {
                 this._data = null;
             }
+        }
+
+        private void InvalidateAndPropagate(BmFontEditData data)
+        {
+            var content = this._gameContent;
+            content.InvalidateCache(GetFontFileAssetName());
+            content.InvalidateCache(this.LocalizeBaseAssetName(GetFontFileAssetName()));
+
+            var fontFile = SpriteTextFields.FontFile;
+            foreach (FontPage page in fontFile?.Pages ?? Enumerable.Empty<FontPage>())
+            {
+                string pageName = $"Fonts/{page.File}";
+
+                content.InvalidateCache(pageName);
+                content.InvalidateCache(this.LocalizeBaseAssetName(pageName));
+            }
+
+            this.PropagateBmFont(data.Font?.PixelZoom);
         }
 
         void PropagateBmFont(float? customPixelZoom)
@@ -243,61 +253,66 @@ namespace FontSettings.Framework.FontChangers
             SpriteText.fontPixelZoom = fontPixelZoom;
         }
 
-        bool TryResolveFontConfig(FontConfig config, out BmFontEditData data, out Exception ex)
+        private ResolveResult ResolveFontConfig(FontConfig config)
         {
-            data = null;
-            ex = null;
+            BmFontEditData data = null;
+            Exception ex = null;
 
             if (LocalizedContentManager.CurrentLanguageLatin)
             {
-                ex = new NotSupportedException(); // TODO: 不支持拉丁。
-                return false;
-            }
-
-            if (!config.Enabled)
-            {
-                data = new BmFontEditData(config, EditMode.DoNothing, null);
-                return true;
-            }
-
-            FontConfig copy = new FontConfig();
-            config.CopyTo(copy);
-
-            bool isAbsolutePath = false;
-            copy.FontFilePath ??= this.GetVanillaFontFile(copy);
-            if (copy.FontFilePath != null)
-                isAbsolutePath = true;
-
-            if (copy.FontFilePath is null)
-            {
-                data = new BmFontEditData(copy, EditMode.Edit, new BmFontData(null, null, GetFontPixelZoom()));
-                return true;
-            }
-
-            BmFontData font;
-            try
-            {
-                font = GenerateBmFont(copy, isAbsolutePath);
-            }
-            catch (Exception exception)
-            {
-                font = null;
-                ex = exception;
-            }
-
-            if (font != null)
-            {
-                data = new BmFontEditData(copy, EditMode.Replace, font);
-                return true;
+                ex = new NotSupportedException();  // TODO: 不支持拉丁。
             }
             else
             {
-                return false;
+                if (!config.Enabled)
+                {
+                    data = new BmFontEditData(config, EditMode.DoNothing, null);
+                }
+                else
+                {
+                    FontConfig copy = new FontConfig();
+                    config.CopyTo(copy);
+
+                    bool isAbsolutePath = false;
+                    copy.FontFilePath ??= this.GetVanillaFontFile(copy);
+                    if (copy.FontFilePath != null)
+                        isAbsolutePath = true;
+
+                    if (copy.FontFilePath is null)
+                    {
+                        data = new BmFontEditData(copy, EditMode.Edit, new BmFontData(null, null, GetFontPixelZoom()));
+                    }
+                    else
+                    {
+                        BmFontData font;
+                        try
+                        {
+                            font = GenerateBmFont(copy, isAbsolutePath);
+                        }
+                        catch (Exception exception)
+                        {
+                            font = null;
+                            ex = exception;
+                        }
+
+                        if (font != null)
+                        {
+                            data = new BmFontEditData(copy, EditMode.Replace, font);
+                        }
+                    }
+                }
             }
 
-        doNothing:
-            data = new BmFontEditData(config, EditMode.DoNothing, null);
-            return true;
+            if (data != null)
+                return this.CreateSuccessResult(data);
+
+            ex ??= new InvalidOperationException();
+            return this.CreateErrorResult(ex);
+        }
+
+        private async Task<ResolveResult> ResolveFontConfigAsync(FontConfig config)
+        {
+            return await Task.Run(() => this.ResolveFontConfig(config));
         }
 
         private static BmFontData GenerateBmFont(FontConfig config, bool isAbsolutePath)
@@ -371,6 +386,24 @@ namespace FontSettings.Framework.FontChangers
         {
             return this._getVanillaFontFile(new LanguageInfo(font.Lang, font.Locale), font.InGameType);
         }
+
+        private record ResolveResult(bool IsSuccessful);
+
+        private record SuccessResolveResult(BmFontEditData Data) : ResolveResult(true);
+
+        private record FailResolveResult(Exception Exception) : ResolveResult(false);
+
+        private BmFontEditData GetResolveData(ResolveResult result) => result is SuccessResolveResult successResult
+            ? successResult.Data
+            : throw new InvalidOperationException();
+
+        private Exception GetResolveException(ResolveResult result) => result is FailResolveResult failResult
+            ? failResult.Exception
+            : throw new InvalidOperationException();
+
+        private ResolveResult CreateSuccessResult(BmFontEditData data) => new SuccessResolveResult(data);
+
+        private ResolveResult CreateErrorResult(Exception exception) => new FailResolveResult(exception);
 
         private record BmFontEditData(FontConfig Config, EditMode EditMode, BmFontData Font) : IDisposable
         {

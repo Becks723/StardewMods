@@ -91,7 +91,7 @@ namespace FontSettings.Framework.FontChangers
         //    }
         //}
 
-        public override bool ChangeGameFont(FontConfig font)
+        public override IGameFontChangeResult ChangeGameFont(FontConfig font)
         {
             try
             {
@@ -105,15 +105,19 @@ namespace FontSettings.Framework.FontChangers
                 {
                     this._data = null;
                     success = false;
+                    throw;
                 }
 
                 if (success)
                 {
-                    if (!this._gameContent.InvalidateCache(this.AssetName))
-                        this._gameContent.Load<SpriteFont>(this.AssetName);
+                    this.InvalidateAndPropagate();
                 }
 
-                return success;
+                return this.GetSuccessResult();
+            }
+            catch (Exception ex)
+            {
+                return this.GetErrorResult(ex);
             }
             finally
             {
@@ -152,7 +156,7 @@ namespace FontSettings.Framework.FontChangers
         //    return success;
         //}
 
-        public override async Task<bool> ChangeGameFontAsync(FontConfig font)
+        public override async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font)
         {
             try
             {
@@ -172,16 +176,25 @@ namespace FontSettings.Framework.FontChangers
 
                 if (success)
                 {
-                    if (!this._gameContent.InvalidateCache(this.AssetName))
-                        this._gameContent.Load<SpriteFont>(this.AssetName);
+                    this.InvalidateAndPropagate();
                 }
 
-                return success;
+                return this.GetSuccessResult();
+            }
+            catch (Exception ex)
+            {
+                return this.GetErrorResult(ex);
             }
             finally
             {
                 this._data = null;
             }
+        }
+
+        private void InvalidateAndPropagate()
+        {
+            if (!this._gameContent.InvalidateCache(this.AssetName))
+                this._gameContent.Load<SpriteFont>(this.AssetName);  // 如果没有缓存过，需要手动加载一次以修改。
         }
 
         FontData ResolveFontConfig(FontConfig config)
