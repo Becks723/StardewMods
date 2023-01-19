@@ -274,13 +274,16 @@ namespace FontSettings.Framework.FontChangers
                     config.CopyTo(copy);
 
                     bool isAbsolutePath = false;
-                    copy.FontFilePath ??= this.GetVanillaFontFile(copy);
-                    if (copy.FontFilePath != null)
-                        isAbsolutePath = true;
+                    if (copy.FontFilePath == null)
+                    {
+                        copy.FontFilePath = this.GetVanillaFontFile(copy);
+                        if (copy.FontFilePath != null)
+                            isAbsolutePath = true;
+                    }
 
                     if (copy.FontFilePath is null)
                     {
-                        data = new BmFontEditData(copy, EditMode.Edit, new BmFontData(null, null, GetFontPixelZoom()));
+                        data = new BmFontEditData(config, EditMode.Edit, new BmFontData(null, null, GetFontPixelZoom()));
                     }
                     else
                     {
@@ -297,7 +300,7 @@ namespace FontSettings.Framework.FontChangers
 
                         if (font != null)
                         {
-                            data = new BmFontEditData(copy, EditMode.Replace, font);
+                            data = new BmFontEditData(config, EditMode.Replace, font);
                         }
                     }
                 }

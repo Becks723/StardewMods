@@ -206,9 +206,12 @@ namespace FontSettings.Framework.FontChangers
             config.CopyTo(copy);
 
             bool isAbsolutePath = false;
-            copy.FontFilePath ??= this.GetVanillaFontFile(copy);
-            if (copy.FontFilePath != null)
-                isAbsolutePath = true;
+            if (copy.FontFilePath == null)
+            {
+                copy.FontFilePath = this.GetVanillaFontFile(copy);
+                if (copy.FontFilePath != null)
+                    isAbsolutePath = true;
+            }
 
             if (copy.FontFilePath == null)
                 return new FontData(config, EditMode.Edit, null);
