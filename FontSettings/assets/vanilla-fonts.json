@@ -1,0 +1,128 @@
+{
+  "Fonts": [
+    /* Official Japanese */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "ja",
+      "Locale": "ja-JP",
+      "InGameType": "SmallFont",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 24.0,
+      "Spacing": -1.0,
+      "LineSpacing": 24
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "ja",
+      "Locale": "ja-JP",
+      "InGameType": "DialogueFont",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 29.0,
+      "Spacing": 0.0,
+      "LineSpacing": 30
+    },
+
+    /* Dialogue Font */
+    {
+      "Enabled": true,
+      "Lang": "ja",
+      "Locale": "ja-JP",
+      "InGameType": "SpriteText",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 24.0,
+      "Spacing": 0.0,
+      "LineSpacing": 24,
+      "PixelZoom": 1.75
+    },
+
+
+    /* Official Korean */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "ko",
+      "Locale": "ko-KR",
+      "InGameType": "SmallFont",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 42.0,
+      "Spacing": 5.0,
+      "LineSpacing": 44
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "ko",
+      "Locale": "ko-KR",
+      "InGameType": "DialogueFont",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 56.0,
+      "Spacing": 2.0,
+      "LineSpacing": 58
+    },
+
+    /* Dialogue Font */
+    {
+      "Enabled": true,
+      "Lang": "ko",
+      "Locale": "ko-KR",
+      "InGameType": "SpriteText",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 49.0,
+      "Spacing": 0.0,
+      "LineSpacing": 49,
+      "PixelZoom": 1.5
+    },
+
+
+    /* Official Chinese */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "zh",
+      "Locale": "zh-CN",
+      "InGameType": "SmallFont",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 28.0,
+      "Spacing": -1.0,
+      "LineSpacing": 28
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "zh",
+      "Locale": "zh-CN",
+      "InGameType": "DialogueFont",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 37.0,
+      "Spacing": 0.0,
+      "LineSpacing": 38
+    },
+
+    /* Dialogue Font */
+    {
+      "Enabled": true,
+      "Lang": "zh",
+      "Locale": "zh-CN",
+      "InGameType": "SpriteText",
+      "FontFilePath": null,
+      "FontIndex": 0,
+      "FontSize": 34.0,
+      "Spacing": 0.0,
+      "LineSpacing": 33,
+      "PixelZoom": 1.5
+    }
+  ]
+}

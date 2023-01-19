@@ -67,6 +67,7 @@ namespace FontSettings
             }
             this.CheckConfigValid(this._config);
             this._config.Sample = this.ReadSampleData();
+            this._config.VanillaFont = this.ReadVanillaFontData();
 
             this.AssertModFileExists(this._const_fontPath_ja, out this._fontFullPath_ja);
             this.AssertModFileExists(this._const_fontPath_ko, out this._fontFullPath_ko);
@@ -279,14 +280,25 @@ namespace FontSettings
 
         private SampleData ReadSampleData()
         {
-            const string path = "assets/sample.json";
-            var sample = this.Helper.Data.ReadJsonFile<SampleData>(path);
-            if (sample == null)
+            return this.ReadModJsonFile<SampleData>("assets/sample.json");
+        }
+
+        private VanillaFontData ReadVanillaFontData()
+        {
+            return this.ReadModJsonFile<VanillaFontData>("assets/vanilla-fonts.json");
+        }
+
+        private TModel ReadModJsonFile<TModel>(string path, bool logIfNotFound = true)
+            where TModel : class, new()
+        {
+            var model = this.Helper.Data.ReadJsonFile<TModel>(path);
+            if (model == null)
             {
-                this.Monitor.Log($"Missing file: {path}. Please download the mod again to restore the file.");
-                sample = new SampleData();
+                if (logIfNotFound)
+                    this.Monitor.Log(I18n.Misc_ModFileNotFound(path), LogLevel.Error);
+                model = new();
             }
-            return sample;
+            return model;
         }
 
         private void SaveConfig(ModConfig config)

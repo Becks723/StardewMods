@@ -880,7 +880,13 @@ namespace FontSettings.Framework.Menus
 
         private FontConfig DefaultFontConfig(GameFontType fontType, LanguageInfo language)
         {
-            var font = new FontConfig();
+            var defaultFonts = this._config.VanillaFont.Fonts;
+            if (defaultFonts.TryGetFontConfig(language.Code, language.Locale, fontType, out FontConfig font))
+            {
+                return font;
+            }
+
+            font = new FontConfig();
             font.Enabled = true;
             font.InGameType = fontType;
             font.Lang = language.Code;

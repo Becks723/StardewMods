@@ -11,6 +11,8 @@ namespace FontSettings.Framework
 
         internal SampleData Sample { get; set; }  // 同上
 
+        internal VanillaFontData VanillaFont { get; set; }  // 同上
+
         public int MinFontSize { get; set; }
 
         public int MaxFontSize { get; set; }
