@@ -126,13 +126,37 @@ namespace FontSettings
             // 记录字体数据。
             this.RecordFontData(newLangugage, newLocale, LocalizedContentManager.CurrentModLanguage);
 
+
+            // 更改游戏字体。
+
+            // 关于顺序：
+            // 游戏里加载字体分别在
+            //      SmallFont    - Game1.TranslateFields
+            //      DialogueFont - Game1.TranslateFields
+            //      SpriteText   - SpriteText.setUpCharacterMap / SpriteText.OnLanguageChange
+            // 若用普通的覆盖相应字段的方法，则需要考虑顺序，确保在上述方法后覆盖。
+            // 而这里我们用SMAPI的Content Api修改，因为SMAPI中有Cache的概念，则无视顺序。
+
+            // 另外，需要确保每种字体都修改（若某种字体没找到，则创建一个空白的）。
+            FontConfig DisabledFontConfig(GameFontType fontType) => new FontConfig
+            {
+                Enabled = false,
+                Lang = newLangugage,
+                Locale = newLocale,
+                InGameType = fontType
+            };
+
             foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
             {
-                if (this._config.Fonts.TryGetFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                    FontHelpers.GetCurrentLocale(), fontType, out FontConfig config))
+                if (!this._config.Fonts.TryGetFontConfig(
+                    code: newLangugage,
+                    locale: newLocale,
+                    inGameType: fontType,
+                    out FontConfig font))
                 {
-                    this._fontChangerImpl.ChangeGameFont(config);
+                    font = DisabledFontConfig(fontType);
                 }
+                this._fontChangerImpl.ChangeGameFont(font);
             }
         }
 
