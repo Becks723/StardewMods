@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,13 +10,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FontSettings.Framework.FontInfomation;
+using FontSettings.Framework.Models;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValleyUI.Mvvm;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontSettingsMenuModel : MenuModelBase
+    internal class FontSettingsMenuModel : MenuModelBase, INotifyDataErrorInfo
     {
         private static FontSettingsMenuModel _instance;
 
@@ -25,17 +27,20 @@ namespace FontSettings.Framework.Menus
             { GameFontType.DialogueFont, false },
             { GameFontType.SpriteText, false }
         };
-        private static readonly StagedValues _stagedValues = new();
 
-        private readonly Dictionary<FontPresetFontType, FontPresetViewModel> _presetViewModels = new();
+        private readonly FontSettingsMenuContextModel _stagedValues;
+        private readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
         private readonly ModConfig _config;
         private readonly FontManager _fontManager;
         private readonly IFontGenerator _sampleFontGenerator;
         private readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
-        private readonly IAsyncGameFontChanger _fontChanger;
-        private readonly FontPresetManager _presetManager;
-        private readonly Action<FontConfigs> _saveFontSettings;
-        private readonly Func<LanguageInfo, GameFontType, string> _getVanillaFontFile;
+        private readonly IFontConfigManager _fontConfigManager;
+        private readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
+        private readonly IGameFontChangerFactory _fontChangerFactory;
+        private readonly IFontFileProvider _fontFileProvider;
+        private readonly IFontPresetManager _presetManager;
+
+        private IAsyncGameFontChanger3 _gameFontChanger;
 
         #region CurrentFontType Property
 
@@ -155,6 +160,8 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
+        private FontConfig_ CurrentFontConfig { get; set; }
+
         #region FontEnabled Property
 
         private bool _fontEnabled;
@@ -193,9 +200,9 @@ namespace FontSettings.Framework.Menus
 
         #region LineSpacing Property
 
-        private int _lineSpacing;
+        private float _lineSpacing;
 
-        public int LineSpacing
+        public float LineSpacing
         {
             get => this._lineSpacing;
             set => this.SetField(ref this._lineSpacing, value);
@@ -236,9 +243,8 @@ namespace FontSettings.Framework.Menus
             get => this._currentFont;
             set
             {
-                this.SetField(ref this._currentFont, value);   // TODO: 取消注释。
-                //this._currentFont = value;      // TODO: 删
-                //this.RaisePropertyChanged();    // TODO: 删
+                this.SetField(ref this._currentFont, value);
+                this.ValidateCurrentFont();
 
                 this.RaisePropertyChanged(nameof(this.FontFilePath));
                 this.RaisePropertyChanged(nameof(this.FontIndex));
@@ -259,13 +265,21 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
-        public string? FontFilePath => InstalledFonts.SimplifyPath(this.CurrentFont.FullPath);
+        #region FontFilePath Property
+
+        public string? FontFilePath => this.CurrentFont.FullPath;
+
+        #endregion
+
+        #region FontIndex Property
 
         public int FontIndex => this.CurrentFont.FontIndex;
 
+        #endregion
+
         public bool IsGeneratingFont => _isGeneratingFont[this.CurrentFontType];
 
-        public bool CanGenerateFont => !this.IsGeneratingFont && this.IsCurrentPresetValid;
+        public bool CanGenerateFont => !this.IsGeneratingFont && !this.HasErrors;
 
         #region AllFonts Property
 
@@ -278,8 +292,6 @@ namespace FontSettings.Framework.Menus
         }
 
         #endregion
-
-        public FontPreset? CurrentPreset => this.PresetViewModel(this.CurrentFontType).CurrentPreset;
 
         #region CurrentPresetName Property
 
@@ -295,8 +307,9 @@ namespace FontSettings.Framework.Menus
 
         #region IsCurrentPresetValid Property
 
-        private bool _isCurrentPresetValid;
+        private bool _isCurrentPresetValid = true;
 
+        [Obsolete("Will be always true until finally removed.")]
         public bool IsCurrentPresetValid
         {
             get => this._isCurrentPresetValid;
@@ -313,6 +326,7 @@ namespace FontSettings.Framework.Menus
 
         private string _messageWhenPresetIsInvalid;
 
+        [Obsolete("Will be always null until finally removed.")]
         public string MessageWhenPresetIsInvalid
         {
             get => this._messageWhenPresetIsInvalid;
@@ -517,23 +531,25 @@ namespace FontSettings.Framework.Menus
 
         public ICommand RefreshFonts { get; }
 
-        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
+        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
         {
             _instance = this;
             this._config = config;
             this._fontManager = fontManager;
             this._sampleFontGenerator = sampleFontGenerator;
             this._sampleAsyncFontGenerator = sampleAsyncFontGenerator;
-            this._fontChanger = fontChanger;
+            this._fontConfigManager = fontConfigManager;
+            this._vanillaFontConfigProvider = vanillaFontConfigProvider;
+            this._fontChangerFactory = fontChangerFactory;
+            this._fontFileProvider = fontFileProvider;
             this._presetManager = presetManager;
-            this._saveFontSettings = saveFontSettings;
-            this._getVanillaFontFile = getVanillaFontFile;
+            this._stagedValues = stagedValues;
 
             // 初始化子ViewModel。
-            var presetFontTypes = new[] { FontPresetFontType.Small, FontPresetFontType.Medium, FontPresetFontType.Dialogue };
-            foreach (var type in presetFontTypes)
+            foreach (var type in Enum.GetValues<GameFontType>())
             {
-                var vm = new FontPresetViewModel(presetManager, type);
+                var vm = new FontPresetViewModel(this._presetManager, type, this._stagedValues.Presets[type]);
                 vm.PresetChanged += this.OnPresetChanged;
                 this._presetViewModels.Add(type, vm);
             }
@@ -542,13 +558,11 @@ namespace FontSettings.Framework.Menus
             this.RegisterCallbackToStageValues();
 
             // 填入之前记录的属性值。
-            this.CurrentFontType = _stagedValues.FontType;
-            this.PreviewMode = _stagedValues.PreviewMode;
-            this.ShowExampleBounds = _stagedValues.ShowBounds;
-            this.ShowExampleText = _stagedValues.ShowText;
-            this.IsTuningCharOffset = _stagedValues.OffsetTuning;
-            foreach (var pair in this._presetViewModels)
-                pair.Value.CurrentPreset = _stagedValues.Presets[pair.Key];
+            this.CurrentFontType = this._stagedValues.FontType;
+            this.PreviewMode = this._stagedValues.PreviewMode;
+            this.ShowExampleBounds = this._stagedValues.ShowBounds;
+            this.ShowExampleText = this._stagedValues.ShowText;
+            this.IsTuningCharOffset = this._stagedValues.OffsetTuning;
 
             // 部分语言不支持SpriteText，重置当前字体类型。
             if (LocalizedContentManager.CurrentLanguageLatin && this.CurrentFontType == GameFontType.SpriteText)
@@ -595,18 +609,20 @@ namespace FontSettings.Framework.Menus
 
         private void PreviousPreset()
         {
-            this.PresetViewModel(this.CurrentFontType).MoveToPreviousPreset();
+            this.PresetViewModel(this.CurrentFontType)
+                .MoveToPreviousPreset();
         }
 
         private void NextPreset()
         {
-            this.PresetViewModel(this.CurrentFontType).MoveToNextPreset();
+            this.PresetViewModel(this.CurrentFontType)
+                .MoveToNextPreset();
         }
 
         private void _SaveCurrentPreset()
         {
-            this.PresetViewModel(this.CurrentFontType).SaveCurrentPreset(
-                this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY, this.PixelZoom);
+            this.PresetViewModel(this.CurrentFontType)
+                .SaveCurrentPreset(this.CreateConfigBasedOnCurrentSettings());
         }
 
         private void _SaveCurrentAsNewPreset(Func<IOverlayMenu> createOverlay)
@@ -627,13 +643,14 @@ namespace FontSettings.Framework.Menus
 
         private void _SaveCurrentAsNewPreset(string newPresetName)
         {
-            this.PresetViewModel(this.CurrentFontType).SaveCurrentAsNewPreset(newPresetName,
-                this.FontFilePath, this.FontIndex, this.FontSize, this.Spacing, this.LineSpacing, this.CharOffsetX, this.CharOffsetY, this.PixelZoom);
+            this.PresetViewModel(this.CurrentFontType)
+                .SaveCurrentAsNewPreset(newPresetName, this.CreateConfigBasedOnCurrentSettings());
         }
 
         private void _DeleteCurrentPreset()
         {
-            this.PresetViewModel(this.CurrentFontType).DeleteCurrentPreset();
+            this.PresetViewModel(this.CurrentFontType)
+                .DeleteCurrentPreset();
         }
 
         private void RefreshAllFonts()
@@ -665,44 +682,36 @@ namespace FontSettings.Framework.Menus
 
         public async Task<FontChangeResult> ChangeFont()
         {
-            FontConfigs fontSettings = this._config.Fonts;
-            FontConfig config = fontSettings.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                FontHelpers.GetCurrentLocale(), this.CurrentFontType);
+            var lastLanguage = FontHelpers.GetCurrentLanguage();  // TODO: make current language not depend on context.
+            var last = this;
+            this.UpdateIsGeneratingFont(this.CurrentFontType, true);
 
-            FontConfig tempConfig = new FontConfig();
-            config.CopyTo(tempConfig);
+            // update with current settings.
+            this.CurrentFontConfig = this.CreateConfigBasedOnCurrentSettings();
 
-            tempConfig.Enabled = this.FontEnabled;
-            tempConfig.FontFilePath = this.FontFilePath;
-            tempConfig.FontIndex = this.FontIndex;
-            tempConfig.FontSize = this.FontSize;
-            tempConfig.Spacing = this.Spacing;
-            tempConfig.LineSpacing = this.LineSpacing;
-            tempConfig.CharOffsetX = this.CharOffsetX;
-            tempConfig.CharOffsetY = this.CharOffsetY;
-            tempConfig.PixelZoom = this.PixelZoom;
-
-            var fontType = this.CurrentFontType;  // 这行是必要的，因为要确保异步前后是同一个字体。
-            this.UpdateIsGeneratingFont(fontType, true);
-
-            return await this._fontChanger.ChangeGameFontAsync(tempConfig).ContinueWith(task =>
+            return await this._gameFontChanger.ChangeGameFontAsync(this.CurrentFontConfig).ContinueWith(task =>
             {
                 // 外面的this 和 ContinueWith中的this 不一定是同一个实例。
                 // 如：用户关闭了菜单，那么this为null；用户关闭又打开了菜单，那么this为另一个实例。
                 // 在这里需要保证不为null，因此使用静态的_instance字段代替this。
                 var instance = _instance;
-
-                instance.UpdateIsGeneratingFont(fontType, false);
-
-                var result = task.Result;
-
-                // 如果成功，更新配置值。
-                if (result.IsSuccessful)
+                try
                 {
-                    tempConfig.CopyTo(config);
-                    instance._saveFontSettings(fontSettings);
+                    var result = task.Result;
+
+                    // 如果成功，更新配置值。
+                    if (result.IsSuccessful)
+                    {
+                        last._fontConfigManager.UpdateFontConfig(
+                            lastLanguage, last.CurrentFontType, last.CurrentFontConfig);
+                    }
+
+                    return new FontChangeResult(result, last.CurrentFontType);
                 }
-                return new FontChangeResult(result, fontType);
+                finally
+                {
+                    instance.UpdateIsGeneratingFont(last.CurrentFontType, false);
+                }
             });
         }
 
@@ -719,10 +728,9 @@ namespace FontSettings.Framework.Menus
 
         public void UpdateExampleCurrent()
         {
-            string fontPath = this.GetFontFileFullPath(this.FontFilePath);
             var param = new SampleFontGeneratorParameter(
                 Enabled: this.FontEnabled,
-                FontFilePath: fontPath,
+                FontFilePath: this.FontFilePath,
                 FontSize: this.FontSize,
                 Spacing: this.Spacing,
                 LineSpacing: this.LineSpacing,
@@ -740,10 +748,9 @@ namespace FontSettings.Framework.Menus
         private CancellationTokenSource _tokenSource;
         public async Task UpdateExampleCurrentAsync()
         {
-            string fontPath = this.GetFontFileFullPath(this.FontFilePath);
             var param = new SampleFontGeneratorParameter(
                 Enabled: this.FontEnabled,
-                FontFilePath: fontPath,
+                FontFilePath: this.FontFilePath,
                 FontSize: this.FontSize,
                 Spacing: this.Spacing,
                 LineSpacing: this.LineSpacing,
@@ -799,8 +806,8 @@ namespace FontSettings.Framework.Menus
             this.Title = newFontType.LocalizedName();
 
             // 更新各个属性。
-            FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                FontHelpers.GetCurrentLocale(), newFontType, this.DefaultFontConfig);
+            FontConfig_ fontConfig = this.GetOrCreateFontConfig();
+            this.CurrentFontConfig = fontConfig;
             this.FontEnabled = fontConfig.Enabled;
             this.FontSize = fontConfig.FontSize;
             this.Spacing = fontConfig.Spacing;
@@ -808,7 +815,9 @@ namespace FontSettings.Framework.Menus
             this.CharOffsetX = fontConfig.CharOffsetX;
             this.CharOffsetY = fontConfig.CharOffsetY;
             this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
-            this.PixelZoom = fontConfig.PixelZoom;
+            this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
+                ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
+                : 0;
 
             // 更新预设。
             this.OnPresetChanged(null, EventArgs.Empty);
@@ -816,31 +825,33 @@ namespace FontSettings.Framework.Menus
             // 更新预览图。
             this.UpdateExampleVanilla();
             this.UpdateExampleCurrent();
+
+            // 更新其他。
+            this._gameFontChanger = this._fontChangerFactory.CreateAsyncChanger(newFontType);
         }
 
         private void OnPresetChanged(object sender, EventArgs e)
         {
-            FontPreset? newPreset = this.PresetViewModel(this.CurrentFontType).CurrentPreset;
+            var presetViewModel = this.PresetViewModel(this.CurrentFontType);
+            string? presetName = presetViewModel.CurrentPresetName;
+            FontConfig_? preset = presetViewModel.CurrentPreset;
+            bool noPresetSelected = preset == null;
 
             // 更新预设名字。
-            if (newPreset == null)
+            if (noPresetSelected)
                 this.CurrentPresetName = "-";
             else
-                this.CurrentPresetName = newPreset.Name;
+                this.CurrentPresetName = presetName;
 
             // 更新几个状态：是否能保存、另存为、删除该预设。
-            this.CanSaveCurrentPreset = this.CanSavePreset(newPreset);
-            this.CanSaveCurrentAsNewPreset = this.CanSaveAsNewPreset(newPreset);
-            this.CanDeleteCurrentPreset = this.CanDeletePreset(newPreset);
+            this.CanSaveCurrentPreset = presetViewModel.CanSavePreset();
+            this.CanSaveCurrentAsNewPreset = presetViewModel.CanSaveAsNewPreset();
+            this.CanDeleteCurrentPreset = presetViewModel.CanDeletePreset();
 
             // 如果无预设，则载入保存的设置。
-            if (newPreset == null)
+            if (noPresetSelected)
             {
-                // 无预设时当然满足。
-                this.IsCurrentPresetValid = true;
-
-                FontConfig fontConfig = this._config.Fonts.GetOrCreateFontConfig(LocalizedContentManager.CurrentLanguageCode,
-                    FontHelpers.GetCurrentLocale(), this.CurrentFontType, this.DefaultFontConfig);
+                FontConfig_ fontConfig = this.CurrentFontConfig;
                 this.FontEnabled = fontConfig.Enabled;
                 this.FontSize = fontConfig.FontSize;
                 this.Spacing = fontConfig.Spacing;
@@ -848,89 +859,99 @@ namespace FontSettings.Framework.Menus
                 this.CharOffsetX = fontConfig.CharOffsetX;
                 this.CharOffsetY = fontConfig.CharOffsetY;
                 this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
-                this.PixelZoom = fontConfig.PixelZoom;
-
-                this.UpdateExampleCurrent();
-                return;
+                this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
+                    ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
+                    : 0;
             }
 
-            // 如果有预设，检查是否满足该预设的要求。
-            this.IsCurrentPresetValid = this.IsPresetValid(newPreset, out FontModel fontMatched, out string message);
-            this.MessageWhenPresetIsInvalid = message;
-            // 满足，则填值。
-            if (this.IsCurrentPresetValid)
+            // 否则载入预设的值。
+            else
             {
                 this.FontEnabled = true;
-                this.FontSize = newPreset.FontSize;
-                this.Spacing = newPreset.Spacing;
-                this.LineSpacing = newPreset.LineSpacing;
-                this.CharOffsetX = newPreset.CharOffsetX;
-                this.CharOffsetY = newPreset.CharOffsetY;
-                this.CurrentFont = fontMatched;
-                this.PixelZoom = newPreset.PixelZoom;
-
-                this.UpdateExampleCurrent();
-            }
-        }
-
-        private FontConfig DefaultFontConfig()
-        {
-            return this.DefaultFontConfig(this.CurrentFontType, FontHelpers.GetCurrentLanguage());
-        }
-
-        private FontConfig DefaultFontConfig(GameFontType fontType, LanguageInfo language)
-        {
-            var defaultFonts = this._config.VanillaFont.Fonts;
-            if (defaultFonts.TryGetFontConfig(language.Code, language.Locale, fontType, out FontConfig font))
-            {
-                return font;
+                this.FontSize = preset.FontSize;
+                this.Spacing = preset.Spacing;
+                this.LineSpacing = preset.LineSpacing;
+                this.CharOffsetX = preset.CharOffsetX;
+                this.CharOffsetY = preset.CharOffsetY;
+                this.CurrentFont = this.FindFont(preset.FontFilePath, preset.FontIndex);
+                this.PixelZoom = preset.Supports<IWithPixelZoom>()
+                    ? preset.GetInstance<IWithPixelZoom>().PixelZoom
+                    : 0;
             }
 
-            font = new FontConfig();
-            font.Enabled = true;
-            font.InGameType = fontType;
-            font.Lang = language.Code;
-            font.Locale = language.Locale;
-            font.FontFilePath = null;
-            font.FontSize = 26;
-            font.Spacing = 0;
-            font.LineSpacing = 26;
-            if (fontType == GameFontType.SpriteText)
-                font.PixelZoom = FontHelpers.GetDefaultFontPixelZoom();
+            this.UpdateExampleCurrent();
+        }
+
+        private FontConfig_ GetOrCreateFontConfig()
+        {
+            var langugage = FontHelpers.GetCurrentLanguage();
+            var fontType = this.CurrentFontType;
+
+            if (this._fontConfigManager.TryGetFontConfig(langugage, fontType, out FontConfig_ config))
+                return config;
+
+            return this._vanillaFontConfigProvider.GetVanillaFontConfig(langugage, fontType);
+        }
+
+        private FontConfig_ CreateConfigBasedOnCurrentSettings()
+        {
+            var font = new FontConfig_(
+                Enabled: this.FontEnabled,
+                FontFilePath: this.FontFilePath,
+                FontIndex: this.FontIndex,
+                FontSize: this.FontSize,
+                Spacing: this.Spacing,
+                LineSpacing: this.LineSpacing,
+                CharOffsetX: this.CharOffsetX,
+                CharOffsetY: this.CharOffsetY,
+                CharacterRanges: this.CurrentFontConfig.CharacterRanges);
+
+            if (this.CurrentFontType == GameFontType.SpriteText)
+                font = new BmFontConfig(
+                    original: font,
+                    pixelZoom: this.PixelZoom);
+
             return font;
         }
 
         private IEnumerable<FontModel> LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。
         {
             if (rescan)
-                InstalledFonts.Rescan();
-            FontModel empty = new FontModel();
-            FontModel[] fonts = InstalledFonts.GetAll().ToArray();
-            return new FontModel[1] { empty }
-                .Concat(fonts);
+                this._fontFileProvider.RescanForFontFiles();
+
+            // single keep-orig font
+            FontModel vanillaFont;
+            {
+                var vanillaFontConfig = this._vanillaFontConfigProvider.GetVanillaFontConfig(FontHelpers.GetCurrentLanguage(),
+                    this.CurrentFontType);
+                vanillaFont = vanillaFontConfig.FontFilePath == null
+                    ? new FontModel { FullPath = null }
+                    : this._fontFileProvider.GetFontData(vanillaFontConfig.FontFilePath)[vanillaFontConfig.FontIndex];
+            }
+            yield return vanillaFont;
+
+            // general fonts
+            var fonts = this._fontFileProvider.FontFiles
+                .SelectMany(font => this._fontFileProvider.GetFontData(font));
+            foreach (var font in fonts)
+                yield return font;
         }
 
-        private FontModel FindFont(string fontFilePath, int fontIndex) // 这里path是简化后的
+        private FontModel FindFont(string fontFilePath, int fontIndex) // 这里path是fullpath
         {
             // 如果找不到字体文件，保持原版。
-            if (fontFilePath == null
-                || !InstalledFonts.TryGetFullPath(fontFilePath, out string fullPath))
+
+            if (fontFilePath == null)
                 return this.AllFonts[0];
 
-            return this.AllFonts.Where(f => f.FullPath == fullPath && f.FontIndex == fontIndex)
-                .FirstOrDefault();
+            var found = this.AllFonts.Where(f => f.FullPath == fontFilePath && f.FontIndex == fontIndex);
+            if (!found.Any())
+                return this.AllFonts[0];
+
+            return found.FirstOrDefault();
         }
 
-        private string? GetFontFileFullPath(string? fontFilePath)
-        {
-            if (fontFilePath == null)
-            {
-                return this._getVanillaFontFile(FontHelpers.GetCurrentLanguage(), this.CurrentFontType);
-            }
-
-            return InstalledFonts.GetFullPath(fontFilePath);
-        }
-
+        [Obsolete("验证字体文件的逻辑需要转移，此方法本身废除。")]
         private bool IsPresetValid(FontPreset preset, out FontModel match, out string invalidMessage)
         {
             match = null;
@@ -978,34 +999,9 @@ namespace FontSettings.Framework.Menus
             return false;
         }
 
-        private bool CanSaveAsNewPreset(FontPreset? preset)
-        {
-            return true;
-        }
-
-        private bool CanSavePreset(FontPreset? preset)
-        {
-            return preset != null                                 // 无选中预设时不可。
-                && !this._presetManager.IsBuiltInPreset(preset);  // 内置的预设不可编辑。
-        }
-
-        private bool CanDeletePreset(FontPreset? preset)
-        {
-            return preset != null                                 // 无选中预设时不可。
-                && !this._presetManager.IsBuiltInPreset(preset);  // 内置的预设不可删除。
-        }
-
         private FontPresetViewModel PresetViewModel(GameFontType fontType)
         {
-            var key = fontType switch
-            {
-                GameFontType.SmallFont => FontPresetFontType.Small,
-                GameFontType.DialogueFont => FontPresetFontType.Medium,
-                GameFontType.SpriteText => FontPresetFontType.Dialogue,
-                _ => throw new NotSupportedException(),
-            };
-
-            return this._presetViewModels[key];
+            return this._presetViewModels[fontType];
         }
 
         private void UpdateIsGeneratingFont(GameFontType fontType, bool isGeneratingFont)
@@ -1023,53 +1019,104 @@ namespace FontSettings.Framework.Menus
                 switch (e.PropertyName)
                 {
                     case nameof(this.CurrentFontType):
-                        _stagedValues.FontType = this.CurrentFontType;
+                        this._stagedValues.FontType = this.CurrentFontType;
                         break;
 
                     case nameof(this.PreviewMode):
-                        _stagedValues.PreviewMode = this.PreviewMode;
+                        this._stagedValues.PreviewMode = this.PreviewMode;
                         break;
 
                     case nameof(this.ShowExampleBounds):
-                        _stagedValues.ShowBounds = this.ShowExampleBounds;
+                        this._stagedValues.ShowBounds = this.ShowExampleBounds;
                         break;
 
                     case nameof(this.ShowExampleText):
-                        _stagedValues.ShowText = this.ShowExampleText;
+                        this._stagedValues.ShowText = this.ShowExampleText;
                         break;
 
                     case nameof(this.IsTuningCharOffset):
-                        _stagedValues.OffsetTuning = this.IsTuningCharOffset;
+                        this._stagedValues.OffsetTuning = this.IsTuningCharOffset;
                         break;
                 }
             };
+        }
 
-            foreach (var pair in this._presetViewModels)
+        // TODO: pull up
+        #region INotifyDataErrorInfo implementation
+
+        private readonly IDictionary<string, IEnumerable<object>> _errorsLookup = new Dictionary<string, IEnumerable<object>>();
+
+        public bool HasErrors
+        {
+            get { return this.GetErrorsCore(string.Empty).Any(); }
+        }
+
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+
+        public IEnumerable GetErrors(string? propertyName)
+        {
+            return this.GetErrorsCore(propertyName);
+        }
+
+        private IEnumerable<object> GetErrorsCore(string? propertyName)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+                return this._errorsLookup.SelectMany(pair => pair.Value);
+
+            return this._errorsLookup.TryGetValue(propertyName, out var error)
+                ? error
+                : Array.Empty<object>();
+        }
+
+        private void RaiseErrorsChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            ErrorsChanged?.Invoke(this,
+                new DataErrorsChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+        private void ValidateCurrentFont()
+        {
+            this.ValidateProperty(() =>
             {
-                var fontType = pair.Key;
-                var vm = pair.Value;
+                var errors = new List<string>();
 
-                vm.PresetChanged += (s, e) =>
-                {
-                    _stagedValues.Presets[fontType] = vm.CurrentPreset;
-                };
+                var fontFilePath = this.FontFilePath;
+                if (fontFilePath != null && !File.Exists(fontFilePath))
+                    errors.Add(I18n.Ui_MainMenu_Validation_Font_FileNotFound(fontFilePath));
+
+                return errors;
+            }, nameof(this.CurrentFont));
+        }
+
+        private void ValidateProperty(Func<IEnumerable<object>> getErrors, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+                throw new ArgumentException("Must be a property name.");
+
+            bool lastHasErrors = this.HasErrors;
+            this._errorsLookup.TryGetValue(propertyName, out var lastPropertyErrors);
+
+            var currentPropertyErrors = getErrors();
+            this._errorsLookup[propertyName] = currentPropertyErrors;
+            bool currentHasErrors = this.HasErrors;
+
+            if (!CompareErrors(lastPropertyErrors, currentPropertyErrors))
+            {
+                this.RaisePropertyChanged(nameof(this.HasErrors));
+
+                this.RaiseErrorsChanged(propertyName);
+                this.RaiseErrorsChanged(string.Empty);
             }
         }
 
-        private class StagedValues
+        private static bool CompareErrors(IEnumerable<object> errors1, IEnumerable<object> errors2)
         {
-            public GameFontType FontType { get; set; } = GameFontType.SmallFont;
-            public PreviewMode PreviewMode { get; set; } = PreviewMode.Normal;
-            public bool ExamplesMerged { get; set; } = false;
-            public bool ShowBounds { get; set; } = false;
-            public bool ShowText { get; set; } = true;
-            public bool OffsetTuning { get; set; } = false;
-            public Dictionary<FontPresetFontType, FontPreset?> Presets { get; } = new()
-            {
-                { FontPresetFontType.Small, null },
-                { FontPresetFontType.Medium, null },
-                { FontPresetFontType.Dialogue, null }
-            };
+            var cast1 = errors1?.Cast<object>() ?? Array.Empty<object>();
+            var cast2 = errors2?.Cast<object>() ?? Array.Empty<object>();
+
+            return (cast1.Count() == cast2.Count() && !cast1.Except(cast2).Any() && !cast2.Except(cast1).Any());
         }
     }
 }

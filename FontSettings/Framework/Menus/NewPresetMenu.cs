@@ -18,7 +18,7 @@ namespace FontSettings.Framework.Menus
 
         public event EventHandler<OverlayMenuClosedEventArgs> Closed;
 
-        public NewPresetMenu(FontPresetManager presetManager, Action<NewPresetMenu> onOpened, Action<NewPresetMenu> onClosed)
+        public NewPresetMenu(IFontPresetManager presetManager, Action<NewPresetMenu> onOpened, Action<NewPresetMenu> onClosed)
         {
             this._onOpened = onOpened;
             this._onClosed = onClosed;

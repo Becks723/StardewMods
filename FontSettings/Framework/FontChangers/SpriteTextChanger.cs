@@ -64,7 +64,7 @@ namespace FontSettings.Framework.FontChangers
                         if (e.NameWithoutLocale.IsEquivalentTo(GetFontFileAssetName()))
                         {
                             XmlSource xmlSource = ParseBack(fontFile);
-                            e.LoadFrom(() => xmlSource, AssetLoadPriority.High);
+                            e.LoadFrom(() => xmlSource, AssetLoadPriority.Exclusive);
                         }
                         else
                         {
@@ -73,7 +73,7 @@ namespace FontSettings.Framework.FontChangers
                                 if (e.NameWithoutLocale.IsEquivalentTo($"Fonts/{page.File}"))
                                 {
                                     Texture2D texture = pages[page.ID];
-                                    e.LoadFrom(() => texture, AssetLoadPriority.High);
+                                    e.LoadFrom(() => texture, AssetLoadPriority.Exclusive);
                                 }
                             }
                         }

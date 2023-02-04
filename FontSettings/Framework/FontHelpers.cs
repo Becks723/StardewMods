@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using BmFont;
 using StardewValley;
 using StardewValley.GameData;
 using static System.Net.Mime.MediaTypeNames;
@@ -167,6 +169,55 @@ namespace FontSettings.Framework
         public static LanguageInfo LanguageIt => GetLanguage(LocalizedContentManager.LanguageCode.it);
         public static LanguageInfo LanguageTr => GetLanguage(LocalizedContentManager.LanguageCode.tr);
         public static LanguageInfo LanguageHu => GetLanguage(LocalizedContentManager.LanguageCode.hu);
+
+        public static string GetFontFileAssetName()  // under game current language context
+        {
+            return GetFontFileAssetName(
+                code: LocalizedContentManager.CurrentLanguageCode,
+                modLanguage: LocalizedContentManager.CurrentModLanguage);
+        }
+
+        public static string GetFontFileAssetName(LocalizedContentManager.LanguageCode code, ModLanguage? modLanguage = null)
+        {
+            return code switch
+            {
+                LocalizedContentManager.LanguageCode.ja => "Fonts/Japanese",
+                LocalizedContentManager.LanguageCode.ru => "Fonts/Russian",
+                LocalizedContentManager.LanguageCode.zh => "Fonts/Chinese",
+                LocalizedContentManager.LanguageCode.th => "Fonts/Thai",
+                LocalizedContentManager.LanguageCode.ko => "Fonts/Korean",
+                LocalizedContentManager.LanguageCode.mod when !modLanguage.UseLatinFont => modLanguage.FontFile,
+                _ => null
+            };
+        }
+
+        public static XmlSource ParseFontFile(FontFile fontFile)
+        {
+            XmlSerializer xmlSerializer = new XmlSerializer(typeof(FontFile));
+            using var writer = new StringWriter();
+            xmlSerializer.Serialize(writer, fontFile);
+
+            string xml = writer.ToString();
+            return new XmlSource(xml);
+        }
+
+        public static string LocalizeAssetName(string assetName)
+        {
+            var language = FontHelpers.GetCurrentLanguage();
+            return LocalizeAssetName(assetName, language.Code, language.Locale);
+        }
+
+        public static string LocalizeAssetName(string assetName, LocalizedContentManager.LanguageCode code, string locale)
+        {
+            var enLanguage = FontHelpers.LanguageEn;
+            if (enLanguage.Code == code
+                && enLanguage.Locale == locale)
+            {
+                return assetName;
+            }
+
+            return $"{assetName}.{locale}";
+        }
 
         /// <summary>
         /// 

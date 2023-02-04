@@ -1,82 +1,151 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.Models;
+using FontSettings.Framework.Preset;
+using StardewValleyUI.Mvvm;
 
 namespace FontSettings.Framework.Menus
 {
-    internal class FontPresetViewModel
+    internal class FontPresetViewModel : MenuModelBase
     {
-        private readonly FontPresetManager _presetManager;
-        private readonly FontPresetFontType _targetFontType;
+        private readonly IFontPresetManager _presetManager;
+        private readonly GameFontType _fontType;
+        private readonly FontSettingsMenuPresetContextModel _stagedValues;
 
-        public FontPreset? CurrentPreset { get; set; }
+        /// <summary>获取当前上下文所有可用的预设。第一个是 无预设 ，即null。</summary>
+        private FontPresetReal?[] _presets;
+        private FontPresetReal?[] Presets
+        {
+            get => this._presets;
+            set => this.SetField(ref this._presets, value);
+        }
+
+        private FontPresetReal? _currentPresetPrivate;
+        private FontPresetReal? CurrentPresetPrivate
+        {
+            get => this._currentPresetPrivate;
+            set
+            {
+                this.SetField(ref this._currentPresetPrivate, value);
+
+                this.RaisePropertyChanged(nameof(this.CurrentPresetName));
+                this.RaisePropertyChanged(nameof(this.CurrentPreset));
+            }
+        }
+
+        private bool NoPresetSelected => this.CurrentPresetPrivate == null;
+
+        public string? CurrentPresetName => this.CurrentPresetPrivate is IPresetWithName withName ? withName.Name
+                                                                                                  : string.Empty;
+
+        public FontConfig_? CurrentPreset => this.CurrentPresetPrivate?.Settings;
 
         public event EventHandler PresetChanged;
 
-        public FontPresetViewModel(FontPresetManager presetManager, FontPresetFontType targetFontType)
+        public FontPresetViewModel(IFontPresetManager presetManager, GameFontType fontType, FontSettingsMenuPresetContextModel stagedValues)
         {
             this._presetManager = presetManager;
-            this._targetFontType = targetFontType;
+            this._fontType = fontType;
+            this._stagedValues = stagedValues;
+
+            this.RegisterCallbackToStageValues();
+
+            this.UpdatePresets();
+
+            // 填入之前记录的值。
+            int index = this._stagedValues.PresetIndex;
+            this.CurrentPresetPrivate = this.Presets.Length > index
+                ? this.Presets[index]
+                : null;
+        }
+
+        private void RegisterCallbackToStageValues()
+        {
+            this.PropertyChanged += (s, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case nameof(this.Presets):
+                    case nameof(this.CurrentPresetPrivate):
+                        this._stagedValues.PresetIndex = Array.IndexOf(this.Presets, this.CurrentPresetPrivate);
+                        break;
+                }
+            };
         }
 
         public void MoveToPreviousPreset()
         {
-            var presets = this.GetAvailablePresets();
-            this.CurrentPreset = GetPreviousItem(presets, this.CurrentPreset, ComparePresets);
+            this.CurrentPresetPrivate = GetPreviousItem(this.Presets, this.CurrentPresetPrivate);
 
             this.RaisePresetChanged(EventArgs.Empty);
         }
 
         public void MoveToNextPreset()
         {
-            var presets = this.GetAvailablePresets();
-            this.CurrentPreset = GetNextItem(presets, this.CurrentPreset, ComparePresets);
+            this.CurrentPresetPrivate = GetNextItem(this.Presets, this.CurrentPresetPrivate);
 
             this.RaisePresetChanged(EventArgs.Empty);
+        }
+
+        public bool CanSaveAsNewPreset()
+        {
+            return true;
+        }
+
+        public bool CanSavePreset()
+        {
+            var currentPreset = CurrentPresetPrivate;
+
+            return currentPreset != null                                  // 无选中预设时不可。
+                && !this._presetManager.IsReadOnlyPreset(currentPreset);  // 只读的预设不可编辑。
+        }
+
+        public bool CanDeletePreset()
+        {
+            var currentPreset = CurrentPresetPrivate;
+
+            return currentPreset != null                                  // 无选中预设时不可。
+                && !this._presetManager.IsReadOnlyPreset(currentPreset);  // 只读的预设不可删除。
         }
 
         public void DeleteCurrentPreset()
         {
-            if (this.CurrentPreset == null) return;
+            if (this.CurrentPresetPrivate == null) return;
 
-            var presets = this.GetAvailablePresets();
-            FontPreset? next = GetNextItem(presets, this.CurrentPreset,
-                ComparePresets);
-            this._presetManager.RemovePreset(this.CurrentPreset.Name);
+            var next = GetNextItem(this.Presets, this.CurrentPresetPrivate);
 
-            this.CurrentPreset = next;
+            this._presetManager.UpdatePreset(this.CurrentPresetName, null);
+
+            this.CurrentPresetPrivate = next;
 
             this.RaisePresetChanged(EventArgs.Empty);
         }
 
-        public void SaveCurrentPreset(string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY, float pixelZoom)
+        public void SaveCurrentPreset(FontConfig_ settings)
         {
-            this._presetManager.EditPreset(this.CurrentPreset, fontFileName, fontIndex, fontSize, spacing, lineSpacing, offsetX, offsetY, pixelZoom);
+            if (this.NoPresetSelected)
+                return;
+
+            if (settings is null)
+                throw new ArgumentNullException(nameof(settings));
+
+            this._presetManager.UpdatePreset(this.CurrentPresetName,
+                new FontPresetReal(FontHelpers.GetCurrentLanguage(), this._fontType, settings));
         }
 
-        public void SaveCurrentAsNewPreset(string presetName, string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY, float pixelZoom)
+        public void SaveCurrentAsNewPreset(string presetName, FontConfig_ settings)
         {
-            FontPreset newPreset = new FontPreset
-            {
-                Name = presetName,
-                Requires = new FontPresetPrecondition
-                {
-                    FontFileName = fontFileName,
-                },
-                FontIndex = fontIndex,
-                FontSize = fontSize,
-                Spacing = spacing,
-                LineSpacing = lineSpacing,
-                CharOffsetX = offsetX,
-                CharOffsetY = offsetY,
-                FontType = _targetFontType,
-                Lang = StardewValley.LocalizedContentManager.CurrentLanguageCode,
-                Locale = FontHelpers.GetCurrentLocale(),
-                PixelZoom = pixelZoom
-            };
-            this._presetManager.AddPreset(newPreset);
+            if (settings is null)
+                throw new ArgumentNullException(nameof(settings));
+
+            this._presetManager.UpdatePreset(presetName,
+                new FontPresetReal(FontHelpers.GetCurrentLanguage(), this._fontType, settings));
+
+            this.UpdatePresets();
         }
 
         protected virtual void RaisePresetChanged(EventArgs e)
@@ -84,23 +153,18 @@ namespace FontSettings.Framework.Menus
             PresetChanged?.Invoke(this, e);
         }
 
-        /// <summary>获取当前上下文所有可用的预设。第一个是 无预设 ，即null。</summary>
-        private FontPreset?[] GetAvailablePresets()
+        private void UpdatePresets()
         {
-            var result = new List<FontPreset>();
-            result.Add(null);
-            result.AddRange(this._presetManager.GetAllUnder(this._targetFontType, FontHelpers.GetCurrentLanguage()));
-
-            return result.ToArray();
+            this.Presets = new FontPresetReal[] { null }.Concat(
+                this._presetManager.GetPresets(FontHelpers.GetCurrentLanguage(), this._fontType)
+                )
+                .ToArray();
         }
 
-        private static bool ComparePresets(FontPreset? x, FontPreset? y)
+        private static T? GetPreviousItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer = null)
         {
-            return new FontPresetComparer().Equals(x, y);
-        }
+            comparer ??= (t1, t2) => object.ReferenceEquals(t1, t2);
 
-        private static T? GetPreviousItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer)
-        {
             int index = Array.FindIndex(array, x => comparer(item, x));
             if (index == -1)
             {
@@ -122,8 +186,10 @@ namespace FontSettings.Framework.Menus
             return array[prevIndex];
         }
 
-        private static T? GetNextItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer)
+        private static T? GetNextItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer = null)
         {
+            comparer ??= (t1, t2) => object.ReferenceEquals(t1, t2);
+
             int index = Array.FindIndex(array, x => comparer(item, x));
             if (index == -1)
             {
@@ -144,5 +210,7 @@ namespace FontSettings.Framework.Menus
 
             return array[nextIndex];
         }
+
+        private record Preset(string Name, FontConfig_ Config);
     }
 }

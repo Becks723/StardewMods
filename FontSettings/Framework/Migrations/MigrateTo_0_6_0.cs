@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.DataAccess;
 using StardewModdingAPI;
 
 namespace FontSettings.Framework.Migrations
@@ -17,7 +18,71 @@ namespace FontSettings.Framework.Migrations
     {
         private readonly string _migrationDataKey = "migration";
         private readonly ISemanticVersion _targetVersion = new SemanticVersion(0, 6, 0);
+        private readonly IModHelper _helper;
+        private readonly IManifest _manifest;
 
+        public MigrateTo_0_6_0(IModHelper helper, IManifest manifest)
+        {
+            this._helper = helper;
+            this._manifest = manifest;
+        }
+
+        public void ApplyDatabaseChanges(FontConfigRepository fontConfigRepository, FontPresetRepository fontPresetRepository, 
+            ModConfig modConfig, Action<ModConfig> writeModConfig)
+        {
+            if (this._manifest.Version.IsNewerThan(this._targetVersion)
+             || this._manifest.Version.Equals(this._targetVersion))
+            {
+                var data = this.ReadOrCreateMigrationData(this._helper);
+                if (!data.HasMigratedTo_0_6_0)
+                {
+                    // 一次性修改：
+
+                    // -（必须一次性）将现存的对话字体缩放改成1f。
+                    // -（未必一次性）将本地存档（包括字体设置、预设）中LanguageCode.en时Locale由"en"改为string.Empty。
+                    {
+                        var fontSettings = fontConfigRepository.ReadAllConfigs();
+                        foreach (FontConfig config in fontSettings)
+                        {
+                            if (config.InGameType == GameFontType.SpriteText)
+                                config.PixelZoom = 1f;
+
+                            if (config.Lang == StardewValley.LocalizedContentManager.LanguageCode.en)
+                                config.Locale = string.Empty;
+                        }
+                        fontConfigRepository.WriteAllConfigs(fontSettings);
+
+                        var presets = fontPresetRepository.ReadAllPresets();
+                        foreach (var pair in presets)
+                        {
+                            string name = pair.Key;
+                            FontPreset preset = pair.Value;
+
+                            if (preset.FontType is FontPresetFontType.Any or FontPresetFontType.Dialogue)
+                                preset.PixelZoom = 1f;
+
+                            if (preset.Lang == StardewValley.LocalizedContentManager.LanguageCode.en)
+                                preset.Locale = string.Empty;
+
+                            fontPresetRepository.WritePreset(name, preset);
+                        }
+
+                        this.SetMigrationProgress(MigrationFlag.ResetPixelZoom);
+                        this.SetMigrationProgress(MigrationFlag.CorrectEnglishLocale);
+                    }
+
+                    // -（必须一次性）将ExampleText改成空字符串。
+                    {
+                        modConfig.ExampleText = string.Empty;
+                        writeModConfig(modConfig);
+
+                        this.SetMigrationProgress(MigrationFlag.EmptyExampleText);
+                    }
+                }
+            }
+        }
+
+        [Obsolete("Use ApplyDatabaseChanges instead.")]
         public void Apply(IModHelper helper, IManifest manifest, FontConfigs fontSettings, Action<FontConfigs> writeFontSettings, ModConfig modConfig, Action<ModConfig> writeModConfig, FontPresetManager presetManager)
         {
             if (manifest.Version.IsNewerThan(this._targetVersion)
@@ -68,6 +133,28 @@ namespace FontSettings.Framework.Migrations
                     }
                 }
             }
+        }
+
+        private MigrationFlag _migrationProgress;
+        private void SetMigrationProgress(MigrationFlag flag)
+        {
+            this._migrationProgress |= flag;
+
+            if (Enum.GetValues<MigrationFlag>()
+                .All(flag => this._migrationProgress.HasFlag(flag)))
+            {
+                var data = this.ReadOrCreateMigrationData(this._helper);
+                data.HasMigratedTo_0_6_0 = true;
+                this.WriteMigrationData(this._helper, data);
+            }
+        }
+
+        [Flags]
+        private enum MigrationFlag
+        {
+            ResetPixelZoom = 1,
+            CorrectEnglishLocale = 2,
+            EmptyExampleText = 4
         }
 
         private MigrationData ReadOrCreateMigrationData(IModHelper helper)

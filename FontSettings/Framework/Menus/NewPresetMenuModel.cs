@@ -11,7 +11,7 @@ namespace FontSettings.Framework.Menus
 {
     internal class NewPresetMenuModel : MenuModelBase
     {
-        private readonly FontPresetManager _presetManager;
+        private readonly IFontPresetManager _presetManager;
 
         public string Name { get; set; }
 
@@ -33,7 +33,7 @@ namespace FontSettings.Framework.Menus
 
         public ICommand CancelCommand { get; }
 
-        public NewPresetMenuModel(FontPresetManager presetManager)
+        public NewPresetMenuModel(IFontPresetManager presetManager)
         {
             this._presetManager = presetManager;
 

@@ -50,7 +50,7 @@ namespace FontSettings.Framework.FontChangers
                             break;
 
                         case EditMode.Replace:
-                            e.LoadFrom(() => data.Font, AssetLoadPriority.High);
+                            e.LoadFrom(() => data.Font, AssetLoadPriority.Exclusive);
                             break;
                     }
                 }

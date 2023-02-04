@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.FontInfomation;
+using FontSettings.Framework.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,7 +23,7 @@ namespace FontSettings.Framework.Menus
 {
     internal class FontSettingsPage : BaseMenu<FontSettingsMenuModel>
     {
-        private readonly FontPresetManager _presetManager;
+        private readonly IFontPresetManager _presetManager;
         private readonly IModRegistry _registry;
         private readonly FontSettingsMenuModel _viewModel;
 
@@ -36,7 +37,8 @@ namespace FontSettings.Framework.Menus
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
-        public FontSettingsPage(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IAsyncGameFontChanger fontChanger, FontPresetManager presetManager, Action<FontConfigs> saveFontSettings, IModRegistry registry, Func<LanguageInfo, GameFontType, string> getVanillaFontFile)
+        public FontSettingsPage(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IModRegistry registry,
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
         {
             this._presetManager = presetManager;
             this._registry = registry;
@@ -50,7 +52,17 @@ namespace FontSettings.Framework.Menus
 
             this.ResetComponents();
 
-            this._viewModel = new FontSettingsMenuModel(config, fontManager, sampleFontGenerator, sampleAsyncFontGenerator, fontChanger, presetManager, saveFontSettings, getVanillaFontFile);
+            this._viewModel = new FontSettingsMenuModel(
+                config: config,
+                fontManager: fontManager,
+                sampleFontGenerator: sampleFontGenerator,
+                sampleAsyncFontGenerator: sampleAsyncFontGenerator,
+                presetManager: presetManager,
+                fontConfigManager: fontConfigManager,
+                vanillaFontConfigProvider: vanillaFontConfigProvider,
+                fontChangerFactory: fontChangerFactory,
+                fontFileProvider: fontFileProvider,
+                stagedValues: stagedValues);
             this.DataContext = this._viewModel;
             this._viewModel.PropertyChanged += this.OnPropertyChanged;
         }
