@@ -15,7 +15,7 @@ using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValleyUI.Mvvm;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.ViewModels
 {
     internal class FontSettingsMenuModel : MenuModelBase, INotifyDataErrorInfo
     {
@@ -118,7 +118,7 @@ namespace FontSettings.Framework.Menus
 
         #endregion
 
-        public string? ExampleText
+        public string ExampleText
         {
             get
             {
@@ -267,7 +267,7 @@ namespace FontSettings.Framework.Menus
 
         #region FontFilePath Property
 
-        public string? FontFilePath => this.CurrentFont.FullPath;
+        public string FontFilePath => this.CurrentFont.FullPath;
 
         #endregion
 
@@ -295,9 +295,9 @@ namespace FontSettings.Framework.Menus
 
         #region CurrentPresetName Property
 
-        private string? _currentPresetName;
+        private string _currentPresetName;
 
-        public string? CurrentPresetName
+        public string CurrentPresetName
         {
             get => this._currentPresetName;
             set => this.SetField(ref this._currentPresetName, value);
@@ -663,13 +663,11 @@ namespace FontSettings.Framework.Menus
             // 检查重新扫描后，之前选中的还在不在。
             bool match = false;
             foreach (FontModel font in this.AllFonts)
-            {
                 if (font == lastFont)
                 {
                     match = true;
                     break;
                 }
-            }
 
             if (match)
                 this.CurrentFont = lastFont;                // 如果还在，更新选中项。
@@ -701,10 +699,8 @@ namespace FontSettings.Framework.Menus
 
                     // 如果成功，更新配置值。
                     if (result.IsSuccessful)
-                    {
                         last._fontConfigManager.UpdateFontConfig(
                             lastLanguage, last.CurrentFontType, last.CurrentFontConfig);
-                    }
 
                     return new FontChangeResult(result, last.CurrentFontType);
                 }
@@ -833,8 +829,8 @@ namespace FontSettings.Framework.Menus
         private void OnPresetChanged(object sender, EventArgs e)
         {
             var presetViewModel = this.PresetViewModel(this.CurrentFontType);
-            string? presetName = presetViewModel.CurrentPresetName;
-            FontConfig_? preset = presetViewModel.CurrentPreset;
+            string presetName = presetViewModel.CurrentPresetName;
+            FontConfig_ preset = presetViewModel.CurrentPreset;
             bool noPresetSelected = preset == null;
 
             // 更新预设名字。
@@ -972,15 +968,12 @@ namespace FontSettings.Framework.Menus
             }
 
             foreach (FontModel font in allFonts)
-            {
                 if (keepOriginal)
-                {
                     if (font.FullPath == null)
                     {
                         match = font;
                         return true;
                     }
-                }
                 else
                 {
                     string name = Path.GetFileNameWithoutExtension(font.FullPath);
@@ -993,7 +986,6 @@ namespace FontSettings.Framework.Menus
                         return true;
                     }
                 }
-            }
 
             invalidMessage = $"当前预设不可用。需要安装字体文件：{preset.Requires.FontFileName}。";
             return false;
@@ -1051,14 +1043,14 @@ namespace FontSettings.Framework.Menus
             get { return this.GetErrorsCore(string.Empty).Any(); }
         }
 
-        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
 
-        public IEnumerable GetErrors(string? propertyName)
+        public IEnumerable GetErrors(string propertyName)
         {
             return this.GetErrorsCore(propertyName);
         }
 
-        private IEnumerable<object> GetErrorsCore(string? propertyName)
+        private IEnumerable<object> GetErrorsCore(string propertyName)
         {
             if (string.IsNullOrEmpty(propertyName))
                 return this._errorsLookup.SelectMany(pair => pair.Value);
@@ -1068,7 +1060,7 @@ namespace FontSettings.Framework.Menus
                 : Array.Empty<object>();
         }
 
-        private void RaiseErrorsChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        private void RaiseErrorsChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             ErrorsChanged?.Invoke(this,
                 new DataErrorsChangedEventArgs(propertyName));
@@ -1090,7 +1082,7 @@ namespace FontSettings.Framework.Menus
             }, nameof(this.CurrentFont));
         }
 
-        private void ValidateProperty(Func<IEnumerable<object>> getErrors, [System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+        private void ValidateProperty(Func<IEnumerable<object>> getErrors, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             if (string.IsNullOrEmpty(propertyName))
                 throw new ArgumentException("Must be a property name.");
@@ -1116,7 +1108,7 @@ namespace FontSettings.Framework.Menus
             var cast1 = errors1?.Cast<object>() ?? Array.Empty<object>();
             var cast2 = errors2?.Cast<object>() ?? Array.Empty<object>();
 
-            return (cast1.Count() == cast2.Count() && !cast1.Except(cast2).Any() && !cast2.Except(cast1).Any());
+            return cast1.Count() == cast2.Count() && !cast1.Except(cast2).Any() && !cast2.Except(cast1).Any();
         }
     }
 }

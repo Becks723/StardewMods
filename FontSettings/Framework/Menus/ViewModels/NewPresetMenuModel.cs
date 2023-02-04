@@ -7,7 +7,7 @@ using System.Windows.Input;
 using StardewModdingAPI.Utilities;
 using StardewValleyUI.Mvvm;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.ViewModels
 {
     internal class NewPresetMenuModel : MenuModelBase
     {

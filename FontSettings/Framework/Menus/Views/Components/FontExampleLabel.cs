@@ -9,7 +9,7 @@ using StardewValley;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views.Components
 {
     internal class FontExampleLabel : Label
     {
@@ -43,7 +43,7 @@ namespace FontSettings.Framework.Menus
             }
         }
 
-        protected override Vector2 MeasureString(string? s)
+        protected override Vector2 MeasureString(string s)
         {
             var font = this.Font;
 

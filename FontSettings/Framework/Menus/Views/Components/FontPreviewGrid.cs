@@ -9,7 +9,7 @@ using StardewValleyUI;
 using StardewValleyUI.Controls;
 using StardewValleyUI.Controls.Primitives;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views.Components
 {
     internal class FontPreviewGrid : Grid
     {

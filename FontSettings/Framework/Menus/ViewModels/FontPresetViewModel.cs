@@ -8,7 +8,7 @@ using FontSettings.Framework.Models;
 using FontSettings.Framework.Preset;
 using StardewValleyUI.Mvvm;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.ViewModels
 {
     internal class FontPresetViewModel : MenuModelBase
     {
@@ -17,15 +17,15 @@ namespace FontSettings.Framework.Menus
         private readonly FontSettingsMenuPresetContextModel _stagedValues;
 
         /// <summary>获取当前上下文所有可用的预设。第一个是 无预设 ，即null。</summary>
-        private FontPresetReal?[] _presets;
-        private FontPresetReal?[] Presets
+        private FontPresetReal[] _presets;
+        private FontPresetReal[] Presets
         {
             get => this._presets;
             set => this.SetField(ref this._presets, value);
         }
 
-        private FontPresetReal? _currentPresetPrivate;
-        private FontPresetReal? CurrentPresetPrivate
+        private FontPresetReal _currentPresetPrivate;
+        private FontPresetReal CurrentPresetPrivate
         {
             get => this._currentPresetPrivate;
             set
@@ -39,10 +39,10 @@ namespace FontSettings.Framework.Menus
 
         private bool NoPresetSelected => this.CurrentPresetPrivate == null;
 
-        public string? CurrentPresetName => this.CurrentPresetPrivate is IPresetWithName withName ? withName.Name
+        public string CurrentPresetName => this.CurrentPresetPrivate is IPresetWithName withName ? withName.Name
                                                                                                   : string.Empty;
 
-        public FontConfig_? CurrentPreset => this.CurrentPresetPrivate?.Settings;
+        public FontConfig_ CurrentPreset => this.CurrentPresetPrivate?.Settings;
 
         public event EventHandler PresetChanged;
 
@@ -163,21 +163,17 @@ namespace FontSettings.Framework.Menus
 
         private static T? GetPreviousItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer = null)
         {
-            comparer ??= (t1, t2) => object.ReferenceEquals(t1, t2);
+            comparer ??= (t1, t2) => ReferenceEquals(t1, t2);
 
             int index = Array.FindIndex(array, x => comparer(item, x));
             if (index == -1)
-            {
                 if (item == null)
-                {
                     if (array.Length > 0)
                         return array[array.Length - 1];
                     else
                         throw new ArgumentOutOfRangeException(nameof(array), "数组长度为零。");
-                }
                 else
                     throw new KeyNotFoundException();
-            }
 
             int prevIndex = index - 1;
             if (prevIndex < 0)
@@ -188,21 +184,17 @@ namespace FontSettings.Framework.Menus
 
         private static T? GetNextItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer = null)
         {
-            comparer ??= (t1, t2) => object.ReferenceEquals(t1, t2);
+            comparer ??= (t1, t2) => ReferenceEquals(t1, t2);
 
             int index = Array.FindIndex(array, x => comparer(item, x));
             if (index == -1)
-            {
                 if (item == null)
-                {
                     if (array.Length > 0)
                         return array[0];
                     else
                         throw new ArgumentOutOfRangeException(nameof(array), "数组长度为零。");
-                }
                 else
                     throw new KeyNotFoundException();
-            }
 
             int nextIndex = index + 1;
             if (nextIndex > array.Length - 1)

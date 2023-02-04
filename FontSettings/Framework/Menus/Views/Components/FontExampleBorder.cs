@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValleyUI.Controls;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views.Components
 {
     internal class FontExampleBorder : TextureBoxBorder
     {

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views.Components
 {
     internal class ToggleTextureButton : TextureButton
     {
@@ -32,7 +32,6 @@ namespace FontSettings.Framework.Menus
             bool isToggled = (bool)e.NewValue;
 
             if (button._togglesTexture)
-            {
                 if (isToggled)
                 {
                     button.Texture = button._onTexture;
@@ -45,7 +44,6 @@ namespace FontSettings.Framework.Menus
                     button.SourceRectangle = button._offSourceRectangle;
                     button.Scale = button._offScale;
                 }
-            }
         }
 
         public ToggleTextureButton()

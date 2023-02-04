@@ -11,6 +11,7 @@ using FontSettings.Framework.FontPatching;
 using FontSettings.Framework.FontScanning;
 using FontSettings.Framework.FontScanning.Scanners;
 using FontSettings.Framework.Menus;
+using FontSettings.Framework.Menus.Views;
 using FontSettings.Framework.Migrations;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Patchers;

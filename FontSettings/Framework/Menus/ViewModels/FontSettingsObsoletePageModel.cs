@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using StardewValleyUI.Mvvm;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.ViewModels
 {
     internal class FontSettingsObsoletePageModel : MenuModelBase
     {

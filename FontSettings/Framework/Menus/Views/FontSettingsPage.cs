@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.FontInfomation;
+using FontSettings.Framework.Menus.ViewModels;
+using FontSettings.Framework.Menus.Views.Components;
 using FontSettings.Framework.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,7 +21,7 @@ using StardewValleyUI.Data;
 using StardewValleyUI.Data.Converters;
 using StardewValleyUI.Menus;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views
 {
     internal class FontSettingsPage : BaseMenu<FontSettingsMenuModel>
     {
@@ -70,9 +72,7 @@ namespace FontSettings.Framework.Menus
         private void OnPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FontSettingsMenuModel.CurrentFontType))
-            {
                 this.TogglePixelZoomOption(this._viewModel.CurrentFontType == GameFontType.SpriteText);
-            }
         }
 
         private Container _container;
@@ -86,14 +86,10 @@ namespace FontSettings.Framework.Menus
             if (option == null) throw new InvalidOperationException();
 
             if (on)
-            {
                 if (!container.Children.Contains(option))
                     container.Children.Insert(this._index, option);
-            }
             else
-            {
                 container.Children.Remove(option);
-            }
         }
 
         protected override void OnDataContextChanged(ValueChangedEventArgs e)
@@ -741,9 +737,7 @@ namespace FontSettings.Framework.Menus
             if (!this._isNewPresetMenu)
                 base.update(time);
             else
-            {
                 this._newPresetMenu.update(time);
-            }
         }
 
         public override void draw(SpriteBatch b)
@@ -775,9 +769,7 @@ namespace FontSettings.Framework.Menus
             base.receiveKeyPress(key);
 
             if (this._isNewPresetMenu)
-            {
                 this._newPresetMenu.receiveKeyPress(key);
-            }
         }
 
         protected override bool CanClose()
@@ -838,9 +830,7 @@ namespace FontSettings.Framework.Menus
 
             const string ID = "BeneathThePlass.StarrySkyInterfaceCP";
             if (this._registry.IsLoaded(ID))
-            {
                 result = whenStarrySkyInterface;
-            }
 
             return result;
         }
@@ -849,7 +839,7 @@ namespace FontSettings.Framework.Menus
         {
             protected override Element Build(AppearanceBuildContext<FontModel> context)
             {
-                FontModel? font = context.Target;
+                FontModel font = context.Target;
 
                 Label l = new Label();
                 l.Text = this.GetText(font);
@@ -860,7 +850,7 @@ namespace FontSettings.Framework.Menus
                 return l;
             }
 
-            private string GetText(FontModel? font)
+            private string GetText(FontModel font)
             {
                 if (font == null)
                     return string.Empty;

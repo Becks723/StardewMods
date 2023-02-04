@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views.Components
 {
     internal class SwitchTextureButton<TEnum> : TextureButton
         where TEnum : struct, Enum

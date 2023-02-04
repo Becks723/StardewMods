@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.Menus.ViewModels;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 using StardewValleyUI.Data;
 using StardewValleyUI.Menus;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views
 {
     internal class FontSettingsObsoletePage : BaseMenu
     {

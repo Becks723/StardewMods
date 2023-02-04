@@ -10,7 +10,7 @@ using StardewValleyUI;
 using StardewValleyUI.Controls;
 using StardewValleyUI.Controls.Primitives;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views.Components
 {
     internal class FontPreviewControl : Control
     {
@@ -66,7 +66,6 @@ namespace FontSettings.Framework.Menus
             if (oldValue == newValue) return;
 
             if (this._container != null)
-            {
                 if (newValue)
                 {
                     this._container.Children.Clear();
@@ -78,7 +77,6 @@ namespace FontSettings.Framework.Menus
                     this._container.Children.Clear();
                     this._container.Children.Add(this.CurrentFontExample);
                 }
-            }
         }
 
         protected override void OnAppearanceChanged(ControlAppearance oldAppearance, ControlAppearance newAppearance)
@@ -159,7 +157,7 @@ namespace FontSettings.Framework.Menus
                     if (child == null)
                         continue;
 
-                    child.Arrange(new RectangleF( Vector2.Zero, availableSize));
+                    child.Arrange(new RectangleF(Vector2.Zero, availableSize));
                 }
 
                 return availableSize;

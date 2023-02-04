@@ -1,4 +1,5 @@
 ﻿using System;
+using FontSettings.Framework.Menus.ViewModels;
 using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValleyUI;
@@ -7,7 +8,7 @@ using StardewValleyUI.Data;
 using StardewValleyUI.Data.Converters;
 using StardewValleyUI.Menus;
 
-namespace FontSettings.Framework.Menus
+namespace FontSettings.Framework.Menus.Views
 {
     internal class NewPresetMenu : BaseMenu<NewPresetMenuModel>, IOverlayMenu
     {
@@ -241,7 +242,7 @@ namespace FontSettings.Framework.Menus
             this._viewModel.CheckNameValid();
         }
 
-        private void RaiseClosed(object? parameter)
+        private void RaiseClosed(object parameter)
         {
             Closed?.Invoke(this, new OverlayMenuClosedEventArgs(parameter));
         }
@@ -251,7 +252,7 @@ namespace FontSettings.Framework.Menus
             this._onOpened(this);
         }
 
-        void IOverlayMenu.Close(object? parameter)
+        void IOverlayMenu.Close(object parameter)
         {
             this.RaiseClosed(parameter);
 
