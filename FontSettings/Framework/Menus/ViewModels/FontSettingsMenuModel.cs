@@ -515,21 +515,21 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
-        public ICommand MoveToPrevFont { get; }
+        public ICommand MoveToPrevFontCommand { get; }
 
-        public ICommand MoveToNextFont { get; }
+        public ICommand MoveToNextFontCommand { get; }
 
-        public ICommand MoveToPrevPreset { get; }
+        public ICommand MoveToPrevPresetCommand { get; }
 
-        public ICommand MoveToNextPreset { get; }
+        public ICommand MoveToNextPresetCommand { get; }
 
-        public ICommand SaveCurrentPreset { get; }
+        public ICommand SaveCurrentPresetCommand { get; }
 
-        public ICommand SaveCurrentAsNewPreset { get; }
+        public ICommand SaveCurrentAsNewPresetCommand { get; }
 
-        public ICommand DeleteCurrentPreset { get; }
+        public ICommand DeleteCurrentPresetCommand { get; }
 
-        public ICommand RefreshFonts { get; }
+        public ICommand RefreshFontsCommand { get; }
 
         public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
@@ -585,14 +585,14 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.MaxPixelZoom = this._config.MaxPixelZoom;
 
             // 初始化命令。
-            this.MoveToPrevFont = new DelegateCommand(this.PreviousFontType);
-            this.MoveToNextFont = new DelegateCommand(this.NextFontType);
-            this.MoveToPrevPreset = new DelegateCommand(this.PreviousPreset);
-            this.MoveToNextPreset = new DelegateCommand(this.NextPreset);
-            this.SaveCurrentPreset = new DelegateCommand(this._SaveCurrentPreset);
-            this.SaveCurrentAsNewPreset = new DelegateCommand<Func<IOverlayMenu>>(this._SaveCurrentAsNewPreset);
-            this.DeleteCurrentPreset = new DelegateCommand(this._DeleteCurrentPreset);
-            this.RefreshFonts = new DelegateCommand(this.RefreshAllFonts);
+            this.MoveToPrevFontCommand = new DelegateCommand(this.PreviousFontType);
+            this.MoveToNextFontCommand = new DelegateCommand(this.NextFontType);
+            this.MoveToPrevPresetCommand = new DelegateCommand(this.PreviousPreset);
+            this.MoveToNextPresetCommand = new DelegateCommand(this.NextPreset);
+            this.SaveCurrentPresetCommand = new DelegateCommand(this.SaveCurrentPreset);
+            this.SaveCurrentAsNewPresetCommand = new DelegateCommand<Func<IOverlayMenu>>(this.SaveCurrentAsNewPreset);
+            this.DeleteCurrentPresetCommand = new DelegateCommand(this._DeleteCurrentPreset);
+            this.RefreshFontsCommand = new DelegateCommand(this.RefreshAllFonts);
         }
 
         private void PreviousFontType()
@@ -619,13 +619,13 @@ namespace FontSettings.Framework.Menus.ViewModels
                 .MoveToNextPreset();
         }
 
-        private void _SaveCurrentPreset()
+        private void SaveCurrentPreset()
         {
             this.PresetViewModel(this.CurrentFontType)
                 .SaveCurrentPreset(this.CreateConfigBasedOnCurrentSettings());
         }
 
-        private void _SaveCurrentAsNewPreset(Func<IOverlayMenu> createOverlay)
+        private void SaveCurrentAsNewPreset(Func<IOverlayMenu> createOverlay)
         {
             if (createOverlay == null) return;
 
@@ -636,12 +636,12 @@ namespace FontSettings.Framework.Menus.ViewModels
                 overlay.Closed += (s, e) =>
                 {
                     if (e.Parameter is string presetName)
-                        this._SaveCurrentAsNewPreset(presetName);
+                        this.SaveCurrentAsNewPreset(presetName);
                 };
             }
         }
 
-        private void _SaveCurrentAsNewPreset(string newPresetName)
+        private void SaveCurrentAsNewPreset(string newPresetName)
         {
             this.PresetViewModel(this.CurrentFontType)
                 .SaveCurrentAsNewPreset(newPresetName, this.CreateConfigBasedOnCurrentSettings());

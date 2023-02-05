@@ -240,7 +240,7 @@ namespace FontSettings.Framework.Menus.Views
                                 {
                                     var prevFontButton = new TextureButton(
                                         Game1.mouseCursors, new(352, 495, 12, 11), 4f);
-                                    context.OneWayBinds(() => this._viewModel.MoveToPrevFont, () => prevFontButton.Command);
+                                    context.OneWayBinds(() => this._viewModel.MoveToPrevFontCommand, () => prevFontButton.Command);
                                     prevFontButton.VerticalAlignment = VerticalAlignment.Center;
                                     prevFontButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
                                     prevFontButton.ClickSound = "smallSelect";
@@ -258,7 +258,7 @@ namespace FontSettings.Framework.Menus.Views
 
                                     var nextFontButton = new TextureButton(
                                         Game1.mouseCursors, new(365, 495, 12, 11), 4f);
-                                    context.OneWayBinds(() => this._viewModel.MoveToNextFont, () => nextFontButton.Command);
+                                    context.OneWayBinds(() => this._viewModel.MoveToNextFontCommand, () => nextFontButton.Command);
                                     nextFontButton.VerticalAlignment = VerticalAlignment.Center;
                                     nextFontButton.Margin = new Thickness(0, 0, borderWidth / 3, 0);
                                     nextFontButton.ClickSound = "smallSelect";
@@ -346,7 +346,7 @@ namespace FontSettings.Framework.Menus.Views
                                             refreshButton.ClickSound = "trashcan";
                                             refreshButton.Margin = new Thickness(optionSpacing, 0, 0, 0);
                                             refreshButton.ToolTip = I18n.Ui_MainMenu_RefreshFonts();
-                                            context.OneWayBinds(() => this._viewModel.RefreshFonts, () => refreshButton.Command);
+                                            context.OneWayBinds(() => this._viewModel.RefreshFontsCommand, () => refreshButton.Command);
 
                                             fontOption.Children.Add(fontComboBox);
                                             fontOption.Children.Add(refreshButton);
@@ -573,7 +573,7 @@ namespace FontSettings.Framework.Menus.Views
                                             prevPresetButton.VerticalAlignment = VerticalAlignment.Center;
                                             prevPresetButton.ToolTip = I18n.Ui_MainMenu_PrevPreset();
                                             prevPresetButton.ClickSound = "smallSelect";
-                                            context.OneWayBinds(() => this._viewModel.MoveToPrevPreset, () => prevPresetButton.Command);
+                                            context.OneWayBinds(() => this._viewModel.MoveToPrevPresetCommand, () => prevPresetButton.Command);
                                             presetGrid.Children.Add(prevPresetButton);
                                             presetGrid.SetColumn(prevPresetButton, 0);
 
@@ -593,7 +593,7 @@ namespace FontSettings.Framework.Menus.Views
                                             nextPresetButton.VerticalAlignment = VerticalAlignment.Center;
                                             nextPresetButton.ToolTip = I18n.Ui_MainMenu_NextPreset();
                                             nextPresetButton.ClickSound = "smallSelect";
-                                            context.OneWayBinds(() => this._viewModel.MoveToNextPreset, () => nextPresetButton.Command);
+                                            context.OneWayBinds(() => this._viewModel.MoveToNextPresetCommand, () => nextPresetButton.Command);
                                             presetGrid.Children.Add(nextPresetButton);
                                             presetGrid.SetColumn(nextPresetButton, 2);
 
@@ -605,7 +605,7 @@ namespace FontSettings.Framework.Menus.Views
                                             savePresetButton.ToolTip = I18n.Ui_MainMenu_SavePreset();
                                             savePresetButton.ClickSound = "newRecipe";
                                             context.OneWayBinds(() => this._viewModel.CanSaveCurrentPreset, () => savePresetButton.GreyedOut, new TrueFalseConverter());
-                                            context.OneWayBinds(() => this._viewModel.SaveCurrentPreset, () => savePresetButton.Command);
+                                            context.OneWayBinds(() => this._viewModel.SaveCurrentPresetCommand, () => savePresetButton.Command);
                                             presetGrid.Children.Add(savePresetButton);
                                             presetGrid.SetColumn(savePresetButton, 3);
 
@@ -617,7 +617,7 @@ namespace FontSettings.Framework.Menus.Views
                                             deletePresetButton.ToolTip = I18n.Ui_MainMenu_DelPreset();
                                             deletePresetButton.ClickSound = "trashcan";
                                             context.OneWayBinds(() => this._viewModel.CanDeleteCurrentPreset, () => deletePresetButton.GreyedOut, new TrueFalseConverter());
-                                            context.OneWayBinds(() => this._viewModel.DeleteCurrentPreset, () => deletePresetButton.Command);
+                                            context.OneWayBinds(() => this._viewModel.DeleteCurrentPresetCommand, () => deletePresetButton.Command);
                                             presetGrid.Children.Add(deletePresetButton);
                                             presetGrid.SetColumn(deletePresetButton, 4);
                                         }
@@ -629,7 +629,7 @@ namespace FontSettings.Framework.Menus.Views
                                         newPresetButton.Margin = new Thickness(0, optionSpacing, 0, 0);
                                         newPresetButton.ClickSound = "coin";
                                         //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
-                                        context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPreset, () => newPresetButton.Command);
+                                        context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPresetCommand, () => newPresetButton.Command);
                                         context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
                                         pStack.Children.Add(newPresetButton);
                                         {
