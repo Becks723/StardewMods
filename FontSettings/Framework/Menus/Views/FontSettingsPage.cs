@@ -835,11 +835,11 @@ namespace FontSettings.Framework.Menus.Views
             return result;
         }
 
-        private class FontAppearance : DataAppearanceBuilder<FontModel>
+        private class FontAppearance : DataAppearanceBuilder<FontViewModel>
         {
-            protected override Element Build(AppearanceBuildContext<FontModel> context)
+            protected override Element Build(AppearanceBuildContext<FontViewModel> context)
             {
-                FontModel font = context.Target;
+                FontViewModel font = context.Target;
 
                 Label l = new Label();
                 l.Text = this.GetText(font);
@@ -850,15 +850,9 @@ namespace FontSettings.Framework.Menus.Views
                 return l;
             }
 
-            private string GetText(FontModel font)
+            private string GetText(FontViewModel font)
             {
-                if (font == null)
-                    return string.Empty;
-
-                if (font.FullPath == null)
-                    return I18n.Ui_MainMenu_Font_KeepOrig();
-                else
-                    return $"{font.FamilyName} ({font.SubfamilyName})";
+                return font.DisplayText;
             }
         }
     }

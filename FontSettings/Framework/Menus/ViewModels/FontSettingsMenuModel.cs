@@ -236,9 +236,9 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #region CurrentFont Property
 
-        private FontModel _currentFont;
+        private FontViewModel _currentFont;
 
-        public FontModel CurrentFont
+        public FontViewModel CurrentFont
         {
             get => this._currentFont;
             set
@@ -267,7 +267,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #region FontFilePath Property
 
-        public string FontFilePath => this.CurrentFont.FullPath;
+        public string FontFilePath => this.CurrentFont.FontFilePath;
 
         #endregion
 
@@ -283,9 +283,9 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #region AllFonts Property
 
-        private ObservableCollection<FontModel> _allFonts;
+        private ObservableCollection<FontViewModel> _allFonts;
 
-        public ObservableCollection<FontModel> AllFonts
+        public ObservableCollection<FontViewModel> AllFonts
         {
             get => this._allFonts;
             set => this.SetField(ref this._allFonts, value);
@@ -568,7 +568,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             if (LocalizedContentManager.CurrentLanguageLatin && this.CurrentFontType == GameFontType.SpriteText)
                 this.CurrentFontType = GameFontType.SmallFont;
 
-            this.AllFonts = new ObservableCollection<FontModel>(this.LoadAllFonts());
+            this.AllFonts = new ObservableCollection<FontViewModel>(this.LoadAllFonts());
             this.OnFontTypeChanged(this.CurrentFontType);
 
             this.MinCharOffsetX = this._config.MinCharOffsetX;
@@ -655,27 +655,14 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private void RefreshAllFonts()
         {
-            var lastFont = this.CurrentFont;  // 记录当前选中的字体。
-
             // 重新扫描本地字体文件。
-            this.AllFonts = new ObservableCollection<FontModel>(this.LoadAllFonts(true));
+            this.AllFonts = new ObservableCollection<FontViewModel>(this.LoadAllFonts(true));
 
-            // 检查重新扫描后，之前选中的还在不在。
-            bool match = false;
-            foreach (FontModel font in this.AllFonts)
-                if (font == lastFont)
-                {
-                    match = true;
-                    break;
-                }
+            // 更新选中字体。
+            this.CurrentFont = this.FindFont(this.FontFilePath, this.FontIndex);
 
-            if (match)
-                this.CurrentFont = lastFont;                // 如果还在，更新选中项。
-            else
-            {
-                this.CurrentFont = this.AllFonts[0];  // 如果不在了，保持原版。
-                this.UpdateExampleCurrent();                // 同时更新示例。
-            }
+            // 更新示例。
+            this.UpdateExampleCurrent();
         }
 
         public async Task<FontChangeResult> ChangeFont()
@@ -910,37 +897,46 @@ namespace FontSettings.Framework.Menus.ViewModels
             return font;
         }
 
-        private IEnumerable<FontModel> LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。
+        private IEnumerable<FontViewModel> LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。
         {
             if (rescan)
                 this._fontFileProvider.RescanForFontFiles();
 
             // single keep-orig font
-            FontModel vanillaFont;
+            FontViewModel vanillaFont;
             {
                 var vanillaFontConfig = this._vanillaFontConfigProvider.GetVanillaFontConfig(FontHelpers.GetCurrentLanguage(),
                     this.CurrentFontType);
-                vanillaFont = vanillaFontConfig.FontFilePath == null
-                    ? new FontModel { FullPath = null }
-                    : this._fontFileProvider.GetFontData(vanillaFontConfig.FontFilePath)[vanillaFontConfig.FontIndex];
+                string fontFilePath = vanillaFontConfig.FontFilePath;
+                int fontIndex = vanillaFontConfig.FontIndex;
+
+                vanillaFont = new FontViewModel(
+                    fontFilePath: fontFilePath,
+                    fontIndex: fontIndex,
+                    displayText: I18n.Ui_MainMenu_Font_KeepOrig());
             }
             yield return vanillaFont;
 
             // general fonts
             var fonts = this._fontFileProvider.FontFiles
-                .SelectMany(font => this._fontFileProvider.GetFontData(font));
+                .SelectMany(file => this._fontFileProvider.GetFontData(file)
+                .Select(font => new FontViewModel(
+                    fontFilePath: font.FullPath,
+                    fontIndex: font.FontIndex,
+                    displayText: $"{font.FamilyName} ({font.SubfamilyName})"))
+                );
             foreach (var font in fonts)
                 yield return font;
         }
 
-        private FontModel FindFont(string fontFilePath, int fontIndex) // 这里path是fullpath
+        private FontViewModel FindFont(string fontFilePath, int fontIndex) // 这里path是fullpath
         {
             // 如果找不到字体文件，保持原版。
 
             if (fontFilePath == null)
                 return this.AllFonts[0];
 
-            var found = this.AllFonts.Where(f => f.FullPath == fontFilePath && f.FontIndex == fontIndex);
+            var found = this.AllFonts.Where(f => f.FontFilePath == fontFilePath && f.FontIndex == fontIndex);
             if (!found.Any())
                 return this.AllFonts[0];
 
@@ -948,7 +944,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         }
 
         [Obsolete("验证字体文件的逻辑需要转移，此方法本身废除。")]
-        private bool IsPresetValid(Framework.DataAccess.Models.FontPresetData preset, out FontModel match, out string invalidMessage)
+        private bool IsPresetValid(Framework.DataAccess.Models.FontPresetData preset, out FontViewModel match, out string invalidMessage)
         {
             match = null;
             invalidMessage = null;
@@ -967,25 +963,25 @@ namespace FontSettings.Framework.Menus.ViewModels
                 specifiedExtension = Path.GetExtension(specifiedFile);
             }
 
-            foreach (FontModel font in allFonts)
+            foreach (FontViewModel font in allFonts)
                 if (keepOriginal)
-                    if (font.FullPath == null)
+                    if (font.FontFilePath == null)
                     {
                         match = font;
                         return true;
                     }
-                else
-                {
-                    string name = Path.GetFileNameWithoutExtension(font.FullPath);
-                    string extension = Path.GetExtension(font.FullPath);
-                    if (name == specifiedName
-                        && extension.Equals(specifiedExtension, StringComparison.OrdinalIgnoreCase)
-                        && preset.FontIndex == font.FontIndex)
+                    else
                     {
-                        match = font;
-                        return true;
+                        string name = Path.GetFileNameWithoutExtension(font.FontFilePath);
+                        string extension = Path.GetExtension(font.FontFilePath);
+                        if (name == specifiedName
+                            && extension.Equals(specifiedExtension, StringComparison.OrdinalIgnoreCase)
+                            && preset.FontIndex == font.FontIndex)
+                        {
+                            match = font;
+                            return true;
+                        }
                     }
-                }
 
             invalidMessage = $"当前预设不可用。需要安装字体文件：{preset.Requires.FontFileName}。";
             return false;
