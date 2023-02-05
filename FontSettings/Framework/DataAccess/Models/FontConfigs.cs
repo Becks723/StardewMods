@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace FontSettings.Framework.DataAccess.Models
 {
-    internal class FontConfigs : List<FontConfig>
+    internal class FontConfigs : List<FontConfigData>
     {
-        public FontConfig GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, Func<FontConfig> createFontConfig)
+        public FontConfigData GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, Func<FontConfigData> createFontConfig)
         {
             if (this.TryGetFontConfig(code, locale, inGameType, out var got))
                 return got;
@@ -18,11 +18,11 @@ namespace FontSettings.Framework.DataAccess.Models
             return got;
         }
 
-        public FontConfig GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
+        public FontConfigData GetOrCreateFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
         {
             return this.GetOrCreateFontConfig(code, locale, inGameType, () =>
             {
-                return new FontConfig
+                return new FontConfigData
                 {
                     Lang = code,
                     Locale = locale,
@@ -31,7 +31,7 @@ namespace FontSettings.Framework.DataAccess.Models
             });
         }
 
-        public FontConfig GetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
+        public FontConfigData GetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
         {
             return (from font in this
                     where font.Lang == code && font.Locale == locale && font.InGameType == inGameType
@@ -39,9 +39,9 @@ namespace FontSettings.Framework.DataAccess.Models
                     .FirstOrDefault();
         }
 
-        public bool TryGetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, out FontConfig fontConfig)
+        public bool TryGetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, out FontConfigData fontConfig)
         {
-            FontConfig got = this.GetFontConfig(code, locale, inGameType);
+            FontConfigData got = this.GetFontConfig(code, locale, inGameType);
 
             if (got != null)
             {

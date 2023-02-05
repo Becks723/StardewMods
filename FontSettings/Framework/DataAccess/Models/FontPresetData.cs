@@ -7,7 +7,7 @@ using StardewValley;
 
 namespace FontSettings.Framework.DataAccess.Models
 {
-    internal class FontPreset
+    internal class FontPresetData
     {
         internal string Name { get; set; }  // 不写入文件，故internal。
 

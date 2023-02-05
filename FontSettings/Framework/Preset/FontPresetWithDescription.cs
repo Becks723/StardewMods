@@ -11,7 +11,7 @@ namespace FontSettings.Framework.Preset
     {
         public string Description { get; }
 
-        public FontPresetWithDescription(LanguageInfo language, GameFontType fontType, FontConfig_ settings, string name, string description)
+        public FontPresetWithDescription(LanguageInfo language, GameFontType fontType, FontConfig settings, string name, string description)
             : base(language, fontType, settings, name)
         {
             this.Description = description;

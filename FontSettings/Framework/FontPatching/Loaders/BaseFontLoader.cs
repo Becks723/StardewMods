@@ -9,14 +9,14 @@ namespace FontSettings.Framework.FontPatching.Loaders
 {
     internal abstract class BaseFontLoader<T> : IFontLoader
     {
-        private readonly FontConfig_ _config;
+        private readonly FontConfig _config;
 
-        protected BaseFontLoader(FontConfig_ config)
+        protected BaseFontLoader(FontConfig config)
         {
             this._config = config;
         }
 
-        protected abstract T Load(FontConfig_ config);
+        protected abstract T Load(FontConfig config);
 
         public object Load()
         {

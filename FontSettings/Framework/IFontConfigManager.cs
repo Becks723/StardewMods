@@ -10,10 +10,10 @@ namespace FontSettings.Framework
     internal interface IFontConfigManager
     {
         /// <summary>Three in one: add, edit, delete.</summary>
-        void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig_? config);
+        void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig? config);
 
-        bool TryGetFontConfig(LanguageInfo language, GameFontType fontType, out FontConfig_? config);
+        bool TryGetFontConfig(LanguageInfo language, GameFontType fontType, out FontConfig? config);
 
-        IDictionary<FontConfigKey, FontConfig_> GetAllFontConfigs();
+        IDictionary<FontConfigKey, FontConfig> GetAllFontConfigs();
     }
 }

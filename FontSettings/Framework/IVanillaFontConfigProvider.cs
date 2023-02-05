@@ -9,30 +9,30 @@ namespace FontSettings.Framework
 {
     internal interface IVanillaFontConfigProvider
     {
-        FontConfig_ GetVanillaFontConfig(LanguageInfo language, GameFontType fontType);
+        FontConfig GetVanillaFontConfig(LanguageInfo language, GameFontType fontType);
     }
 
     internal class VanillaFontConfigProvider : IVanillaFontConfigProvider
     {
-        private readonly IDictionary<FontConfigKey, FontConfig_> _vanillaFontsLookup;
+        private readonly IDictionary<FontConfigKey, FontConfig> _vanillaFontsLookup;
 
-        public VanillaFontConfigProvider(IDictionary<FontConfigKey, FontConfig_> vanillaFonts)
+        public VanillaFontConfigProvider(IDictionary<FontConfigKey, FontConfig> vanillaFonts)
         {
             this._vanillaFontsLookup = vanillaFonts;
         }
 
-        public FontConfig_ GetVanillaFontConfig(LanguageInfo language, GameFontType fontType)
+        public FontConfig GetVanillaFontConfig(LanguageInfo language, GameFontType fontType)
         {
-            if (this._vanillaFontsLookup.TryGetValue(new FontConfigKey(language, fontType), out FontConfig_ value))
+            if (this._vanillaFontsLookup.TryGetValue(new FontConfigKey(language, fontType), out FontConfig value))
                 return value;
 
             return this.CreateFallbackFontConfig(language, fontType);
         }
 
-        private FontConfig_ CreateFallbackFontConfig(LanguageInfo language, GameFontType fontType)
+        private FontConfig CreateFallbackFontConfig(LanguageInfo language, GameFontType fontType)
         {
             if (fontType != GameFontType.SpriteText)
-                return new FontConfig_(
+                return new FontConfig(
                     Enabled: true,
                     FontFilePath: null,
                     FontIndex: 0,

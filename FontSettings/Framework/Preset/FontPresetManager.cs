@@ -10,17 +10,17 @@ using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework.Preset
 {
-    internal class FontPresetManager_ : IFontPresetManager
+    internal class FontPresetManager : IFontPresetManager
     {
-        private readonly IDictionary<string, FontPresetReal> _keyedPresets = new Dictionary<string, FontPresetReal>();
+        private readonly IDictionary<string, FontPreset> _keyedPresets = new Dictionary<string, FontPreset>();
 
-        private readonly IList<FontPresetReal> _presets = new List<FontPresetReal>();
+        private readonly IList<FontPreset> _presets = new List<FontPreset>();
 
-        private readonly IList<FontPresetReal> _readonlyPresets = new List<FontPresetReal>();
+        private readonly IList<FontPreset> _readonlyPresets = new List<FontPreset>();
 
         public event EventHandler<PresetUpdatedEventArgs>? PresetUpdated;
 
-        public FontPresetManager_(IEnumerable<FontPresetReal> presets)
+        public FontPresetManager(IEnumerable<FontPreset> presets)
         {
             foreach (var preset in presets)
             {
@@ -32,14 +32,14 @@ namespace FontSettings.Framework.Preset
             }
         }
 
-        public IEnumerable<FontPresetReal> GetPresets(LanguageInfo language, GameFontType fontType)
+        public IEnumerable<FontPreset> GetPresets(LanguageInfo language, GameFontType fontType)
         {
             return from preset in this.GetAllPresets()
                    where preset.Language == language && preset.FontType == fontType
                    select preset;
         }
 
-        public bool IsReadOnlyPreset(FontPresetReal preset)
+        public bool IsReadOnlyPreset(FontPreset preset)
         {
             return !this._keyedPresets.Values.Contains(preset);
         }
@@ -59,7 +59,7 @@ namespace FontSettings.Framework.Preset
             return invalidType == null;
         }
 
-        void IFontPresetManager.UpdatePreset(string name, FontPresetReal? preset)
+        void IFontPresetManager.UpdatePreset(string name, FontPreset? preset)
         {
             if (!this._keyedPresets.ContainsKey(name))
             {
@@ -84,9 +84,9 @@ namespace FontSettings.Framework.Preset
             }
         }
 
-        private IEnumerable<FontPresetReal> GetAllPresets()
+        private IEnumerable<FontPreset> GetAllPresets()
         {
-            foreach (var preset in _keyedPresets.Values)
+            foreach (var preset in this._keyedPresets.Values)
                 yield return preset;
         }
 
@@ -107,7 +107,7 @@ namespace FontSettings.Framework.Preset
             return this._keyedPresets.ContainsKey(name);
         }
 
-        private void RaisePresetUpdated(string name, FontPresetReal? preset)
+        private void RaisePresetUpdated(string name, FontPreset? preset)
         {
             this.RaisePresetUpdated(
                 new PresetUpdatedEventArgs(name, preset));
@@ -123,9 +123,9 @@ namespace FontSettings.Framework.Preset
     {
         public string Name { get; }
 
-        public FontPresetReal? Preset { get; }
+        public FontPreset? Preset { get; }
 
-        public PresetUpdatedEventArgs(string name, FontPresetReal? preset)
+        public PresetUpdatedEventArgs(string name, FontPreset? preset)
         {
             this.Name = name;
             this.Preset = preset;

@@ -17,15 +17,15 @@ namespace FontSettings.Framework.Menus.ViewModels
         private readonly FontSettingsMenuPresetContextModel _stagedValues;
 
         /// <summary>获取当前上下文所有可用的预设。第一个是 无预设 ，即null。</summary>
-        private FontPresetReal[] _presets;
-        private FontPresetReal[] Presets
+        private FontPreset[] _presets;
+        private FontPreset[] Presets
         {
             get => this._presets;
             set => this.SetField(ref this._presets, value);
         }
 
-        private FontPresetReal _currentPresetPrivate;
-        private FontPresetReal CurrentPresetPrivate
+        private FontPreset _currentPresetPrivate;
+        private FontPreset CurrentPresetPrivate
         {
             get => this._currentPresetPrivate;
             set
@@ -42,7 +42,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         public string CurrentPresetName => this.CurrentPresetPrivate is IPresetWithName withName ? withName.Name
                                                                                                   : string.Empty;
 
-        public FontConfig_ CurrentPreset => this.CurrentPresetPrivate?.Settings;
+        public FontConfig CurrentPreset => this.CurrentPresetPrivate?.Settings;
 
         public event EventHandler PresetChanged;
 
@@ -125,7 +125,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.RaisePresetChanged(EventArgs.Empty);
         }
 
-        public void SaveCurrentPreset(FontConfig_ settings)
+        public void SaveCurrentPreset(FontConfig settings)
         {
             if (this.NoPresetSelected)
                 return;
@@ -137,7 +137,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 new FontPresetWithName(FontHelpers.GetCurrentLanguage(), this._fontType, settings, this.CurrentPresetName));   // TODO: 封装preset实例创建过程
         }
 
-        public void SaveCurrentAsNewPreset(string presetName, FontConfig_ settings)
+        public void SaveCurrentAsNewPreset(string presetName, FontConfig settings)
         {
             if (settings is null)
                 throw new ArgumentNullException(nameof(settings));
@@ -155,7 +155,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private void UpdatePresets()
         {
-            this.Presets = new FontPresetReal[] { null }.Concat(
+            this.Presets = new FontPreset[] { null }.Concat(
                 this._presetManager.GetPresets(FontHelpers.GetCurrentLanguage(), this._fontType)
                 )
                 .ToArray();
@@ -203,6 +203,6 @@ namespace FontSettings.Framework.Menus.ViewModels
             return array[nextIndex];
         }
 
-        private record Preset(string Name, FontConfig_ Config);
+        private record Preset(string Name, FontConfig Config);
     }
 }

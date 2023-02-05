@@ -19,7 +19,7 @@ namespace FontSettings.Framework.Models
     /// <param name="CharOffsetX"></param>
     /// <param name="CharOffsetY"></param>
     /// <param name="CharacterRanges">Must not be null.</param>
-    internal record FontConfig_(
+    internal record FontConfig(
         bool Enabled,
         string FontFilePath,
         int FontIndex,
@@ -30,7 +30,7 @@ namespace FontSettings.Framework.Models
         float CharOffsetY,
         IEnumerable<CharacterRange> CharacterRanges) : IExtensible
     {
-        public T GetInstance<T>() where T : class=>this as T;
+        public T GetInstance<T>() where T : class => this as T;
 
         public bool Supports<T>() where T : class => this is T;
     }

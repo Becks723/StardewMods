@@ -11,16 +11,16 @@ namespace FontSettings.Framework
     {
         private readonly object _lock = new object();
 
-        private readonly IDictionary<FontConfigKey, FontConfig_> _fontConfigs;
+        private readonly IDictionary<FontConfigKey, FontConfig> _fontConfigs;
 
         public event EventHandler ConfigUpdated;
 
-        public FontConfigManager(IDictionary<FontConfigKey, FontConfig_> fontConfigs)
+        public FontConfigManager(IDictionary<FontConfigKey, FontConfig> fontConfigs)
         {
             this._fontConfigs = fontConfigs;
         }
 
-        public void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig_? config)
+        public void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig? config)
         {
             var key = new FontConfigKey(language, fontType);
 
@@ -46,9 +46,9 @@ namespace FontSettings.Framework
             }
         }
 
-        public bool TryGetFontConfig(LanguageInfo language, GameFontType fontType, out FontConfig_? fontConfig)
+        public bool TryGetFontConfig(LanguageInfo language, GameFontType fontType, out FontConfig? fontConfig)
         {
-            FontConfig_? got = this.GetFontConfig(language, fontType);
+            FontConfig? got = this.GetFontConfig(language, fontType);
 
             if (got != null)
             {
@@ -62,7 +62,7 @@ namespace FontSettings.Framework
             }
         }
 
-        public IDictionary<FontConfigKey, FontConfig_> GetAllFontConfigs()
+        public IDictionary<FontConfigKey, FontConfig> GetAllFontConfigs()
         {
             lock (this._lock)
             {
@@ -70,12 +70,12 @@ namespace FontSettings.Framework
             }
         }
 
-        public FontConfig_? GetFontConfig(LanguageInfo language, GameFontType fontType)
+        public FontConfig? GetFontConfig(LanguageInfo language, GameFontType fontType)
         {
             lock (this._lock)
             {
                 var key = new FontConfigKey(language, fontType);
-                if (this._fontConfigs.TryGetValue(key, out FontConfig_ value))
+                if (this._fontConfigs.TryGetValue(key, out FontConfig value))
                     return value;
 
                 return null;

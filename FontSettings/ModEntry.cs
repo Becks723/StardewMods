@@ -58,7 +58,7 @@ namespace FontSettings
         private FontConfigManager _fontConfigManager;
         private IVanillaFontConfigProvider _vanillaFontConfigProvider;
         private IFontFileProvider _fontFileProvider;
-        private FontPresetManager_ _fontPresetManager;
+        private Framework.Preset.FontPresetManager _fontPresetManager;
         private IGameFontChangerFactory _fontChangerFactory;
         private FontPatchInvalidatorManager _invalidatorManager;
 
@@ -179,12 +179,12 @@ namespace FontSettings
             }
             return fontFileProvider;
         }
-        FontPresetManager_ GetFontPresetManager(FontPresetParser parser)
+        Framework.Preset.FontPresetManager GetFontPresetManager(FontPresetParser parser)
         {
             var presets = this._fontPresetRepository.ReadAllPresets()
                 .SelectMany(pair => parser.Parse(pair.Value));
 
-            return new FontPresetManager_(presets);
+            return new Framework.Preset.FontPresetManager(presets);
         }
         private void OnFontConfigUpdated(object sender, EventArgs e)
         {

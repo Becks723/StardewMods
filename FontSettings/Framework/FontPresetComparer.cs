@@ -9,9 +9,9 @@ using FontSettings.Framework.DataAccess.Models;
 namespace FontSettings.Framework
 {
     [Obsolete]
-    internal class FontPresetComparer : IEqualityComparer<FontPreset>
+    internal class FontPresetComparer : IEqualityComparer<FontPresetData>
     {
-        public bool Equals(FontPreset x, FontPreset y)
+        public bool Equals(FontPresetData x, FontPresetData y)
         {
             if (x is null) return y is null;
             if (y is null) return x is null;
@@ -31,7 +31,7 @@ namespace FontSettings.Framework
                 return presetName1 == presetName2;
         }
 
-        public int GetHashCode([DisallowNull] FontPreset obj)
+        public int GetHashCode([DisallowNull] FontPresetData obj)
         {
             return obj.Name.GetHashCode();
         }

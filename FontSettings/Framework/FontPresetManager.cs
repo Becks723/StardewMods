@@ -15,13 +15,13 @@ namespace FontSettings.Framework
     [Obsolete("本身已弃用，但逻辑仍可借鉴。")]
     internal class FontPresetManager
     {
-        private readonly IList<FontPreset> _builtInPresets = new List<FontPreset>();
-        private readonly IList<FontPreset> _userDefinedPresets = new List<FontPreset>();
+        private readonly IList<FontPresetData> _builtInPresets = new List<FontPresetData>();
+        private readonly IList<FontPresetData> _userDefinedPresets = new List<FontPresetData>();
         private readonly string _rootDir;
         private readonly string _builtInDir;
         private readonly FontPresetComparer _comparer = new();
 
-        public FontPresetManager(string presetsDir, string builtInFolderName, IEnumerable<FontPreset> builtInPresets = null)
+        public FontPresetManager(string presetsDir, string builtInFolderName, IEnumerable<FontPresetData> builtInPresets = null)
         {
             this._rootDir = presetsDir;
             this._builtInDir = Path.Combine(this._rootDir, builtInFolderName);
@@ -30,13 +30,13 @@ namespace FontSettings.Framework
             Directory.CreateDirectory(this._builtInDir);
 
             if (builtInPresets != null)
-                foreach (FontPreset item in builtInPresets)
+                foreach (FontPresetData item in builtInPresets)
                     this._builtInPresets.Add(item);
 
             this.Load();
         }
 
-        public IEnumerable<FontPreset> GetAll(bool skipBuiltIn = false, bool skipUserDefined = false)
+        public IEnumerable<FontPresetData> GetAll(bool skipBuiltIn = false, bool skipUserDefined = false)
         {
             switch (skipBuiltIn, skipUserDefined)
             {
@@ -47,13 +47,13 @@ namespace FontSettings.Framework
                 case (false, false):
                     return this._builtInPresets.Concat(this._userDefinedPresets);
                 case (true, true):
-                    return Enumerable.Empty<FontPreset>();
+                    return Enumerable.Empty<FontPresetData>();
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        public IEnumerable<FontPreset> GetAllUnder(FontPresetFontType fontType, LanguageInfo language, bool includeGeneral = true, bool skipBuiltIn = false, bool skipUserDefined = false)
+        public IEnumerable<FontPresetData> GetAllUnder(FontPresetFontType fontType, LanguageInfo language, bool includeGeneral = true, bool skipBuiltIn = false, bool skipUserDefined = false)
         {
             var all = this.GetAll(skipBuiltIn, skipUserDefined);
             var result = all.Where(p => p.FontType == fontType && p.Lang == language.Code && p.Locale == language.Locale);
@@ -62,9 +62,9 @@ namespace FontSettings.Framework
             return result;
         }
 
-        public bool IsBuiltInPreset(FontPreset preset)
+        public bool IsBuiltInPreset(FontPresetData preset)
         {
-            foreach (FontPreset item in this._builtInPresets)
+            foreach (FontPresetData item in this._builtInPresets)
             {
                 if (this._comparer.Equals(item, preset))
                     return true;
@@ -73,10 +73,10 @@ namespace FontSettings.Framework
             return false;
         }
 
-        public bool TryFindPreset(string name, out FontPreset preset)
+        public bool TryFindPreset(string name, out FontPresetData preset)
         {
             var allPresets = this.GetAll();
-            foreach (FontPreset item in allPresets)
+            foreach (FontPresetData item in allPresets)
             {
                 if (this._comparer.Equals(item.Name, name))
                 {
@@ -89,7 +89,7 @@ namespace FontSettings.Framework
             return false;
         }
 
-        public void AddPreset(FontPreset preset)
+        public void AddPreset(FontPresetData preset)
         {
             this.AssertNotNull(preset, nameof(preset));
             this.AssertValidName(preset.Name);
@@ -98,7 +98,7 @@ namespace FontSettings.Framework
             this.WriteToFile(preset);
         }
 
-        public bool TryAddPreset(FontPreset preset)
+        public bool TryAddPreset(FontPresetData preset)
         {
             try
             {
@@ -113,7 +113,7 @@ namespace FontSettings.Framework
 
         public bool RemovePreset(string name, bool canRemoveBuiltIn = false)
         {
-            if (!this.TryFindPreset(name, out FontPreset preset))
+            if (!this.TryFindPreset(name, out FontPresetData preset))
                 return false;
 
             if (this._userDefinedPresets.Remove(preset))
@@ -132,7 +132,7 @@ namespace FontSettings.Framework
             return false;
         }
 
-        public void EditPreset(FontPreset preset,
+        public void EditPreset(FontPresetData preset,
             string fontFileName, int fontIndex, float fontSize, float spacing, int lineSpacing, float offsetX, float offsetY, float pixelZoom)
         {
             this.AssertNotNull(preset, nameof(preset));
@@ -165,7 +165,7 @@ namespace FontSettings.Framework
             return invalidType == null;
         }
 
-        internal void EditPreset(FontPreset preset, Action<FontPreset> editor)
+        internal void EditPreset(FontPresetData preset, Action<FontPresetData> editor)
         {
             this.AssertNotNull(preset, nameof(preset));
             this.AssertNoInvalidChar(preset.Name, nameof(preset));
@@ -176,7 +176,7 @@ namespace FontSettings.Framework
             this.WriteToFile(preset);
         }
 
-        private void WriteToFile(FontPreset preset)  // 名称必须合法。
+        private void WriteToFile(FontPresetData preset)  // 名称必须合法。
         {
             string json = JsonConvert.SerializeObject(preset, GetJsonSerializeSettings());
 
@@ -190,40 +190,40 @@ namespace FontSettings.Framework
         {
             this.EnsureBuiltInPresets();
 
-            foreach (FontPreset builtInPreset in this.LoadFromDir(this._builtInDir))
+            foreach (FontPresetData builtInPreset in this.LoadFromDir(this._builtInDir))
                 this._builtInPresets.Add(builtInPreset);
-            foreach (FontPreset preset in this.LoadFromDir(this._rootDir))
+            foreach (FontPresetData preset in this.LoadFromDir(this._rootDir))
                 this._userDefinedPresets.Add(preset);
         }
 
         private void EnsureBuiltInPresets()
         {
             string[] potentialPresetFiles = Directory.GetFiles(this._builtInDir, "*.json", SearchOption.TopDirectoryOnly);
-            foreach (FontPreset item in this._builtInPresets)
+            foreach (FontPresetData item in this._builtInPresets)
             {
 
             }
         }
 
-        private FontPreset[] LoadFromDir(string directory)
+        private FontPresetData[] LoadFromDir(string directory)
         {
-            var result = new List<FontPreset>();
+            var result = new List<FontPresetData>();
             string[] potentialPresetFiles = Directory.GetFiles(directory, "*.json", SearchOption.TopDirectoryOnly);
             foreach (string file in potentialPresetFiles)
             {
-                if (TryLoadPreset(file, out FontPreset preset))
+                if (TryLoadPreset(file, out FontPresetData preset))
                     result.Add(preset);
             }
 
             return result.ToArray();
         }
 
-        private static bool TryLoadPreset(string fullPath, out FontPreset preset)
+        private static bool TryLoadPreset(string fullPath, out FontPresetData preset)
         {
             string str = File.ReadAllText(fullPath);
             try
             {
-                preset = JsonConvert.DeserializeObject<FontPreset>(str, GetJsonDeserializeSettings());
+                preset = JsonConvert.DeserializeObject<FontPresetData>(str, GetJsonDeserializeSettings());
                 preset.Name = Path.GetFileNameWithoutExtension(fullPath);
                 return true;
             }

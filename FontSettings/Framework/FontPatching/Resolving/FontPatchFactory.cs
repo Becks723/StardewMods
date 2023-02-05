@@ -17,13 +17,13 @@ namespace FontSettings.Framework.FontPatching.Resolving
         public IFontPatch ForBypassSpriteFont()
             => this.CreatePatch();
 
-        public IFontPatch ForLoadSpriteFont(FontConfig_ config)
+        public IFontPatch ForLoadSpriteFont(FontConfig config)
             => this.CreatePatch(new SpriteFontLoader(config));
 
         public IFontPatch ForLoadSpriteFont(SpriteFont spriteFont)
             => this.CreatePatch(new SimpleFontLoader(spriteFont));
 
-        public IFontPatch ForEditSpriteFont(FontConfig_ config)
+        public IFontPatch ForEditSpriteFont(FontConfig config)
             => this.CreatePatch(new SpriteFontEditor(config));
 
         public IBmFontPatch ForBypassBmFont()
@@ -37,7 +37,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
             return this.CreateBmPatch(fontFileLoader, pageLoaders, fontPixelZoom);
         }
 
-        public IBmFontPatch ForEditBmFont(FontConfig_ config)
+        public IBmFontPatch ForEditBmFont(FontConfig config)
             => this.CreateBmPatch(new BmFontFileEditor(config));
 
         private IFontPatch CreatePatch() => new FontPatch(null, null);

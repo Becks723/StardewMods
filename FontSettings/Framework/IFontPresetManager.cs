@@ -10,11 +10,11 @@ namespace FontSettings.Framework
 {
     internal interface IFontPresetManager
     {
-        void UpdatePreset(string name, FontPresetReal? preset);
+        void UpdatePreset(string name, FontPreset? preset);
 
-        IEnumerable<FontPresetReal> GetPresets(LanguageInfo language, GameFontType fontType);
+        IEnumerable<FontPreset> GetPresets(LanguageInfo language, GameFontType fontType);
 
-        bool IsReadOnlyPreset(FontPresetReal preset);
+        bool IsReadOnlyPreset(FontPreset preset);
 
         bool IsValidPresetName(string? name, out InvalidPresetNameTypes? invalidType);
     }

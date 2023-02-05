@@ -20,13 +20,13 @@ namespace FontSettings.Framework.DataAccess.Parsing
             this._fontFileProvider = fontFileProvider;
         }
 
-        public KeyValuePair<FontConfigKey, FontConfig_> Parse(FontConfig config)
+        public KeyValuePair<FontConfigKey, FontConfig> Parse(FontConfigData config)
         {
             var key = new FontConfigKey(
                 Language: new LanguageInfo(config.Lang, config.Locale),
                 FontType: config.InGameType);
 
-            var parsed = new FontConfig_(
+            var parsed = new FontConfig(
                 Enabled: config.Enabled,
                 FontFilePath: this.ParseFontFilePath(config.FontFilePath, key.Language, key.FontType),
                 FontIndex: config.FontIndex,
@@ -45,13 +45,13 @@ namespace FontSettings.Framework.DataAccess.Parsing
             return new(key, parsed);
         }
 
-        public FontConfig ParseBack(KeyValuePair<FontConfigKey, FontConfig_> config)
+        public FontConfigData ParseBack(KeyValuePair<FontConfigKey, FontConfig> config)
         {
             var language = config.Key.Language;
             var fontType = config.Key.FontType;
             var configValue = config.Value;
 
-            var parsedBack = new FontConfig();
+            var parsedBack = new FontConfigData();
 
             // common fields.
             parsedBack.Lang = language.Code;

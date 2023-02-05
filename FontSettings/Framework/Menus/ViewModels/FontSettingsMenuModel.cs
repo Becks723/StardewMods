@@ -160,7 +160,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
-        private FontConfig_ CurrentFontConfig { get; set; }
+        private FontConfig CurrentFontConfig { get; set; }
 
         #region FontEnabled Property
 
@@ -802,7 +802,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.Title = newFontType.LocalizedName();
 
             // 更新各个属性。
-            FontConfig_ fontConfig = this.GetOrCreateFontConfig();
+            FontConfig fontConfig = this.GetOrCreateFontConfig();
             this.CurrentFontConfig = fontConfig;
             this.FontEnabled = fontConfig.Enabled;
             this.FontSize = fontConfig.FontSize;
@@ -830,7 +830,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         {
             var presetViewModel = this.PresetViewModel(this.CurrentFontType);
             string presetName = presetViewModel.CurrentPresetName;
-            FontConfig_ preset = presetViewModel.CurrentPreset;
+            FontConfig preset = presetViewModel.CurrentPreset;
             bool noPresetSelected = preset == null;
 
             // 更新预设名字。
@@ -847,7 +847,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 如果无预设，则载入保存的设置。
             if (noPresetSelected)
             {
-                FontConfig_ fontConfig = this.CurrentFontConfig;
+                FontConfig fontConfig = this.CurrentFontConfig;
                 this.FontEnabled = fontConfig.Enabled;
                 this.FontSize = fontConfig.FontSize;
                 this.Spacing = fontConfig.Spacing;
@@ -878,20 +878,20 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.UpdateExampleCurrent();
         }
 
-        private FontConfig_ GetOrCreateFontConfig()
+        private FontConfig GetOrCreateFontConfig()
         {
             var langugage = FontHelpers.GetCurrentLanguage();
             var fontType = this.CurrentFontType;
 
-            if (this._fontConfigManager.TryGetFontConfig(langugage, fontType, out FontConfig_ config))
+            if (this._fontConfigManager.TryGetFontConfig(langugage, fontType, out FontConfig config))
                 return config;
 
             return this._vanillaFontConfigProvider.GetVanillaFontConfig(langugage, fontType);
         }
 
-        private FontConfig_ CreateConfigBasedOnCurrentSettings()
+        private FontConfig CreateConfigBasedOnCurrentSettings()
         {
-            var font = new FontConfig_(
+            var font = new FontConfig(
                 Enabled: this.FontEnabled,
                 FontFilePath: this.FontFilePath,
                 FontIndex: this.FontIndex,
@@ -948,7 +948,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         }
 
         [Obsolete("验证字体文件的逻辑需要转移，此方法本身废除。")]
-        private bool IsPresetValid(Framework.DataAccess.Models.FontPreset preset, out FontModel match, out string invalidMessage)
+        private bool IsPresetValid(Framework.DataAccess.Models.FontPresetData preset, out FontModel match, out string invalidMessage)
         {
             match = null;
             invalidMessage = null;

@@ -7,17 +7,17 @@ using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework.Preset
 {
-    internal class FontPresetWithName : FontPresetReal, IPresetWithName
+    internal class FontPresetWithName : FontPreset, IPresetWithName
     {
         public string Name { get; }
 
-        public FontPresetWithName(LanguageInfo language, GameFontType fontType, FontConfig_ settings, string name) 
+        public FontPresetWithName(LanguageInfo language, GameFontType fontType, FontConfig settings, string name) 
             : base(language, fontType, settings)
         {
             this.Name = name;
         }
 
-        public FontPresetWithName(FontPresetReal copy, string name) 
+        public FontPresetWithName(FontPreset copy, string name) 
             : base(copy)
         {
             this.Name = name;

@@ -18,7 +18,7 @@ namespace FontSettings.Framework.FontPatching
             this._invalidator = invalidator;
         }
 
-        public IGameFontChangeResult ChangeGameFont(FontConfig_ font)
+        public IGameFontChangeResult ChangeGameFont(FontConfig font)
         {
             Exception? exception;
 
@@ -45,7 +45,7 @@ namespace FontSettings.Framework.FontPatching
                 return this.ErrorResult(exception, this.GetErrorMessageRecursively);
         }
 
-        public async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig_ font)
+        public async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font)
         {
             Exception? exception;
 

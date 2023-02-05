@@ -21,7 +21,7 @@ namespace FontSettings.Framework
         private readonly IDictionary<LanguageInfo, GameBitmapSpriteFont> _builtInBmFonts = new Dictionary<LanguageInfo, GameBitmapSpriteFont>();
 
         /// <summary>需要手动释放。</summary> 
-        private readonly IDictionary<FontConfig, SpriteFont> _spriteFonts = new Dictionary<FontConfig, SpriteFont>();
+        private readonly IDictionary<FontConfigData, SpriteFont> _spriteFonts = new Dictionary<FontConfigData, SpriteFont>();
 
         /// <summary>需要手动释放。</summary> 
         private readonly IList<GameBitmapSpriteFont> _bmFonts = new List<GameBitmapSpriteFont>();
@@ -34,7 +34,7 @@ namespace FontSettings.Framework
         }
 
         [Obsolete("自0.5.0版本起正式废除。")]
-        public SpriteFont GetLoadedFont(FontConfig config)
+        public SpriteFont GetLoadedFont(FontConfigData config)
         {
             if (this._spriteFonts.TryGetValue(config, out SpriteFont spriteFont))
                 return spriteFont;
@@ -47,7 +47,7 @@ namespace FontSettings.Framework
         }
 
         [Obsolete("自0.5.0版本起正式废除。")]
-        public void RecordSpriteFont(FontConfig fontConfig, SpriteFont value)
+        public void RecordSpriteFont(FontConfigData fontConfig, SpriteFont value)
         {
             if (value != null && !this._spriteFonts.ContainsKey(fontConfig))
                 this._spriteFonts[fontConfig] = value;

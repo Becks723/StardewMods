@@ -9,7 +9,7 @@ namespace FontSettings.Framework.FontPatching.Editors
 {
     internal abstract class BaseFontEditor<T> : IFontEditor
     {
-        private readonly FontConfig_ _config;
+        private readonly FontConfig _config;
 
         public void Edit(object data)
         {
@@ -17,9 +17,9 @@ namespace FontSettings.Framework.FontPatching.Editors
                 this.Edit(tData, this._config);
         }
 
-        protected abstract void Edit(T data, FontConfig_ config);
+        protected abstract void Edit(T data, FontConfig config);
 
-        protected BaseFontEditor(FontConfig_ config)
+        protected BaseFontEditor(FontConfig config)
         {
             this._config = config;
         }

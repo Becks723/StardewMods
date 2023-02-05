@@ -11,12 +11,12 @@ namespace FontSettings.Framework.FontPatching.Loaders
 {
     internal class SpriteFontLoader : BaseFontLoader<SpriteFont>
     {
-        public SpriteFontLoader(FontConfig_ config) 
+        public SpriteFontLoader(FontConfig config) 
             : base(config)
         {
         }
 
-        protected override SpriteFont Load(FontConfig_ config)
+        protected override SpriteFont Load(FontConfig config)
         {
             return SpriteFontGenerator.FromTtf(  // TODO: processing
                 ttfPath: config.FontFilePath,

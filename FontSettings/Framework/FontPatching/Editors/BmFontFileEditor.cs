@@ -10,19 +10,19 @@ namespace FontSettings.Framework.FontPatching.Editors
 {
     internal class BmFontFileEditor : BaseFontEditor<XmlSource>
     {
-        public BmFontFileEditor(FontConfig_ config)
+        public BmFontFileEditor(FontConfig config)
             : base(config)
         {
         }
 
-        protected override void Edit(XmlSource xmlSource, FontConfig_ config)
+        protected override void Edit(XmlSource xmlSource, FontConfig config)
         {
             FontFile fontFile = FontLoader.Parse(xmlSource.Source);
             this.Edit(fontFile, config);
             this.ResetXmlSource(xmlSource, FontHelpers.ParseFontFile(fontFile).Source);
         }
 
-        private void Edit(FontFile fontFile, FontConfig_ config)
+        private void Edit(FontFile fontFile, FontConfig config)
         {
             BmFontGenerator.EditExisting(
                 existingFont: fontFile,

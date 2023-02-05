@@ -20,9 +20,9 @@ namespace FontSettings.Framework.DataAccess
             this._rootDir = presetsDir;
         }
 
-        public IDictionary<string, FontPreset> ReadAllPresets()
+        public IDictionary<string, FontPresetData> ReadAllPresets()
         {
-            var result = new Dictionary<string, FontPreset>();
+            var result = new Dictionary<string, FontPresetData>();
 
             string[] potentialPresetFiles = Directory.GetFiles(this._rootDir, "*.json", SearchOption.TopDirectoryOnly);
             foreach (string file in potentialPresetFiles)
@@ -34,7 +34,7 @@ namespace FontSettings.Framework.DataAccess
             return result;
         }
 
-        public void WritePreset(string name, FontPreset? preset)
+        public void WritePreset(string name, FontPresetData? preset)
         {
             // when null, delete the preset if exists.
             if (preset == null)
@@ -51,14 +51,14 @@ namespace FontSettings.Framework.DataAccess
             }
         }
 
-        private static bool TryLoadPreset(string fullPath, out KeyValuePair<string, FontPreset> preset)
+        private static bool TryLoadPreset(string fullPath, out KeyValuePair<string, FontPresetData> preset)
         {
             try
             {
                 string name = Path.GetFileNameWithoutExtension(fullPath);
 
                 string json = File.ReadAllText(fullPath);
-                FontPreset value = JsonConvert.DeserializeObject<FontPreset>(json, GetJsonDeserializeSettings());
+                FontPresetData value = JsonConvert.DeserializeObject<FontPresetData>(json, GetJsonDeserializeSettings());
                 value.Name = name;
 
                 preset = KeyValuePair.Create(name, value);

@@ -10,7 +10,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 {
     internal class SpriteFontPatchResolver : BaseFontPatchResolver
     {
-        public override IResult<IFontPatch, Exception> Resolve(FontConfig_ config)
+        public override IResult<IFontPatch, Exception> Resolve(FontConfig config)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
             }
         }
 
-        public override async Task<IResult<IFontPatch, Exception>> ResolveAsync(FontConfig_ config)
+        public override async Task<IResult<IFontPatch, Exception>> ResolveAsync(FontConfig config)
         {
             return await Task.Run(() => this.Resolve(config));
         }

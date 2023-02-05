@@ -9,8 +9,8 @@ namespace FontSettings.Framework.FontPatching
 {
     internal interface IFontPatchResolver
     {
-        IResult<IFontPatch, Exception> Resolve(FontConfig_ config);
+        IResult<IFontPatch, Exception> Resolve(FontConfig config);
 
-        Task<IResult<IFontPatch, Exception>> ResolveAsync(FontConfig_ config);
+        Task<IResult<IFontPatch, Exception>> ResolveAsync(FontConfig config);
     }
 }

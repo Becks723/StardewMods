@@ -11,7 +11,7 @@ namespace FontSettings.Framework.Migrations
 {
     /// <summary>
     /// 迁移至0.6.0<br/>
-    /// · 在<see cref="FontConfig"/>中添加了一个属性<see cref="FontConfig.PixelZoom"/>，会更改SpriteText的缩放比例。默认值为0，我们需要将原有设置的该项设为1。<br/>
+    /// · 在<see cref="FontConfigData"/>中添加了一个属性<see cref="FontConfigData.PixelZoom"/>，会更改SpriteText的缩放比例。默认值为0，我们需要将原有设置的该项设为1。<br/>
     /// · 将LanguageCode.en时的Locale由 "en" 改成 string.Empty。
     /// · <see cref="ModConfig.ExampleText"/>一般情况不需要再设置，因此改成空字符串。
     /// </summary>
@@ -43,7 +43,7 @@ namespace FontSettings.Framework.Migrations
                     // -（未必一次性）将本地存档（包括字体设置、预设）中LanguageCode.en时Locale由"en"改为string.Empty。
                     {
                         var fontSettings = fontConfigRepository.ReadAllConfigs();
-                        foreach (FontConfig config in fontSettings)
+                        foreach (FontConfigData config in fontSettings)
                         {
                             if (config.InGameType == GameFontType.SpriteText)
                                 config.PixelZoom = 1f;
@@ -57,7 +57,7 @@ namespace FontSettings.Framework.Migrations
                         foreach (var pair in presets)
                         {
                             string name = pair.Key;
-                            FontPreset preset = pair.Value;
+                            FontPresetData preset = pair.Value;
 
                             if (preset.FontType is FontPresetFontType.Any or FontPresetFontType.Dialogue)
                                 preset.PixelZoom = 1f;
@@ -94,7 +94,7 @@ namespace FontSettings.Framework.Migrations
                 {
                     // 一次性修改：
                     // - 将现存的对话字体缩放改成1f。
-                    foreach (FontConfig config in fontSettings)
+                    foreach (FontConfigData config in fontSettings)
                     {
                         if (config.InGameType == GameFontType.SpriteText)
                         {
@@ -113,7 +113,7 @@ namespace FontSettings.Framework.Migrations
 
                 // 将本地存档（包括字体设置、预设）中LanguageCode.en时Locale由"en"改为string.Empty。
                 {
-                    foreach (FontConfig config in fontSettings)
+                    foreach (FontConfigData config in fontSettings)
                     {
                         if (config.Lang == StardewValley.LocalizedContentManager.LanguageCode.en)
                         {
@@ -123,7 +123,7 @@ namespace FontSettings.Framework.Migrations
                     writeFontSettings(fontSettings);
 
                     var allPresets = presetManager.GetAll();
-                    foreach (FontPreset preset in allPresets)
+                    foreach (FontPresetData preset in allPresets)
                     {
                         if (preset.Lang == StardewValley.LocalizedContentManager.LanguageCode.en
                             && preset.Locale != string.Empty)

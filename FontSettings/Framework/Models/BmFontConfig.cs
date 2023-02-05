@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace FontSettings.Framework.Models
 {
-    internal record BmFontConfig : FontConfig_, IWithPixelZoom
+    internal record BmFontConfig : FontConfig, IWithPixelZoom
     {
         public float PixelZoom { get; }
 
-        public BmFontConfig(FontConfig_ original, float pixelZoom) 
+        public BmFontConfig(FontConfig original, float pixelZoom) 
             : base(original)
         {
             this.PixelZoom = pixelZoom;

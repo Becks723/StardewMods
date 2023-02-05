@@ -10,12 +10,12 @@ namespace FontSettings.Framework.FontPatching.Editors
 {
     internal class SpriteFontEditor : BaseFontEditor<SpriteFont>
     {
-        public SpriteFontEditor(FontConfig_ config)
+        public SpriteFontEditor(FontConfig config)
             : base(config)
         {
         }
 
-        protected override void Edit(SpriteFont font, FontConfig_ config)
+        protected override void Edit(SpriteFont font, FontConfig config)
         {
             SpriteFontGenerator.EditExisting(
                 existingFont: font,

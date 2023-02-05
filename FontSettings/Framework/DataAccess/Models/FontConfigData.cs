@@ -7,7 +7,7 @@ using StardewValley;
 
 namespace FontSettings.Framework.DataAccess.Models
 {
-    internal class FontConfig
+    internal class FontConfigData
     {
         public bool Enabled { get; set; } = false;
 

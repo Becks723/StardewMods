@@ -22,12 +22,12 @@ namespace FontSettings.Framework.DataAccess.Parsing
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
         }
 
-        public IEnumerable<FontPresetReal> Parse(FontPreset preset)
+        public IEnumerable<Preset.FontPreset> Parse(Models.FontPresetData preset)
         {
             var language = new LanguageInfo(preset.Lang, preset.Locale);
             var fontType = this.ParseFontType(preset.FontType);
 
-            var settings = new FontConfig_(
+            var settings = new FontConfig(
                 Enabled: true,
                 FontFilePath: this.ParseFontFilePath(preset.Requires.FontFileName, language, fontType),
                 FontIndex: preset.FontIndex,
@@ -43,7 +43,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                     original: settings,
                     pixelZoom: preset.PixelZoom);
 
-            var fontPreset = new FontPresetReal(
+            var fontPreset = new Preset.FontPreset(
                 language: language,
                 fontType: fontType,
                 settings: settings);
@@ -56,11 +56,11 @@ namespace FontSettings.Framework.DataAccess.Parsing
             yield return fontPreset;
         }
 
-        public FontPreset ParseBack(FontPresetReal preset)
+        public Models.FontPresetData ParseBack(Preset.FontPreset preset)
         {
             var font = preset.Settings;
 
-            return new FontPreset
+            return new Models.FontPresetData
             {
                 Requires = new() { FontFileName = this.ParseBackFontFilePath(font.FontFilePath, preset.Language, preset.FontType) },
                 FontType = this.ParseBackFontType(preset.FontType),

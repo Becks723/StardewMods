@@ -9,11 +9,11 @@ namespace FontSettings.Framework
 {
     internal interface IGameFontChanger
     {
-        IGameFontChangeResult ChangeGameFont(FontConfig_ font);
+        IGameFontChangeResult ChangeGameFont(FontConfig font);
     }
 
     internal interface IAsyncGameFontChanger
     {
-        Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig_ font);
+        Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font);
     }
 }
