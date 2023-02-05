@@ -44,11 +44,14 @@ namespace FontSettings.Framework.DataAccess.Parsing
                     pixelZoom: preset.PixelZoom);
 
             var fontPreset = new FontPresetReal(
-                language,
-                fontType,
-                settings);
+                language: language,
+                fontType: fontType,
+                settings: settings);
 
-            fontPreset = new FontPresetWithName(fontPreset, preset.Name);
+            // 目前的预设全是withKey的，而key就是name本身。
+            fontPreset = new FontPresetWithKey(
+                copy: new FontPresetWithName(fontPreset, preset.Name),
+                key: preset.Name);
 
             yield return fontPreset;
         }

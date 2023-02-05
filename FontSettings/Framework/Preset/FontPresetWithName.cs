@@ -22,5 +22,10 @@ namespace FontSettings.Framework.Preset
         {
             this.Name = name;
         }
+
+        protected FontPresetWithName(FontPresetWithName copy)
+            : this(copy, copy.Name)
+        {
+        }
     }
 }

@@ -24,16 +24,17 @@ namespace FontSettings.Framework.Preset
         {
             foreach (var preset in presets)
             {
-                if (preset is IPresetWithKey<string> withKey)
+                if (preset.Supports<IPresetWithKey<string>>())
+                {
+                    var withKey = preset.GetInstance<IPresetWithKey<string>>();
                     this._keyedPresets[withKey.Key] = preset;
-
-                this._presets.Add(preset);
+                }
             }
         }
 
         public IEnumerable<FontPresetReal> GetPresets(LanguageInfo language, GameFontType fontType)
         {
-            return from preset in this._presets
+            return from preset in this.GetAllPresets()
                    where preset.Language == language && preset.FontType == fontType
                    select preset;
         }
@@ -81,6 +82,12 @@ namespace FontSettings.Framework.Preset
                     this.RaisePresetUpdated(name, null);
                 }
             }
+        }
+
+        private IEnumerable<FontPresetReal> GetAllPresets()
+        {
+            foreach (var preset in _keyedPresets.Values)
+                yield return preset;
         }
 
         private bool ContainsInvalidChar(string name)

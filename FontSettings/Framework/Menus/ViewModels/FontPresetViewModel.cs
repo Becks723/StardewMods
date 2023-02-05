@@ -98,7 +98,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public bool CanSavePreset()
         {
-            var currentPreset = CurrentPresetPrivate;
+            var currentPreset = this.CurrentPresetPrivate;
 
             return currentPreset != null                                  // 无选中预设时不可。
                 && !this._presetManager.IsReadOnlyPreset(currentPreset);  // 只读的预设不可编辑。
@@ -106,7 +106,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public bool CanDeletePreset()
         {
-            var currentPreset = CurrentPresetPrivate;
+            var currentPreset = this.CurrentPresetPrivate;
 
             return currentPreset != null                                  // 无选中预设时不可。
                 && !this._presetManager.IsReadOnlyPreset(currentPreset);  // 只读的预设不可删除。
@@ -134,7 +134,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 throw new ArgumentNullException(nameof(settings));
 
             this._presetManager.UpdatePreset(this.CurrentPresetName,
-                new FontPresetReal(FontHelpers.GetCurrentLanguage(), this._fontType, settings));
+                new FontPresetWithName(FontHelpers.GetCurrentLanguage(), this._fontType, settings, this.CurrentPresetName));   // TODO: 封装preset实例创建过程
         }
 
         public void SaveCurrentAsNewPreset(string presetName, FontConfig_ settings)
@@ -143,7 +143,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 throw new ArgumentNullException(nameof(settings));
 
             this._presetManager.UpdatePreset(presetName,
-                new FontPresetReal(FontHelpers.GetCurrentLanguage(), this._fontType, settings));
+                new FontPresetWithName(FontHelpers.GetCurrentLanguage(), this._fontType, settings, presetName));   // TODO: 封装preset实例创建过程
 
             this.UpdatePresets();
         }
