@@ -68,8 +68,18 @@ Configure:
 
 
 Release Notes:
-0.6.3 - 2023-01-
-- Fix a bug where everytime game launches, 1. ExampleText gets cleared, 2. PixelZoom is set to 1.0.
+0.7.0 - 2023-02-06
+- Improvements:
+	- Display UI sliders' value.
+	- Improve font processing when you select "keep original".
+
+- Bugfixes:
+	- Fix a major bug where all fonts get lost after returning to title (or anyone invalidating it).
+	- Fix a bug where everytime game launches, 1. ExampleText gets cleared, 2. PixelZoom is set to 1.0.
+	- Add back the refresh button.
+
+- Compatibility:
+	- Drop 0.2 migration.
 
 0.6.2 - 2023-01-05
 - Fix a bug where Dialogue font failed to set when 'Enabled' is not checked.
