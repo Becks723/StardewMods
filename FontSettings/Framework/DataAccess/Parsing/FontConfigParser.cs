@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework.DataAccess.Parsing

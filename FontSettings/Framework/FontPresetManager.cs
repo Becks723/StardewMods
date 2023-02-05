@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.DataAccess.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using StardewModdingAPI;
@@ -11,6 +12,7 @@ using StardewModdingAPI.Utilities;
 
 namespace FontSettings.Framework
 {
+    [Obsolete("本身已弃用，但逻辑仍可借鉴。")]
     internal class FontPresetManager
     {
         private readonly IList<FontPreset> _builtInPresets = new List<FontPreset>();

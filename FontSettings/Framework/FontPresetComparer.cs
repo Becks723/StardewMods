@@ -4,9 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.DataAccess.Models;
 
 namespace FontSettings.Framework
 {
+    [Obsolete]
     internal class FontPresetComparer : IEqualityComparer<FontPreset>
     {
         public bool Equals(FontPreset x, FontPreset y)

@@ -17,14 +17,14 @@ namespace FontSettings.Framework.FontPatching
             this._invalidatorManager = invalidatorManager;
         }
 
-        public IAsyncGameFontChanger3 CreateAsyncChanger(GameFontType fontType)
+        public IAsyncGameFontChanger CreateAsyncChanger(GameFontType fontType)
         {
             return new FontPatchChanger(
                 resolver: this.GetResolver(fontType),
                 invalidator: this.GetInvalidator(fontType));
         }
 
-        public IGameFontChanger3 CreateChanger(GameFontType fontType)
+        public IGameFontChanger CreateChanger(GameFontType fontType)
         {
             throw new NotSupportedException();
         }

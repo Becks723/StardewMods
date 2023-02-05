@@ -1,4 +1,4 @@
-﻿namespace FontSettings.Framework
+﻿namespace FontSettings.Framework.DataAccess.Models
 {
     internal class VanillaFontData
     {

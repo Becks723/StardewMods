@@ -40,7 +40,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         private readonly IFontFileProvider _fontFileProvider;
         private readonly IFontPresetManager _presetManager;
 
-        private IAsyncGameFontChanger3 _gameFontChanger;
+        private IAsyncGameFontChanger _gameFontChanger;
 
         #region CurrentFontType Property
 
@@ -948,7 +948,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         }
 
         [Obsolete("验证字体文件的逻辑需要转移，此方法本身废除。")]
-        private bool IsPresetValid(FontPreset preset, out FontModel match, out string invalidMessage)
+        private bool IsPresetValid(Framework.DataAccess.Models.FontPreset preset, out FontModel match, out string invalidMessage)
         {
             match = null;
             invalidMessage = null;

@@ -8,8 +8,8 @@ namespace FontSettings.Framework
 {
     internal interface IGameFontChangerFactory
     {
-        IGameFontChanger3 CreateChanger(GameFontType fontType);
+        IGameFontChanger CreateChanger(GameFontType fontType);
 
-        IAsyncGameFontChanger3 CreateAsyncChanger(GameFontType fontType);
+        IAsyncGameFontChanger CreateAsyncChanger(GameFontType fontType);
     }
 }

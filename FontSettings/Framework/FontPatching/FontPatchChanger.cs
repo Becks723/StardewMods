@@ -7,7 +7,7 @@ using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework.FontPatching
 {
-    internal class FontPatchChanger : IGameFontChanger3, IAsyncGameFontChanger3
+    internal class FontPatchChanger : IGameFontChanger, IAsyncGameFontChanger
     {
         private readonly IFontPatchResolver _resolver;
         private readonly IFontPatchInvalidator _invalidator;

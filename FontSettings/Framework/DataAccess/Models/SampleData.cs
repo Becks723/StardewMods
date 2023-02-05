@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework
+namespace FontSettings.Framework.DataAccess.Models
 {
     internal class SampleData
     {

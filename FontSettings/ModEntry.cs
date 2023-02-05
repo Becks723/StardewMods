@@ -5,6 +5,7 @@ using System.Linq;
 using BmFont;
 using FontSettings.Framework;
 using FontSettings.Framework.DataAccess;
+using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.DataAccess.Parsing;
 using FontSettings.Framework.FontGenerators;
 using FontSettings.Framework.FontPatching;
@@ -35,7 +36,6 @@ namespace FontSettings
         private readonly string _const_fontPath_ko = "assets/fonts/SDMiSaeng/SDMiSaeng.ttf";
         private readonly string _const_fontPath_zh = "assets/fonts/NotoSansCJKsc-Bold/NotoSansCJKsc-Bold.otf";
 
-        private readonly MigrateTo_0_2_0 _0_2_0_Migration = new();
         private MigrateTo_0_6_0 _0_6_0_Migration;
 
         private ModConfig _config;
@@ -76,17 +76,8 @@ namespace FontSettings
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
             Textures.Init(helper.ModContent);
-            if (this._0_2_0_Migration.NeedMigrate(helper))
-            {
-                this._0_2_0_Migration.Apply(helper, out this._config);
-                this.SaveConfig(this._config);
-                this.SaveFontSettings(this._config.Fonts);
-            }
-            else
-            {
-                this._config = helper.ReadConfig<ModConfig>();
-                this._config.Fonts = this.ReadFontSettings();
-            }
+
+            this._config = helper.ReadConfig<ModConfig>();
             this.CheckConfigValid(this._config);
 
             foreach (var code in Enum.GetValues<LocalizedContentManager.LanguageCode>())

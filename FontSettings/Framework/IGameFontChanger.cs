@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework
 {
     internal interface IGameFontChanger
     {
-        IGameFontChangeResult ChangeGameFont(FontConfig font);
+        IGameFontChangeResult ChangeGameFont(FontConfig_ font);
     }
 
     internal interface IAsyncGameFontChanger
     {
-        Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font);
+        Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig_ font);
     }
 }

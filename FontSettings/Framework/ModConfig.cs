@@ -1,4 +1,5 @@
-﻿using StardewModdingAPI;
+﻿using FontSettings.Framework.DataAccess.Models;
+using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 
 namespace FontSettings.Framework
@@ -7,11 +8,7 @@ namespace FontSettings.Framework
     {
         public string ExampleText { get; set; }
 
-        internal FontConfigs Fonts { get; set; }  // 这个不要储存在config.json里，故设为internal。
-
-        internal SampleData Sample { get; set; }  // 同上
-
-        internal VanillaFontData VanillaFont { get; set; }  // 同上
+        internal SampleData Sample { get; set; }  // 这个不要储存在config.json里，故设为internal。
 
         public int MinFontSize { get; set; }
 
@@ -64,7 +61,6 @@ namespace FontSettings.Framework
         public void ResetToDefault()
         {
             this.ExampleText = string.Empty;
-            this.Fonts = new FontConfigs();
             this.MinFontSize = this.DEFAULT_MinFontSize;
             this.MaxFontSize = this.DEFAULT_MaxFontSize;
             this.MinSpacing = this.DEFAULT_MinSpacing;

@@ -39,11 +39,8 @@
 
 	<!--ignored files-->
 	<ItemGroup>
-		<Compile Remove="Framework\Legacy\Menus\*.cs"/>
-		<None Include="Framework\Legacy\Menus\*.cs"/>
-
-		<Compile Remove="Framework\GameFontChanger2.cs" />
-		<None Include="Framework\GameFontChanger2.cs" />
+		<Compile Remove="Framework\Legacy\Menus\*.cs" />
+		<None Include="Framework\Legacy\Menus\*.cs" />
 	</ItemGroup>
 
 

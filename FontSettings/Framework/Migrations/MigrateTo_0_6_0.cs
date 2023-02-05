@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess;
+using FontSettings.Framework.DataAccess.Models;
 using StardewModdingAPI;
 
 namespace FontSettings.Framework.Migrations

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework
+namespace FontSettings.Framework.DataAccess.Models
 {
     internal class FontConfigs : List<FontConfig>
     {
@@ -31,7 +31,7 @@ namespace FontSettings.Framework
             });
         }
 
-        public FontConfig? GetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
+        public FontConfig GetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType)
         {
             return (from font in this
                     where font.Lang == code && font.Locale == locale && font.InGameType == inGameType
@@ -39,9 +39,9 @@ namespace FontSettings.Framework
                     .FirstOrDefault();
         }
 
-        public bool TryGetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, out FontConfig? fontConfig)
+        public bool TryGetFontConfig(StardewValley.LocalizedContentManager.LanguageCode code, string locale, GameFontType inGameType, out FontConfig fontConfig)
         {
-            FontConfig? got = this.GetFontConfig(code, locale, inGameType);
+            FontConfig got = this.GetFontConfig(code, locale, inGameType);
 
             if (got != null)
             {
