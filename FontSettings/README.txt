@@ -67,6 +67,16 @@ Configure:
     - FontSettingsInGameMenu    Legacy option, don't touch it.
 
 
+Help & Feedback:
+	Where to feedback:
+		1. At Nexus modpage: https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts
+		
+	Report a bug:
+		1. At Nexus modpage: https://www.nexusmods.com/stardewvalley/mods/12467?tab=bugs
+
+	Thirst for feedback about this mod!
+
+
 Release Notes:
 0.7.0 - 2023-02-06
 - Improvements:

@@ -42,13 +42,23 @@
     - OpenFontSettingsMenu      打开字体菜单的按键（默认LeftAlt + F）
     - FontSettingsInGameMenu    先前版本的遗留选项，无视即可。
 
+
 兼容性：
     兼容Smapi 3.14.0及以上，Windows、MacOS、Linux系统，
     字体格式兼容TrueType（.ttf, .ttc）、OpenType（.otf, .otc, .ttf, .ttc）。
 
+
 其他问题：
     问：这个模组支持联机吗？一定要所有玩家同时安装吗？
     答：支持；不需要，实际上对联机毫无影响。
+
+
+帮助&反馈：
+    反馈、提问：
+		1. n网模组页面：https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts
+		
+	Bug提交：
+		1. n网模组页面：https://www.nexusmods.com/stardewvalley/mods/12467?tab=bugs
 
 
 更新日志：
