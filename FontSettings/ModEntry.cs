@@ -138,6 +138,11 @@ namespace FontSettings
 
                 new FontShadowPatcher(this._config)
                     .Patch(Harmony, this.Monitor);
+
+                var spriteTextPatcher = new SpriteTextPatcher();
+                spriteTextPatcher.Patch(Harmony, this.Monitor);
+                this._mainFontPatcher.FontPixelZoomOverride += (s, e) =>
+                    spriteTextPatcher.SetOverridePixelZoom(e.PixelZoom);
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequested;

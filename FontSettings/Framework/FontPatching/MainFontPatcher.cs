@@ -8,7 +8,6 @@ using FontSettings.Framework.FontPatching.Editors;
 using FontSettings.Framework.FontPatching.Loaders;
 using StardewModdingAPI.Events;
 using StardewValley;
-using StardewValley.BellsAndWhistles;
 
 namespace FontSettings.Framework.FontPatching
 {
@@ -17,6 +16,8 @@ namespace FontSettings.Framework.FontPatching
         private readonly FontConfigManager _fontConfigManager;
         private readonly FontPatchResolverFactory _resolverFactory;
         private readonly FontPatchInvalidatorManager _invalidatorManager;
+
+        public event EventHandler<FontPixelZoomOverrideEventArgs> FontPixelZoomOverride;
 
         public MainFontPatcher(FontConfigManager fontConfigManager, FontPatchResolverFactory resolverFactory,
             FontPatchInvalidatorManager invalidatorManager)
@@ -117,11 +118,16 @@ namespace FontSettings.Framework.FontPatching
 
         private void PatchFontFile(AssetRequestedEventArgs e)
         {
-            this._bmFontPatch = this.ResolvePatch(GameFontType.SpriteText) as IBmFontPatch;
-            if (this._bmFontPatch != null)
+            var bmFontPatch = this.ResolvePatch(GameFontType.SpriteText) as IBmFontPatch;
+            if (bmFontPatch != null)
             {
-                this.PatchCommonFontCore(e, this._bmFontPatch);
+                this.PatchCommonFontCore(e, bmFontPatch);
+
+                if (bmFontPatch.PageLoaders == null)
+                    this.RaiseFontPixelZoomOverride(bmFontPatch.FontPixelZoom);
             }
+
+            this._bmFontPatch = bmFontPatch;
         }
 
         private void PatchFontPages(AssetRequestedEventArgs e)
@@ -147,7 +153,7 @@ namespace FontSettings.Framework.FontPatching
                         this._bmFontPatch = null;
 
                         // 设置缩放，放在最后。
-                        SpriteText.fontPixelZoom = bmFontPatch.FontPixelZoom;
+                        this.RaiseFontPixelZoomOverride(bmFontPatch.FontPixelZoom);
                     }
                 }
             }
@@ -180,5 +186,29 @@ namespace FontSettings.Framework.FontPatching
 
         private IFontPatchResolver GetResolver(GameFontType fontType)
             => this._resolverFactory.CreateResolver(fontType);
+
+        private void RaiseFontPixelZoomOverride(float pixelZoom)
+        {
+            this.RaiseFontPixelZoomOverride(
+                new FontPixelZoomOverrideEventArgs(true, pixelZoom));
+        }
+
+        protected virtual void RaiseFontPixelZoomOverride(FontPixelZoomOverrideEventArgs e)
+        {
+            FontPixelZoomOverride?.Invoke(this, e);
+        }
+    }
+
+    internal class FontPixelZoomOverrideEventArgs : EventArgs
+    {
+        public bool NeedsOverride { get; }
+
+        public float PixelZoom { get; }
+
+        public FontPixelZoomOverrideEventArgs(bool needsOverride, float pixelZoom)
+        {
+            this.NeedsOverride = needsOverride;
+            this.PixelZoom = pixelZoom;
+        }
     }
 }
