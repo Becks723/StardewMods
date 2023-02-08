@@ -33,7 +33,7 @@ namespace FontSettings.Framework
         {
             return new FontFile()
             {
-                Info = new FontInfo()
+                Info = new BmFont.FontInfo()
                 {
                     Face = font.Info.Face,
                     Size = font.Info.Size,

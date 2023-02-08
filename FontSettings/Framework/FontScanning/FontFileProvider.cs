@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FontSettings.Framework.FontInfomation;
+using FontSettings.Framework.FontInfo;
 using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework.FontScanning
@@ -33,7 +33,7 @@ namespace FontSettings.Framework.FontScanning
                 .Distinct();
         }
 
-        private readonly IFontInfoSource _fontSource = new FontInfoSource();
+        private readonly IFontInfoRetriever _fontSource = new FontInfoRetriever();
         public FontModel[] GetFontData(string fontFile)
         {
             return this._fontSource.GetFontInfo(fontFile);

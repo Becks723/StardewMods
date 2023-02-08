@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using FontSettings.Framework.FontInfomation;
 using FontSettings.Framework.Models;
 using StardewModdingAPI.Utilities;
 using StardewValley;

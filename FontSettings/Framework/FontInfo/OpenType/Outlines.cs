@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework.FontInfomation
+namespace FontSettings.Framework.FontInfo.OpenType
 {
     internal enum Outlines : uint
     {

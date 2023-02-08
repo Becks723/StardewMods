@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework.FontInfomation
+namespace FontSettings.Framework.FontInfo.OpenType
 {
     internal class OpenTypeCommonReader : IDisposable
     {
@@ -35,7 +35,7 @@ namespace FontSettings.Framework.FontInfomation
 
         public short ReadInt16() => BinaryPrimitives.ReadInt16BigEndian(this.InternalRead(2));
 
-        public int ReadUInt24() => (this.ReadUInt8() << 16) | this.ReadUInt16();
+        public int ReadUInt24() => this.ReadUInt8() << 16 | this.ReadUInt16();
 
         public uint ReadUInt32() => BinaryPrimitives.ReadUInt32BigEndian(this.InternalRead(4));
 
@@ -95,9 +95,7 @@ namespace FontSettings.Framework.FontInfomation
             if (!this._isDisposed)
             {
                 if (disposing)
-                {
                     this._stream.Dispose();
-                }
                 this._isDisposed = true;
             }
         }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework.FontInfomation
+namespace FontSettings.Framework.FontInfo.OpenType
 {
     /// <summary>https://docs.microsoft.com/zh-cn/typography/opentype/spec/name#platform-ids</summary>
     internal enum PlatformIDs : ushort
@@ -72,7 +72,7 @@ namespace FontSettings.Framework.FontInfomation
 
             reader.Seek(offset + stringOffset, SeekOrigin.Begin);
             byte[] bytesStr = reader.ReadBytes(length);
-            Encoding encoding = (this.EncodingID is 1 or 3) ? Encoding.BigEndianUnicode : Encoding.UTF8;  // TODO: 编码这块还不大明白，为啥只考虑了PlatformID为0（Unicode）的情况。
+            Encoding encoding = this.EncodingID is 1 or 3 ? Encoding.BigEndianUnicode : Encoding.UTF8;  // TODO: 编码这块还不大明白，为啥只考虑了PlatformID为0（Unicode）的情况。
             string value = encoding.GetString(bytesStr, 0, bytesStr.Length);
             value = value.Replace("\0", string.Empty);  // 有可能隔一个字符一个\0，如EarMasterJazz.ttf
             this.Value = value;
@@ -122,11 +122,11 @@ namespace FontSettings.Framework.FontInfomation
         /// <returns>若没找到匹配的，返回空字符串<see cref="string.Empty"/>。</returns>
         public string GetName(int langaugeID, NameIDs nameID)
         {
-            string? bestMatch = null;  // 参数要求的语言
-            string? secondBest = null;  // 本机内置语言
-            string? thirdBest = null;  // 无关语言（culture-independent）
-            string? fourthBest = null;   // 英语（美国）
-            string? fifthBest = null;  // 跳过语言检查
+            string bestMatch = null;  // 参数要求的语言
+            string secondBest = null;  // 本机内置语言
+            string thirdBest = null;  // 无关语言（culture-independent）
+            string fourthBest = null;   // 英语（美国）
+            string fifthBest = null;  // 跳过语言检查
 
             foreach (NameRecord nameRecord in this._names)
             {

@@ -6,10 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.FontInfo.OpenType;
+using FontSettings.Framework.Models;
 
-namespace FontSettings.Framework.FontInfomation
+namespace FontSettings.Framework.FontInfo
 {
-    internal class FontInfoSource : IFontInfoSource
+    internal class FontInfoRetriever : IFontInfoRetriever
     {
         public FontModel[] GetFontInfo(string fontFile)
         {
@@ -95,22 +97,15 @@ namespace FontSettings.Framework.FontInfomation
             ushort s1 = reader.ReadUInt16();
             ushort s2 = reader.ReadUInt16();
 
-            if (((s1 >> 8) & 0xFF) == (byte)'t' &&
+            if ((s1 >> 8 & 0xFF) == (byte)'t' &&
                 (s1 & 0xFF) == (byte)'t' &&
-                ((s2 >> 8) & 0xFF) == (byte)'c' &&
+                (s2 >> 8 & 0xFF) == (byte)'c' &&
                 (s2 & 0xFF) == (byte)'f')
                 return FontFormat.OpenTypeCollection;
             else if ((s1 << 16 | s2) is 0x00010000 or 0x4F54544F)
                 return FontFormat.OpenType;
             else
                 return FontFormat.Unknown;
-        }
-
-        private enum FontFormat
-        {
-            Unknown,
-            OpenType,           // .ttf .otf
-            OpenTypeCollection  // .ttc .otc
         }
     }
 }
