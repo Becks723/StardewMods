@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{A99638DD-6D9F-4C29-A8DD-71FADD387727}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{212D1521-0505-47E1-9047-690B2340075A}"
+	ProjectSection(SolutionItems) = preProject
+		_build\common.targets = _build\common.targets
+		_build\smapi.targets = _build\smapi.targets
+		_build\stardewvalleyui.targets = _build\stardewvalleyui.targets
+		_build\translation-builder.targets = _build\translation-builder.targets
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedCode", "SharedCode\SharedCode.shproj", "{AB84FF3C-F7C6-4D02-8988-E46C64D35C7D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhoneTravelingCart", "PhoneTravelingCart\PhoneTravelingCart.csproj", "{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaircasePlacementFix", "StaircasePlacementFix\StaircasePlacementFix.csproj", "{DE590FC9-929B-4351-A917-3FA17877030D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings", "FontSettings\FontSettings.csproj", "{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE590FC9-929B-4351-A917-3FA17877030D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE590FC9-929B-4351-A917-3FA17877030D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE590FC9-929B-4351-A917-3FA17877030D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE590FC9-929B-4351-A917-3FA17877030D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA406B18-90FF-4E2F-A6C6-18874C906F3B}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SharedCode\SharedCode.projitems*{9347c094-6e2d-425b-8a6c-ddbd5009e2a5}*SharedItemsImports = 5
+		SharedCode\SharedCode.projitems*{97390b2e-bbda-4449-b588-bce42d7ef3fe}*SharedItemsImports = 5
+		SharedCode\SharedCode.projitems*{ab84ff3c-f7c6-4d02-8988-e46c64d35c7d}*SharedItemsImports = 13
+	EndGlobalSection
+EndGlobal
