@@ -4,7 +4,6 @@
 	<Import Project="..\_build\translation-builder.targets" />
 	<Import Project="..\_build\stardewvalleyui.targets" />
 	<Import Project="dependencies\StbTrueTypeSharp.targets" />
-	<!--<Import Project="dependencies\ExternalFontLibs.targets" Label="Shared" />-->
 
 	<PropertyGroup>
 		<Version>0.7.0</Version>
