@@ -1,5 +1,10 @@
-# 我的星露谷模组
+## Font Settings
+Download: [Nexus](https://www.nexusmods.com/stardewvalley/mods/12467)
 
-## 长笛块拓展 Extended Flute Block
 
-## 字体设置 Font Settings
+## Phone Traveling Cart
+Download: [Nexus](https://www.nexusmods.com/stardewvalley/mods/12981)
+
+
+## Staircase Placement Fix
+Download: [Nexus](https://www.nexusmods.com/stardewvalley/mods/13381)
