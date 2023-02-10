@@ -154,8 +154,8 @@ namespace FontSettings.Framework
                         int height = pc.y1 - pc.y0;
                         chars.Add((char)(range.Start + i));
                         bounds.Add(new Rectangle(pc.x0, pc.y0, width, height));
-                        cropping.Add(new Rectangle((int)Math.Round(pc.xoff + charOffsetX), (int)Math.Round(yOff + charOffsetY), width, height));
-                        kerning.Add(new Vector3(0, width, pc.xadvance - width));
+                        cropping.Add(new Rectangle((int)Math.Round(charOffsetX), (int)Math.Round(yOff + charOffsetY), width, height));
+                        kerning.Add(new Vector3(pc.xoff, width, pc.xadvance - pc.xoff - width));
                     }
                 }
 
@@ -214,7 +214,7 @@ namespace FontSettings.Framework
                 }
 
                 x += size.X;
-                
+
                 // 更新最底y值。
                 if (bottomY < y + size.Y)
                     bottomY = y + size.Y;
