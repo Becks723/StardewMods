@@ -123,6 +123,186 @@
       "Spacing": 0.0,
       "LineSpacing": 33,
       "PixelZoom": 1.5
+    },
+
+
+    /* Official English */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "en",
+      "Locale": "",
+      "InGameType": "SmallFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 26.0,
+      "Spacing": -1.0,
+      "LineSpacing": 33
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "en",
+      "Locale": "",
+      "InGameType": "DialogueFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 39.0,
+      "Spacing": -2.0,
+      "LineSpacing": 50
+    },
+
+
+    /* Official German */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "de",
+      "Locale": "de-DE",
+      "InGameType": "SmallFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 26.0,
+      "Spacing": -1.0,
+      "LineSpacing": 33
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "de",
+      "Locale": "de-DE",
+      "InGameType": "DialogueFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 26.0,
+      "Spacing": -2.0,
+      "LineSpacing": 33
+    },
+
+
+    /* Official French */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "fr",
+      "Locale": "fr-FR",
+      "InGameType": "SmallFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 26.0,
+      "Spacing": -1.0,
+      "LineSpacing": 33
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "fr",
+      "Locale": "fr-FR",
+      "InGameType": "DialogueFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 39.0,
+      "Spacing": -2.0,
+      "LineSpacing": 50
+    },
+
+
+    /* Official Spanish */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "es",
+      "Locale": "es-ES",
+      "InGameType": "SmallFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 26.0,
+      "Spacing": -1.0,
+      "LineSpacing": 33
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "es",
+      "Locale": "es-ES",
+      "InGameType": "DialogueFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 39.0,
+      "Spacing": -2.0,
+      "LineSpacing": 50
+    },
+
+
+    /* Official Italian */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "it",
+      "Locale": "it-IT",
+      "InGameType": "SmallFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 26.0,
+      "Spacing": -1.0,
+      "LineSpacing": 33
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "it",
+      "Locale": "it-IT",
+      "InGameType": "DialogueFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 39.0,
+      "Spacing": -2.0,
+      "LineSpacing": 50
+    },
+
+
+    /* Official Hungarian */
+    // TODO
+
+
+    /* Official Portuguese */
+    /* Small Font */
+    {
+      "Enabled": true,
+      "Lang": "pt",
+      "Locale": "pt-BR",
+      "InGameType": "SmallFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 26.0,
+      "Spacing": -1.0,
+      "LineSpacing": 33
+    },
+
+    /* Medium Font */
+    {
+      "Enabled": true,
+      "Lang": "pt",
+      "Locale": "pt-BR",
+      "InGameType": "DialogueFont",
+      "FontFilePath": "assets/fonts/svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 39.0,
+      "Spacing": -2.0,
+      "LineSpacing": 50
     }
+
+
+    /* Official Russian */
+    // TODO
+
+
+    /* Official Turkish */
+    // TODO
   ]
 }
