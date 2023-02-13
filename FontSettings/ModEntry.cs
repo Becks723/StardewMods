@@ -151,68 +151,6 @@ namespace FontSettings
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
         }
 
-        IVanillaFontConfigProvider GetVanillaFontConfigProvider()
-        {
-            var modFontFileProvider = new FontFileProvider();
-            modFontFileProvider.Scanners.Add(new BasicFontFileScanner(this.Helper.DirectoryPath, new ScanSettings()));
-
-            var parser = new FontConfigParser(modFontFileProvider);
-            var vanillaFonts = this._vanillaFontDataRepository
-                .ReadVanillaFontData().Fonts
-                .Select(font => parser.Parse(font))
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
-
-            return new VanillaFontConfigProvider(vanillaFonts);
-        }
-        FontConfigManager GetFontConfigManager(FontConfigParserForUser parser)
-        {
-            var vanillaFonts = this._fontConfigRepository.ReadAllConfigs()
-                .Select(font => parser.Parse(font))
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
-
-            return new FontConfigManager(vanillaFonts);
-        }
-
-        IFontFileProvider GetFontFileProvider()
-        {
-            var fontFileProvider = new FontFileProvider();
-            {
-                var scanSettings = new ScanSettings();
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
-            }
-            return fontFileProvider;
-        }
-        Framework.Preset.FontPresetManager GetFontPresetManager(FontPresetParser parser)
-        {
-            var presets = this._fontPresetRepository.ReadAllPresets()
-                .SelectMany(pair => parser.Parse(pair.Value));
-
-            return new Framework.Preset.FontPresetManager(presets);
-        }
-        private void OnFontConfigUpdated(object sender, EventArgs e)
-        {
-            var configs = this._fontConfigManager.GetAllFontConfigs()
-                .Select(pair => this._userFontConfigParser.ParseBack(pair));
-
-            var configObject = new FontConfigs();
-            foreach (var config in configs)
-                configObject.Add(config);
-
-            this._fontConfigRepository.WriteAllConfigs(configObject);
-        }
-        private void OnFontPresetUpdated(object sender, PresetUpdatedEventArgs e)
-        {
-            string name = e.Name;
-            var preset = e.Preset;
-
-            var presetObject = preset == null
-                ? null
-                : this._fontPresetParser.ParseBack(preset);
-
-            this._fontPresetRepository.WritePreset(name, presetObject);
-        }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
@@ -500,6 +438,69 @@ namespace FontSettings
                 config.MaxPixelZoom = 5f;
                 config.MinPixelZoom = 0.1f;
             }
+        }
+
+        IVanillaFontConfigProvider GetVanillaFontConfigProvider()
+        {
+            var modFontFileProvider = new FontFileProvider();
+            modFontFileProvider.Scanners.Add(new BasicFontFileScanner(this.Helper.DirectoryPath, new ScanSettings()));
+
+            var parser = new FontConfigParser(modFontFileProvider);
+            var vanillaFonts = this._vanillaFontDataRepository
+                .ReadVanillaFontData().Fonts
+                .Select(font => parser.Parse(font))
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            return new VanillaFontConfigProvider(vanillaFonts);
+        }
+        FontConfigManager GetFontConfigManager(FontConfigParserForUser parser)
+        {
+            var vanillaFonts = this._fontConfigRepository.ReadAllConfigs()
+                .Select(font => parser.Parse(font))
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            return new FontConfigManager(vanillaFonts);
+        }
+
+        IFontFileProvider GetFontFileProvider()
+        {
+            var fontFileProvider = new FontFileProvider();
+            {
+                var scanSettings = new ScanSettings();
+                fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
+                fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
+                fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
+            }
+            return fontFileProvider;
+        }
+        Framework.Preset.FontPresetManager GetFontPresetManager(FontPresetParser parser)
+        {
+            var presets = this._fontPresetRepository.ReadAllPresets()
+                .SelectMany(pair => parser.Parse(pair.Value));
+
+            return new Framework.Preset.FontPresetManager(presets);
+        }
+        private void OnFontConfigUpdated(object sender, EventArgs e)
+        {
+            var configs = this._fontConfigManager.GetAllFontConfigs()
+                .Select(pair => this._userFontConfigParser.ParseBack(pair));
+
+            var configObject = new FontConfigs();
+            foreach (var config in configs)
+                configObject.Add(config);
+
+            this._fontConfigRepository.WriteAllConfigs(configObject);
+        }
+        private void OnFontPresetUpdated(object sender, PresetUpdatedEventArgs e)
+        {
+            string name = e.Name;
+            var preset = e.Preset;
+
+            var presetObject = preset == null
+                ? null
+                : this._fontPresetParser.ParseBack(preset);
+
+            this._fontPresetRepository.WritePreset(name, presetObject);
         }
 
         private void OpenFontSettingsMenu()
