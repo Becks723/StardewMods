@@ -18,6 +18,8 @@ namespace FontSettings.Framework.DataAccess
         public FontPresetRepository(string presetsDir)
         {
             this._rootDir = presetsDir;
+
+            Directory.CreateDirectory(presetsDir);
         }
 
         public IDictionary<string, FontPresetData> ReadAllPresets()
