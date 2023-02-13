@@ -6,7 +6,7 @@
 	<Import Project="dependencies\StbTrueTypeSharp.targets" />
 
 	<PropertyGroup>
-		<Version>0.7.0</Version>
+		<Version>0.7.1</Version>
 		<TargetFramework>net5.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>

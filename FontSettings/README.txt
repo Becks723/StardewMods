@@ -67,6 +67,16 @@ Configure:
     - FontSettingsInGameMenu    Legacy option, don't touch it.
 
 
+FAQ:
+	Q: How do I set dialogue font? There's no dialogue font tab in the menu.
+	A: For those languages only contains latin characters, 
+		they just use game's default font as Dialogue Font, which is hardcoded in a spritesheet, 
+		so you might not set Dialogue Font for now.
+
+	Q: I just want to set font size with vanilla font. But it seems not working when I select "Keep Original".
+	A: You need to download additional files. Find vanilla font for your language in modpage optional files.
+
+
 Help & Feedback:
 	Where to feedback:
 		1. At Nexus modpage: https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts
@@ -78,10 +88,15 @@ Help & Feedback:
 
 
 Release Notes:
+0.7.1 - 2023-02-14
+	- Slim mod file. Move those vanilla font file (assets/fonts) to optional mod file.
+	- Improve font change effects when you select "keep original". (all languages now support, except hu, ru, tr)
+	- Bugfixes.
+
 0.7.0 - 2023-02-06
 - Improvements:
 	- Display UI sliders' value.
-	- Improve font processing when you select "keep original".
+	- Improve font change effects when you select "keep original". (current cjk)
 
 - Bugfixes:
 	- Fix a major bug where all fonts get lost after returning to title (or anyone invalidating it).
