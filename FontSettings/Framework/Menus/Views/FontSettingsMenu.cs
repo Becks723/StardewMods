@@ -22,7 +22,7 @@ using StardewValleyUI.Menus;
 
 namespace FontSettings.Framework.Menus.Views
 {
-    internal class FontSettingsPage : BaseMenu<FontSettingsMenuModel>
+    internal class FontSettingsMenu : BaseMenu<FontSettingsMenuModel>
     {
         private readonly IFontPresetManager _presetManager;
         private readonly IModRegistry _registry;
@@ -38,7 +38,7 @@ namespace FontSettings.Framework.Menus.Views
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
-        public FontSettingsPage(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IModRegistry registry,
+        public FontSettingsMenu(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IModRegistry registry,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
         {
             this._presetManager = presetManager;

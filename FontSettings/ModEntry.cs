@@ -540,13 +540,13 @@ namespace FontSettings
                 Game1.activeClickableMenu = menu;
         }
 
-        private FontSettingsPage CreateFontSettingsMenu()
+        private FontSettingsMenu CreateFontSettingsMenu()
         {
             var gen = new SampleFontGenerator(this._fontManager);
             IFontGenerator sampleFontGenerator = gen;
             IAsyncFontGenerator sampleAsyncFontGenerator = gen;
 
-            return new FontSettingsPage(
+            return new FontSettingsMenu(
                 config: this._config,
                 fontManager: this._fontManager,
                 sampleFontGenerator: sampleFontGenerator,
