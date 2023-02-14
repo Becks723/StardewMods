@@ -76,6 +76,8 @@ namespace FontSettings.Framework.Menus
         public void Draw(SpriteBatch b)
         {
             this.draw(b);
+
+            Game1.activeClickableMenu?.drawMouse(b);  // TODO: 不知道为什么有时候会覆盖鼠标，因此加上这一行确保鼠标绘制。
         }
 
         private void SetSourceRect(Rectangle sourceRect)
