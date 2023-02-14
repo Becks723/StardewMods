@@ -87,8 +87,8 @@ namespace FontSettings.Framework.Menus.Views
             if (on)
                 if (!container.Children.Contains(option))
                     container.Children.Insert(this._index, option);
-            else
-                container.Children.Remove(option);
+                else
+                    container.Children.Remove(option);
         }
 
         protected override void OnDataContextChanged(ValueChangedEventArgs e)
@@ -137,14 +137,17 @@ namespace FontSettings.Framework.Menus.Views
         protected override void ResetComponents(MenuInitializationContext context)
         {
             Grid rootGrid = new Grid();
-            rootGrid.SuggestedWidth = 1000;
-            rootGrid.SuggestedHeight = 600;
+            rootGrid.SuggestedWidth = Math.Max(Game1.uiViewport.Width * 0.67f, 1000);
+            rootGrid.SuggestedHeight = Math.Max(Game1.uiViewport.Height * 0.67f, 600);
             rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
             {
                 var titleBorder = new TextureBoxBorder();
+                titleBorder.Box = TextureBoxes.Default;
                 titleBorder.DrawShadow = false;
-                titleBorder.Padding += new Thickness(0, borderWidth / 3);
+                titleBorder.Padding += new Thickness(borderWidth / 3, 0);
+                titleBorder.HorizontalAlignment = HorizontalAlignment.Center;
+                titleBorder.Margin = new Thickness(0, 0, 0, borderWidth / 2);
                 rootGrid.Children.Add(titleBorder);
                 rootGrid.SetRow(titleBorder, 0);
                 {
@@ -163,6 +166,7 @@ namespace FontSettings.Framework.Menus.Views
                 rootGrid.SetRow(mainGrid, 1);
                 {
                     Grid settingsGrid = new Grid();
+                    settingsGrid.Margin = new Thickness(borderWidth / 2, 0, 0, 0);
                     settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
                     settingsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                     mainGrid.Children.Add(settingsGrid);
