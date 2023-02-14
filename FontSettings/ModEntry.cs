@@ -66,6 +66,8 @@ namespace FontSettings
 
         private MainFontPatcher _mainFontPatcher;
 
+        private TitleFontButton _titleFontButton;
+
         internal static IModHelper ModHelper { get; private set; }
 
         internal static Harmony Harmony { get; private set; }
@@ -125,6 +127,11 @@ namespace FontSettings
             // init font patching.
             this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), this._invalidatorManager);
 
+            // init title font button.
+            this._titleFontButton = new TitleFontButton(
+                position: this.GetTitleFontButtonPosition(),
+                onClicked: () => this.OpenFontSettingsMenu());
+
             this.AssertModFileExists(this._const_fontPath_ja, out _);
             this.AssertModFileExists(this._const_fontPath_ko, out _);
             this.AssertModFileExists(this._const_fontPath_zh, out _);
@@ -149,6 +156,9 @@ namespace FontSettings
             helper.Events.Content.AssetReady += this.OnAssetReady;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
+            helper.Events.Display.WindowResized += this.OnWindowResized;
+            helper.Events.Display.Rendered += this.OnRendered;
+            helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
 
@@ -180,6 +190,23 @@ namespace FontSettings
         private void OnAssetReady(object sender, AssetReadyEventArgs e)
         {
             this._mainFontPatcher.OnAssetReady(e);
+        }
+
+        private void OnWindowResized(object sender, WindowResizedEventArgs e)
+        {
+            this._titleFontButton.Position = this.GetTitleFontButtonPosition();
+        }
+
+        private void OnRendered(object sender, RenderedEventArgs e)
+        {
+            if (this.IsTitleMenuInteractable())
+                this._titleFontButton.Draw(e.SpriteBatch);
+        }
+
+        private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
+        {
+            if (this.IsTitleMenuInteractable())
+                this._titleFontButton.Update();
         }
 
         protected override void Dispose(bool disposing)
@@ -505,11 +532,21 @@ namespace FontSettings
 
         private void OpenFontSettingsMenu()
         {
+            var menu = this.CreateFontSettingsMenu();
+
+            if (Game1.activeClickableMenu is TitleMenu)
+                TitleMenu.subMenu = menu;
+            else
+                Game1.activeClickableMenu = menu;
+        }
+
+        private FontSettingsPage CreateFontSettingsMenu()
+        {
             var gen = new SampleFontGenerator(this._fontManager);
             IFontGenerator sampleFontGenerator = gen;
             IAsyncFontGenerator sampleAsyncFontGenerator = gen;
 
-            Game1.activeClickableMenu = new FontSettingsPage(
+            return new FontSettingsPage(
                 config: this._config,
                 fontManager: this._fontManager,
                 sampleFontGenerator: sampleFontGenerator,
@@ -553,6 +590,42 @@ namespace FontSettings
                 return false;
             }
             return true;
+        }
+
+        private Microsoft.Xna.Framework.Point GetTitleFontButtonPosition()
+        {
+            var registry = this.Helper.ModRegistry;
+            bool gmcm = registry.IsLoaded("spacechase0.GenericModConfigMenu");  // (36, Game1.viewport.Height - 100)
+            bool mum = registry.IsLoaded("cat.modupdatemenu");                  // (36, Game1.viewport.Height - 150 - 48)
+                                                                                // ()
+            int interval = 75 + 24;
+
+            switch (0)
+            {
+                case { } when !gmcm:
+                    return new(36, Game1.viewport.Height - interval);
+
+                case { } when gmcm:
+                    return mum
+                        ? new(36, Game1.viewport.Height - interval * 3)
+                        : new(36, Game1.viewport.Height - interval * 2);
+
+                default:
+                    return new(36, Game1.viewport.Height - interval);
+            }
+        }
+
+        /// <summary>Copied from GMCM source code :D</summary>
+        private bool IsTitleMenuInteractable()
+        {
+            if (Game1.activeClickableMenu is not TitleMenu titleMenu || TitleMenu.subMenu != null)
+                return false;
+
+            var method = this.Helper.Reflection.GetMethod(titleMenu, "ShouldAllowInteraction", false);
+            if (method != null)
+                return method.Invoke<bool>();
+            else // method isn't available on Android
+                return this.Helper.Reflection.GetField<bool>(titleMenu, "titleInPosition").GetValue();
         }
     }
 }

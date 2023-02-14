@@ -23,6 +23,7 @@ namespace FontSettings.Framework
         public static Texture2D FontPreviewNormal => LoadTexture("assets/font-preview-normal.png");
         public static Texture2D FontPreviewCompare => LoadTexture("assets/font-preview-compare.png");
         public static Texture2D SectionBox => LoadTexture("assets/section-box.png");
+        public static Texture2D TitleFontButton => LoadTexture("assets/font-button.png");
 
         private static Texture2D LoadTexture(string relativePath)
         {
