@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
+using Microsoft.Xna.Framework.Content;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.BellsAndWhistles;
@@ -22,7 +24,8 @@ namespace FontSettings.Framework.Patchers
             );
             harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), "OnLanguageChange"),
-                postfix: new HarmonyMethod(typeof(SpriteTextPatcher), nameof(SpriteText_OnLanguageChange_Postfix))
+                postfix: new HarmonyMethod(typeof(SpriteTextPatcher), nameof(SpriteText_OnLanguageChange_Postfix)),
+                finalizer: new HarmonyMethod(typeof(SpriteTextPatcher), nameof(SpriteText_OnLanguageChange_Finalizer))
             );
         }
 
@@ -48,6 +51,30 @@ namespace FontSettings.Framework.Patchers
                 if (_pixelZoomLookup.TryGetValue(FontHelpers.GetCurrentLanguage(), out float pixelZoom))
                     SpriteText.fontPixelZoom = pixelZoom;
             }
+        }
+
+        private static Exception SpriteText_OnLanguageChange_Finalizer(Exception __exception)
+        {
+            /*
+             * Suppress exception:
+             * Happens when changing from BmFont-supported to latin (i.e. non-BmFont-supported) language, such as zh to en.
+             * 
+             * at SpriteText::OnLanguageChange:
+             * 	foreach (FontPage current2 in SpriteText.FontFile.Pages)
+			 *  {
+			 *	   SpriteText.fontPages.Add(Game1.content.Load<Texture2D>("Fonts\\" + current2.File));
+			 *  }
+             *
+             * `FontFile` field remains zh's, and Font Settings changes the pages' name. 
+             * So a `FileNotFoundException` wrapped in a `ContentLoadException` is thrown.
+             * We just need to suppress it, since en does not use these fields.
+             */
+
+            if (__exception is ContentLoadException contentLoadException
+                && contentLoadException.InnerException is FileNotFoundException)
+                return null;
+
+            return __exception;
         }
     }
 }
