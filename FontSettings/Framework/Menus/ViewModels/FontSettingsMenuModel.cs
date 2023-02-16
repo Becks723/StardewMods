@@ -701,29 +701,45 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public void UpdateExampleVanilla()
         {
-            if (this.CurrentFontType is GameFontType.SpriteText)
-                this.ExampleVanillaFont = this._fontManager.GetBuiltInBmFont();
-            else
-                this.ExampleVanillaFont = new XNASpriteFont(
-                    this._fontManager.GetBuiltInSpriteFont(this.CurrentFontType));
+            try
+            {
+                if (this.CurrentFontType is GameFontType.SpriteText)
+                    this.ExampleVanillaFont = this._fontManager.GetBuiltInBmFont();
+                else
+                    this.ExampleVanillaFont = new XNASpriteFont(
+                        this._fontManager.GetBuiltInSpriteFont(this.CurrentFontType));
+            }
+            catch (Exception ex)
+            {
+                ILog.Trace($"Error in vanilla sample font: {ex.Message}\n{ex.StackTrace}");
+                this.ExampleVanillaFont = null;
+            }
         }
 
         public void UpdateExampleCurrent()
         {
-            var param = new SampleFontGeneratorParameter(
-                Enabled: this.FontEnabled,
-                FontFilePath: this.FontFilePath,
-                FontSize: this.FontSize,
-                Spacing: this.Spacing,
-                LineSpacing: this.LineSpacing,
-                SampleText: this.ExampleText,
-                FontType: this.CurrentFontType,
-                Language: FontHelpers.GetCurrentLanguage(),
-                PixelZoom: this.PixelZoom,
-                FontIndex: this.FontIndex,
-                CharOffsetX: this.CharOffsetX,
-                CharOffsetY: this.CharOffsetY);
-            this.ExampleCurrentFont = this._sampleFontGenerator.GenerateFont(param);
+            try
+            {
+                var param = new SampleFontGeneratorParameter(
+                    Enabled: this.FontEnabled,
+                    FontFilePath: this.FontFilePath,
+                    FontSize: this.FontSize,
+                    Spacing: this.Spacing,
+                    LineSpacing: this.LineSpacing,
+                    SampleText: this.ExampleText,
+                    FontType: this.CurrentFontType,
+                    Language: FontHelpers.GetCurrentLanguage(),
+                    PixelZoom: this.PixelZoom,
+                    FontIndex: this.FontIndex,
+                    CharOffsetX: this.CharOffsetX,
+                    CharOffsetY: this.CharOffsetY);
+                this.ExampleCurrentFont = this._sampleFontGenerator.GenerateFont(param);
+            }
+            catch (Exception ex)
+            {
+                ILog.Trace($"Error in current sample font: {ex.Message}\n{ex.StackTrace}");
+                this.ExampleCurrentFont = null;
+            }
         }
 
         private bool _isUpdatingExampleCurrent;
