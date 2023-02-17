@@ -12,7 +12,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
     internal class BmFontPatchResolver : BaseFontPatchResolver
     {
         // must return IBmFontPatch.
-        public override IResult<IFontPatch, Exception> Resolve(FontConfig config)
+        public override IResult<IFontPatch, Exception> Resolve(FontConfig config, FontPatchContext context)
         {
             try
             {
@@ -49,7 +49,10 @@ namespace FontSettings.Framework.FontPatching.Resolving
                     float pixelZoom = config.Supports<IWithPixelZoom>()
                         ? config.GetInstance<IWithPixelZoom>().PixelZoom
                         : 1f;
-                    patch = this.PatchFactory.ForLoadBmFont(bmFont, pixelZoom);
+
+                    patch = context.Language.Code != StardewValley.LocalizedContentManager.LanguageCode.mod
+                        ? this.PatchFactory.ForLoadBmFont(bmFont, pixelZoom)
+                        : this.PatchFactory.ForReplaceBmFont(bmFont, pixelZoom);
                 }
 
                 return this.SuccessResult(patch);
@@ -59,11 +62,6 @@ namespace FontSettings.Framework.FontPatching.Resolving
             {
                 return this.ErrorResult(ex);
             }
-        }
-
-        public override async Task<IResult<IFontPatch, Exception>> ResolveAsync(FontConfig config)
-        {
-            return await Task.Run(() => this.Resolve(config));
         }
     }
 }

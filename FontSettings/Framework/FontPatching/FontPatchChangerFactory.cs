@@ -21,7 +21,8 @@ namespace FontSettings.Framework.FontPatching
         {
             return new FontPatchChanger(
                 resolver: this.GetResolver(fontType),
-                invalidator: this.GetInvalidator(fontType));
+                invalidator: this.GetInvalidator(fontType),
+                fontType: fontType);
         }
 
         public IGameFontChanger CreateChanger(GameFontType fontType)

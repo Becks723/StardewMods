@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BmFont;
 using FontSettings.Framework.FontPatching.Editors;
 using FontSettings.Framework.FontPatching.Loaders;
+using FontSettings.Framework.FontPatching.Replacers;
 using StardewModdingAPI.Events;
 using StardewValley;
 
@@ -73,7 +74,8 @@ namespace FontSettings.Framework.FontPatching
             if (this._fontConfigManager.TryGetFontConfig(FontHelpers.GetCurrentLanguage(), fontType, out var config))
             {
                 var resolver = this.GetResolver(fontType);
-                var result = resolver.Resolve(config);
+                var result = resolver.Resolve(config, 
+                    new FontPatchContext(FontHelpers.GetCurrentLanguage(), fontType));
                 if (result.IsSuccess)
                 {
                     return result.GetData();
@@ -166,7 +168,10 @@ namespace FontSettings.Framework.FontPatching
 
         private void EditAsset(AssetRequestedEventArgs e, IFontEditor editor, AssetEditPriority priority = AssetEditPriority.Default)
         {
-            e.Edit(asset => editor.Edit(asset.Data), priority);
+            if (editor is IFontReplacer replacer)
+                e.Edit(asset => asset.ReplaceWith(replacer.Replacement), priority);
+            else
+                e.Edit(asset => editor.Edit(asset.Data), priority);
         }
 
         private void UpdateFontFile(AssetReadyEventArgs e)

@@ -11,18 +11,20 @@ namespace FontSettings.Framework.FontPatching
     {
         private readonly IFontPatchResolver _resolver;
         private readonly IFontPatchInvalidator _invalidator;
+        private readonly GameFontType _fontType;
 
-        public FontPatchChanger(IFontPatchResolver resolver, IFontPatchInvalidator invalidator)
+        public FontPatchChanger(IFontPatchResolver resolver, IFontPatchInvalidator invalidator, GameFontType fontType)
         {
             this._resolver = resolver;
             this._invalidator = invalidator;
+            this._fontType = fontType;
         }
 
         public IGameFontChangeResult ChangeGameFont(FontConfig font)
         {
             Exception? exception;
 
-            var result = this._resolver.Resolve(font);
+            var result = this._resolver.Resolve(font, this.GetCurrentContext());
             if (result.IsSuccess)
             {
                 exception = null;
@@ -49,7 +51,7 @@ namespace FontSettings.Framework.FontPatching
         {
             Exception? exception;
 
-            var result = await this._resolver.ResolveAsync(font);
+            var result = await this._resolver.ResolveAsync(font, this.GetCurrentContext());
             if (result.IsSuccess)
             {
                 exception = null;
@@ -72,6 +74,7 @@ namespace FontSettings.Framework.FontPatching
                 return this.ErrorResult(exception, this.GetErrorMessageRecursively);
         }
 
+        private FontPatchContext GetCurrentContext() => new FontPatchContext(FontHelpers.GetCurrentLanguage(), this._fontType);
 
         private string GetErrorMessageRecursively(Exception exception)
         {

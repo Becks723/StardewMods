@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.FontPatching.Editors;
 using FontSettings.Framework.FontPatching.Loaders;
+using FontSettings.Framework.FontPatching.Replacers;
 using FontSettings.Framework.Models;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -26,6 +27,9 @@ namespace FontSettings.Framework.FontPatching.Resolving
         public IFontPatch ForEditSpriteFont(FontConfig config)
             => this.CreatePatch(new SpriteFontEditor(config));
 
+        public IFontPatch ForReplaceSpriteFont(SpriteFont spriteFont)
+            => this.CreatePatch(new FontReplacer(spriteFont));
+
         public IBmFontPatch ForBypassBmFont()
             => this.CreateBmPatch();
 
@@ -35,6 +39,14 @@ namespace FontSettings.Framework.FontPatching.Resolving
                 out IFontLoader fontFileLoader,
                 out IDictionary<string, IFontLoader> pageLoaders);
             return this.CreateBmPatch(fontFileLoader, pageLoaders, fontPixelZoom);
+        }
+
+        public IBmFontPatch ForReplaceBmFont(BmFontData bmFont, float fontPixelZoom)
+        {
+            this._bmFontLoadHelper.GetLoaders(bmFont,
+                out IFontReplacer fontFileReplacer,
+                out IDictionary<string, IFontLoader> pageLoaders);
+            return this.CreateBmPatch(fontFileReplacer, pageLoaders, fontPixelZoom);
         }
 
         public IBmFontPatch ForEditBmFont(FontConfig config)
@@ -48,6 +60,6 @@ namespace FontSettings.Framework.FontPatching.Resolving
         private IBmFontPatch CreateBmPatch() => new BmFontPatch(null, null, null);
         private IBmFontPatch CreateBmPatch(IFontLoader loader, IDictionary<string, IFontLoader> pageLoaders, float fontPixelZoom) => new BmFontPatch(loader, null, pageLoaders, fontPixelZoom);
         private IBmFontPatch CreateBmPatch(IFontEditor editor) => new BmFontPatch(null, editor, null);
-        private IBmFontPatch CreateBmPatch(IFontLoader loader, IFontEditor editor, IDictionary<string, IFontLoader> pageLoaders) => new BmFontPatch(loader, editor, pageLoaders);
+        private IBmFontPatch CreateBmPatch(IFontReplacer replacer, IDictionary<string, IFontLoader> pageLoaders, float fontPixelZoom) => new BmFontPatch(null, replacer, pageLoaders, fontPixelZoom);
     }
 }

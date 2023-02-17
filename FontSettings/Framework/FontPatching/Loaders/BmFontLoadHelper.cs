@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BmFont;
+using FontSettings.Framework.FontPatching.Replacers;
 using FontSettings.Framework.Models;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -32,6 +33,14 @@ namespace FontSettings.Framework.FontPatching.Loaders
 
                 pageLoaders.Add(name, pageLoader);
             }
+        }
+
+        public void GetLoaders(BmFontData bmFont,
+            out IFontReplacer fontFileReplacer,
+            out IDictionary<string, IFontLoader> pageLoaders)
+        {
+            this.GetLoaders(bmFont, out IFontLoader fontFileLoader, out pageLoaders);
+            fontFileReplacer = new FontReplacer(fontFileLoader);
         }
     }
 }
