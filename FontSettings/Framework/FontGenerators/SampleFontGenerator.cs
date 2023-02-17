@@ -13,11 +13,11 @@ namespace FontSettings.Framework.FontGenerators
     {
         private readonly char _defaultChar = '*';
 
-        private readonly FontManager _fontManager;
+        private readonly IVanillaFontProvider _vanillaFontProvider;
 
-        public SampleFontGenerator(FontManager fontManager)
+        public SampleFontGenerator(IVanillaFontProvider vanillaFontProvider)
         {
-            this._fontManager = fontManager;
+            this._vanillaFontProvider = vanillaFontProvider;
         }
 
         protected override ISpriteFont GenerateFontCore(SampleFontGeneratorParameter param)
@@ -54,11 +54,11 @@ namespace FontSettings.Framework.FontGenerators
             SpriteFont spriteFont;
 
             if (!param.Enabled)
-                spriteFont = this._fontManager.GetBuiltInSpriteFont(param.Language, param.FontType);
+                spriteFont = this.GetVanillaSpriteFont(param.Language, param.FontType);
 
             else if (param.FontFilePath == null)
                 spriteFont = SpriteFontGenerator.FromExisting(
-                    existingFont: this._fontManager.GetBuiltInSpriteFont(param.Language, param.FontType),
+                    existingFont: this.GetVanillaSpriteFont(param.Language, param.FontType),
                     overrideSpacing: param.Spacing,
                     overrideLineSpacing: (int)param.LineSpacing,
                     extraCharOffsetX: param.CharOffsetX,
@@ -82,11 +82,11 @@ namespace FontSettings.Framework.FontGenerators
         private ISpriteFont BmFont(SampleFontGeneratorParameter param)
         {
             if (FontHelpers.IsLatinLanguage(param.Language) || !param.Enabled)
-                return this._fontManager.GetBuiltInBmFont(param.Language);
+                return this.GetVanillaBmFont(param.Language, GameFontType.SpriteText);
 
             else if (param.FontFilePath is null)
             {
-                GameBitmapSpriteFont builtIn = this._fontManager.GetBuiltInBmFont(param.Language);
+                GameBitmapSpriteFont builtIn = this.GetVanillaBmFont(param.Language, GameFontType.SpriteText);
 
                 FontFile fontFile = builtIn.FontFile.DeepClone();
                 fontFile.Common.LineHeight = (int)param.LineSpacing;
@@ -125,6 +125,19 @@ namespace FontSettings.Framework.FontGenerators
                 };
             }
         }
-    }
 
+        private SpriteFont? GetVanillaSpriteFont(LanguageInfo language, GameFontType fontType)
+        {
+            var font = this._vanillaFontProvider.GetVanillaFont(language, fontType);
+            return font is XNASpriteFont xnaFont
+                ? xnaFont.InnerFont
+                : null;
+        }
+
+        private GameBitmapSpriteFont? GetVanillaBmFont(LanguageInfo language, GameFontType fontType)
+        {
+            var font = this._vanillaFontProvider.GetVanillaFont(language, fontType);
+            return font as GameBitmapSpriteFont;
+        }
+    }
 }

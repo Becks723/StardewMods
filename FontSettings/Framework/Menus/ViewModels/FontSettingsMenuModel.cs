@@ -30,7 +30,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         private readonly FontSettingsMenuContextModel _stagedValues;
         private readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
         private readonly ModConfig _config;
-        private readonly FontManager _fontManager;
+        private readonly IVanillaFontProvider _vanillaFontProvider;
         private readonly IFontGenerator _sampleFontGenerator;
         private readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
         private readonly IFontConfigManager _fontConfigManager;
@@ -530,12 +530,12 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public ICommand RefreshFontsCommand { get; }
 
-        public FontSettingsMenuModel(ModConfig config, FontManager fontManager, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
+        public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
         {
             _instance = this;
             this._config = config;
-            this._fontManager = fontManager;
+            this._vanillaFontProvider = vanillaFontProvider;
             this._sampleFontGenerator = sampleFontGenerator;
             this._sampleAsyncFontGenerator = sampleAsyncFontGenerator;
             this._fontConfigManager = fontConfigManager;
@@ -703,11 +703,8 @@ namespace FontSettings.Framework.Menus.ViewModels
         {
             try
             {
-                if (this.CurrentFontType is GameFontType.SpriteText)
-                    this.ExampleVanillaFont = this._fontManager.GetBuiltInBmFont();
-                else
-                    this.ExampleVanillaFont = new XNASpriteFont(
-                        this._fontManager.GetBuiltInSpriteFont(this.CurrentFontType));
+                this.ExampleVanillaFont = this._vanillaFontProvider.GetVanillaFont(
+                    FontHelpers.GetCurrentLanguage(), this.CurrentFontType);
             }
             catch (Exception ex)
             {

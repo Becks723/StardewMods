@@ -13,13 +13,15 @@ namespace FontSettings.Framework.DataAccess.Parsing
     {
         private readonly IFontFileProvider _fontFileProvider;
         private readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
+        private readonly IVanillaFontProvider _vanillaFontProvider;
 
         private readonly FontFilePathParseHelper _fontFilePathParseHelper = new();
 
-        public FontPresetParser(IFontFileProvider fontFileProvider, IVanillaFontConfigProvider vanillaFontConfigProvider)
+        public FontPresetParser(IFontFileProvider fontFileProvider, IVanillaFontConfigProvider vanillaFontConfigProvider, IVanillaFontProvider vanillaFontProvider)
         {
             this._fontFileProvider = fontFileProvider;
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
+            this._vanillaFontProvider = vanillaFontProvider;
         }
 
         public IEnumerable<Preset.FontPreset> Parse(Models.FontPresetData preset)
@@ -36,7 +38,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 LineSpacing: preset.LineSpacing,
                 CharOffsetX: preset.CharOffsetX,
                 CharOffsetY: preset.CharOffsetY,
-                CharacterRanges: CharRangeSource.GetBuiltInCharRange(language));
+                CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType));
 
             if (preset.PixelZoom != 0)
                 settings = new BmFontConfig(
@@ -72,8 +74,8 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 LineSpacing = (int)font.LineSpacing,
                 CharOffsetX = font.CharOffsetX,
                 CharOffsetY = font.CharOffsetY,
-                PixelZoom = font.Supports<IWithPixelZoom>() 
-                    ? font.GetInstance<IWithPixelZoom>().PixelZoom 
+                PixelZoom = font.Supports<IWithPixelZoom>()
+                    ? font.GetInstance<IWithPixelZoom>().PixelZoom
                     : 0,
             };
         }

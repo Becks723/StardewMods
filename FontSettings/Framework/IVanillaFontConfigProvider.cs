@@ -15,10 +15,12 @@ namespace FontSettings.Framework
     internal class VanillaFontConfigProvider : IVanillaFontConfigProvider
     {
         private readonly IDictionary<FontConfigKey, FontConfig> _vanillaFontsLookup;
+        private readonly IVanillaFontProvider _vanillaFontProvider;
 
-        public VanillaFontConfigProvider(IDictionary<FontConfigKey, FontConfig> vanillaFonts)
+        public VanillaFontConfigProvider(IDictionary<FontConfigKey, FontConfig> vanillaFonts, IVanillaFontProvider vanillaFontProvider)
         {
             this._vanillaFontsLookup = vanillaFonts;
+            this._vanillaFontProvider = vanillaFontProvider;
         }
 
         public FontConfig GetVanillaFontConfig(LanguageInfo language, GameFontType fontType)
@@ -41,7 +43,7 @@ namespace FontSettings.Framework
                     LineSpacing: 26,
                     CharOffsetX: 0,
                     CharOffsetY: 0,
-                    CharacterRanges: CharRangeSource.GetBuiltInCharRange(language));
+                    CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType));
 
             else
                 return new BmFontConfig(
@@ -53,7 +55,7 @@ namespace FontSettings.Framework
                     LineSpacing: 26,
                     CharOffsetX: 0,
                     CharOffsetY: 0,
-                    CharacterRanges: CharRangeSource.GetBuiltInCharRange(language),
+                    CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType),
                     PixelZoom: FontHelpers.GetDefaultFontPixelZoom());
         }
     }

@@ -14,8 +14,8 @@ namespace FontSettings.Framework.DataAccess.Parsing
     {
         private readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
 
-        public FontConfigParserForUser(IFontFileProvider fontFileProvider, IVanillaFontConfigProvider vanillaFontConfigProvider)
-            : base(fontFileProvider)
+        public FontConfigParserForUser(IFontFileProvider fontFileProvider, IVanillaFontProvider vanillaFontProvider, IVanillaFontConfigProvider vanillaFontConfigProvider)
+            : base(fontFileProvider, vanillaFontProvider)
         {
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
         }

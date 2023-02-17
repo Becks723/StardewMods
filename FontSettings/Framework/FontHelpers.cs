@@ -9,7 +9,6 @@ using System.Xml.Serialization;
 using BmFont;
 using StardewValley;
 using StardewValley.GameData;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace FontSettings.Framework
 {
@@ -17,25 +16,28 @@ namespace FontSettings.Framework
     {
         public static IEnumerable<CharacterRange> GetCharRange(string? s, char? defaultCharacter = null)
         {
-            if (s is null || s.Length is 0)
-            {
-                if (defaultCharacter is null)
-                    return Enumerable.Empty<CharacterRange>();
-                else
-                    return new[] { new CharacterRange() { Start = defaultCharacter.Value, End = defaultCharacter.Value } };
-            }
-
             char[] chars = defaultCharacter != null
                 ? s.ToCharArray().Append(defaultCharacter.Value).Distinct().ToArray()
                 : s.ToCharArray().Distinct().ToArray();
-            Array.Sort(chars);
+            return GetCharacterRanges(chars);
+        }
+
+        public static IEnumerable<CharacterRange> GetCharacterRanges(IEnumerable<char>? chars)
+        {
+            if (chars == null || !chars.Any())
+                return Enumerable.Empty<CharacterRange>();
+
+            var charArray = chars
+                .Distinct()
+                .OrderBy(c => c)
+                .ToArray();
             List<CharacterRange> result = new();
-            char start = chars[0];
-            for (int i = 1; i < chars.Length; i++)
+            char start = charArray[0];
+            for (int i = 1; i < charArray.Length; i++)
             {
-                char last = chars[i - 1];
-                char current = chars[i];
-                if (i < chars.Length - 1)
+                char last = charArray[i - 1];
+                char current = charArray[i];
+                if (i < charArray.Length - 1)
                 {
                     if (last + 1 == current)
                         continue;

@@ -66,6 +66,8 @@ namespace FontSettings
 
         private MainFontPatcher _mainFontPatcher;
 
+        private VanillaFontProvider _vanillaFontProvider;
+
         private TitleFontButton _titleFontButton;
 
         internal static IModHelper ModHelper { get; private set; }
@@ -82,14 +84,8 @@ namespace FontSettings
             this._config = helper.ReadConfig<ModConfig>();
             this.CheckConfigValid(this._config);
 
-            foreach (var code in Enum.GetValues<LocalizedContentManager.LanguageCode>())
-            {
-                if (code == LocalizedContentManager.LanguageCode.th)
-                    continue;
-
-                if (code != LocalizedContentManager.LanguageCode.mod)
-                    this.RecordVanillaFontData(code, FontHelpers.GetLocale(code));
-            }
+            this._vanillaFontProvider = new VanillaFontProvider(this.Monitor);
+            this._vanillaFontProvider.RecordForVanillaLangauges();
 
             // init migrations.
             this._0_6_0_Migration = new(helper, this.ModManifest);
@@ -112,8 +108,8 @@ namespace FontSettings
             this._vanillaFontConfigProvider = this.GetVanillaFontConfigProvider();
             this._fontFileProvider = this.GetFontFileProvider();
 
-            this._userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontConfigProvider);
-            this._fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider);
+            this._userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontProvider, this._vanillaFontConfigProvider);
+            this._fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider, this._vanillaFontProvider);
 
             this._fontConfigManager = this.GetFontConfigManager(this._userFontConfigParser);
             this._fontPresetManager = this.GetFontPresetManager(this._fontPresetParser);
@@ -472,13 +468,13 @@ namespace FontSettings
             var modFontFileProvider = new FontFileProvider();
             modFontFileProvider.Scanners.Add(new BasicFontFileScanner(this.Helper.DirectoryPath, new ScanSettings()));
 
-            var parser = new FontConfigParser(modFontFileProvider);
+            var parser = new FontConfigParser(modFontFileProvider, this._vanillaFontProvider);
             var vanillaFonts = this._vanillaFontDataRepository
                 .ReadVanillaFontData().Fonts
                 .Select(font => parser.Parse(font))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
-            return new VanillaFontConfigProvider(vanillaFonts);
+            return new VanillaFontConfigProvider(vanillaFonts, this._vanillaFontProvider);
         }
         FontConfigManager GetFontConfigManager(FontConfigParserForUser parser)
         {
@@ -542,13 +538,13 @@ namespace FontSettings
 
         private FontSettingsMenu CreateFontSettingsMenu()
         {
-            var gen = new SampleFontGenerator(this._fontManager);
+            var gen = new SampleFontGenerator(this._vanillaFontProvider);
             IFontGenerator sampleFontGenerator = gen;
             IAsyncFontGenerator sampleAsyncFontGenerator = gen;
 
             return new FontSettingsMenu(
                 config: this._config,
-                fontManager: this._fontManager,
+                vanillaFontProvider: this._vanillaFontProvider,
                 sampleFontGenerator: sampleFontGenerator,
                 sampleAsyncFontGenerator: sampleAsyncFontGenerator,
                 presetManager: this._fontPresetManager,

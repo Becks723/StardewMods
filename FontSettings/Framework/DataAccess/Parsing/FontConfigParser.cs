@@ -6,18 +6,21 @@ using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.Models;
+using Microsoft.Xna.Framework.Input;
 
 namespace FontSettings.Framework.DataAccess.Parsing
 {
     internal class FontConfigParser
     {
         protected readonly IFontFileProvider _fontFileProvider;
+        private readonly IVanillaFontProvider _vanillaFontProvider;
 
         protected readonly FontFilePathParseHelper _fontFilePathParseHelper = new();
 
-        public FontConfigParser(IFontFileProvider fontFileProvider)
+        public FontConfigParser(IFontFileProvider fontFileProvider, IVanillaFontProvider vanillaFontProvider)
         {
             this._fontFileProvider = fontFileProvider;
+            this._vanillaFontProvider = vanillaFontProvider;
         }
 
         public KeyValuePair<FontConfigKey, FontConfig> Parse(FontConfigData config)
@@ -35,7 +38,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 LineSpacing: config.LineSpacing,
                 CharOffsetX: config.CharOffsetX,
                 CharOffsetY: config.CharOffsetY,
-                CharacterRanges: config.CharacterRanges ?? CharRangeSource.GetBuiltInCharRange(key.Language)  // if null, use game built-in ranges.
+                CharacterRanges: config.CharacterRanges ?? this._vanillaFontProvider.GetVanillaCharacterRanges(key.Language, key.FontType)  // if null, use game built-in ranges.
             );
 
             // TODO: PixelZoom < 0 时 validate。
@@ -78,7 +81,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
             // CharacterRanges
             IEnumerable<CharacterRange> ranges;
             {
-                var vanillaRanges = CharRangeSource.GetBuiltInCharRange(language);
+                var vanillaRanges = this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType);
                 var currentRanges = configValue.CharacterRanges;
 
                 if (vanillaRanges == currentRanges)
