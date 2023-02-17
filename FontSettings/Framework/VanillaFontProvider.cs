@@ -230,10 +230,10 @@ namespace FontSettings.Framework
             }
         }
 
-        private static IEnumerable<CharacterRange> GetCharacterRanges(GameBitmapSpriteFont font)
+        private static IEnumerable<CharacterRange> GetCharacterRanges(GameBitmapSpriteFont? font)
         {
             return FontHelpers.GetCharacterRanges(
-                font.CharacterMap.Select(pair => pair.Key));
+                font?.CharacterMap.Select(pair => pair.Key));
         }
     }
 }
