@@ -20,16 +20,13 @@ namespace FontSettings.Framework.Preset
 
         public event EventHandler<PresetUpdatedEventArgs>? PresetUpdated;
 
+        public FontPresetManager()
+        {
+        }
+
         public FontPresetManager(IEnumerable<FontPreset> presets)
         {
-            foreach (var preset in presets)
-            {
-                if (preset.Supports<IPresetWithKey<string>>())
-                {
-                    var withKey = preset.GetInstance<IPresetWithKey<string>>();
-                    this._keyedPresets[withKey.Key] = preset;
-                }
-            }
+            this.AddPresets(presets);
         }
 
         public IEnumerable<FontPreset> GetPresets(LanguageInfo language, GameFontType fontType)
@@ -59,14 +56,34 @@ namespace FontSettings.Framework.Preset
             return invalidType == null;
         }
 
+        /// <summary>Won't raise <see cref="PresetUpdated"/>.</summary>
+        public void AddPresets(IEnumerable<FontPreset> presets)
+        {
+            foreach (var preset in presets)
+            {
+                if (preset.Supports<IPresetWithKey<string>>())
+                {
+                    var withKey = preset.GetInstance<IPresetWithKey<string>>();
+                    this._keyedPresets[withKey.Key] = preset;
+                }
+            }
+        }
+
         void IFontPresetManager.UpdatePreset(string name, FontPreset? preset)
+        {
+            this.UpdatePreset(name, preset, raisePresetUpdated: true);
+        }
+
+        private void UpdatePreset(string name, FontPreset? preset, bool raisePresetUpdated)
         {
             if (!this._keyedPresets.ContainsKey(name))
             {
                 if (preset != null)
                 {
                     this._keyedPresets.Add(name, preset);
-                    this.RaisePresetUpdated(name, preset);
+
+                    if (raisePresetUpdated)
+                        this.RaisePresetUpdated(name, preset);
                 }
             }
             else
@@ -74,12 +91,16 @@ namespace FontSettings.Framework.Preset
                 if (preset != null)
                 {
                     this._keyedPresets[name] = preset;
-                    this.RaisePresetUpdated(name, this._keyedPresets[name]);
+
+                    if (raisePresetUpdated)
+                        this.RaisePresetUpdated(name, this._keyedPresets[name]);
                 }
                 else
                 {
                     this._keyedPresets.Remove(name);
-                    this.RaisePresetUpdated(name, null);
+
+                    if (raisePresetUpdated)
+                        this.RaisePresetUpdated(name, null);
                 }
             }
         }

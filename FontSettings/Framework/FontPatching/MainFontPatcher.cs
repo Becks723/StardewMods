@@ -18,6 +18,8 @@ namespace FontSettings.Framework.FontPatching
         private readonly FontPatchResolverFactory _resolverFactory;
         private readonly FontPatchInvalidatorManager _invalidatorManager;
 
+        private bool _bypassFontPatch;
+
         public event EventHandler<FontPixelZoomOverrideEventArgs> FontPixelZoomOverride;
 
         public MainFontPatcher(FontConfigManager fontConfigManager, FontPatchResolverFactory resolverFactory,
@@ -30,6 +32,9 @@ namespace FontSettings.Framework.FontPatching
 
         public void OnAssetRequested(AssetRequestedEventArgs e)
         {
+            if (this._bypassFontPatch)
+                return;
+
             if (e.NameWithoutLocale.IsEquivalentTo("Fonts/SmallFont"))
             {
                 this.PatchCommonFont(e, GameFontType.SmallFont);
@@ -49,6 +54,16 @@ namespace FontSettings.Framework.FontPatching
         public void OnAssetReady(AssetReadyEventArgs e)
         {
             this.UpdateFontFile(e);
+        }
+
+        public void PauseFontPatch()
+        {
+            this._bypassFontPatch = true;
+        }
+
+        public void ResumeFontPatch()
+        {
+            this._bypassFontPatch = false;
         }
 
         private void PatchCommonFont(AssetRequestedEventArgs e, GameFontType fontType)
@@ -74,7 +89,7 @@ namespace FontSettings.Framework.FontPatching
             if (this._fontConfigManager.TryGetFontConfig(FontHelpers.GetCurrentLanguage(), fontType, out var config))
             {
                 var resolver = this.GetResolver(fontType);
-                var result = resolver.Resolve(config, 
+                var result = resolver.Resolve(config,
                     new FontPatchContext(FontHelpers.GetCurrentLanguage(), fontType));
                 if (result.IsSuccess)
                 {

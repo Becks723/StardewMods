@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BmFont;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI;
 using StardewValley.Menus;
 
 namespace FontSettings.Framework
@@ -98,6 +99,12 @@ namespace FontSettings.Framework
             if (next == values.Length)
                 next = 0;
             return values[next];
+        }
+
+        public static bool IsEquivalentToAny(this IAssetName assetName, params string?[] assetNames)
+        {
+            return assetNames.Any(
+                name => assetName.IsEquivalentTo(name));
         }
     }
 }

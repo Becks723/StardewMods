@@ -24,7 +24,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
             this._vanillaFontProvider = vanillaFontProvider;
         }
 
-        public IEnumerable<Preset.FontPreset> Parse(Models.FontPresetData preset)
+        public IEnumerable<FontPreset> Parse(FontPresetData preset)
         {
             var language = new LanguageInfo(preset.Lang, preset.Locale);
             var fontType = this.ParseFontType(preset.FontType);
@@ -45,7 +45,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                     original: settings,
                     pixelZoom: preset.PixelZoom);
 
-            var fontPreset = new Preset.FontPreset(
+            var fontPreset = new FontPreset(
                 language: language,
                 fontType: fontType,
                 settings: settings);
@@ -58,11 +58,11 @@ namespace FontSettings.Framework.DataAccess.Parsing
             yield return fontPreset;
         }
 
-        public Models.FontPresetData ParseBack(Preset.FontPreset preset)
+        public FontPresetData ParseBack(FontPreset preset)
         {
             var font = preset.Settings;
 
-            return new Models.FontPresetData
+            return new FontPresetData
             {
                 Requires = new() { FontFileName = this.ParseBackFontFilePath(font.FontFilePath, preset.Language, preset.FontType) },
                 FontType = this.ParseBackFontType(preset.FontType),
@@ -78,6 +78,30 @@ namespace FontSettings.Framework.DataAccess.Parsing
                     ? font.GetInstance<IWithPixelZoom>().PixelZoom
                     : 0,
             };
+        }
+
+        public IEnumerable<FontPreset> ParseCollection(IEnumerable<FontPresetData> presets)
+        {
+            return this.ParseCollection(presets,
+                predicate: _ => true);
+        }
+
+        public IEnumerable<FontPreset> ParseCollection(IEnumerable<FontPresetData> presets, LanguageInfo language, GameFontType fontType)
+        {
+            return this.ParseCollection(presets,
+                predicate: preset => preset.Lang == language.Code
+                                    && preset.Locale == language.Locale
+                                    && this.ParseFontType(preset.FontType) == fontType);
+        }
+
+        public IEnumerable<FontPreset> ParseCollection(IEnumerable<FontPresetData> presets, Func<FontPresetData, bool> predicate)
+        {
+            if (predicate is null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            return presets
+                .Where(preset => predicate(preset))
+                .SelectMany(preset => this.Parse(preset));
         }
 
         private GameFontType ParseFontType(FontPresetFontType presetFontType)

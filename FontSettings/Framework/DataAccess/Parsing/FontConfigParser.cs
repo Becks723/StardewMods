@@ -94,6 +94,31 @@ namespace FontSettings.Framework.DataAccess.Parsing
             return parsedBack;
         }
 
+        public IDictionary<FontConfigKey, FontConfig> ParseCollection(FontConfigs configs)
+        {
+            return this.ParseCollection(configs,
+                predicate: _ => true);
+        }
+
+        public IDictionary<FontConfigKey, FontConfig> ParseCollection(FontConfigs configs, LanguageInfo language, GameFontType fontType)
+        {
+           return this.ParseCollection(configs,
+                predicate: config => config.Lang == language.Code
+                                    && config.Locale == language.Locale
+                                    && config.InGameType == fontType);
+        }
+
+        public IDictionary<FontConfigKey, FontConfig> ParseCollection(FontConfigs configs, Func<FontConfigData, bool> predicate)
+        {
+            if (predicate is null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            return configs
+                .Where(config => predicate(config))
+                .Select(config => this.Parse(config))
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+        }
+
         protected virtual string ParseFontFilePath(string path, LanguageInfo language, GameFontType fontType)
         {
             return this._fontFilePathParseHelper.ParseFontFilePath(path, this._fontFileProvider.FontFiles);

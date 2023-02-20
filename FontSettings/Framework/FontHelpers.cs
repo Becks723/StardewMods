@@ -158,6 +158,14 @@ namespace FontSettings.Framework
             return new LanguageInfo(code, GetLocale(code));
         }
 
+        public static LanguageInfo GetModLanguage(ModLanguage modLanguage)
+        {
+            if (modLanguage is null)
+                throw new ArgumentNullException(nameof(modLanguage));
+
+            return new LanguageInfo(LocalizedContentManager.LanguageCode.mod, GetModLocale(modLanguage));
+        }
+
         public static LanguageInfo LanguageEn => GetLanguage(LocalizedContentManager.LanguageCode.en);
         public static LanguageInfo LanguageJa => GetLanguage(LocalizedContentManager.LanguageCode.ja);
         public static LanguageInfo LanguageRu => GetLanguage(LocalizedContentManager.LanguageCode.ru);
@@ -171,6 +179,11 @@ namespace FontSettings.Framework
         public static LanguageInfo LanguageIt => GetLanguage(LocalizedContentManager.LanguageCode.it);
         public static LanguageInfo LanguageTr => GetLanguage(LocalizedContentManager.LanguageCode.tr);
         public static LanguageInfo LanguageHu => GetLanguage(LocalizedContentManager.LanguageCode.hu);
+
+        public static bool IsModLanguage(this LanguageInfo language)
+        {
+            return language.Code == LocalizedContentManager.LanguageCode.mod;
+        }
 
         public static string GetFontFileAssetName()  // under game current language context
         {
@@ -205,7 +218,11 @@ namespace FontSettings.Framework
 
         public static string LocalizeAssetName(string assetName)
         {
-            var language = FontHelpers.GetCurrentLanguage();
+            return LocalizeAssetName(assetName, FontHelpers.GetCurrentLanguage());
+        }
+
+        public static string LocalizeAssetName(string assetName, LanguageInfo language)
+        {
             return LocalizeAssetName(assetName, language.Code, language.Locale);
         }
 

@@ -9,13 +9,25 @@ namespace FontSettings.Framework
 {
     internal class VanillaFontConfigProvider : IVanillaFontConfigProvider
     {
-        private readonly IDictionary<FontConfigKey, FontConfig> _vanillaFontsLookup;
+        private readonly IDictionary<FontConfigKey, FontConfig> _vanillaFontsLookup = new Dictionary<FontConfigKey, FontConfig>();
         private readonly IVanillaFontProvider _vanillaFontProvider;
 
-        public VanillaFontConfigProvider(IDictionary<FontConfigKey, FontConfig> vanillaFonts, IVanillaFontProvider vanillaFontProvider)
+        public VanillaFontConfigProvider(IVanillaFontProvider vanillaFontProvider)
         {
-            this._vanillaFontsLookup = vanillaFonts;
             this._vanillaFontProvider = vanillaFontProvider;
+        }
+
+        public VanillaFontConfigProvider(IDictionary<FontConfigKey, FontConfig> vanillaFonts, IVanillaFontProvider vanillaFontProvider)
+            : this(vanillaFontProvider)
+        {
+            foreach (var pair in vanillaFonts)
+                this._vanillaFontsLookup.Add(pair);
+        }
+
+        public void AddVanillaFontConfigs(IDictionary<FontConfigKey, FontConfig> vanillaFonts)
+        {
+            foreach (var pair in vanillaFonts)
+                this._vanillaFontsLookup[pair.Key] = pair.Value;
         }
 
         public FontConfig GetVanillaFontConfig(LanguageInfo language, GameFontType fontType)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.Models;
+using StardewValleyUI;
 
 namespace FontSettings.Framework
 {
@@ -11,16 +12,32 @@ namespace FontSettings.Framework
     {
         private readonly object _lock = new object();
 
-        private readonly IDictionary<FontConfigKey, FontConfig> _fontConfigs;
+        private readonly IDictionary<FontConfigKey, FontConfig> _fontConfigs = new Dictionary<FontConfigKey, FontConfig>();
 
         public event EventHandler ConfigUpdated;
 
+        public FontConfigManager()
+        {
+        }
+
         public FontConfigManager(IDictionary<FontConfigKey, FontConfig> fontConfigs)
         {
-            this._fontConfigs = fontConfigs;
+            foreach (var pair in fontConfigs)
+                this._fontConfigs.Add(pair);
+        }
+
+        /// <summary>Won't raise <see cref="ConfigUpdated"/>.</summary>
+        public void AddFontConfig(KeyValuePair<FontConfigKey, FontConfig> config)
+        {
+            this.UpdateFontConfig(config.Key.Language, config.Key.FontType, config.Value, raiseConfigUpdated: false);
         }
 
         public void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig? config)
+        {
+            this.UpdateFontConfig(language, fontType, config, raiseConfigUpdated: true);
+        }
+
+        private void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig? config, bool raiseConfigUpdated)
         {
             var key = new FontConfigKey(language, fontType);
 
@@ -31,7 +48,8 @@ namespace FontSettings.Framework
                     if (config != null)
                     {
                         this._fontConfigs.Add(key, config);
-                        this.RaiseConfigUpdated(EventArgs.Empty);
+                        if (raiseConfigUpdated)
+                            this.RaiseConfigUpdated(EventArgs.Empty);
                     }
                 }
                 else
@@ -41,11 +59,11 @@ namespace FontSettings.Framework
                     else
                         this._fontConfigs.Remove(key);
 
-                    this.RaiseConfigUpdated(EventArgs.Empty);
+                    if (raiseConfigUpdated)
+                        this.RaiseConfigUpdated(EventArgs.Empty);
                 }
             }
         }
-
         public bool TryGetFontConfig(LanguageInfo language, GameFontType fontType, out FontConfig? fontConfig)
         {
             FontConfig? got = this.GetFontConfig(language, fontType);
