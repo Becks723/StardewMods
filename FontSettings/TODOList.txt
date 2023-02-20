@@ -25,7 +25,10 @@
 	- BmFont的Kerning？
 	- 下拉框条目用各自的字体显示。
 	- 代码里的TODO。
-
+	- 为assets添加assetname，使其可替换。
+	- assets/vanilla-fonts扩展：新建一个custom-vanilla-fonts给用户配置。
+		1. 添加更多自定义语言。
+		2. 重写已存在的配置，用于自定义字体。
 
 
 Dialogue font under latin language:
