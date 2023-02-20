@@ -13,7 +13,11 @@ Compatibility:
 
 
 Usage:
-	Press LeftAlt + F to call out the Font Settings menu. Configure the fonts, then click OK, your font is set!
+	To open Font Settings menu, choose one in following:
+	1. Click the font button at left-bottom corner of the title menu. (the one with an uppercase 'A')
+	2. HotKey. (default LeftAlt + F)
+	
+	In the menu, configure the fonts, then click OK, your font is set!
 	Settings:
 		General
 			- Enabled: Whether to enable custom font. Check to enable, otherwise keep vanilla.
@@ -88,6 +92,11 @@ Help & Feedback:
 
 
 Release Notes:
+0.7.2 - 2023-02-20
+	- Adds a font button into title menu. You can find it at lb corner, appear as an uppercase 'A'.
+    - Now supports custom language.
+	- Bugfixes.
+
 0.7.1 - 2023-02-14
 	- Slim mod file. Move those vanilla font file (assets/fonts) to optional mod file.
 	- Improve font change effects when you select "keep original". (all languages now support, except hu, ru, tr)
