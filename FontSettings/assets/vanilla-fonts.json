@@ -11,7 +11,7 @@
       "FontIndex": 0,
       "FontSize": 24.0,
       "Spacing": -1.0,
-      "LineSpacing": 24
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -53,7 +53,7 @@
       "FontIndex": 0,
       "FontSize": 42.0,
       "Spacing": 5.0,
-      "LineSpacing": 44
+      "LineSpacing": 42
     },
 
     /* Medium Font */
@@ -95,7 +95,7 @@
       "FontIndex": 0,
       "FontSize": 28.0,
       "Spacing": -1.0,
-      "LineSpacing": 28
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -137,7 +137,7 @@
       "FontIndex": 0,
       "FontSize": 26.0,
       "Spacing": -1.0,
-      "LineSpacing": 33
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -150,7 +150,7 @@
       "FontIndex": 0,
       "FontSize": 39.0,
       "Spacing": -2.0,
-      "LineSpacing": 50
+      "LineSpacing": 42
     },
 
 
@@ -165,7 +165,7 @@
       "FontIndex": 0,
       "FontSize": 26.0,
       "Spacing": -1.0,
-      "LineSpacing": 33
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -193,7 +193,7 @@
       "FontIndex": 0,
       "FontSize": 26.0,
       "Spacing": -1.0,
-      "LineSpacing": 33
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -221,7 +221,7 @@
       "FontIndex": 0,
       "FontSize": 26.0,
       "Spacing": -1.0,
-      "LineSpacing": 33
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -249,7 +249,7 @@
       "FontIndex": 0,
       "FontSize": 26.0,
       "Spacing": -1.0,
-      "LineSpacing": 33
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -281,7 +281,7 @@
       "FontIndex": 0,
       "FontSize": 26.0,
       "Spacing": -1.0,
-      "LineSpacing": 33
+      "LineSpacing": 26
     },
 
     /* Medium Font */
@@ -303,6 +303,6 @@
 
 
     /* Official Turkish */
-    // TODO
+    // TODO   small linespacing = 30
   ]
 }
