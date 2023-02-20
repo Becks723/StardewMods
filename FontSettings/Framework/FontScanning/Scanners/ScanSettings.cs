@@ -11,5 +11,12 @@ namespace FontSettings.Framework.FontScanning.Scanners
         public bool RecursiveScan { get; set; } = true;
 
         public ISet<string> Extensions { get; } = new HashSet<string>(new[] { ".ttf", ".ttc", ".otf" });
+
+        public IEnumerable<string> IgnoredFiles { get; } = GetIgnoredFiles();
+
+        private static IEnumerable<string> GetIgnoredFiles()
+        {
+            yield return "mstmc.ttf";
+        }
     }
 }

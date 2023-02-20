@@ -22,6 +22,7 @@ namespace FontSettings.Framework.FontScanning.Scanners
         {
             bool recursiveScan = this._scanSettings.RecursiveScan;
             string[] extensions = this._scanSettings.Extensions.ToArray();
+            var ignoredFiles = this._scanSettings.IgnoredFiles;
 
             var allFiles = Directory.EnumerateFiles(
                 path: this._baseDirectory,
@@ -29,6 +30,7 @@ namespace FontSettings.Framework.FontScanning.Scanners
                 searchOption: recursiveScan ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             return from file in allFiles
                    where extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                   where !ignoredFiles.Any(ignore => file.EndsWith(ignore))  // TODO: 大小写
                    select file;
         }
     }
