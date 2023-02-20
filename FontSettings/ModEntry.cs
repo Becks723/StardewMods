@@ -31,8 +31,6 @@ namespace FontSettings
 {
     internal class ModEntry : Mod
     {
-        private readonly string _globalFontDataKey = "font-data";
-
         private MigrateTo_0_6_0 _0_6_0_Migration;
 
         private ModConfig _config;
@@ -99,9 +97,9 @@ namespace FontSettings
             // init service objects.
             this._config.Sample = this._sampleDataRepository.ReadSampleData();
             this._vanillaFontConfigProvider = new VanillaFontConfigProvider(this._vanillaFontProvider);
-            this._fontFileProvider = this.GetFontFileProvider();
+            this._fontFileProvider = this.CreateInstalledFontFileProvider();
 
-            this._vanillaFontConfigParser = new FontConfigParser(this.GetModFontFileProvider(), this._vanillaFontProvider);
+            this._vanillaFontConfigParser = new FontConfigParser(this.CreateModFontFileProvider(), this._vanillaFontProvider);
             this._userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontProvider, this._vanillaFontConfigProvider);
             this._fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider, this._vanillaFontProvider);
 
@@ -211,26 +209,9 @@ namespace FontSettings
                 this._titleFontButton.Update();
         }
 
-        private FontConfigs ReadFontSettings()
-        {
-            FontConfigs fonts = this.Helper.Data.ReadGlobalData<FontConfigs>(this._globalFontDataKey);
-            if (fonts == null)
-            {
-                fonts = new FontConfigs();
-                this.Helper.Data.WriteGlobalData(this._globalFontDataKey, fonts);
-            }
-
-            return fonts;
-        }
-
         private void SaveConfig(ModConfig config)
         {
             this.Helper.WriteConfig(config);
-        }
-
-        private void SaveFontSettings(FontConfigs fonts)
-        {
-            this.Helper.Data.WriteGlobalData(this._globalFontDataKey, fonts);
         }
 
         private void ResetConfig()
@@ -293,7 +274,7 @@ namespace FontSettings
             }
         }
 
-        IFontFileProvider GetFontFileProvider()
+        private IFontFileProvider CreateInstalledFontFileProvider()
         {
             var fontFileProvider = new FontFileProvider();
             {
@@ -305,7 +286,7 @@ namespace FontSettings
             return fontFileProvider;
         }
 
-        IFontFileProvider GetModFontFileProvider()
+        private IFontFileProvider CreateModFontFileProvider()
         {
             var fontFileProvider = new FontFileProvider();
             {
