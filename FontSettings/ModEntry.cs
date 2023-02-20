@@ -32,9 +32,6 @@ namespace FontSettings
     internal class ModEntry : Mod
     {
         private readonly string _globalFontDataKey = "font-data";
-        private readonly string _const_fontPath_ja = "assets/fonts/sp-setofont/sp-setofont.ttf";
-        private readonly string _const_fontPath_ko = "assets/fonts/SDMiSaeng/SDMiSaeng.ttf";
-        private readonly string _const_fontPath_zh = "assets/fonts/NotoSansCJKsc-Bold/NotoSansCJKsc-Bold.otf";
 
         private MigrateTo_0_6_0 _0_6_0_Migration;
 
@@ -124,10 +121,6 @@ namespace FontSettings
             this._titleFontButton = new TitleFontButton(
                 position: this.GetTitleFontButtonPosition(),
                 onClicked: () => this.OpenFontSettingsMenu());
-
-            this.AssertModFileExists(this._const_fontPath_ja, out _);
-            this.AssertModFileExists(this._const_fontPath_ko, out _);
-            this.AssertModFileExists(this._const_fontPath_zh, out _);
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
