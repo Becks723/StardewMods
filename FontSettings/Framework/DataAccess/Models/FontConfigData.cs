@@ -48,5 +48,14 @@ namespace FontSettings.Framework.DataAccess.Models
         /// <summary>缩放倍数。仅当<see cref="InGameType"/>为<see cref="GameFontType.SpriteText"/>时用到。对应<see cref="StardewValley.BellsAndWhistles.SpriteText.fontPixelZoom"/>字段。</summary>
         public float PixelZoom { get; set; }
 
+        internal bool IsSameContextWith(FontConfigData other)
+        {
+            if (other is null) 
+                throw new ArgumentNullException(nameof(other));
+
+            return this.Lang == other.Lang
+                && this.Locale == other.Locale
+                && this.InGameType == other.InGameType;
+        }
     }
 }

@@ -344,12 +344,21 @@ namespace FontSettings
 
         private void OnFontConfigUpdated(object sender, EventArgs e)
         {
-            var configs = this._fontConfigManager.GetAllFontConfigs()
+            var runtimeConfigs = this._fontConfigManager.GetAllFontConfigs()
                 .Select(pair => this._userFontConfigParser.ParseBack(pair));
 
             var configObject = new FontConfigs();
-            foreach (var config in configs)
+
+            foreach (var config in runtimeConfigs)
                 configObject.Add(config);
+
+            // 由于 文件中的配置 和 运行时产生的配置 并不同步，因此要手动加回部分文件中的配置。
+            var savedConfigs = this._fontConfigRepository.ReadAllConfigs();
+            foreach (var config in savedConfigs)
+            {
+                if (!runtimeConfigs.Any(config.IsSameContextWith))
+                    configObject.Add(config);
+            }
 
             this._fontConfigRepository.WriteAllConfigs(configObject);
         }
