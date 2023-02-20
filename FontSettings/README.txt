@@ -82,11 +82,14 @@ FAQ:
 
 
 Help & Feedback:
-	Where to feedback:
-		1. At Nexus modpage: https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts
-		
+	Where to feedback/askforhelp:
+		1. At Nexus modpage POSTS: https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts
+		2. On Stardew Valley Official Discord: https://discord.gg/stardewvalley
+			Ping me @Becks723#7620 anytime. I won't be always around but I'll check.
+
 	Report a bug:
-		1. At Nexus modpage: https://www.nexusmods.com/stardewvalley/mods/12467?tab=bugs
+		1. At Nexus modpage BUGS: https://www.nexusmods.com/stardewvalley/mods/12467?tab=bugs
+		2. On Github: https://github.com/Becks723/StardewMods/issues
 
 	Thirst for feedback about this mod!
 
