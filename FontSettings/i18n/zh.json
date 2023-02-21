@@ -35,6 +35,8 @@
   "ui.main-menu.show-example-bounds": "显示边框",
   "ui.main-menu.show-example-text": "显示文字",
 
+  "ui.main-menu.failed-to-recognize-font-file": "未能识别字体：{{filePath}}",
+
   "ui.new-preset-menu.title": "新预设",
   "ui.new-preset-menu.name": "名称",
   "ui.invalid-preset-name.empty": "不可为空。",

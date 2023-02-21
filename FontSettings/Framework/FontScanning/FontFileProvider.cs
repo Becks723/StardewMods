@@ -34,7 +34,7 @@ namespace FontSettings.Framework.FontScanning
         }
 
         private readonly IFontInfoRetriever _fontSource = new FontInfoRetriever();
-        public FontModel[] GetFontData(string fontFile)
+        public IResult<FontModel[]> GetFontData(string fontFile)
         {
             return this._fontSource.GetFontInfo(fontFile);
         }

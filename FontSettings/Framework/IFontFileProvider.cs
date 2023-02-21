@@ -13,6 +13,6 @@ namespace FontSettings.Framework
 
         void RescanForFontFiles();
 
-        FontModel[] GetFontData(string fontFile);
+        IResult<FontModel[]> GetFontData(string fontFile);
     }
 }

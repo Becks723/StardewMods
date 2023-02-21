@@ -9,6 +9,6 @@ namespace FontSettings.Framework.FontInfo
 {
     internal interface IFontInfoRetriever
     {
-        FontModel[] GetFontInfo(string fontFile);
+        IResult<FontModel[]> GetFontInfo(string fontFile);
     }
 }

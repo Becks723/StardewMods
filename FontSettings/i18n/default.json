@@ -37,6 +37,7 @@
   "ui.main-menu.show-example-text": "Show Text",
 
   "ui.main-menu.validation.font.file-not-found": "Font file not found: {{filePath}}",
+  "ui.main-menu.failed-to-recognize-font-file": "Failed to recognize font file: {{filePath}}",
 
   "ui.new-preset-menu.title": "New Preset",
   "ui.new-preset-menu.name": "Name",

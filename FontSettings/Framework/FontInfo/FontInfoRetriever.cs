@@ -13,17 +13,31 @@ namespace FontSettings.Framework.FontInfo
 {
     internal class FontInfoRetriever : IFontInfoRetriever
     {
-        public FontModel[] GetFontInfo(string fontFile)
+        public IResult<FontModel[]> GetFontInfo(string fontFile)
         {
-            FontFormat format = GetFontFormat(fontFile);
-            if (format is FontFormat.Unknown)
-                throw new NotSupportedException($"不支持的字体格式！文件：{fontFile}");
+            try
+            {
+                FontFormat format = GetFontFormat(fontFile);
 
-            if (format is FontFormat.OpenTypeCollection)
-                return this.LoadFontCollection(fontFile);
-            else
-                return new FontModel[1] { this.LoadSingleFont(fontFile) };
+                FontModel[] info = format switch
+                {
+                    FontFormat.OpenType => this.LoadSingleFont(fontFile),
+                    FontFormat.OpenTypeCollection => this.LoadFontCollection(fontFile),
+                    FontFormat.Unknown => throw new NotSupportedException($"不支持的字体格式！文件：{fontFile}"),
+                    _ => throw new NotSupportedException("..."),
+                };
+
+                return SuccessResult(info);
+            }
+
+            catch (Exception ex)
+            {
+                return ErrorResult(ex);
+            }
         }
+
+        private FontModel[] LoadSingleFont(string fontFile)
+            => new FontModel[1] { this.LoadSingleFontCore(fontFile) };
 
         private FontModel[] LoadFontCollection(string fontFile)
         {
@@ -76,7 +90,7 @@ namespace FontSettings.Framework.FontInfo
             };
         }
 
-        private FontModel LoadSingleFont(string fontFile)
+        private FontModel LoadSingleFontCore(string fontFile)
         {
             using (var reader = new OpenTypeCommonReader(File.OpenRead(fontFile)))
                 return this.LoadFont(fontFile, reader);
@@ -106,6 +120,21 @@ namespace FontSettings.Framework.FontInfo
                 return FontFormat.OpenType;
             else
                 return FontFormat.Unknown;
+        }
+
+        private static IResult<FontModel[]> SuccessResult(FontModel[] data) => new Result(true, data, null);
+        private static IResult<FontModel[]> ErrorResult(Exception ex) => new Result(false, null, ex);
+        private record Result(bool IsSuccess, FontModel[] Data, Exception Exception) : IResult<FontModel[]>
+        {
+            public FontModel[] GetData() => this.Data;
+
+            public string GetError()
+            {
+                var ex = this.Exception;
+                return ex != null
+                    ? $"{ex.Message}\n{ex.StackTrace}"
+                    : null;
+            }
         }
     }
 }

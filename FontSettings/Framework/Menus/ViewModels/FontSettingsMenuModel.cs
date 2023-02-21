@@ -931,11 +931,22 @@ namespace FontSettings.Framework.Menus.ViewModels
 
             // general fonts
             var fonts = this._fontFileProvider.FontFiles
-                .SelectMany(file => this._fontFileProvider.GetFontData(file)
+                .SelectMany(file =>
+                    {
+                        var result = this._fontFileProvider.GetFontData(file);
+                        if (result.IsSuccess)
+                            return result.GetData();
+                        else
+                        {
+                            ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
+                            ILog.Trace(result.GetError());
+                            return Array.Empty<FontModel>();
+                        }
+                    })
                 .Select(font => new FontViewModel(
                     fontFilePath: font.FullPath,
                     fontIndex: font.FontIndex,
-                    displayText: $"{font.FamilyName} ({font.SubfamilyName})"))
+                    displayText: $"{font.FamilyName} ({font.SubfamilyName})")
                 );
             foreach (var font in fonts)
                 yield return font;
