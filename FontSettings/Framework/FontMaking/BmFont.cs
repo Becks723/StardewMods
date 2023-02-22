@@ -271,17 +271,18 @@ namespace BmFontCS
                 int glyphIndex = stbtt_FindGlyphIndex(this._fontInfo, codepoint);
                 if (glyphIndex != 0)  // 未定义 TODO: 警告
                 {
-                    Glyph glyph = new Glyph();
-                    stbtt_GetGlyphBox(this._fontInfo, glyphIndex, &x0, &y0, &x1, &y1);
+                    stbtt_GetGlyphBitmapBox(this._fontInfo, glyphIndex, this._scale, this._scale, &x0, &y0, &x1, &y1);
                     stbtt_GetGlyphHMetrics(this._fontInfo, glyphIndex, &advanceWidth, null);
 
+                    Glyph glyph = new Glyph();
                     glyph.Id = codepoint;
                     glyph.GlyphIndex = glyphIndex;
-                    glyph.Width = (int)((x1 - x0) * this._scale);
-                    glyph.Height = (int)((y1 - y0) * this._scale);
-                    glyph.XAdvance = (int)(advanceWidth * this._scale);
-                    glyph.XOffset = (int)(x0 * this._scale);
-                    glyph.YOffset = (int)(this._ascender - y1 * this._scale);
+                    glyph.Width = x1 - x0;
+                    glyph.Height = y1 - y0;
+                    glyph.XAdvance = (int)Math.Ceiling(advanceWidth * this._scale);
+                    glyph.XOffset = x0;
+                    glyph.YOffset = (int)Math.Floor(y0 + this._ascender);
+
                     result.Add(glyph);
                 }
             }
