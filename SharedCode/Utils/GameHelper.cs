@@ -13,7 +13,8 @@ namespace CodeShared.Utils
         {
             return Game1.locations
                 .Concat(
-                    from location in Game1.locations.OfType<BuildableGameLocation>()
+                    from location in Game1.locations
+                    where location.IsBuildableLocation()
                     from building in location.buildings
                     where building.indoors.Value != null
                     select building.indoors.Value
