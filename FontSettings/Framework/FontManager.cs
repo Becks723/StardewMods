@@ -103,9 +103,9 @@ namespace FontSettings.Framework
             if (!this._builtInBmFonts.ContainsKey(language) && !FontHelpers.IsLatinLanguage(language))
                 this._builtInBmFonts[language] = new GameBitmapSpriteFont()
                 {
-                    FontFile = SpriteTextFields.FontFile,
-                    Pages = SpriteTextFields.fontPages.ToList(),
-                    CharacterMap = new(SpriteTextFields._characterMap),
+                    FontFile = SpriteText.FontFile,
+                    Pages = SpriteText.fontPages.ToList(),
+                    CharacterMap = new(SpriteText.characterMap),
                     LanguageCode = language.Code,
                     FontPixelZoom = SpriteText.fontPixelZoom
                 };

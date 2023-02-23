@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.GameData;
 
 namespace FontSettings.Framework
@@ -373,9 +374,9 @@ namespace FontSettings.Framework
                     fontPages.Add(Game1.content.Load<Texture2D>("Fonts\\" + current2.File));
                 }
 
-                SpriteTextFields.FontFile = fontFile;
-                SpriteTextFields._characterMap = characterMap;
-                SpriteTextFields.fontPages = fontPages;
+                SpriteText.FontFile = fontFile;
+                SpriteText.characterMap = characterMap;
+                SpriteText.fontPages = fontPages;
             }
         }
 

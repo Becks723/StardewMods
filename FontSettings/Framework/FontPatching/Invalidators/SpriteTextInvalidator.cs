@@ -7,6 +7,7 @@ using BmFont;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 
 namespace FontSettings.Framework.FontPatching.Invalidators
 {
@@ -29,7 +30,7 @@ namespace FontSettings.Framework.FontPatching.Invalidators
                 this._contentHelper.InvalidateCache(this.LocalizeBaseAssetName(fontFileName));
 
                 // pages
-                var fontFile = SpriteTextFields.FontFile;
+                var fontFile = SpriteText.FontFile;
                 foreach (FontPage page in fontFile?.Pages ?? Enumerable.Empty<FontPage>())
                 {
                     string pageName = $"Fonts/{page.File}";
@@ -59,9 +60,9 @@ namespace FontSettings.Framework.FontPatching.Invalidators
                     fontPages.Add(Game1.content.Load<Texture2D>("Fonts\\" + current2.File));
                 }
 
-                SpriteTextFields.FontFile = fontFile;
-                SpriteTextFields._characterMap = characterMap;
-                SpriteTextFields.fontPages = fontPages;
+                SpriteText.FontFile = fontFile;
+                SpriteText.characterMap = characterMap;
+                SpriteText.fontPages = fontPages;
             }
         }
 
