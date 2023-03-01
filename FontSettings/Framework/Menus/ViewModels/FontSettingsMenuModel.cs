@@ -278,7 +278,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public bool IsGeneratingFont => _isGeneratingFont[this.CurrentFontType];
 
-        public bool CanGenerateFont => !this.IsGeneratingFont && !this.HasErrors;
+        public bool CanGenerateFont => !this.IsGeneratingFont /*&& !this.HasErrors*/;
 
         #region AllFonts Property
 
