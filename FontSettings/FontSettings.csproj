@@ -6,10 +6,11 @@
 	<Import Project="dependencies\StbTrueTypeSharp.targets" />
 
 	<PropertyGroup>
-		<Version>0.7.2</Version>
+		<Version>0.7.3</Version>
 		<TargetFramework>net5.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>
+		<Company>Becks723</Company>
 	</PropertyGroup>
 
 	<!--smapi specific-->
