@@ -40,7 +40,7 @@ namespace FontSettings
         private VanillaFontDataRepository _vanillaFontDataRepository;
         private SampleDataRepository _sampleDataRepository;
 
-        private FontConfigParser _vanillaFontConfigParser;
+        private FontConfigParserForVanilla _vanillaFontConfigParser;
         private FontConfigParserForUser _userFontConfigParser;
         private FontPresetParser _fontPresetParser;
 
@@ -99,7 +99,7 @@ namespace FontSettings
             this._vanillaFontConfigProvider = new VanillaFontConfigProvider(this._vanillaFontProvider);
             this._fontFileProvider = this.CreateInstalledFontFileProvider();
 
-            this._vanillaFontConfigParser = new FontConfigParser(this.CreateModFontFileProvider(), this._vanillaFontProvider);
+            this._vanillaFontConfigParser = new FontConfigParserForVanilla(this.CreateVanillaFontFileProvider(), this._vanillaFontProvider);
             this._userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontProvider, this._vanillaFontConfigProvider);
             this._fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider, this._vanillaFontProvider);
 
@@ -286,11 +286,14 @@ namespace FontSettings
             return fontFileProvider;
         }
 
-        private IFontFileProvider CreateModFontFileProvider()
+        private IFontFileProvider CreateVanillaFontFileProvider()
         {
             var fontFileProvider = new FontFileProvider();
             {
                 var scanSettings = new ScanSettings();
+                fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
+                fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
+                fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
                 fontFileProvider.Scanners.Add(new BasicFontFileScanner(this.Helper.DirectoryPath, scanSettings));
             }
             return fontFileProvider;

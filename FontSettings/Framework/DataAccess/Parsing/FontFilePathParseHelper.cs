@@ -34,6 +34,18 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 Path.GetFileName(path);
         }
 
+        public string? ParseFontFilePathOrNull(string? path, IEnumerable<string> fontFiles)
+        {
+            if (path == null)
+                return null;
+
+            // 找完整路径。
+            string mapped = (from file in fontFiles
+                             where this.IsSubpath(file, path)
+                             select file).FirstOrDefault();
+            return mapped;
+        }
+
         public string? ParseFontFilePath(string? path, IEnumerable<string> fontFiles,
             IVanillaFontConfigProvider vanillaFontConfigProvider, LanguageInfo language, GameFontType fontType)
         {
