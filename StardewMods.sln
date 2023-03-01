@@ -3,6 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{212D1521-0505-47E1-9047-690B2340075A}"
+	ProjectSection(SolutionItems) = preProject
+		_build\common.targets = _build\common.targets
+		_build\smapi.targets = _build\smapi.targets
+		_build\stardewvalleyui.targets = _build\stardewvalleyui.targets
+		_build\translation-builder.targets = _build\translation-builder.targets
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{A99638DD-6D9F-4C29-A8DD-71FADD387727}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -12,12 +20,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{A99638DD-6
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{212D1521-0505-47E1-9047-690B2340075A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{693A1DFF-145C-4356-A1EF-B098A246E029}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stardewvalleyui", "stardewvalleyui", "{686735C0-AD4C-4505-842E-A5D803B278D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{90BEB4E3-BF95-4DC7-831D-19FA05DBB305}"
 	ProjectSection(SolutionItems) = preProject
-		_build\common.targets = _build\common.targets
-		_build\smapi.targets = _build\smapi.targets
-		_build\stardewvalleyui.targets = _build\stardewvalleyui.targets
-		_build\translation-builder.targets = _build\translation-builder.targets
+		_libs\stardewvalleyui\Debug\StardewValleyUI.dll = _libs\stardewvalleyui\Debug\StardewValleyUI.dll
+		_libs\stardewvalleyui\Debug\StardewValleyUI.pdb = _libs\stardewvalleyui\Debug\StardewValleyUI.pdb
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{6D395670-AB12-4FA7-AA57-6000F82E4324}"
+	ProjectSection(SolutionItems) = preProject
+		_libs\stardewvalleyui\Release\StardewValleyUI.dll = _libs\stardewvalleyui\Release\StardewValleyUI.dll
+		_libs\stardewvalleyui\Release\StardewValleyUI.pdb = _libs\stardewvalleyui\Release\StardewValleyUI.pdb
 	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedCode", "SharedCode\SharedCode.shproj", "{AB84FF3C-F7C6-4D02-8988-E46C64D35C7D}"
@@ -49,6 +65,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{693A1DFF-145C-4356-A1EF-B098A246E029} = {A99638DD-6D9F-4C29-A8DD-71FADD387727}
+		{686735C0-AD4C-4505-842E-A5D803B278D8} = {693A1DFF-145C-4356-A1EF-B098A246E029}
+		{90BEB4E3-BF95-4DC7-831D-19FA05DBB305} = {686735C0-AD4C-4505-842E-A5D803B278D8}
+		{6D395670-AB12-4FA7-AA57-6000F82E4324} = {686735C0-AD4C-4505-842E-A5D803B278D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EA406B18-90FF-4E2F-A6C6-18874C906F3B}
