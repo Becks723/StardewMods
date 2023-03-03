@@ -43,9 +43,6 @@
   "ui.invalid-preset-name.invalid-char": "不可包含非法字符，如：/、\\、*、\"、|、<、>、? 等。",
   "ui.invalid-preset-name.duplicated": "该名称已被占用。",
 
-  "ui.obsolete-page.paragraph": "字体设置界面已从游戏菜单中移除。\n点击热键'{{hotkey}}'打开设置界面。",
-  "ui.obsolete-page.hide-this-tab": "不再显示此页面",
-
   "config.example-text": "示例文本",
   "config.example-text.description": "用来校准字体。‘\\n’表示换行，建议设置两行，这样校准行间距时看得清楚一点。",
   "config.min-font-size": "最小字体大小",

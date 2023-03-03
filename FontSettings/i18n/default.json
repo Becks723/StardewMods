@@ -45,9 +45,6 @@
   "ui.invalid-preset-name.invalid-char": "Contains invalid chars (/, \\, *, \", |, <, >, ?).",
   "ui.invalid-preset-name.duplicated": "Already in use.",
 
-  "ui.obsolete-page.paragraph": "Font Settings menu has been seperated from game menu.\nTry to press '{{hotkey}}' instead to open a standalone one.",
-  "ui.obsolete-page.hide-this-tab": "No longer show this tab",
-
   "config.example-text": "Example Text",
   "config.example-text.description": "Text for adjustion when setting fonts. '\\n' means a line break. I suggest you to use one line break, i.e, two lines, so you can recognize line spacing more.",
   "config.min-font-size": "Min font size",

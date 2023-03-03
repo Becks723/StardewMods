@@ -38,8 +38,6 @@ namespace FontSettings.Framework
 
         public KeybindList OpenFontSettingsMenu { get; set; } = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
 
-        public bool FontSettingsInGameMenu { get; set; } = true;
-
         private readonly int DEFAULT_MinFontSize = 5;
         private readonly int DEFAULT_MaxFontSize = 75;
         private readonly int DEFAULT_MinSpacing = -10;
@@ -75,7 +73,6 @@ namespace FontSettings.Framework
             this.MaxPixelZoom = this.DEFAULT_MaxPixelZoom;
             this.DisableTextShadow = false;
             this.OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
-            this.FontSettingsInGameMenu = true;
         }
     }
 }

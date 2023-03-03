@@ -122,9 +122,6 @@ namespace FontSettings
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                new GameMenuPatcher()
-                    .AddFontSettingsPage(helper, Harmony, this._config, this.SaveConfig);
-
                 new FontShadowPatcher(this._config)
                     .Patch(Harmony, this.Monitor);
 
