@@ -46,7 +46,7 @@
   "ui.invalid-preset-name.duplicated": "Already in use.",
 
   "config.example-text": "Example Text",
-  "config.example-text.description": "Text for adjustion when setting fonts. '\\n' means a line break. I suggest you to use one line break, i.e, two lines, so you can recognize line spacing more.",
+  "config.example-text.description": "Custom sample text. Keep this unset unless you really want yours, the mod has its built-in one.",
   "config.min-font-size": "Min font size",
   "config.min-font-size.description": "Min font size (in pixel).",
   "config.max-font-size": "Max font size",
