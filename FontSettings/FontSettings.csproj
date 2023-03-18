@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
+	<Import Project="..\FontSettings.Shared\FontSettings.Shared.projitems" Label="Shared" />
 	<Import Project="..\_build\smapi.targets" />
 	<Import Project="..\_build\translation-builder.targets" />
 	<Import Project="..\_build\stardewvalleyui.targets" />

@@ -44,6 +44,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaircasePlacementFix", "St
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings", "FontSettings\FontSettings.csproj", "{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FontSettings.Shared", "FontSettings.Shared\FontSettings.Shared.shproj", "{14E62FC5-3554-4307-9349-58B68B7E4A57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,7 +78,9 @@ Global
 		SolutionGuid = {EA406B18-90FF-4E2F-A6C6-18874C906F3B}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		FontSettings.Shared\FontSettings.Shared.projitems*{14e62fc5-3554-4307-9349-58b68b7e4a57}*SharedItemsImports = 13
 		SharedCode\SharedCode.projitems*{9347c094-6e2d-425b-8a6c-ddbd5009e2a5}*SharedItemsImports = 5
+		FontSettings.Shared\FontSettings.Shared.projitems*{97390b2e-bbda-4449-b588-bce42d7ef3fe}*SharedItemsImports = 5
 		SharedCode\SharedCode.projitems*{97390b2e-bbda-4449-b588-bce42d7ef3fe}*SharedItemsImports = 5
 		SharedCode\SharedCode.projitems*{ab84ff3c-f7c6-4d02-8988-e46c64d35c7d}*SharedItemsImports = 13
 	EndGlobalSection

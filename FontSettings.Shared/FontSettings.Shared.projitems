@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>14e62fc5-3554-4307-9349-58b68b7e4a57</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>FontSettings.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFont.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFontGenerator.bmfontcs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFontGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFontGenerator.fontbm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FontMaking\SpriteFontGenerator.cs" />
+  </ItemGroup>
+</Project>
