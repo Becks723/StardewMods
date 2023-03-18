@@ -69,6 +69,7 @@ namespace FontSettings
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
             Textures.Init(helper.ModContent);
+            StardewValleyUI.EntryPoint.Main();
 
             this._config = helper.ReadConfig<ModConfig>();
             this.CheckConfigValid(this._config);
