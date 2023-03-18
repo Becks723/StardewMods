@@ -3,5 +3,8 @@
 		<Reference Include="StardewValleyUI">
 			<HintPath>$(SolutionDir)\_libs\stardewvalleyui\$(Configuration)\StardewValleyUI.dll</HintPath>
 		</Reference>
+		<Reference Include="StardewValleyUI.DataBinding">
+			<HintPath>$(SolutionDir)\_libs\stardewvalleyui\$(Configuration)\StardewValleyUI.DataBinding.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 </Project>
