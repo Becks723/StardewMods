@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\FontSettings.Shared\FontSettings.Shared.projitems" Label="Shared" />
+	<Import Project="..\_build\smapi.targets" />
+	<Import Project="..\_build\stbtruetype-sharp.targets" />
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net5.0</TargetFramework>
+		<AssemblyName>makefont</AssemblyName>
+		<RootNamespace>FontSettings.CommandLine</RootNamespace>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<!--smapi specific-->
+	<PropertyGroup>
+		<BundleExtraAssemblies>ThirdParty, Game</BundleExtraAssemblies>
+		<EnableModDeploy>false</EnableModDeploy>
+		<EnableModZip>false</EnableModZip>
+		<EnableGameDebugging>false</EnableGameDebugging>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommandLineParser" Version="2.9.1" />
+		<PackageReference Include="Monogame.Framework.Content.Pipeline" Version="3.8.0.1641" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="BmFont" HintPath="$(GamePath)\BmFont.dll" />
+		<Reference Include="SkiaSharp" HintPath="$(TargetDir)\SkiaSharp.dll" />
+	</ItemGroup>
+
+</Project>

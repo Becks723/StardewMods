@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using BmFont;
+using FontSettings.Framework;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;  // Game1.graphics.GraphicsDevice
@@ -18,6 +19,22 @@ namespace BmFontCS
         private float _ascender, _descender, _lineHeight;
 
         public void GenerateIntoMemory(string fontFilePath, out FontFile fontFile, out Texture2D[] pages, BmFontSettings settings)
+        {
+            this.GenerateIntoMemory(fontFilePath, out fontFile, out Page[] pgs, settings);
+
+            pages = pgs
+                .Select(p => MakeFontUtils.GenerateTexture2D(p.Buffer, p.Width, p.Height))
+                .ToArray();
+        }
+
+        public void GenerateIntoMemory(string fontFilePath, out FontFile fontFile, out byte[][] pages, BmFontSettings settings)
+        {
+            this.GenerateIntoMemory(fontFilePath, out fontFile, out Page[] pgs, settings);
+
+            pages = pgs.Select(p => p.Buffer).ToArray();
+        }
+
+        private void GenerateIntoMemory(string fontFilePath, out FontFile fontFile, out Page[] pages, BmFontSettings settings)
         {
             byte[] ttf = File.ReadAllBytes(fontFilePath);
 
@@ -41,22 +58,7 @@ namespace BmFontCS
                 Page[] pgs = this.RenderGlyphsToPages(glyphs, pageSizes, settings);
 
                 fontFile = this.GetFontInfo(fontFilePath, settings, pgs, glyphs, settings.Spacing.Horizontal);
-                pages = pgs.Select(pg =>
-                {
-                    Texture2D texture = new Texture2D(Game1.graphics.GraphicsDevice, pg.Width, pg.Height);
-
-                    Color[] data = new Color[pg.Width * pg.Height];
-                    for (int i = 0; i < pg.Buffer.Length; i++)
-                    {
-                        byte b = pg.Buffer[i];
-                        data[i].R = b;
-                        data[i].G = b;
-                        data[i].B = b;
-                        data[i].A = b;
-                    }
-                    texture.SetData(data);
-                    return texture;
-                }).ToArray();
+                pages = pgs;
             }
             finally
             {

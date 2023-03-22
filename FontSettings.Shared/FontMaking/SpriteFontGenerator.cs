@@ -81,7 +81,34 @@ namespace FontSettings.Framework
             }
         }
 
-        public static unsafe SpriteFont FromTtf(
+        public static SpriteFont FromTtf(
+            string ttfPath,
+            int fontIndex,
+            float fontPixelHeight,
+            IEnumerable<CharacterRange> characterRanges,
+            int? bitmapWidth = null,
+            int? bitmapHeight = null,
+            char? defaultCharacter = '*',
+            float spacing = 0,
+            int? lineSpacing = null,
+            float charOffsetX = 0,
+            float charOffsetY = 0)
+        {
+            var data = GenerateMetadata(ttfPath, fontIndex, fontPixelHeight, characterRanges, bitmapWidth, bitmapHeight, defaultCharacter, spacing, lineSpacing, charOffsetX, charOffsetY);
+
+            Texture2D texture = MakeFontUtils.GenerateTexture2D(data.Pixels, data.Width, data.Height);
+            return new SpriteFont(
+                texture: texture,
+                glyphBounds: data.Bounds,
+                cropping: data.Cropping,
+                characters: data.Characters,
+                lineSpacing: data.LineSpacing,
+                spacing: data.Spacing,
+                kerning: data.Kerning,
+                defaultCharacter: data.DefaultCharacter);
+        }
+
+        internal static unsafe SpriteFontMetadata GenerateMetadata(
             string ttfPath,
             int fontIndex,
             float fontPixelHeight,
@@ -159,15 +186,17 @@ namespace FontSettings.Framework
                     }
                 }
 
-                return new SpriteFont(
-                    texture: GenerateTexture(pixels, finalTexWidth, finalTexHeight),
-                    glyphBounds: bounds,
-                    cropping: cropping,
-                    characters: chars,
-                    lineSpacing: lineSpacing ?? lineHeight,
-                    spacing: spacing,
-                    kerning: kerning,
-                    defaultCharacter: defaultCharacter);
+                return new SpriteFontMetadata(
+                    Pixels: pixels,
+                    Width: finalTexWidth,
+                    Height: finalTexHeight,
+                    Bounds: bounds,
+                    Cropping: cropping,
+                    Characters: chars,
+                    LineSpacing: lineSpacing ?? lineHeight,
+                    Spacing: spacing,
+                    Kerning: kerning,
+                    DefaultCharacter: defaultCharacter);
             }
             finally
             {
@@ -175,9 +204,18 @@ namespace FontSettings.Framework
             }
         }
 
-        private static Texture2D GenerateTexture(byte[] pixels, int width, int height)
+        private static Texture2D GenerateTexture(byte[] pixels, int width, int height, GraphicsDevice? graphicsDevice = null)
         {
-            Texture2D result = new Texture2D(Game1.graphics.GraphicsDevice, width, height);
+            if (graphicsDevice == null)
+            {
+                var game1Device = Game1.graphics?.GraphicsDevice;
+                if (game1Device == null)
+                    throw new InvalidOperationException($"The game is not running! Needs 'Game1.graphics?.GraphicsDevice' but it's null.");
+
+                graphicsDevice = game1Device;
+            }
+
+            Texture2D result = new Texture2D(graphicsDevice, width, height);
 
             Color[] colorData = new Color[width * height];
             for (int i = 0; i < pixels.Length; i++)
@@ -276,5 +314,18 @@ namespace FontSettings.Framework
                 return (value + blockSize - 1) & ~(blockSize - 1);
             }
         }
+
     }
+
+    internal record SpriteFontMetadata(
+        byte[] Pixels,
+        int Width,
+        int Height,
+        List<Rectangle> Bounds,
+        List<Rectangle> Cropping,
+        List<char> Characters,
+        float Spacing,
+        int LineSpacing,
+        List<Vector3> Kerning,
+        char? DefaultCharacter);
 }

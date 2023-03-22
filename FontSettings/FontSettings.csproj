@@ -4,7 +4,7 @@
 	<Import Project="..\_build\smapi.targets" />
 	<Import Project="..\_build\translation-builder.targets" />
 	<Import Project="..\_build\stardewvalleyui.targets" />
-	<Import Project="dependencies\StbTrueTypeSharp.targets" />
+	<Import Project="..\_build\stbtruetype-sharp.targets" />
 
 	<PropertyGroup>
 		<Version>0.7.3</Version>
@@ -43,6 +43,5 @@
 		<Compile Remove="Framework\Legacy\Menus\*.cs" />
 		<None Include="Framework\Legacy\Menus\*.cs" />
 	</ItemGroup>
-
 
 </Project>

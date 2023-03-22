@@ -9,10 +9,17 @@
     <Import_RootNamespace>FontSettings.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CharacterRange.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLine\ICommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLine\ICommandRunner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CommandLine\MakeFontOption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFont.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFontGenerator.bmfontcs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFontGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FontMaking\BmFontGenerator.fontbm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FontMaking\MakeFontUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FontMaking\SpriteFontGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ILog.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Log.cs" />
   </ItemGroup>
 </Project>

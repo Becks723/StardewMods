@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FontSettings.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "--out-format bmfont --out-name TestBmFont --font-path \"C:\\Windows\\Fonts\\andyb.ttf\" --size 20px --xnb true"
+    }
+  }
+}

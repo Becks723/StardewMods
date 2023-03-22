@@ -37,5 +37,48 @@ namespace FontSettings.Framework
                 fontChar.YOffset += (int)Math.Round(charOffsetY);
             }
         }
+
+        public static BmFontMetadata GenerateMetadata(
+            string name,
+            string fontFilePath,
+            int fontIndex,
+            float fontSize,
+            float spacing,
+            int? lineSpacing,
+            float charOffsetX,
+            float charOffsetY,
+            IEnumerable<CharacterRange> charRanges,
+            int? pageWidth = null,
+            int? pageHeight = null)
+        {
+            if ((pageWidth == null && pageHeight != null)
+             || (pageWidth != null && pageHeight == null))
+                throw new ArgumentException($"{nameof(pageWidth)} and {nameof(pageHeight)} must be both null or non-null.");
+
+            int bitmapWidth = pageWidth ?? 512;
+            int bitmapHeight = pageHeight ?? 512;
+
+            var bmfont = new BmFontCS.BmFont();
+            bmfont.GenerateIntoMemory(fontFilePath, out FontFile fontFile, out byte[][] pages, new BmFontSettings
+            {
+                FontSize = (int)Math.Round(fontSize),
+                FontIndex = fontIndex,
+                Chars = charRanges.Select(range => new UnicodeRange { Start = range.Start, End = range.End }).ToArray(),
+                Spacing = new Spacing((int)Math.Round(spacing), 0),
+                TextureSize = new Size(bitmapWidth, bitmapHeight),
+                Name = name
+            });
+
+            // offset
+            foreach (FontChar fontChar in fontFile.Chars)
+            {
+                fontChar.XOffset += (int)Math.Round(charOffsetX);
+                fontChar.YOffset += (int)Math.Round(charOffsetY);
+            }
+
+            return new BmFontMetadata(
+                FontFile: fontFile,
+                Pages: pages.Select(p => new BmFontPageMetadata(p)).ToArray());
+        }
     }
 }

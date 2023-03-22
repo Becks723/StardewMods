@@ -150,4 +150,8 @@ namespace FontSettings.Framework
                 existingFont.Common.LineHeight = (int)overrideLineSpacing.Value;
         }
     }
+
+    internal record BmFontMetadata(FontFile FontFile, BmFontPageMetadata[] Pages);
+
+    internal record BmFontPageMetadata(byte[] Pixels);
 }
