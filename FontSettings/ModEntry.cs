@@ -278,10 +278,22 @@ namespace FontSettings
             var fontFileProvider = new FontFileProvider();
             {
                 var scanSettings = new ScanSettings();
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
 
+                // installation folder for each platform.
+                switch (Constants.TargetPlatform)
+                {
+                    case GamePlatform.Windows:
+                        fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
+                        break;
+                    case GamePlatform.Mac:
+                        fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
+                        break;
+                    case GamePlatform.Linux:
+                        fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
+                        break;
+                }
+
+                // custom folders specified by user.
                 var customFolders = this._config.CustomFontFolders.Distinct().ToArray();
                 foreach (string folder in customFolders)
                 {
