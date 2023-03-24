@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using FontSettings.Framework.DataAccess.Models;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
@@ -55,7 +57,7 @@ namespace FontSettings.Framework
         private readonly float DEFAULT_MaxPixelZoom = 5f;
         private readonly bool DEFAULT_DisableTextShadow = false;
         private readonly KeybindList DEFAULT_OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
-        private readonly string[] DEFAULT_CustomFontFolders = { Constants.GamePath };
+        private readonly string[] DEFAULT_CustomFontFolders = GetDefaultCustomFontFolders().ToArray();
 
         public ModConfig()
         {
@@ -80,6 +82,21 @@ namespace FontSettings.Framework
             this.DisableTextShadow = this.DEFAULT_DisableTextShadow;
             this.OpenFontSettingsMenu = this.DEFAULT_OpenFontSettingsMenu;
             this.CustomFontFolders = new List<string>(this.DEFAULT_CustomFontFolders);
+            foreach (string folder in this.CustomFontFolders)
+                Directory.CreateDirectory(folder);
+        }
+
+        private static IEnumerable<string> GetDefaultCustomFontFolders()
+        {
+            switch (Constants.TargetPlatform)
+            {
+                case GamePlatform.Android:
+                    yield return Path.Combine(Constants.GamePath, "FontSettings", "fonts");
+                    break;
+
+                default:
+                    yield break;
+            }
         }
     }
 }
