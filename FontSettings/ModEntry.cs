@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using BmFont;
@@ -388,22 +389,33 @@ namespace FontSettings
 
         private FontSettingsMenu CreateFontSettingsMenu()
         {
-            var gen = new SampleFontGenerator(this._vanillaFontProvider);
-            IFontGenerator sampleFontGenerator = gen;
-            IAsyncFontGenerator sampleAsyncFontGenerator = gen;
+            Stopwatch stopwatch = new Stopwatch();
+            try
+            {
+                stopwatch.Start();
 
-            return new FontSettingsMenu(
-                config: this._config,
-                vanillaFontProvider: this._vanillaFontProvider,
-                sampleFontGenerator: sampleFontGenerator,
-                sampleAsyncFontGenerator: sampleAsyncFontGenerator,
-                presetManager: this._fontPresetManager,
-                registry: this.Helper.ModRegistry,
-                fontConfigManager: this._fontConfigManager,
-                vanillaFontConfigProvider: this._vanillaFontConfigProvider,
-                fontChangerFactory: this._fontChangerFactory,
-                fontFileProvider: this._fontFileProvider,
-                stagedValues: this._menuContextModel);
+                var gen = new SampleFontGenerator(this._vanillaFontProvider);
+                IFontGenerator sampleFontGenerator = gen;
+                IAsyncFontGenerator sampleAsyncFontGenerator = gen;
+
+                return new FontSettingsMenu(
+                    config: this._config,
+                    vanillaFontProvider: this._vanillaFontProvider,
+                    sampleFontGenerator: sampleFontGenerator,
+                    sampleAsyncFontGenerator: sampleAsyncFontGenerator,
+                    presetManager: this._fontPresetManager,
+                    registry: this.Helper.ModRegistry,
+                    fontConfigManager: this._fontConfigManager,
+                    vanillaFontConfigProvider: this._vanillaFontConfigProvider,
+                    fontChangerFactory: this._fontChangerFactory,
+                    fontFileProvider: this._fontFileProvider,
+                    stagedValues: this._menuContextModel);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                this.Monitor.Log($"{nameof(FontSettingsMenu)} creation completed in '{stopwatch.ElapsedMilliseconds}ms'");
+            }
         }
 
         private bool AssertModFileExists(string relativePath, out string? fullPath) // fullPath = null when returns false
