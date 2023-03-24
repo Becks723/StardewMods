@@ -291,6 +291,9 @@ namespace FontSettings
                     case GamePlatform.Linux:
                         fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
                         break;
+                    case GamePlatform.Android:
+                        fontFileProvider.Scanners.Add(new IntalledFontScannerForAndroid(scanSettings));
+                        break;
                 }
 
                 // custom folders specified by user.
