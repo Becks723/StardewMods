@@ -273,7 +273,7 @@ namespace FontSettings
             }
         }
 
-        private IFontFileProvider CreateInstalledFontFileProvider()
+        private FontFileProvider CreateInstalledFontFileProvider()
         {
             var fontFileProvider = new FontFileProvider();
             {
@@ -281,20 +281,27 @@ namespace FontSettings
                 fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
                 fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
                 fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
+
+                var customFolders = this._config.CustomFontFolders.Distinct().ToArray();
+                foreach (string folder in customFolders)
+                {
+                    if (!Directory.Exists(folder))
+                        this.Monitor.Log($"Skipped invalid custom font folder: {folder}");
+
+                    fontFileProvider.Scanners.Add(new BasicFontFileScanner(folder, scanSettings));
+                }
             }
             return fontFileProvider;
         }
 
         private IFontFileProvider CreateVanillaFontFileProvider()
         {
-            var fontFileProvider = new FontFileProvider();
-            {
-                var scanSettings = new ScanSettings();
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
-                fontFileProvider.Scanners.Add(new BasicFontFileScanner(this.Helper.DirectoryPath, scanSettings));
-            }
+            var fontFileProvider = this.CreateInstalledFontFileProvider();
+
+            var scanSettings = new ScanSettings();
+            string vanillaFontFolder = Path.Combine(this.Helper.DirectoryPath, "assets/fonts");
+            Directory.CreateDirectory(vanillaFontFolder);
+            fontFileProvider.Scanners.Add(new BasicFontFileScanner(vanillaFontFolder, scanSettings));
             return fontFileProvider;
         }
 

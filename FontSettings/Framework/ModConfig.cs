@@ -1,4 +1,5 @@
-﻿using FontSettings.Framework.DataAccess.Models;
+﻿using System.Collections.Generic;
+using FontSettings.Framework.DataAccess.Models;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 
@@ -34,9 +35,11 @@ namespace FontSettings.Framework
 
         public float MaxPixelZoom { get; set; }
 
-        public bool DisableTextShadow { get; set; } = false;
+        public bool DisableTextShadow { get; set; }
 
-        public KeybindList OpenFontSettingsMenu { get; set; } = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
+        public KeybindList OpenFontSettingsMenu { get; set; }
+
+        public IList<string> CustomFontFolders { get; set; }
 
         private readonly int DEFAULT_MinFontSize = 5;
         private readonly int DEFAULT_MaxFontSize = 75;
@@ -50,6 +53,9 @@ namespace FontSettings.Framework
         private readonly int DEFAULT_MaxCharOffsetY = 10;
         private readonly float DEFAULT_MinPixelZoom = 0.5f;
         private readonly float DEFAULT_MaxPixelZoom = 5f;
+        private readonly bool DEFAULT_DisableTextShadow = false;
+        private readonly KeybindList DEFAULT_OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
+        private readonly string[] DEFAULT_CustomFontFolders = { Constants.GamePath };
 
         public ModConfig()
         {
@@ -71,8 +77,9 @@ namespace FontSettings.Framework
             this.MaxCharOffsetY = this.DEFAULT_MaxCharOffsetY;
             this.MinPixelZoom = this.DEFAULT_MinPixelZoom;
             this.MaxPixelZoom = this.DEFAULT_MaxPixelZoom;
-            this.DisableTextShadow = false;
-            this.OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
+            this.DisableTextShadow = this.DEFAULT_DisableTextShadow;
+            this.OpenFontSettingsMenu = this.DEFAULT_OpenFontSettingsMenu;
+            this.CustomFontFolders = new List<string>(this.DEFAULT_CustomFontFolders);
         }
     }
 }
