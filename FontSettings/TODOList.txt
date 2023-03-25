@@ -35,6 +35,9 @@
 		1. 添加更多自定义语言。
 		2. 重写已存在的配置，用于自定义字体。
 	- 扫描字体的过程记录日志
+	- 将第三方dll归入libs目录。
+		目前难点：SMAPI用cecil提前解析依赖，因此无法用AssemblyResolve事件；
+				目前只识别与主dll同一目录的依赖（见AssemblyLoader::GetReferencedLocalAssemblies），可能需要写一份PR。
 
 Dialogue font under latin language:
 Solution:
