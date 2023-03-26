@@ -275,49 +275,56 @@ namespace FontSettings
 
         private FontFileProvider CreateInstalledFontFileProvider()
         {
-            var fontFileProvider = new FontFileProvider();
-            {
-                var scanSettings = new ScanSettings();
-
-                // installation folder for each platform.
-                switch (Constants.TargetPlatform)
-                {
-                    case GamePlatform.Windows:
-                        fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
-                        break;
-                    case GamePlatform.Mac:
-                        fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
-                        break;
-                    case GamePlatform.Linux:
-                        fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
-                        break;
-                    case GamePlatform.Android:
-                        fontFileProvider.Scanners.Add(new IntalledFontScannerForAndroid(scanSettings));
-                        break;
-                }
-
-                // custom folders specified by user.
-                var customFolders = this._config.CustomFontFolders.Distinct().ToArray();
-                foreach (string folder in customFolders)
-                {
-                    if (!Directory.Exists(folder))
-                        this.Monitor.Log($"Skipped invalid custom font folder: {folder}");
-
-                    fontFileProvider.Scanners.Add(new BasicFontFileScanner(folder, scanSettings));
-                }
-            }
-            return fontFileProvider;
+            return new FontFileProviderPerformaceImproved(this.YieldInstalledFontScanners());
         }
 
         private IFontFileProvider CreateVanillaFontFileProvider()
         {
-            var fontFileProvider = this.CreateInstalledFontFileProvider();
+            return new FontFileProviderPerformaceImproved(this.YieldVanillaFontScanners());
+        }
 
+        private IEnumerable<IFontFileScanner> YieldInstalledFontScanners()
+        {
+            var scanSettings = new ScanSettings();
+
+            // installation folder for each platform.
+            switch (Constants.TargetPlatform)
+            {
+                case GamePlatform.Windows:
+                    yield return new InstalledFontScannerForWindows(scanSettings);
+                    break;
+                case GamePlatform.Mac:
+                    yield return new InstalledFontScannerForMacOS(scanSettings);
+                    break;
+                case GamePlatform.Linux:
+                    yield return new InstalledFontScannerForLinux(scanSettings);
+                    break;
+                case GamePlatform.Android:
+                    yield return new IntalledFontScannerForAndroid(scanSettings);
+                    break;
+            }
+
+            // custom folders specified by user.
+            var customFolders = this._config.CustomFontFolders.Distinct().ToArray();
+            foreach (string folder in customFolders)
+            {
+                if (!Directory.Exists(folder))
+                    this.Monitor.Log($"Skipped invalid custom font folder: {folder}");
+
+                yield return new BasicFontFileScanner(folder, scanSettings);
+            }
+        }
+
+        private IEnumerable<IFontFileScanner> YieldVanillaFontScanners()
+        {
+            foreach (var scanner in this.YieldInstalledFontScanners())
+                yield return scanner;
+
+            // mod internal 'assets/fonts' folder.
             var scanSettings = new ScanSettings();
             string vanillaFontFolder = Path.Combine(this.Helper.DirectoryPath, "assets/fonts");
             Directory.CreateDirectory(vanillaFontFolder);
-            fontFileProvider.Scanners.Add(new BasicFontFileScanner(vanillaFontFolder, scanSettings));
-            return fontFileProvider;
+            yield return new BasicFontFileScanner(vanillaFontFolder, scanSettings);
         }
 
         private void OnFontRecordStarted(object sender, RecordEventArgs e)
