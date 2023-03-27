@@ -69,7 +69,7 @@ namespace FontSettings
             ModHelper = this.Helper;
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
-            Textures.Init(helper.ModContent);
+            Textures.Init(this.ModManifest);
             StardewValleyUI.EntryPoint.Main();
 
             this._config = helper.ReadConfig<ModConfig>();
@@ -116,11 +116,6 @@ namespace FontSettings
 
             // init font patching.
             this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), this._invalidatorManager);
-
-            // init title font button.
-            this._titleFontButton = new TitleFontButton(
-                position: this.GetTitleFontButtonPosition(),
-                onClicked: () => this.OpenFontSettingsMenu());
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
@@ -171,6 +166,11 @@ namespace FontSettings
                 monitor: this.Monitor,
                 manifest: this.ModManifest
             ).Integrate();
+
+            // init title font button. (must be after `Textures.OnAssetRequested` subscription)
+            this._titleFontButton = new TitleFontButton(
+                position: this.GetTitleFontButtonPosition(),
+                onClicked: () => this.OpenFontSettingsMenu());
         }
 
         private void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)
@@ -183,6 +183,7 @@ namespace FontSettings
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
+            Textures.OnAssetRequested(e);
             this._mainFontPatcher.OnAssetRequested(e);
         }
 
@@ -193,19 +194,20 @@ namespace FontSettings
 
         private void OnWindowResized(object sender, WindowResizedEventArgs e)
         {
-            this._titleFontButton.Position = this.GetTitleFontButtonPosition();
+            if (this._titleFontButton != null)
+                this._titleFontButton.Position = this.GetTitleFontButtonPosition();
         }
 
         private void OnRendered(object sender, RenderedEventArgs e)
         {
             if (this.IsTitleMenuInteractable())
-                this._titleFontButton.Draw(e.SpriteBatch);
+                this._titleFontButton?.Draw(e.SpriteBatch);
         }
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             if (this.IsTitleMenuInteractable())
-                this._titleFontButton.Update();
+                this._titleFontButton?.Update();
         }
 
         private void SaveConfig(ModConfig config)
