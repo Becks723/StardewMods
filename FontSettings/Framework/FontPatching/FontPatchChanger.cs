@@ -7,74 +7,34 @@ using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework.FontPatching
 {
-    internal class FontPatchChanger : IGameFontChanger, IAsyncGameFontChanger
+    internal class FontPatchChanger : IAsyncGameFontChanger
     {
-        private readonly IFontPatchResolver _resolver;
-        private readonly IFontPatchInvalidator _invalidator;
-        private readonly GameFontType _fontType;
+        private readonly MainFontPatcher _mainFontPatcher;
 
-        public FontPatchChanger(IFontPatchResolver resolver, IFontPatchInvalidator invalidator, GameFontType fontType)
+        public FontPatchChanger(MainFontPatcher mainFontPatcher)
         {
-            this._resolver = resolver;
-            this._invalidator = invalidator;
-            this._fontType = fontType;
+            this._mainFontPatcher = mainFontPatcher;
         }
 
-        public IGameFontChangeResult ChangeGameFont(FontConfig font)
+        public async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font, LanguageInfo language, GameFontType fontType)
         {
-            Exception? exception;
+            var context = new FontPatchContext(language, fontType);
 
-            var result = this._resolver.Resolve(font, this.GetCurrentContext());
-            if (result.IsSuccess)
-            {
-                exception = null;
-
-                IFontPatch patch = result.GetData();
-                this._invalidator.Patch = patch;
-
-                this._invalidator.InvalidateAndPropagate();
-                // TODO: 这里怎么才能知道有没有改成功呢？
-                // 1) InvalidateAndPropagate的返回值改成bool？
-            }
-            else
-            {
-                exception = result.GetError();
-            }
+            Exception? exception = await this._mainFontPatcher.PendPatchAsync(font, context);
 
             if (exception == null)
-                return this.SuccessResult();
-            else
-                return this.ErrorResult(exception, this.GetErrorMessageRecursively);
-        }
-
-        public async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font)
-        {
-            Exception? exception;
-
-            var result = await this._resolver.ResolveAsync(font, this.GetCurrentContext());
-            if (result.IsSuccess)
             {
-                exception = null;
-
-                IFontPatch patch = result.GetData();
-                this._invalidator.Patch = patch;
-
-                this._invalidator.InvalidateAndPropagate();
+                this._mainFontPatcher.InvalidateGameFont(context);
                 // TODO: 这里怎么才能知道有没有改成功呢？
                 // 1) InvalidateAndPropagate的返回值改成bool？
+
+                return this.SuccessResult();
             }
             else
             {
-                exception = result.GetError();
-            }
-
-            if (exception == null)
-                return this.SuccessResult();
-            else
                 return this.ErrorResult(exception, this.GetErrorMessageRecursively);
+            }
         }
-
-        private FontPatchContext GetCurrentContext() => new FontPatchContext(FontHelpers.GetCurrentLanguage(), this._fontType);
 
         private string GetErrorMessageRecursively(Exception exception)
         {

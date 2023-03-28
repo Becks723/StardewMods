@@ -35,11 +35,10 @@ namespace FontSettings.Framework.Menus.ViewModels
         private readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
         private readonly IFontConfigManager _fontConfigManager;
         private readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
-        private readonly IGameFontChangerFactory _fontChangerFactory;
+        private readonly IAsyncGameFontChanger _gameFontChanger;
         private readonly IFontFileProvider _fontFileProvider;
         private readonly IFontPresetManager _presetManager;
 
-        private IAsyncGameFontChanger _gameFontChanger;
 
         #region CurrentFontType Property
 
@@ -531,7 +530,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         public ICommand RefreshFontsCommand { get; }
 
         public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
         {
             _instance = this;
             this._config = config;
@@ -540,7 +539,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._sampleAsyncFontGenerator = sampleAsyncFontGenerator;
             this._fontConfigManager = fontConfigManager;
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
-            this._fontChangerFactory = fontChangerFactory;
+            this._gameFontChanger = gameFontChanger;
             this._fontFileProvider = fontFileProvider;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
@@ -673,7 +672,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             // update with current settings.
             this.CurrentFontConfig = this.CreateConfigBasedOnCurrentSettings();
 
-            return await this._gameFontChanger.ChangeGameFontAsync(this.CurrentFontConfig).ContinueWith(task =>
+            return await this._gameFontChanger.ChangeGameFontAsync(this.CurrentFontConfig, lastLanguage, this.CurrentFontType).ContinueWith(task =>
             {
                 // 外面的this 和 ContinueWith中的this 不一定是同一个实例。
                 // 如：用户关闭了菜单，那么this为null；用户关闭又打开了菜单，那么this为另一个实例。
@@ -820,9 +819,6 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 更新预览图。
             this.UpdateExampleVanilla();
             this.UpdateExampleCurrent();
-
-            // 更新其他。
-            this._gameFontChanger = this._fontChangerFactory.CreateAsyncChanger(newFontType);
         }
 
         private void OnPresetChanged(object sender, EventArgs e)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,14 +20,18 @@ namespace FontSettings.Framework.FontPatching.Invalidators
             this._contentHelper = modHelper.GameContent;
         }
 
-        protected override void InvalidateCore()
+        protected override void InvalidateCore(FontPatchContext context)
         {
+            Debug.Assert(context.FontType == GameFontType.SpriteText);
+
+            var language = context.Language;
+
             // invalidate.
             {
                 // font file
-                string fontFileName = FontHelpers.GetFontFileAssetName();
+                string fontFileName = FontHelpers.GetFontFileAssetName(language);
                 this._contentHelper.InvalidateCache(fontFileName);
-                this._contentHelper.InvalidateCache(this.LocalizeBaseAssetName(fontFileName));
+                this._contentHelper.InvalidateCache(FontHelpers.LocalizeAssetName(fontFileName, language));
 
                 // pages
                 var fontFile = SpriteTextFields.FontFile;
@@ -35,14 +40,14 @@ namespace FontSettings.Framework.FontPatching.Invalidators
                     string pageName = $"Fonts/{page.File}";
 
                     this._contentHelper.InvalidateCache(pageName);
-                    this._contentHelper.InvalidateCache(this.LocalizeBaseAssetName(pageName));
+                    this._contentHelper.InvalidateCache(FontHelpers.LocalizeAssetName(pageName, language));
                 }
             }
 
             // propagate
             {
                 // fontFile
-                FontFile fontFile = this.LoadFontFile(FontHelpers.GetFontFileAssetName());
+                FontFile fontFile = this.LoadFontFile(FontHelpers.GetFontFileAssetName(language));
 
                 // characterMap
                 var characterMap = new Dictionary<char, FontChar>();

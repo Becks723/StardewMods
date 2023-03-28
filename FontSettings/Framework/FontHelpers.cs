@@ -192,6 +192,19 @@ namespace FontSettings.Framework
                 modLanguage: LocalizedContentManager.CurrentModLanguage);
         }
 
+        public static string GetFontFileAssetName(LanguageInfo language)
+        {
+            var modLanguages = GetModLanguages();
+
+            ModLanguage? modLanguage = !IsModLanguage(language)
+                ? null
+                : modLanguages
+                    .Where(lang => lang.LanguageCode == language.Locale)
+                    .FirstOrDefault();
+
+            return GetFontFileAssetName(language.Code, modLanguage);
+        }
+
         public static string GetFontFileAssetName(LocalizedContentManager.LanguageCode code, ModLanguage? modLanguage = null)
         {
             return code switch
@@ -204,6 +217,11 @@ namespace FontSettings.Framework
                 LocalizedContentManager.LanguageCode.mod when !modLanguage.UseLatinFont => modLanguage.FontFile,
                 _ => null
             };
+        }
+
+        private static ModLanguage[] GetModLanguages()
+        {
+            return Game1.content.Load<List<ModLanguage>>("Data/AdditionalLanguages").ToArray();
         }
 
         public static XmlSource ParseFontFile(FontFile fontFile)

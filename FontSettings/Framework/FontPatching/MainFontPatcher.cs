@@ -7,6 +7,7 @@ using BmFont;
 using FontSettings.Framework.FontPatching.Editors;
 using FontSettings.Framework.FontPatching.Loaders;
 using FontSettings.Framework.FontPatching.Replacers;
+using FontSettings.Framework.Models;
 using StardewModdingAPI.Events;
 using StardewValley;
 
@@ -16,18 +17,20 @@ namespace FontSettings.Framework.FontPatching
     {
         private readonly FontConfigManager _fontConfigManager;
         private readonly FontPatchResolverFactory _resolverFactory;
-        private readonly FontPatchInvalidatorManager _invalidatorManager;
+        private readonly IFontPatchInvalidator _invalidator;
 
         private bool _bypassFontPatch;
+
+        private readonly IDictionary<FontPatchContext, IFontPatch?> _pendingPatchSlots = new Dictionary<FontPatchContext, IFontPatch?>();
 
         public event EventHandler<FontPixelZoomOverrideEventArgs> FontPixelZoomOverride;
 
         public MainFontPatcher(FontConfigManager fontConfigManager, FontPatchResolverFactory resolverFactory,
-            FontPatchInvalidatorManager invalidatorManager)
+            IFontPatchInvalidator invalidator)
         {
             this._fontConfigManager = fontConfigManager;
             this._resolverFactory = resolverFactory;
-            this._invalidatorManager = invalidatorManager;
+            this._invalidator = invalidator;
         }
 
         public void OnAssetRequested(AssetRequestedEventArgs e)
@@ -66,6 +69,48 @@ namespace FontSettings.Framework.FontPatching
             this._bypassFontPatch = false;
         }
 
+        public async Task<Exception?> PendPatchAsync(FontPatchContext context)
+        {
+            var language = context.Language;
+            var fontType = context.FontType;
+            if (this._fontConfigManager.TryGetFontConfig(language, fontType, out var config))
+            {
+                return await this.PendPatchAsync(config, context);
+            }
+
+            return new KeyNotFoundException();  // not found saved config. 
+        }
+
+        public async Task<Exception?> PendPatchAsync(FontConfig fontConfig, FontPatchContext context)
+        {
+            var resolver = this.GetResolver(context.FontType);
+            var result = await resolver.ResolveAsync(fontConfig, context);
+            if (result.IsSuccess)
+            {
+                this.UpdatePendingPatch(context, result.GetData());
+                return null;
+            }
+            else
+            {
+                return result.GetError();
+            }
+        }
+
+        /// <summary>Sync one, not thread safe.</summary>
+        public void InvalidateGameFont(FontPatchContext context)
+        {
+            this._invalidator.InvalidateAndPropagate(context);
+        }
+
+        /// <summary>Thread safe.</summary>
+        public void UpdatePendingPatch(FontPatchContext context, IFontPatch patch)
+        {
+            lock (this._pendingPatchSlots)
+            {
+                this._pendingPatchSlots[context] = patch;
+            }
+        }
+
         private void PatchCommonFont(AssetRequestedEventArgs e, GameFontType fontType)
         {
             var patch = this.ResolvePatch(fontType);
@@ -77,20 +122,28 @@ namespace FontSettings.Framework.FontPatching
 
         private IFontPatch? ResolvePatch(GameFontType fontType)
         {
-            var invalidator = this._invalidatorManager.GetInvalidator(fontType);
+            var language = FontHelpers.GetCurrentLanguage();
+            var context = new FontPatchContext(language, fontType);
 
             // patch data is prepared in advance.
-            if (invalidator.IsInProgress && invalidator.Patch != null)
+            lock (this._pendingPatchSlots)
             {
-                return invalidator.Patch;
+                try
+                {
+                    if (this._pendingPatchSlots.TryGetValue(context, out IFontPatch? patch))
+                        return patch;
+                }
+                finally
+                {
+                    this._pendingPatchSlots[context] = null;
+                }
             }
 
             // we need resolve manually.
-            if (this._fontConfigManager.TryGetFontConfig(FontHelpers.GetCurrentLanguage(), fontType, out var config))
+            if (this._fontConfigManager.TryGetFontConfig(language, fontType, out var config))
             {
                 var resolver = this.GetResolver(fontType);
-                var result = resolver.Resolve(config,
-                    new FontPatchContext(FontHelpers.GetCurrentLanguage(), fontType));
+                var result = resolver.Resolve(config, context);
                 if (result.IsSuccess)
                 {
                     return result.GetData();
@@ -198,9 +251,9 @@ namespace FontSettings.Framework.FontPatching
                 var newFontFile = FontLoader.Parse(xml.Source);
 
                 // update for invalidator.
-                var spriteTextInvalidator = this._invalidatorManager.GetInvalidator(GameFontType.SpriteText) as ISpriteTextPatchInvalidator;
-                if (spriteTextInvalidator != null)
-                    spriteTextInvalidator.UpdateFontFile(newFontFile);
+                //var spriteTextInvalidator = this._invalidator.GetInvalidator(GameFontType.SpriteText) as ISpriteTextPatchInvalidator;
+                //if (spriteTextInvalidator != null)
+                //    spriteTextInvalidator.UpdateFontFile(newFontFile);
             }
         }
 

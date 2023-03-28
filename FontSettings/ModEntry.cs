@@ -10,6 +10,7 @@ using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.DataAccess.Parsing;
 using FontSettings.Framework.FontGenerators;
 using FontSettings.Framework.FontPatching;
+using FontSettings.Framework.FontPatching.Invalidators;
 using FontSettings.Framework.FontScanning;
 using FontSettings.Framework.FontScanning.Scanners;
 using FontSettings.Framework.Menus;
@@ -49,8 +50,6 @@ namespace FontSettings
         private VanillaFontConfigProvider _vanillaFontConfigProvider;
         private IFontFileProvider _fontFileProvider;
         private Framework.Preset.FontPresetManager _fontPresetManager;
-        private IGameFontChangerFactory _fontChangerFactory;
-        private FontPatchInvalidatorManager _invalidatorManager;
 
         private readonly FontSettingsMenuContextModel _menuContextModel = new();
 
@@ -107,15 +106,14 @@ namespace FontSettings
 
             this._fontConfigManager = new FontConfigManager();
             this._fontPresetManager = new Framework.Preset.FontPresetManager();
-            this._invalidatorManager = new FontPatchInvalidatorManager(helper);
-            this._fontChangerFactory = new FontPatchChangerFactory(new FontPatchResolverFactory(), this._invalidatorManager);
 
             // connect manager and repository.
             this._fontConfigManager.ConfigUpdated += this.OnFontConfigUpdated;
             this._fontPresetManager.PresetUpdated += this.OnFontPresetUpdated;
 
             // init font patching.
-            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), this._invalidatorManager);
+            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), new FontPatchInvalidatorComposition(helper));
+            this._vanillaFontProvider.SetInvalidateHelper(this._mainFontPatcher);
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
@@ -438,7 +436,7 @@ namespace FontSettings
                     registry: this.Helper.ModRegistry,
                     fontConfigManager: this._fontConfigManager,
                     vanillaFontConfigProvider: this._vanillaFontConfigProvider,
-                    fontChangerFactory: this._fontChangerFactory,
+                    gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
                     fontFileProvider: this._fontFileProvider,
                     stagedValues: this._menuContextModel);
             }

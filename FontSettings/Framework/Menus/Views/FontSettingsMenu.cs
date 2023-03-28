@@ -39,7 +39,7 @@ namespace FontSettings.Framework.Menus.Views
         private NewPresetMenu _newPresetMenu;
 
         public FontSettingsMenu(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IModRegistry registry,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
         {
             this._presetManager = presetManager;
             this._registry = registry;
@@ -61,7 +61,7 @@ namespace FontSettings.Framework.Menus.Views
                 presetManager: presetManager,
                 fontConfigManager: fontConfigManager,
                 vanillaFontConfigProvider: vanillaFontConfigProvider,
-                fontChangerFactory: fontChangerFactory,
+                gameFontChanger: gameFontChanger,
                 fontFileProvider: fontFileProvider,
                 stagedValues: stagedValues);
             this.DataContext = this._viewModel;

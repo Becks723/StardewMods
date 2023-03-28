@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using BmFont;
+using FontSettings.Framework.FontPatching;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -135,30 +136,58 @@ namespace FontSettings.Framework
 
                 this.RaiseRecordFinished(language, fontType);
 
-                this._invalidateContextList.Add(new(language, fontType, fontType == GameFontType.SpriteText
-                        ? e.NameWithoutLocale.BaseName
-                        : null));
+                _ = this.PendPatch(new FontPatchContext(language, fontType));
             }
         }
 
-        private readonly IList<InvalidateContext> _invalidateContextList = new List<InvalidateContext>();
+        private readonly ISet<InvalidateContext> _invalidateContextList = new HashSet<InvalidateContext>();
         public void OnUpdateTicking(UpdateTickingEventArgs e)
         {
-            try
+            lock (this._invalidateContextList)
             {
-                foreach (var context in this._invalidateContextList)
+                try
                 {
-                    if (context != null)
-                        this.InvalidateTargetFont(context.Language, context.FontType, context.FontFile);
+                    foreach (var context in this._invalidateContextList)
+                    {
+                        if (context != null)
+                            this._mainFontPatcher.InvalidateGameFont(new FontPatchContext(context.Language, context.FontType));
+                    }
                 }
-            }
-            finally
-            {
-                this._invalidateContextList.Clear();
+                finally
+                {
+                    this._invalidateContextList.Clear();
+                }
             }
         }
 
-        private record InvalidateContext(LanguageInfo Language, GameFontType FontType, string? FontFile = null);
+        private async Task PendPatch(FontPatchContext context)
+        {
+            Exception? exception = await this._mainFontPatcher.PendPatchAsync(context);
+            if (exception == null)
+            {
+                lock (this._invalidateContextList)
+                {
+                    this._invalidateContextList.Add(
+                        new InvalidateContext(context.Language, context.FontType));
+                    this._monitor.Log($"To invalidate count: {this._invalidateContextList.Count}");
+                }
+            }
+            else
+            {
+                if (exception is not KeyNotFoundException)
+                {
+                    // TODO
+                }
+            }
+        }
+
+        private MainFontPatcher _mainFontPatcher;
+        public void SetInvalidateHelper(MainFontPatcher mainFontPatcher)
+        {
+            this._mainFontPatcher = mainFontPatcher;
+        }
+
+        private record InvalidateContext(LanguageInfo Language, GameFontType FontType);
 
         public bool HasRecorded(LanguageInfo language, GameFontType fontType)
         {
@@ -310,78 +339,6 @@ namespace FontSettings.Framework
             }
 
             return false;
-        }
-
-        private void InvalidateTargetFont(LanguageInfo language, GameFontType fontType, string? fontFile = null)
-        {
-            switch (fontType)
-            {
-                case GameFontType.SmallFont:
-                    this._helper.GameContent.InvalidateCache(
-                        FontHelpers.LocalizeAssetName("Fonts/SmallFont", language));
-                    break;
-
-                case GameFontType.DialogueFont:
-                    this._helper.GameContent.InvalidateCache(
-                        FontHelpers.LocalizeAssetName("Fonts/SpriteFont1", language));
-                    break;
-
-                case GameFontType.SpriteText:
-                    if (fontFile != null)
-                        this.InvalidateBmFontFile(language, fontFile);
-                    break;
-            }
-        }
-
-        private void InvalidateBmFontFile(LanguageInfo language, string fontFileName)
-        {
-            FontFile fontFile = this.LoadFontFile(fontFileName);
-
-            this._helper.GameContent.InvalidateCache(fontFileName);
-            this._helper.GameContent.InvalidateCache(
-                FontHelpers.LocalizeAssetName(fontFileName, language));
-
-            if (fontFile != null)
-            {
-                foreach (FontPage page in fontFile.Pages)
-                {
-                    string pageName = $"Fonts/{page.File}";
-
-                    this._helper.GameContent.InvalidateCache(pageName);
-                    this._helper.GameContent.InvalidateCache(
-                        FontHelpers.LocalizeAssetName(pageName, language));
-                }
-            }
-
-            // propagate
-            {
-                // fontFile
-                fontFile = this.LoadFontFile(fontFileName);
-
-                // characterMap
-                var characterMap = new Dictionary<char, FontChar>();
-                foreach (FontChar current in fontFile.Chars)
-                {
-                    char key = (char)current.ID;
-                    characterMap.Add(key, current);
-                }
-
-                // fontPages
-                var fontPages = new List<Texture2D>();
-                foreach (FontPage current2 in fontFile.Pages)
-                {
-                    fontPages.Add(Game1.content.Load<Texture2D>("Fonts\\" + current2.File));
-                }
-
-                SpriteTextFields.FontFile = fontFile;
-                SpriteTextFields._characterMap = characterMap;
-                SpriteTextFields.fontPages = fontPages;
-            }
-        }
-
-        private FontFile LoadFontFile(string fontFile)
-        {
-            return FontLoader.Parse(Game1.content.Load<XmlSource>(fontFile).Source);
         }
     }
 
