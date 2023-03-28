@@ -56,7 +56,6 @@ namespace FontSettings.Framework.FontPatching
 
         public void OnAssetReady(AssetReadyEventArgs e)
         {
-            this.UpdateFontFile(e);
         }
 
         public void PauseFontPatch()
@@ -240,21 +239,6 @@ namespace FontSettings.Framework.FontPatching
                 e.Edit(asset => asset.ReplaceWith(replacer.Replacement), priority);
             else
                 e.Edit(asset => editor.Edit(asset.Data), priority);
-        }
-
-        private void UpdateFontFile(AssetReadyEventArgs e)
-        {
-            string fontFileName = FontHelpers.GetFontFileAssetName();
-            if (e.NameWithoutLocale.IsEquivalentTo(fontFileName))
-            {
-                XmlSource xml = Game1.content.Load<XmlSource>(fontFileName);
-                var newFontFile = FontLoader.Parse(xml.Source);
-
-                // update for invalidator.
-                //var spriteTextInvalidator = this._invalidator.GetInvalidator(GameFontType.SpriteText) as ISpriteTextPatchInvalidator;
-                //if (spriteTextInvalidator != null)
-                //    spriteTextInvalidator.UpdateFontFile(newFontFile);
-            }
         }
 
         private IFontPatchResolver GetResolver(GameFontType fontType)

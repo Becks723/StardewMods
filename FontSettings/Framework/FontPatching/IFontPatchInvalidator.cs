@@ -10,9 +10,4 @@ namespace FontSettings.Framework.FontPatching
     {
         void InvalidateAndPropagate(FontPatchContext context);
     }
-
-    internal interface ISpriteTextPatchInvalidator : IFontPatchInvalidator
-    {
-        void UpdateFontFile(BmFont.FontFile fontFile);
-    }
 }

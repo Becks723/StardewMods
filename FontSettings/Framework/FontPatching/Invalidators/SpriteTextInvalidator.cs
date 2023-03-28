@@ -11,7 +11,7 @@ using StardewValley;
 
 namespace FontSettings.Framework.FontPatching.Invalidators
 {
-    internal class SpriteTextInvalidator : BaseFontPatchInvalidator, ISpriteTextPatchInvalidator
+    internal class SpriteTextInvalidator : BaseFontPatchInvalidator
     {
         private readonly IGameContentHelper _contentHelper;
 
@@ -73,11 +73,6 @@ namespace FontSettings.Framework.FontPatching.Invalidators
         private FontFile LoadFontFile(string assetName)
         {
             return FontLoader.Parse(Game1.content.Load<XmlSource>(assetName).Source);
-        }
-
-        void ISpriteTextPatchInvalidator.UpdateFontFile(FontFile fontFile)
-        {
-
         }
     }
 }
