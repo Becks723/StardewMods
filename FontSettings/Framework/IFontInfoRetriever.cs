@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.Models;
 
-namespace FontSettings.Framework.FontInfo
+namespace FontSettings.Framework
 {
     internal interface IFontInfoRetriever
     {

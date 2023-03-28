@@ -12,7 +12,5 @@ namespace FontSettings.Framework
         IEnumerable<string> FontFiles { get; }
 
         void RescanForFontFiles();
-
-        IResult<FontModel[]> GetFontData(string fontFile);
     }
 }

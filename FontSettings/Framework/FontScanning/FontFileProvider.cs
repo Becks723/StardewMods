@@ -48,11 +48,5 @@ namespace FontSettings.Framework.FontScanning
                 .SelectMany(scanner => scanner.ScanForFontFiles())
                 .Distinct();
         }
-
-        private readonly IFontInfoRetriever _fontSource = new FontInfoRetriever();
-        public IResult<FontModel[]> GetFontData(string fontFile)
-        {
-            return this._fontSource.GetFontInfo(fontFile);
-        }
     }
 }

@@ -37,6 +37,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         private readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
         private readonly IAsyncGameFontChanger _gameFontChanger;
         private readonly IFontFileProvider _fontFileProvider;
+        private readonly IFontInfoRetriever _fontInfoRetriever;
         private readonly IFontPresetManager _presetManager;
 
 
@@ -530,7 +531,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         public ICommand RefreshFontsCommand { get; }
 
         public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
         {
             _instance = this;
             this._config = config;
@@ -541,6 +542,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
             this._gameFontChanger = gameFontChanger;
             this._fontFileProvider = fontFileProvider;
+            this._fontInfoRetriever = fontInfoRetriever;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
 
@@ -929,7 +931,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             var fonts = this._fontFileProvider.FontFiles
                 .SelectMany(file =>
                     {
-                        var result = this._fontFileProvider.GetFontData(file);
+                        var result = this._fontInfoRetriever.GetFontInfo(file);
                         if (result.IsSuccess)
                             return result.GetData();
                         else

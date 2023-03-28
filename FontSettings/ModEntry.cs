@@ -9,6 +9,7 @@ using FontSettings.Framework.DataAccess;
 using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.DataAccess.Parsing;
 using FontSettings.Framework.FontGenerators;
+using FontSettings.Framework.FontInfo;
 using FontSettings.Framework.FontPatching;
 using FontSettings.Framework.FontPatching.Invalidators;
 using FontSettings.Framework.FontScanning;
@@ -438,6 +439,7 @@ namespace FontSettings
                     vanillaFontConfigProvider: this._vanillaFontConfigProvider,
                     gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
                     fontFileProvider: this._fontFileProvider,
+                    fontInfoRetriever: new FontInfoRetriever(),
                     stagedValues: this._menuContextModel);
             }
             finally

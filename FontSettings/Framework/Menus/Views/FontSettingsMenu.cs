@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontSettings.Framework.FontInfo;
 using FontSettings.Framework.Menus.ViewModels;
 using FontSettings.Framework.Menus.Views.Components;
 using FontSettings.Framework.Models;
@@ -39,7 +40,7 @@ namespace FontSettings.Framework.Menus.Views
         private NewPresetMenu _newPresetMenu;
 
         public FontSettingsMenu(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IModRegistry registry,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
         {
             this._presetManager = presetManager;
             this._registry = registry;
@@ -63,6 +64,7 @@ namespace FontSettings.Framework.Menus.Views
                 vanillaFontConfigProvider: vanillaFontConfigProvider,
                 gameFontChanger: gameFontChanger,
                 fontFileProvider: fontFileProvider,
+                fontInfoRetriever: fontInfoRetriever,
                 stagedValues: stagedValues);
             this.DataContext = this._viewModel;
             this._viewModel.PropertyChanged += this.OnPropertyChanged;
