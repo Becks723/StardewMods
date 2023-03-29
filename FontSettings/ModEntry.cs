@@ -15,6 +15,7 @@ using FontSettings.Framework.FontPatching.Invalidators;
 using FontSettings.Framework.FontScanning;
 using FontSettings.Framework.FontScanning.Scanners;
 using FontSettings.Framework.Menus;
+using FontSettings.Framework.Menus.ViewModels;
 using FontSettings.Framework.Menus.Views;
 using FontSettings.Framework.Migrations;
 using FontSettings.Framework.Models;
@@ -428,19 +429,20 @@ namespace FontSettings
                 IFontGenerator sampleFontGenerator = gen;
                 IAsyncFontGenerator sampleAsyncFontGenerator = gen;
 
-                return new FontSettingsMenu(
+                FontSettingsMenuModel viewModel = new FontSettingsMenuModel(
                     config: this._config,
                     vanillaFontProvider: this._vanillaFontProvider,
                     sampleFontGenerator: sampleFontGenerator,
                     sampleAsyncFontGenerator: sampleAsyncFontGenerator,
                     presetManager: this._fontPresetManager,
-                    registry: this.Helper.ModRegistry,
                     fontConfigManager: this._fontConfigManager,
                     vanillaFontConfigProvider: this._vanillaFontConfigProvider,
                     gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
                     fontFileProvider: this._fontFileProvider,
                     fontInfoRetriever: new FontInfoRetriever(),
                     stagedValues: this._menuContextModel);
+
+                return new FontSettingsMenu(this._fontPresetManager, this.Helper.ModRegistry, viewModel);
             }
             finally
             {
