@@ -11,7 +11,7 @@ using FontSettings.Framework.Models;
 
 namespace FontSettings.Framework.FontInfo
 {
-    internal class FontInfoRetriever : IFontInfoRetriever
+    internal class FontInfoRetriever : IFontInfoRetriever, IAsyncFontInfoRetriever
     {
         public IResult<FontModel[]> GetFontInfo(string fontFile)
         {
@@ -34,6 +34,11 @@ namespace FontSettings.Framework.FontInfo
             {
                 return ErrorResult(ex);
             }
+        }
+
+        public async Task<IResult<FontModel[]>> GetFontInfoAsync(string fontFile)
+        {
+            return await Task.Run(() => this.GetFontInfo(fontFile));
         }
 
         private FontModel[] LoadSingleFont(string fontFile)
