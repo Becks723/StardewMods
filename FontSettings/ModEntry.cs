@@ -429,18 +429,36 @@ namespace FontSettings
                 IFontGenerator sampleFontGenerator = gen;
                 IAsyncFontGenerator sampleAsyncFontGenerator = gen;
 
-                FontSettingsMenuModel viewModel = new FontSettingsMenuModel(
-                    config: this._config,
-                    vanillaFontProvider: this._vanillaFontProvider,
-                    sampleFontGenerator: sampleFontGenerator,
-                    sampleAsyncFontGenerator: sampleAsyncFontGenerator,
-                    presetManager: this._fontPresetManager,
-                    fontConfigManager: this._fontConfigManager,
-                    vanillaFontConfigProvider: this._vanillaFontConfigProvider,
-                    gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
-                    fontFileProvider: this._fontFileProvider,
-                    fontInfoRetriever: new FontInfoRetriever(),
-                    stagedValues: this._menuContextModel);
+                FontSettingsMenuModel viewModel;
+                {
+                    bool async = true;
+                    if (async)
+                        viewModel = new FontSettingsMenuModelAsync(
+                            config: this._config,
+                            vanillaFontProvider: this._vanillaFontProvider,
+                            sampleFontGenerator: sampleFontGenerator,
+                            sampleAsyncFontGenerator: sampleAsyncFontGenerator,
+                            presetManager: this._fontPresetManager,
+                            fontConfigManager: this._fontConfigManager,
+                            vanillaFontConfigProvider: this._vanillaFontConfigProvider,
+                            gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
+                            fontFileProvider: this._fontFileProvider,
+                            asyncFontInfoRetriever: new FontInfoRetriever(),
+                            stagedValues: this._menuContextModel);
+                    else
+                        viewModel = new FontSettingsMenuModel(
+                            config: this._config,
+                            vanillaFontProvider: this._vanillaFontProvider,
+                            sampleFontGenerator: sampleFontGenerator,
+                            sampleAsyncFontGenerator: sampleAsyncFontGenerator,
+                            presetManager: this._fontPresetManager,
+                            fontConfigManager: this._fontConfigManager,
+                            vanillaFontConfigProvider: this._vanillaFontConfigProvider,
+                            gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
+                            fontFileProvider: this._fontFileProvider,
+                            fontInfoRetriever: new FontInfoRetriever(),
+                            stagedValues: this._menuContextModel);
+                }
 
                 return new FontSettingsMenu(this._fontPresetManager, this.Helper.ModRegistry, viewModel);
             }

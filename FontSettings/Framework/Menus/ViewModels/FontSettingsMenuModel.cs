@@ -27,18 +27,18 @@ namespace FontSettings.Framework.Menus.ViewModels
             { GameFontType.SpriteText, false }
         };
 
-        private readonly FontSettingsMenuContextModel _stagedValues;
-        private readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
-        private readonly ModConfig _config;
-        private readonly IVanillaFontProvider _vanillaFontProvider;
-        private readonly IFontGenerator _sampleFontGenerator;
-        private readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
-        private readonly IFontConfigManager _fontConfigManager;
-        private readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
-        private readonly IAsyncGameFontChanger _gameFontChanger;
-        private readonly IFontFileProvider _fontFileProvider;
-        private readonly IFontInfoRetriever _fontInfoRetriever;
-        private readonly IFontPresetManager _presetManager;
+        protected readonly FontSettingsMenuContextModel _stagedValues;
+        protected readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
+        protected readonly ModConfig _config;
+        protected readonly IVanillaFontProvider _vanillaFontProvider;
+        protected readonly IFontGenerator _sampleFontGenerator;
+        protected readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
+        protected readonly IFontConfigManager _fontConfigManager;
+        protected readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
+        protected readonly IAsyncGameFontChanger _gameFontChanger;
+        protected readonly IFontFileProvider _fontFileProvider;
+        protected readonly IFontInfoRetriever _fontInfoRetriever;
+        protected readonly IFontPresetManager _presetManager;
 
 
         #region CurrentFontType Property
@@ -159,7 +159,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
-        private FontConfig CurrentFontConfig { get; set; }
+        protected FontConfig CurrentFontConfig { get; set; }
 
         #region FontEnabled Property
 
@@ -282,7 +282,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #region AllFonts Property
 
-        private ObservableCollection<FontViewModel> _allFonts;
+        private ObservableCollection<FontViewModel> _allFonts = new();
 
         public ObservableCollection<FontViewModel> AllFonts
         {
@@ -528,7 +528,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public ICommand DeleteCurrentPresetCommand { get; }
 
-        public ICommand RefreshFontsCommand { get; }
+        public ICommand RefreshFontsCommand { get; protected init; }
 
         public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
@@ -568,7 +568,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             if (LocalizedContentManager.CurrentLanguageLatin && this.CurrentFontType == GameFontType.SpriteText)
                 this.CurrentFontType = GameFontType.SmallFont;
 
-            this.AllFonts = new ObservableCollection<FontViewModel>(this.LoadAllFonts());
+            this.InitAllFonts();
             this.OnFontTypeChanged(this.CurrentFontType);
 
             this.MinCharOffsetX = this._config.MinCharOffsetX;
@@ -950,7 +950,12 @@ namespace FontSettings.Framework.Menus.ViewModels
                 yield return font;
         }
 
-        private FontViewModel FindFont(string fontFilePath, int fontIndex) // 这里path是fullpath
+        protected virtual void InitAllFonts()
+        {
+            this.AllFonts = new ObservableCollection<FontViewModel>(this.LoadAllFonts());
+        }
+
+        protected virtual FontViewModel FindFont(string fontFilePath, int fontIndex) // 这里path是fullpath
         {
             // 如果找不到字体文件，保持原版。
 
