@@ -96,7 +96,7 @@ namespace FontSettings.Framework.Menus.Views
         {
             Game1.playSound("coin");
 
-            var (result, fontType) = await this._viewModel.ChangeFont();
+            var (result, fontType) = await this._viewModel.ChangeFontAsync();
             if (result.IsSuccessful)
             {
                 Game1.playSound("money");

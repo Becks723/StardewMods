@@ -677,7 +677,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.UpdateExampleCurrent();
         }
 
-        public async Task<FontChangeResult> ChangeFont()
+        public async Task<FontChangeResult> ChangeFontAsync()
         {
             var lastLanguage = FontHelpers.GetCurrentLanguage();  // TODO: make current language not depend on context.
             var last = this;
