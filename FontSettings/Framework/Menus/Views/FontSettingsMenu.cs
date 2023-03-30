@@ -339,6 +339,7 @@ namespace FontSettings.Framework.Menus.Views
                                             refreshButton.Margin = new Thickness(optionSpacing, 0, 0, 0);
                                             refreshButton.ToolTip = I18n.Ui_MainMenu_RefreshFonts();
                                             context.OneWayBinds(() => this._viewModel.RefreshFontsCommand, () => refreshButton.Command);
+                                            context.OneWayBinds(() => this._viewModel.IsRefreshingFonts, () => refreshButton.GreyedOut);
 
                                             fontOption.Children.Add(fontComboBox);
                                             fontOption.Children.Add(refreshButton);

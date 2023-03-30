@@ -29,7 +29,14 @@ namespace FontSettings.Framework.Menus.ViewModels
         {
             this._asyncFontInfoRetriever = asyncFontInfoRetriever;
 
-            this.RefreshFontsCommand = new AsyncDelegateCommand(this.RefreshAllFontsAsync);
+            void LogAsyncException(string commandName, Exception ex)  // commandName: must end with "Command"
+            {
+                int length = commandName.Length - "Command".Length;
+                string name = commandName.Substring(0, length);
+
+                ILog.Error($"Error when {name}: {ex.Message}\n{ex.StackTrace}");
+            }
+            this.RefreshFontsCommand = new AsyncDelegateCommand(this.RefreshAllFontsAsync, this.CanRefreshAllFonts, ex => LogAsyncException(nameof(this.RefreshFontsCommand), ex));
 
             _ = this.UpdateAllFontsAsync(rescan: false);
         }
@@ -39,10 +46,26 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private async Task RefreshAllFontsAsync()
         {
+            try
+            {
+                this.IsRefreshingFonts = true;
+
 #if DEBUG
-            await Task.Delay(2000);  // 延迟2秒，调试更明显
+                await Task.Delay(2000);  // 延迟2秒，调试更明显
+
+                // throw new Exception("Test exception for 'async void'");  // 异常处理测试，确保不能崩游戏。
 #endif
-            await this.UpdateAllFontsAsync(rescan: true);
+                await this.UpdateAllFontsAsync(rescan: true);
+            }
+            finally
+            {
+                this.IsRefreshingFonts = false;
+            }
+        }
+
+        private bool CanRefreshAllFonts()
+        {
+            return !this.IsRefreshingFonts;
         }
 
         private async Task<IEnumerable<FontViewModel>> LoadInstalledFontsAsync(bool rescan = false)  // rescan: 是否重新扫描本地字体。

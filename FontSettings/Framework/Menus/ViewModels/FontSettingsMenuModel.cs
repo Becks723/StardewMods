@@ -280,6 +280,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public bool CanGenerateFont => !this.IsGeneratingFont /*&& !this.HasErrors*/;
 
+        #region IsRefreshingFonts Property
+
+        private bool _isRefreshingFonts;
+
+        public bool IsRefreshingFonts
+        {
+            get => this._isRefreshingFonts;
+            set => this.SetField(ref this._isRefreshingFonts, value);
+        }
+
+        #endregion
+
         #region AllFonts Property
 
         private ObservableCollection<FontViewModel> _allFonts = new();
