@@ -48,7 +48,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         {
             try
             {
-                this.IsRefreshingFonts = true;
+                _asyncIndicator.IsRefreshingFonts = true;
 
 #if DEBUG
                 await Task.Delay(2000);  // 延迟2秒，调试更明显
@@ -59,7 +59,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
             finally
             {
-                this.IsRefreshingFonts = false;
+                _asyncIndicator.IsRefreshingFonts = false;
             }
         }
 

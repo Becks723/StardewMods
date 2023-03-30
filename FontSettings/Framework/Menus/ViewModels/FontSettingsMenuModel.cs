@@ -18,14 +18,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 {
     internal class FontSettingsMenuModel : MenuModelBase, INotifyDataErrorInfo
     {
-        private static FontSettingsMenuModel _instance;
-
-        private static readonly Dictionary<GameFontType, bool> _isGeneratingFont = new()
-        {
-            { GameFontType.SmallFont, false },
-            { GameFontType.DialogueFont, false },
-            { GameFontType.SpriteText, false }
-        };
+        protected static readonly AsyncIndicator _asyncIndicator = new();
 
         protected readonly FontSettingsMenuContextModel _stagedValues;
         protected readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
@@ -276,7 +269,20 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
-        public bool IsGeneratingFont => _isGeneratingFont[this.CurrentFontType];
+        #region IsGeneratingFont Property
+
+        private bool _isGeneratingFont;
+        public bool IsGeneratingFont
+        {
+            get => this._isGeneratingFont;
+            set
+            {
+                this.SetField(ref this._isGeneratingFont, value);
+                this.RaisePropertyChanged(nameof(this.CanGenerateFont));
+            }
+        }
+
+        #endregion
 
         public bool CanGenerateFont => !this.IsGeneratingFont /*&& !this.HasErrors*/;
 
@@ -526,6 +532,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
+        private LanguageInfo Language { get; }
+
         public ICommand MoveToPrevFontCommand { get; }
 
         public ICommand MoveToNextFontCommand { get; }
@@ -545,7 +553,10 @@ namespace FontSettings.Framework.Menus.ViewModels
         public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
         {
-            _instance = this;
+            // 订阅异步完成事件。
+            _asyncIndicator.IsGeneratingFontChanged += (_, fontType) => this.IsGeneratingFont = _asyncIndicator.IsGeneratingFont(fontType);
+            _asyncIndicator.IsRefreshingFontsChanged += (_, _) => this.IsRefreshingFonts = _asyncIndicator.IsRefreshingFonts;
+
             this._config = config;
             this._vanillaFontProvider = vanillaFontProvider;
             this._sampleFontGenerator = sampleFontGenerator;
@@ -576,6 +587,10 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.ShowExampleText = this._stagedValues.ShowText;
             this.IsTuningCharOffset = this._stagedValues.OffsetTuning;
 
+            // 填入异步布尔值。
+            this.IsGeneratingFont = _asyncIndicator.IsGeneratingFont(this.CurrentFontType);
+            this.IsRefreshingFonts = _asyncIndicator.IsRefreshingFonts;
+
             // 部分语言不支持SpriteText，重置当前字体类型。
             if (LocalizedContentManager.CurrentLanguageLatin && this.CurrentFontType == GameFontType.SpriteText)
                 this.CurrentFontType = GameFontType.SmallFont;
@@ -595,6 +610,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.MaxLineSpacing = this._config.MaxLineSpacing;
             this.MinPixelZoom = this._config.MinPixelZoom;
             this.MaxPixelZoom = this._config.MaxPixelZoom;
+            this.Language = FontHelpers.GetCurrentLanguage();
 
             // 初始化命令。
             this.MoveToPrevFontCommand = new DelegateCommand(this.PreviousFontType);
@@ -677,37 +693,34 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.UpdateExampleCurrent();
         }
 
-        public async Task<FontChangeResult> ChangeFontAsync()
+        public virtual async Task<FontChangeResult> ChangeFontAsync()
         {
-            var lastLanguage = FontHelpers.GetCurrentLanguage();  // TODO: make current language not depend on context.
-            var last = this;
-            this.UpdateIsGeneratingFont(this.CurrentFontType, true);
-
             // update with current settings.
             this.CurrentFontConfig = this.CreateConfigBasedOnCurrentSettings();
 
-            return await this._gameFontChanger.ChangeGameFontAsync(this.CurrentFontConfig, lastLanguage, this.CurrentFontType).ContinueWith(task =>
+            var fontType = this.CurrentFontType;  // 可能在异步完成后变化，需要存一下。
+            var fontConfig = this.CurrentFontConfig;  // 可能在异步完成后变化，需要存一下。
+
+            try
             {
-                // 外面的this 和 ContinueWith中的this 不一定是同一个实例。
-                // 如：用户关闭了菜单，那么this为null；用户关闭又打开了菜单，那么this为另一个实例。
-                // 在这里需要保证不为null，因此使用静态的_instance字段代替this。
-                var instance = _instance;
-                try
-                {
-                    var result = task.Result;
+                _asyncIndicator.UpdateIsGeneratingFont(this.CurrentFontType, true);
 
-                    // 如果成功，更新配置值。
-                    if (result.IsSuccessful)
-                        last._fontConfigManager.UpdateFontConfig(
-                            lastLanguage, last.CurrentFontType, last.CurrentFontConfig);
+                var result = await this._gameFontChanger.ChangeGameFontAsync(
+                    font: this.CurrentFontConfig,
+                    language: this.Language,
+                    fontType: this.CurrentFontType);
 
-                    return new FontChangeResult(result, last.CurrentFontType);
-                }
-                finally
-                {
-                    instance.UpdateIsGeneratingFont(last.CurrentFontType, false);
-                }
-            });
+                // 如果成功，更新配置值。
+                if (result.IsSuccessful)
+                    this._fontConfigManager.UpdateFontConfig(
+                        this.Language, fontType, fontConfig);
+
+                return new FontChangeResult(result, fontType);
+            }
+            finally
+            {
+                _asyncIndicator.UpdateIsGeneratingFont(fontType, false);
+            }
         }
 
         internal record FontChangeResult(IGameFontChangeResult InnerResult, GameFontType FontType);
@@ -1030,14 +1043,6 @@ namespace FontSettings.Framework.Menus.ViewModels
             return this._presetViewModels[fontType];
         }
 
-        private void UpdateIsGeneratingFont(GameFontType fontType, bool isGeneratingFont)
-        {
-            _isGeneratingFont[fontType] = isGeneratingFont;
-
-            this.RaisePropertyChanged(nameof(this.IsGeneratingFont));
-            this.RaisePropertyChanged(nameof(this.CanGenerateFont));
-        }
-
         private void RegisterCallbackToStageValues()
         {
             PropertyChanged += (s, e) =>
@@ -1143,6 +1148,56 @@ namespace FontSettings.Framework.Menus.ViewModels
             var cast2 = errors2?.Cast<object>() ?? Array.Empty<object>();
 
             return cast1.Count() == cast2.Count() && !cast1.Except(cast2).Any() && !cast2.Except(cast1).Any();
+        }
+
+        protected class AsyncIndicator
+        {
+            private readonly Dictionary<GameFontType, bool> _isGeneratingFont = new()
+            {
+                { GameFontType.SmallFont, false },
+                { GameFontType.DialogueFont, false },
+                { GameFontType.SpriteText, false }
+            };
+
+            public event EventHandler IsRefreshingFontsChanged;
+            public event EventHandler<GameFontType> IsGeneratingFontChanged;
+
+            #region IsRefreshingFonts Property
+
+            private bool _isRefreshingFonts;
+            public bool IsRefreshingFonts
+            {
+                get => this._isRefreshingFonts;
+                set
+                {
+                    if (this._isRefreshingFonts != value)
+                    {
+                        this._isRefreshingFonts = value;
+                        IsRefreshingFontsChanged?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            }
+
+            #endregion
+
+            public bool IsGeneratingFont(GameFontType fontType)
+            {
+                lock (this._isGeneratingFont)
+                    return this._isGeneratingFont[fontType];
+            }
+
+            public void UpdateIsGeneratingFont(GameFontType fontType, bool value)
+            {
+                lock (this._isGeneratingFont)
+                {
+                    bool lastValue = this._isGeneratingFont[fontType];
+                    if (lastValue != value)
+                    {
+                        this._isGeneratingFont[fontType] = value;
+                        IsGeneratingFontChanged?.Invoke(this, fontType);
+                    }
+                }
+            }
         }
     }
 }
