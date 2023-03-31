@@ -89,10 +89,29 @@ namespace FontSettings.Framework.Menus.Views
 
         private async void UpdateExampleCurrent(object sender, EventArgs e)
         {
-            await this._viewModel.UpdateExampleCurrentAsync();
+            try
+            {
+                await this._viewModel.UpdateExampleCurrentAsync();
+            }
+            catch (Exception ex)
+            {
+                this.LogException("Update sample", ex);
+            }
         }
 
         private async void OkButtonClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                await this.OkButtonClickedAsync();
+            }
+            catch (Exception ex)
+            {
+                this.LogException("Generate font", ex);
+            }
+        }
+
+        private async Task OkButtonClickedAsync()
         {
             Game1.playSound("coin");
 
@@ -121,6 +140,11 @@ namespace FontSettings.Framework.Menus.Views
                 string error = result.GetErrorMessage();
                 ILog.Error(error);
             }
+        }
+
+        private void LogException(string name, Exception exception)
+        {
+            ILog.Error($"Error when {name}: {exception.Message}\n{exception.StackTrace}");
         }
 
         protected override void ResetComponents(MenuInitializationContext context)
