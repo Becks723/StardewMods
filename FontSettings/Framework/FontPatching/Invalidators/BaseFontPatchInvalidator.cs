@@ -8,9 +8,12 @@ namespace FontSettings.Framework.FontPatching.Invalidators
 {
     internal abstract class BaseFontPatchInvalidator : IFontPatchInvalidator
     {
+        private static readonly object _lock = new();
+
         public void InvalidateAndPropagate(FontPatchContext context)
         {
-            this.InvalidateCore(context);
+            lock (_lock)
+                this.InvalidateCore(context);
         }
 
         protected abstract void InvalidateCore(FontPatchContext context);

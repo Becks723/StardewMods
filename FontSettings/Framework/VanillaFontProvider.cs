@@ -141,23 +141,34 @@ namespace FontSettings.Framework
         }
 
         private readonly ISet<InvalidateContext> _invalidateContextList = new HashSet<InvalidateContext>();
-        public void OnUpdateTicking(UpdateTickingEventArgs e)
+        public async void OnUpdateTicking(UpdateTickingEventArgs e)
         {
+            try
+            {
+                await this.InvalidatePendings();
+            }
+            catch (Exception ex)
+            {
+                this._monitor.Log($"Error when invalidating fonts: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        private async Task InvalidatePendings()
+        {
+            InvalidateContext[] invalidateContexts;
             lock (this._invalidateContextList)
             {
-                try
-                {
-                    foreach (var context in this._invalidateContextList)
-                    {
-                        if (context != null)
-                            this._mainFontPatcher.InvalidateGameFont(new FontPatchContext(context.Language, context.FontType));
-                    }
-                }
-                finally
-                {
-                    this._invalidateContextList.Clear();
-                }
+                invalidateContexts = this._invalidateContextList.ToArray();
+                this._invalidateContextList.Clear();
             }
+
+            if (invalidateContexts.Length == 0)
+                return;
+            IEnumerable<Task> invalidateTasks = invalidateContexts
+                    .Select(context =>
+                        this._mainFontPatcher.InvalidateGameFontAsync(new FontPatchContext(context.Language, context.FontType))
+                    );
+            await Task.WhenAll(invalidateTasks);
         }
 
         private async Task PendPatch(FontPatchContext context)

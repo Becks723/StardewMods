@@ -101,6 +101,11 @@ namespace FontSettings.Framework.FontPatching
             this._invalidator.InvalidateAndPropagate(context);
         }
 
+        public async Task InvalidateGameFontAsync(FontPatchContext context)
+        {
+            await Task.Run(() => this._invalidator.InvalidateAndPropagate(context));  // here assumes `_invalidator.InvalidateAndPropagate` thread safe
+        }
+
         /// <summary>Thread safe.</summary>
         public void UpdatePendingPatch(FontPatchContext context, IFontPatch patch)
         {
