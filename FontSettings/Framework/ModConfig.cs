@@ -58,6 +58,7 @@ namespace FontSettings.Framework
         private readonly float DEFAULT_MinPixelZoom = 0.5f;
         private readonly float DEFAULT_MaxPixelZoom = 5f;
         private readonly bool DEFAULT_DisableTextShadow = false;
+        private readonly bool DEFAULT_SimplifiedDropDown = true;
         private readonly KeybindList DEFAULT_OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
         private readonly string[] DEFAULT_CustomFontFolders = GetDefaultCustomFontFolders().ToArray();
 
@@ -82,6 +83,7 @@ namespace FontSettings.Framework
             this.MinPixelZoom = this.DEFAULT_MinPixelZoom;
             this.MaxPixelZoom = this.DEFAULT_MaxPixelZoom;
             this.DisableTextShadow = this.DEFAULT_DisableTextShadow;
+            this.SimplifiedDropDown = this.DEFAULT_SimplifiedDropDown;
             this.OpenFontSettingsMenu = this.DEFAULT_OpenFontSettingsMenu;
             this.CustomFontFolders = new List<string>(this.DEFAULT_CustomFontFolders);
             foreach (string folder in this.CustomFontFolders)
