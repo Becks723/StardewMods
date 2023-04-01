@@ -8,7 +8,7 @@
   "hud-message.failed-set-font": "{{fontType}}设置失败，详见SMAPI窗口。",
 
   "ui.main-menu.title": "字体设置",
-  "ui.main-menu.font-type-help.paragraph": "星露谷物语的字体大致分为三类：小字体、中字体、对话字体。\n点击左右箭头切换当前设置的字体类型。\n根据喜好，你可以全部设置，也可以只设置其中的几个。",
+  "ui.main-menu.font-type-help.paragraph": "星露谷物语的字体大致分为三类：\n- 小字体\n- 中字体\n- 对话字体\n点击左右箭头切换当前设置的字体类型。\n根据喜好，你可以全部设置，也可以只设置其中的几个。",
   "ui.main-menu.section.general": "常规",
   "ui.main-menu.enable": "启用字体",
   "ui.main-menu.font": "字体",

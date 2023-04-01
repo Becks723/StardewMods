@@ -831,9 +831,11 @@ namespace FontSettings.Framework.Menus.Views
             var lang = FontHelpers.GetCurrentLanguage();
             if (FontHelpers.IsLatinLanguage(lang))
             {
+                string locale = lang.Locale != string.Empty ? lang.Locale : "en";
+
                 sb.AppendLine();
                 sb.AppendLine()
-                    .Append(I18n.Ui_MainMenu_FontTypeHelp_LatinLang_Paragraph(lang.Locale));
+                    .Append(I18n.Ui_MainMenu_FontTypeHelp_LatinLang_Paragraph(locale));
             }
 
             return sb.ToString();
