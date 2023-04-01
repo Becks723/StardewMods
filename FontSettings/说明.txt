@@ -51,8 +51,7 @@
     - MaxPixelZoom			    缩放比例 最大值。（默认5）
     - DisableTextShadow         是否禁用字体阴影（默认false）
     - OpenFontSettingsMenu      打开字体菜单的按键（默认LeftAlt + F）
-    - FontSettingsInGameMenu    先前版本的遗留选项，无视即可。
-
+    - SimplifiedDropDown        在大量数据下，减少下拉框卡顿，代价是选中时不再显示高亮（默认true）
 
 兼容性：
     兼容Smapi 3.14.0及以上，Windows、MacOS、Linux系统，
@@ -73,6 +72,14 @@
 
 
 更新日志：
+【测试版】0.8.0 - 2023-04-02
+    - 一些性能上的优化：
+        - 打开菜单变快
+        - 减少卡界面的情况
+        - 添加一个选项用于优化下拉框。配置菜单中叫“减少下拉框卡顿”，config.json中叫"SimplifiedDropDown"。详见“配置”段。
+    - 正式移除嵌入主菜单中的设置界面。
+    - Bug修复。
+
 【测试版】0.7.3 - 2023-03-01
 	- 优化对话字体：修复字符显示不全，切割感。
 	- 修复点不了ok键的问题。

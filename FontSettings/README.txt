@@ -47,7 +47,6 @@ Usage:
 		For those languages only contains latin characters, 
 		they just use game's default font as Dialogue Font, which is hardcoded in a spritesheet, 
 		so you might not set Dialogue Font for now.
-		If you have a solution, let me know!
 
 
 Configure:
@@ -68,7 +67,7 @@ Configure:
     - MaxCharOffsetY			Max value of the y-offset option, default 10.
 	- MinPixelZoom			    Min value of the pixel zoom option, default 0.5.
     - MaxPixelZoom			    Max value of the pixel zoom option, default 5.
-    - FontSettingsInGameMenu    Legacy option, don't touch it.
+    - SimplifiedDropDown        Set true if UI drop down options cause glitches, low-performance, default true.
 
 
 FAQ:
@@ -95,6 +94,14 @@ Help & Feedback:
 
 
 Release Notes:
+0.8.0 - 2023-04-02
+	- Some performance ups.
+		- Speed up menu opening.
+		- Reduce game not resposing times.
+		- Optimized UI drop down options. See "SimplifiedDropDown" option in 'Configure' section.
+	- Finally remove font settings menu from main game menu.
+	- Bugfixes.
+
 0.7.3 - 2023-03-01
 	- Fix dialogue font's characters incomplete/clipped render.
 	- Fix in some case cannot click ok button.
