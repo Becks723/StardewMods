@@ -71,6 +71,8 @@
   "config.min-pixel-zoom.description": "字符的缩放比例 最小值（仅对话字体）",
   "config.disable-text-shadow": "禁用字体阴影",
   "config.disable-text-shadow.description": "禁用字体阴影。",
+  "config.simplified-drop-down": "减少下拉框卡顿",
+  "config.simplified-drop-down.description": "在大量数据下，减少下拉框卡顿，代价是选中时不再显示高亮。",
   "config.font-menu-key": "字体菜单",
   "config.font-menu-key.description": "绑定打开字体菜单的按键。",
   "config.font-settings-in-game-menu": "在游戏内置菜单中设置字体",

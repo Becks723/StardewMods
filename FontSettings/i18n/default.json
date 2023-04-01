@@ -73,6 +73,8 @@
   "config.min-pixel-zoom.description": "Min pixel zoom for each character. (only dialogue font)",
   "config.disable-text-shadow": "Disable text shadow",
   "config.disable-text-shadow.description": "Whether to hide font shadow.",
+  "config.simplified-drop-down": "Simplified Drop down Option",
+  "config.simplified-drop-down.description": "If drop down options in UI are glitchy, low-performance, check it.",
   "config.font-menu-key": "Open Font Menu",
   "config.font-menu-key.description": "Key-binding to open a font settings menu.",
   "config.font-settings-in-game-menu": "Font Page in Game Menu",

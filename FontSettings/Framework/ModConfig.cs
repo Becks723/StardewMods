@@ -39,6 +39,8 @@ namespace FontSettings.Framework
 
         public bool DisableTextShadow { get; set; }
 
+        public bool SimplifiedDropDown { get; set; }
+
         public KeybindList OpenFontSettingsMenu { get; set; }
 
         public IList<string> CustomFontFolders { get; set; }

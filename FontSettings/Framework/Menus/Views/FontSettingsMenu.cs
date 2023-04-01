@@ -27,6 +27,7 @@ namespace FontSettings.Framework.Menus.Views
     {
         private readonly IFontPresetManager _presetManager;
         private readonly IModRegistry _registry;
+        private readonly bool _simplifiedComboBox;
         private readonly FontSettingsMenuModel _viewModel;
 
         private readonly Texture2D _save;
@@ -39,10 +40,11 @@ namespace FontSettings.Framework.Menus.Views
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
-        public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, FontSettingsMenuModel viewModel)
+        public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, bool simplifiedComboBox, FontSettingsMenuModel viewModel)
         {
             this._presetManager = presetManager;
             this._registry = registry;
+            this._simplifiedComboBox = simplifiedComboBox;
 
             this._save = Textures.Save;
             this._delete = Textures.Delete;
@@ -349,7 +351,7 @@ namespace FontSettings.Framework.Menus.Views
                                         fontOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                         gStack.Children.Add(fontOption);
                                         {
-                                            var fontComboBox = new ComboBox();
+                                            var fontComboBox = new TempComboBox(this._simplifiedComboBox);
                                             fontComboBox.SuggestedWidth = 400;
                                             fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
                                             context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);

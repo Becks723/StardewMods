@@ -460,7 +460,7 @@ namespace FontSettings
                             stagedValues: this._menuContextModel);
                 }
 
-                return new FontSettingsMenu(this._fontPresetManager, this.Helper.ModRegistry, viewModel);
+                return new FontSettingsMenu(this._fontPresetManager, this.Helper.ModRegistry, this._config.SimplifiedDropDown, viewModel);
             }
             finally
             {
