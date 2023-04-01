@@ -74,7 +74,7 @@ namespace FontSettings
             StardewValleyUI.EntryPoint.Main();
 
             this._config = helper.ReadConfig<ModConfig>();
-            this.CheckConfigValid(this._config);
+            this._config.ValidateValues(this.Monitor);
 
             // init vanilla font provider.
             this._vanillaFontProvider = new VanillaFontProvider(helper, this.Monitor);
@@ -222,57 +222,6 @@ namespace FontSettings
 
             // 保存
             this.Helper.WriteConfig(this._config);
-        }
-
-        private void CheckConfigValid(ModConfig config)
-        {
-            string WarnMessage<T>(string name, T max, T min) => $"{name}：最大值（{max}）小于最小值（{min}）。已重置。";
-
-            // x offset
-            if (config.MaxCharOffsetX < config.MinCharOffsetX)
-            {
-                ILog.Warn(WarnMessage("横轴偏移量", config.MaxCharOffsetX, config.MinCharOffsetX));
-                config.MaxCharOffsetX = 10;
-                config.MinCharOffsetX = -10;
-            }
-
-            // y offset
-            if (config.MaxCharOffsetY < config.MinCharOffsetY)
-            {
-                ILog.Warn(WarnMessage("纵轴偏移量", config.MaxCharOffsetY, config.MinCharOffsetY));
-                config.MaxCharOffsetY = 10;
-                config.MinCharOffsetY = -10;
-            }
-
-            // font size
-            if (config.MaxFontSize < config.MinFontSize)
-            {
-                ILog.Warn(WarnMessage("字体大小", config.MaxFontSize, config.MinFontSize));
-                config.MaxFontSize = 100;
-            }
-
-            // spacing
-            if (config.MaxSpacing < config.MinSpacing)
-            {
-                ILog.Warn(WarnMessage("字间距", config.MaxSpacing, config.MinSpacing));
-                config.MaxSpacing = 10;
-                config.MinSpacing = -10;
-            }
-
-            // line spacing
-            if (config.MaxLineSpacing < config.MinLineSpacing)
-            {
-                ILog.Warn(WarnMessage("行间距", config.MaxLineSpacing, config.MinLineSpacing));
-                config.MaxLineSpacing = 100;
-            }
-
-            // pixel zoom
-            if (config.MaxPixelZoom < config.MinPixelZoom)
-            {
-                ILog.Warn(WarnMessage("缩放比例", config.MaxPixelZoom, config.MinPixelZoom));
-                config.MaxPixelZoom = 5f;
-                config.MinPixelZoom = 0.1f;
-            }
         }
 
         private FontFileProvider CreateInstalledFontFileProvider()

@@ -88,6 +88,60 @@ namespace FontSettings.Framework
                 Directory.CreateDirectory(folder);
         }
 
+        public void ValidateValues(IMonitor? monitor)
+        {
+            string WarnMessage<T>(string name, T max, T min) => $"{name}：最大值（{max}）小于最小值（{min}）。已重置。";
+            void WarnLog<T>(string name, T max, T min) => monitor?.Log(WarnMessage(name, max, min), LogLevel.Warn);
+
+            // x offset
+            if (this.MaxCharOffsetX < this.MinCharOffsetX)
+            {
+                WarnLog("横轴偏移量", this.MaxCharOffsetX, this.MinCharOffsetX);
+                this.MaxCharOffsetX = this.DEFAULT_MaxCharOffsetX;
+                this.MinCharOffsetX = this.DEFAULT_MinCharOffsetX;
+            }
+
+            // y offset
+            if (this.MaxCharOffsetY < this.MinCharOffsetY)
+            {
+                ILog.Warn(WarnMessage("纵轴偏移量", this.MaxCharOffsetY, this.MinCharOffsetY));
+                this.MaxCharOffsetY = this.DEFAULT_MaxCharOffsetY;
+                this.MinCharOffsetY = this.DEFAULT_MinCharOffsetY;
+            }
+
+            // font size
+            if (this.MaxFontSize < this.MinFontSize)
+            {
+                ILog.Warn(WarnMessage("字体大小", this.MaxFontSize, this.MinFontSize));
+                this.MaxFontSize = this.DEFAULT_MaxFontSize;
+                this.MinFontSize = this.DEFAULT_MinFontSize;
+            }
+
+            // spacing
+            if (this.MaxSpacing < this.MinSpacing)
+            {
+                ILog.Warn(WarnMessage("字间距", this.MaxSpacing, this.MinSpacing));
+                this.MaxSpacing = this.DEFAULT_MaxSpacing;
+                this.MinSpacing = this.DEFAULT_MinSpacing;
+            }
+
+            // line spacing
+            if (this.MaxLineSpacing < this.MinLineSpacing)
+            {
+                ILog.Warn(WarnMessage("行间距", this.MaxLineSpacing, this.MinLineSpacing));
+                this.MaxLineSpacing = this.DEFAULT_MaxLineSpacing;
+                this.MinLineSpacing = this.DEFAULT_MinLineSpacing;
+            }
+
+            // pixel zoom
+            if (this.MaxPixelZoom < this.MinPixelZoom)
+            {
+                ILog.Warn(WarnMessage("缩放比例", this.MaxPixelZoom, this.MinPixelZoom));
+                this.MaxPixelZoom = this.DEFAULT_MaxPixelZoom;
+                this.MinPixelZoom = this.DEFAULT_MinPixelZoom;
+            }
+        }
+
         private static IEnumerable<string> GetDefaultCustomFontFolders()
         {
             switch (Constants.TargetPlatform)
