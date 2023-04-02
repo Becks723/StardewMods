@@ -354,6 +354,7 @@ namespace FontSettings.Framework.Menus.Views
                                             var fontComboBox = new TempComboBox(this._simplifiedComboBox);
                                             fontComboBox.SuggestedWidth = 400;
                                             fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
+                                            fontComboBox.ItemComparer = new FontViewModelComparer();
                                             context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
                                             context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
                                             fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
