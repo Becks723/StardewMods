@@ -94,6 +94,10 @@ Help & Feedback:
 
 
 Release Notes:
+0.8.1 - 2023-04-02
+	- Fix error when select font after refreshing fonts.
+	- Fix font not reload until ok is pressed second time.
+
 0.8.0 - 2023-04-02
 	- Some performance ups.
 		- Speed up menu opening.
