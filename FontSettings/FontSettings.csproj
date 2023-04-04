@@ -40,7 +40,10 @@
 
 	<!--ignored files-->
 	<ItemGroup>
-
+		<Compile Remove="Framework\Patchers\GameMenuResizeHandler.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="Framework\Patchers\GameMenuResizeHandler.cs" />
 	</ItemGroup>
 
 </Project>
