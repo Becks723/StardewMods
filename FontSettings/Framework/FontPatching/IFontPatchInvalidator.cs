@@ -8,6 +8,6 @@ namespace FontSettings.Framework.FontPatching
 {
     internal interface IFontPatchInvalidator
     {
-        void InvalidateAndPropagate(FontPatchContext context);
+        void InvalidateAndPropagate(FontContext context);
     }
 }

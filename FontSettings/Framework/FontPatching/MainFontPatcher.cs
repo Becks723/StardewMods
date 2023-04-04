@@ -21,7 +21,7 @@ namespace FontSettings.Framework.FontPatching
 
         private bool _bypassFontPatch;
 
-        private readonly IDictionary<FontPatchContext, IFontPatch?> _pendingPatchSlots = new Dictionary<FontPatchContext, IFontPatch?>();
+        private readonly IDictionary<FontContext, IFontPatch?> _pendingPatchSlots = new Dictionary<FontContext, IFontPatch?>();
 
         public event EventHandler<FontPixelZoomOverrideEventArgs> FontPixelZoomOverride;
 
@@ -68,7 +68,7 @@ namespace FontSettings.Framework.FontPatching
             this._bypassFontPatch = false;
         }
 
-        public async Task<Exception?> PendPatchAsync(FontPatchContext context)
+        public async Task<Exception?> PendPatchAsync(FontContext context)
         {
             var language = context.Language;
             var fontType = context.FontType;
@@ -80,7 +80,7 @@ namespace FontSettings.Framework.FontPatching
             return new KeyNotFoundException();  // not found saved config. 
         }
 
-        public async Task<Exception?> PendPatchAsync(FontConfig fontConfig, FontPatchContext context)
+        public async Task<Exception?> PendPatchAsync(FontConfig fontConfig, FontContext context)
         {
             var resolver = this.GetResolver(context.FontType);
             var result = await resolver.ResolveAsync(fontConfig, context);
@@ -96,18 +96,18 @@ namespace FontSettings.Framework.FontPatching
         }
 
         /// <summary>Sync one, not thread safe.</summary>
-        public void InvalidateGameFont(FontPatchContext context)
+        public void InvalidateGameFont(FontContext context)
         {
             this._invalidator.InvalidateAndPropagate(context);
         }
 
-        public async Task InvalidateGameFontAsync(FontPatchContext context)
+        public async Task InvalidateGameFontAsync(FontContext context)
         {
             await Task.Run(() => this._invalidator.InvalidateAndPropagate(context));  // here assumes `_invalidator.InvalidateAndPropagate` thread safe
         }
 
         /// <summary>Thread safe.</summary>
-        public void UpdatePendingPatch(FontPatchContext context, IFontPatch patch)
+        public void UpdatePendingPatch(FontContext context, IFontPatch patch)
         {
             lock (this._pendingPatchSlots)
             {
@@ -127,7 +127,7 @@ namespace FontSettings.Framework.FontPatching
         private IFontPatch? ResolvePatch(GameFontType fontType)
         {
             var language = FontHelpers.GetCurrentLanguage();
-            var context = new FontPatchContext(language, fontType);
+            var context = new FontContext(language, fontType);
 
             // patch data is prepared in advance.
             lock (this._pendingPatchSlots)

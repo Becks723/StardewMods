@@ -10,13 +10,13 @@ namespace FontSettings.Framework.FontPatching.Invalidators
     {
         private static readonly object _lock = new();
 
-        public void InvalidateAndPropagate(FontPatchContext context)
+        public void InvalidateAndPropagate(FontContext context)
         {
             lock (_lock)
                 this.InvalidateCore(context);
         }
 
-        protected abstract void InvalidateCore(FontPatchContext context);
+        protected abstract void InvalidateCore(FontContext context);
 
         protected string LocalizeBaseAssetName(string baseName)
         {

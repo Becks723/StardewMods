@@ -12,7 +12,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
     internal class BmFontPatchResolver : BaseFontPatchResolver
     {
         // must return IBmFontPatch.
-        public override IResult<IFontPatch, Exception> Resolve(FontConfig config, FontPatchContext context)
+        public override IResult<IFontPatch, Exception> Resolve(FontConfig config, FontContext context)
         {
             try
             {

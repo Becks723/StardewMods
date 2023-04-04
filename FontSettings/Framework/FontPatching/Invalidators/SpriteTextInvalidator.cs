@@ -20,7 +20,7 @@ namespace FontSettings.Framework.FontPatching.Invalidators
             this._contentHelper = modHelper.GameContent;
         }
 
-        protected override void InvalidateCore(FontPatchContext context)
+        protected override void InvalidateCore(FontContext context)
         {
             Debug.Assert(context.FontType == GameFontType.SpriteText);
 

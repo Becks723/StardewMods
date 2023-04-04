@@ -16,7 +16,7 @@ namespace FontSettings.Framework.FontPatching.Invalidators
             this._helper = helper;
         }
 
-        public void InvalidateAndPropagate(FontPatchContext context)
+        public void InvalidateAndPropagate(FontContext context)
         {
             IFontPatchInvalidator invalidator = context.FontType switch
             {

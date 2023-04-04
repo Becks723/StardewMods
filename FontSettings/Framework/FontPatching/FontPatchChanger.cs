@@ -18,7 +18,7 @@ namespace FontSettings.Framework.FontPatching
 
         public async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font, LanguageInfo language, GameFontType fontType)
         {
-            var context = new FontPatchContext(language, fontType);
+            var context = new FontContext(language, fontType);
 
             Exception? exception = await this._mainFontPatcher.PendPatchAsync(font, context);
 

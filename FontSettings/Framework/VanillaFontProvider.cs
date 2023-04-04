@@ -136,7 +136,7 @@ namespace FontSettings.Framework
 
                 this.RaiseRecordFinished(language, fontType);
 
-                _ = this.PendPatch(new FontPatchContext(language, fontType));
+                _ = this.PendPatch(new FontContext(language, fontType));
             }
         }
 
@@ -166,12 +166,12 @@ namespace FontSettings.Framework
                 return;
             IEnumerable<Task> invalidateTasks = invalidateContexts
                     .Select(context =>
-                        this._mainFontPatcher.InvalidateGameFontAsync(new FontPatchContext(context.Language, context.FontType))
+                        this._mainFontPatcher.InvalidateGameFontAsync(new FontContext(context.Language, context.FontType))
                     );
             await Task.WhenAll(invalidateTasks);
         }
 
-        private async Task PendPatch(FontPatchContext context)
+        private async Task PendPatch(FontContext context)
         {
             Exception? exception = await this._mainFontPatcher.PendPatchAsync(context);
             if (exception == null)
