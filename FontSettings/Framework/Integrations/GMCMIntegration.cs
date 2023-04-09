@@ -2,7 +2,7 @@
 using CodeShared.Integrations.GenericModConfigMenu;
 using StardewModdingAPI;
 
-namespace FontSettings.Framework
+namespace FontSettings.Framework.Integrations
 {
     internal class GMCMIntegration : GenericModConfigMenuIntegrationBase
     {

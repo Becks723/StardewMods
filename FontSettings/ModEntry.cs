@@ -14,6 +14,7 @@ using FontSettings.Framework.FontPatching;
 using FontSettings.Framework.FontPatching.Invalidators;
 using FontSettings.Framework.FontScanning;
 using FontSettings.Framework.FontScanning.Scanners;
+using FontSettings.Framework.Integrations;
 using FontSettings.Framework.Menus;
 using FontSettings.Framework.Menus.ViewModels;
 using FontSettings.Framework.Menus.Views;
@@ -164,9 +165,16 @@ namespace FontSettings
                 save: () => this.SaveConfig(this._config),
                 modRegistry: this.Helper.ModRegistry,
                 monitor: this.Monitor,
-                manifest: this.ModManifest
-            ).Integrate();
+                manifest: this.ModManifest)
+                .Integrate();
 
+            new ToolbarIconsIntegration(
+                modRegistry: this.Helper.ModRegistry,
+                monitor: this.Monitor,
+                uniqueId: this.ModManifest.UniqueID,
+                openFontSettingsMenu: this.OpenFontSettingsMenu)
+                .Integrate();
+            
             // init title font button. (must be after `Textures.OnAssetRequested` subscription)
             this._titleFontButton = new TitleFontButton(
                 position: this.GetTitleFontButtonPosition(),
