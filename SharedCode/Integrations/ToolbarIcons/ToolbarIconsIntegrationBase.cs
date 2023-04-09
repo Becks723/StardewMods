@@ -5,7 +5,7 @@ using StardewModdingAPI;
 
 namespace CodeShared.Integrations.ToolbarIcons
 {
-    internal abstract class ToolbarIconsIntegrationBase : ModIntegration<IToolbarIconsApi>
+    internal abstract class ToolbarIconsIntegrationBase : ModIntegrationBase<IToolbarIconsApi>
     {
         protected ToolbarIconsIntegrationBase(IModRegistry modRegistry, IMonitor monitor)
             : base(modID: "furyx639.ToolbarIcons", modRegistry, monitor)
