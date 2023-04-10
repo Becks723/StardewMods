@@ -707,8 +707,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
                 var result = await this._gameFontChanger.ChangeGameFontAsync(
                     font: this.CurrentFontConfig,
-                    language: this.Language,
-                    fontType: this.CurrentFontType);
+                    context: this.GetFontContext());
 
                 // 如果成功，更新配置值。
                 if (result.IsSuccessful)
@@ -724,6 +723,11 @@ namespace FontSettings.Framework.Menus.ViewModels
         }
 
         internal record FontChangeResult(IGameFontChangeResult InnerResult, GameFontType FontType);
+
+        private FontContext GetFontContext()
+        {
+            return FontContext.For(this.Language, this.CurrentFontType);
+        }
 
         public void UpdateExampleVanilla()
         {

@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace FontSettings.Framework
 {
-    internal record FontContext(LanguageInfo Language, GameFontType FontType);
+    internal partial record FontContext(LanguageInfo Language, GameFontType FontType);
 }

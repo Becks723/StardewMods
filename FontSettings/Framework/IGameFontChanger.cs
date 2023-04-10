@@ -15,6 +15,6 @@ namespace FontSettings.Framework
     internal interface IAsyncGameFontChanger
     {
         /// <summary>Reload game font using <paramref name="font"/> parameter.</summary>
-        Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font, LanguageInfo language, GameFontType fontType);
+        Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font, FontContext context);
     }
 }
