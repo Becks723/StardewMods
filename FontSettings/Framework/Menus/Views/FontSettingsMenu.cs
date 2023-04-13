@@ -661,6 +661,26 @@ namespace FontSettings.Framework.Menus.Views
                                         }
                                     }
                                 }
+
+                                // unsorted
+                                // reset
+                                var resetOption = new Grid();
+                                resetOption.HorizontalAlignment = HorizontalAlignment.Left;
+                                resetOption.Margin = new Thickness(0, frameSpacing, 0, 0);
+                                stack.Children.Add(resetOption);
+                                {
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_ResetFont();
+                                    label.HorizontalAlignment = HorizontalAlignment.Left;
+                                    resetOption.Children.Add(label);
+
+                                    var button = new TextureButton(Game1.mouseCursors, new Rectangle(294, 428, 21, 11), 4f);
+                                    button.HorizontalAlignment = HorizontalAlignment.Right;
+                                    button.ClickSound = "bigDeSelect";
+                                    context.OneWayBinds(() => this._viewModel.ResetFontCommand, () => button.Command);
+                                    resetOption.Children.Add(button);
+                                }
                             }
                         }
 

@@ -31,6 +31,9 @@
   "ui.main-menu.new-preset": "保存当前设置为新预设",
   "ui.main-menu.save-preset": "保存",
   "ui.main-menu.del-preset": "删除",
+
+  "ui.main-menu.reset-font": "恢复为原版字体",
+
   "ui.main-menu.merge-examples": "合并示例",
   "ui.main-menu.show-example-bounds": "显示边框",
   "ui.main-menu.show-example-text": "显示文字",

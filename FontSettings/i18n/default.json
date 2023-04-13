@@ -32,6 +32,9 @@
   "ui.main-menu.new-preset": "Save current as...",
   "ui.main-menu.save-preset": "Save",
   "ui.main-menu.del-preset": "Delete",
+
+  "ui.main-menu.reset-font": "Reset Current Font",
+
   "ui.main-menu.merge-examples": "Compare",
   "ui.main-menu.show-example-bounds": "Show Bounds",
   "ui.main-menu.show-example-text": "Show Text",

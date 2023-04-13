@@ -550,6 +550,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public ICommand RefreshFontsCommand { get; protected init; }
 
+        public ICommand ResetFontCommand { get; }
+
         public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
         {
@@ -621,6 +623,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.SaveCurrentAsNewPresetCommand = new DelegateCommand<Func<IOverlayMenu>>(this.SaveCurrentAsNewPreset);
             this.DeleteCurrentPresetCommand = new DelegateCommand(this._DeleteCurrentPreset);
             this.RefreshFontsCommand = new DelegateCommand(this.RefreshAllFonts);
+            this.ResetFontCommand = new DelegateCommand(this.ResetCurrentFont);
         }
 
         private void PreviousFontType()
@@ -688,6 +691,15 @@ namespace FontSettings.Framework.Menus.ViewModels
 
             // 更新选中字体。
             this.CurrentFont = this.FindFont(this.FontFilePath, this.FontIndex);
+
+            // 更新示例。
+            this.UpdateExampleCurrent();
+        }
+
+        private void ResetCurrentFont()
+        {
+            this.CurrentFontConfig = this._vanillaFontConfigProvider.GetVanillaFontConfig(this.Language, this.CurrentFontType);
+            this.FillOptionsWithFontConfig(this.CurrentFontConfig);
 
             // 更新示例。
             this.UpdateExampleCurrent();
@@ -833,16 +845,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 更新各个属性。
             FontConfig fontConfig = this.GetOrCreateFontConfig();
             this.CurrentFontConfig = fontConfig;
-            this.FontEnabled = fontConfig.Enabled;
-            this.FontSize = fontConfig.FontSize;
-            this.Spacing = fontConfig.Spacing;
-            this.LineSpacing = fontConfig.LineSpacing;
-            this.CharOffsetX = fontConfig.CharOffsetX;
-            this.CharOffsetY = fontConfig.CharOffsetY;
-            this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
-            this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
-                ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
-                : 0;
+            this.FillOptionsWithFontConfig(fontConfig);
 
             // 更新预设。
             this.OnPresetChanged(null, EventArgs.Empty);
@@ -873,17 +876,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 如果无预设，则载入保存的设置。
             if (noPresetSelected)
             {
-                FontConfig fontConfig = this.CurrentFontConfig;
-                this.FontEnabled = fontConfig.Enabled;
-                this.FontSize = fontConfig.FontSize;
-                this.Spacing = fontConfig.Spacing;
-                this.LineSpacing = fontConfig.LineSpacing;
-                this.CharOffsetX = fontConfig.CharOffsetX;
-                this.CharOffsetY = fontConfig.CharOffsetY;
-                this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
-                this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
-                    ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
-                    : 0;
+                this.FillOptionsWithFontConfig(this.CurrentFontConfig);
             }
 
             // 否则载入预设的值。
@@ -996,6 +989,20 @@ namespace FontSettings.Framework.Menus.ViewModels
                 return this.AllFonts[0];
 
             return found.FirstOrDefault();
+        }
+
+        private void FillOptionsWithFontConfig(FontConfig fontConfig)
+        {
+            this.FontEnabled = fontConfig.Enabled;
+            this.FontSize = fontConfig.FontSize;
+            this.Spacing = fontConfig.Spacing;
+            this.LineSpacing = fontConfig.LineSpacing;
+            this.CharOffsetX = fontConfig.CharOffsetX;
+            this.CharOffsetY = fontConfig.CharOffsetY;
+            this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
+            this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
+                ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
+                : 0;
         }
 
         [Obsolete("验证字体文件的逻辑需要转移，此方法本身废除。")]
