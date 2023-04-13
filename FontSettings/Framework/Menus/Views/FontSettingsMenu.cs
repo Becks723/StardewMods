@@ -666,7 +666,7 @@ namespace FontSettings.Framework.Menus.Views
 
                         var okButton = new TextureButton(
                             Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
-                        okButton.HorizontalAlignment = HorizontalAlignment.Right;
+                        okButton.HorizontalAlignment = HorizontalAlignment.Center;
                         okButton.VerticalAlignment = VerticalAlignment.Center;
                         context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
                         okButton.Click += this.OkButtonClicked;
@@ -697,6 +697,7 @@ namespace FontSettings.Framework.Menus.Views
 
                         var optionsStack = new StackContainer();
                         optionsStack.Orientation = Orientation.Horizontal;
+                        optionsStack.HorizontalAlignment = HorizontalAlignment.Center;
                         previewGrid.Children.Add(optionsStack);
                         previewGrid.SetRow(optionsStack, 1);
                         {
