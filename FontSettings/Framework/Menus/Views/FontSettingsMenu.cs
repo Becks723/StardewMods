@@ -202,7 +202,7 @@ namespace FontSettings.Framework.Menus.Views
                             {
                                 // added.
                                 var backgroundBorder = new TextureBoxBorder();
-                                backgroundBorder.Box = TextureBoxes.ThickBorder;
+                                backgroundBorder.Box = TextureBoxes.Default;
                                 backgroundBorder.DrawShadow = false;
                                 grid.Children.Add(backgroundBorder);
                                 grid.SetColumn(backgroundBorder, 0);
@@ -680,7 +680,7 @@ namespace FontSettings.Framework.Menus.Views
                     mainGrid.Children.Add(previewGrid);
                     mainGrid.SetColumn(previewGrid, 0);
                     {
-                        var previewControl = new FontPreviewGrid(TextureBoxes.Default, 8);
+                        var previewControl = new FontPreviewGrid(TextureBoxes.ThickBorder, 8);
                         context.OneWayBinds(() => this._viewModel.PreviewMode, () => previewControl.Mode);
                         var vanillaTextLabel = previewControl.VanillaFontExample;
                         var currentTextLabel = previewControl.CurrentFontExample;
