@@ -21,10 +21,4 @@
 		<EnableModZip>false</EnableModZip>
 		<EnableHarmony>true</EnableHarmony>
 	</PropertyGroup>
-	
-	<ItemGroup>
-		<None Update="说明.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
 </Project>
