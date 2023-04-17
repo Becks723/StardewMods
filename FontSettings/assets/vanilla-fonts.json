@@ -262,7 +262,7 @@
       "FontIndex": 0,
       "FontSize": 39.0,
       "Spacing": -2.0,
-      "LineSpacing": 50
+      "LineSpacing": 42
     },
 
 
@@ -347,6 +347,20 @@
       "FontSize": 26.0,
       "Spacing": -2.0,
       "LineSpacing": 33
+    },
+
+    /* Dialogue Font */
+    {
+      "Enabled": true,
+      "Lang": "ru",
+      "Locale": "ru-RU",
+      "InGameType": "SpriteText",
+      "FontFilePath": "svffs.ttf",
+      "FontIndex": 0,
+      "FontSize": 13.0,
+      "Spacing": 0.0,
+      "LineSpacing": 15,
+      "PixelZoom": 3
     },
 
 
