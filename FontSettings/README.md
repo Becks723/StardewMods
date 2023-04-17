@@ -83,6 +83,20 @@ Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalle
 | MaxPixelZoom | Max reachable value of the pixel zoom option, default `5`. |
 | SimplifiedDropDown | Set `true` if UI drop down options cause glitches, low-performance, default `true`. |
 
+#### Edit Mod Assets
+Textures for this mod are stored in the `FontSettings/assets` folder. To edit them, you may:
+* For own use, draw your own version and replace the texture file. Your own texture must be same size and filename as original one.
+* For shared use, use [Content Patcher](https://www.nexusmods.com/stardewvalley/mods/1915). Each png file is an asset entry. Its name formats as `Mods/Becks723.FontSettings/<filename>`.
+
+	e.g. to edit `delete.png`, add this to json.
+	```js
+	{
+   		"Action": "EditImage",
+   		"Target": "Mods/Becks723.FontSettings/delete",
+   		"FromFile": "path/to/yourtexturefile.png"
+	}
+	```
+
 
 ## Compatibility:
 Lastest version works with Windows, MacOS, Linux.
@@ -101,7 +115,11 @@ Lastest version works with Windows, MacOS, Linux.
 
 ## Release Notes
 #### 0.9.0 -
-- Improve font change effects when you select "keep original". (all common characters done)
+- Add support for [Toolbar Icons](https://www.nexusmods.com/stardewvalley/mods/11026).
+- You can customize this mod's textures (See [edit mod assets](#edit-mod-assets) section).
+- Add a "Reset Font" option into UI, for restoring vanilla font.
+- Improve font change effects when you select "keep original" (all common characters done).
+- Improve font settings menu UI slightly.
 
 #### 0.8.1 - 2023-04-02
 - Fix error when select font after refreshing fonts.
