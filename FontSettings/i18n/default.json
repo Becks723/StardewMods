@@ -78,6 +78,8 @@
   "config.disable-text-shadow.description": "Whether to hide font shadow.",
   "config.simplified-drop-down": "Simplified Drop down Option",
   "config.simplified-drop-down.description": "Check if drop down options in UI cause glitches, low-performance.",
+  "config.enable-latin-dialogue-font": "Enable custom dialogue font in latin languages",
+  "config.enable-latin-dialogue-font.description": "Whether to enable custom dialogue font in latin languages. Latin Language: language that only contains latin characters. Current ({{locale}}) is a latin language: {{isLatinLanguage}}",
   "config.font-menu-key": "Open Font Menu",
   "config.font-menu-key.description": "Key-binding to open a font settings menu.",
   "config.font-settings-in-game-menu": "Font Page in Game Menu",

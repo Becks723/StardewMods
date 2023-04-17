@@ -852,7 +852,7 @@ namespace FontSettings.Framework.Menus.Views
             var lang = FontHelpers.GetCurrentLanguage();
             if (FontHelpers.IsLatinLanguage(lang))
             {
-                string locale = lang.Locale != string.Empty ? lang.Locale : "en";
+                string locale = FontHelpers.GetCurrentDisplayLocale();
 
                 sb.AppendLine();
                 sb.AppendLine()

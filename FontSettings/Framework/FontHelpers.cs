@@ -166,6 +166,23 @@ namespace FontSettings.Framework
             return new LanguageInfo(LocalizedContentManager.LanguageCode.mod, GetModLocale(modLanguage));
         }
 
+        public static string GetCurrentDisplayLocale()
+        {
+            var lang = FontHelpers.GetCurrentLanguage();
+            return lang.Locale != string.Empty
+                ? lang.Locale
+                : "en";
+        }
+
+        public static bool IsCurrentLatinLanguage()
+        {
+            var lang = FontHelpers.GetCurrentLanguage();
+            if (FontHelpers.IsModLanguage(lang))
+                return LocalizedContentManager.CurrentModLanguage.UseLatinFont;
+            else
+                return FontHelpers.IsLatinLanguage(lang.Code);
+        }
+
         public static LanguageInfo LanguageEn => GetLanguage(LocalizedContentManager.LanguageCode.en);
         public static LanguageInfo LanguageJa => GetLanguage(LocalizedContentManager.LanguageCode.ja);
         public static LanguageInfo LanguageRu => GetLanguage(LocalizedContentManager.LanguageCode.ru);

@@ -32,6 +32,16 @@ namespace FontSettings.Framework.Integrations
                     set: val => this.Config.DisableTextShadow = val
                 )
 
+                // enable latin dialogue font
+                .AddCheckbox(
+                    name: I18n.Config_EnableLatinDialogueFont,
+                    tooltip: () => I18n.Config_EnableLatinDialogueFont_Description(
+                        locale: FontHelpers.GetCurrentDisplayLocale(),
+                        isLatinLanguage: FontHelpers.IsCurrentLatinLanguage()),
+                    get: () => this.Config.EnableLatinDialogueFont,
+                    set: val => this.Config.EnableLatinDialogueFont = val
+                )
+
                 .AddTextBox(
                     name: I18n.Config_ExampleText,
                     tooltip: I18n.Config_ExampleText_Description,
