@@ -565,7 +565,6 @@ namespace FontSettings.Framework.Menus.Views
                                 // unsorted
                                 // reset
                                 var resetOption = new Grid();
-                                resetOption.HorizontalAlignment = HorizontalAlignment.Left;
                                 resetOption.Margin = new Thickness(0, frameSpacing, 0, 0);
                                 stack.Children.Add(resetOption);
                                 {
