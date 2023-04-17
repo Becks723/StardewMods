@@ -18,7 +18,7 @@
 	- 暂时√ 字体的生成方案：
 		- SpriteFont：stbtrutype（当前）
 		- BmFont：stbtrutype（当前）、fontbm（备用）、bmfont
-    - 部分√ 保持原版字体时能够调节字体大小。（目前除了hu, ru, tr都已完成）
+    - 部分√ 保持原版字体时能够调节字体大小。（目前常用字符都已完成，剩下一些查漏补缺）
 
 
 	- 安卓版本

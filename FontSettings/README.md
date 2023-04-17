@@ -100,6 +100,9 @@ Lastest version works with Windows, MacOS, Linux.
 
 
 ## Release Notes
+#### 0.9.0 -
+- Improve font change effects when you select "keep original". (all common characters done)
+
 #### 0.8.1 - 2023-04-02
 - Fix error when select font after refreshing fonts.
 - Fix font not reload until ok is pressed the second time.
