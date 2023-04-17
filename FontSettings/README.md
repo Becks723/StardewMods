@@ -91,9 +91,9 @@ Textures for this mod are stored in the `FontSettings/assets` folder. To edit th
 	e.g. to edit `delete.png`, add this to json.
 	```js
 	{
-   		"Action": "EditImage",
-   		"Target": "Mods/Becks723.FontSettings/delete",
-   		"FromFile": "path/to/yourtexturefile.png"
+		"Action": "EditImage",
+		"Target": "Mods/Becks723.FontSettings/delete",
+		"FromFile": "path/to/yourtexturefile.png"
 	}
 	```
 
@@ -114,7 +114,7 @@ Lastest version works with Windows, MacOS, Linux.
 
 
 ## Release Notes
-#### 0.9.0 -
+#### 0.9.0 - 2023-04-18
 - Add support for [Toolbar Icons](https://www.nexusmods.com/stardewvalley/mods/11026).
 - You can customize this mod's textures (See [edit mod assets](#edit-mod-assets) section).
 - Add a "Reset Font" option into UI, for restoring vanilla font.
