@@ -53,7 +53,7 @@ namespace FontSettings.Framework
                         result.Add(new CharacterRange(start, current));
                     else
                     {
-                        result.Add(new CharacterRange(last, last));
+                        result.Add(new CharacterRange(start, last));
                         result.Add(new CharacterRange(current, current));
                     }
                 }
