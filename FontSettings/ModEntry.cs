@@ -127,6 +127,9 @@ namespace FontSettings
                 spriteTextPatcher.Patch(Harmony, this.Monitor);
                 this._mainFontPatcher.FontPixelZoomOverride += (s, e) =>
                     spriteTextPatcher.SetOverridePixelZoom(e.PixelZoom);
+
+                new SpriteTextLatinPatcher(this._config, this.ModManifest, helper)
+                    .Patch(Harmony, this.Monitor);
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequestedEarly;
@@ -174,7 +177,7 @@ namespace FontSettings
                 uniqueId: this.ModManifest.UniqueID,
                 openFontSettingsMenu: this.OpenFontSettingsMenu)
                 .Integrate();
-            
+
             // init title font button. (must be after `Textures.OnAssetRequested` subscription)
             this._titleFontButton = new TitleFontButton(
                 position: this.GetTitleFontButtonPosition(),

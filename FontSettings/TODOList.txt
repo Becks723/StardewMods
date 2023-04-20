@@ -39,6 +39,9 @@
 		目前难点：SMAPI用cecil提前解析依赖，因此无法用AssemblyResolve事件；
 				目前只识别与主dll同一目录的依赖（见AssemblyLoader::GetReferencedLocalAssemblies），可能需要写一份PR。
 
-Dialogue font under latin language:
+Custom Dialogue font under latin language:
 Solution:
-	The core is to patch SpriteText::drawString
+Skip related if check withs `LocalizedContentManager.CurrentLanguageLatin` (use transpiler to change the field into a `false`)
+`SpriteText.setUpCharacterMap`: latin languages do same things as non-latin do. Initialize bmfont related fields, subscribe the `OnLanguageChange` callback.
+`SpriteText.OnLanguageChange`: similar to `setUpCharacterMap`, do the inits.
+`SpriteText.drawString`: Replace the only `CurrentLanguageLatin` with `false`.

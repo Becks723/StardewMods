@@ -37,9 +37,13 @@
 
 	<!--ignored files-->
 	<ItemGroup>
+		<Compile Remove="Framework\FontChangers\LatinSpriteTextChanger.cs" />
+		<Compile Remove="Framework\LatinSpriteFont.cs" />
 		<Compile Remove="Framework\Patchers\GameMenuResizeHandler.cs" />
 	</ItemGroup>
 	<ItemGroup>
+		<None Include="Framework\FontChangers\LatinSpriteTextChanger.cs" />
+		<None Include="Framework\LatinSpriteFont.cs" />
 		<None Include="Framework\Patchers\GameMenuResizeHandler.cs" />
 	</ItemGroup>
 
