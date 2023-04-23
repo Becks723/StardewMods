@@ -1,0 +1,16 @@
+﻿{
+  "Name": "Infinite Farm",
+  "Author": "Becks723",
+  "Version": "0.1.0",
+  "Description": "",
+  "UniqueID": "Becks723.InfiniteFarm",
+  "MinimumApiVersion": "3.14.0",
+  "EntryDll": "InfiniteFarm.dll",
+  "UpdateKeys": [],
+  "Dependencies": [
+    {
+      "UniqueID": "spacechase0.GenericModConfigMenu",
+      "IsRequired": false
+    }
+  ]
+}

@@ -51,17 +51,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{0C75
 		_libs\stbtruetype-sharp\Release\StbTrueTypeSharp.pdb = _libs\stbtruetype-sharp\Release\StbTrueTypeSharp.pdb
 	EndProjectSection
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedCode", "SharedCode\SharedCode.shproj", "{AB84FF3C-F7C6-4D02-8988-E46C64D35C7D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhoneTravelingCart", "PhoneTravelingCart\PhoneTravelingCart.csproj", "{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaircasePlacementFix", "StaircasePlacementFix\StaircasePlacementFix.csproj", "{DE590FC9-929B-4351-A917-3FA17877030D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings", "FontSettings\FontSettings.csproj", "{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedCode", "SharedCode\SharedCode.shproj", "{AB84FF3C-F7C6-4D02-8988-E46C64D35C7D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhoneTravelingCart", "PhoneTravelingCart\PhoneTravelingCart.csproj", "{FEF80594-BD60-4FB8-A8F4-6D70A7688318}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FontSettings.Shared", "FontSettings.Shared\FontSettings.Shared.shproj", "{14E62FC5-3554-4307-9349-58B68B7E4A57}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings.Cli", "FontSettings.Cli\FontSettings.Cli.csproj", "{931AF295-AA21-42EE-93F2-6D9431693919}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings.Cli", "FontSettings.Cli\FontSettings.Cli.csproj", "{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings", "FontSettings\FontSettings.csproj", "{A11FF721-39BE-4EA9-BBB6-8A2D79092965}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InfiniteFarm", "InfiniteFarm\InfiniteFarm.csproj", "{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,22 +71,26 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{931AF295-AA21-42EE-93F2-6D9431693919}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{931AF295-AA21-42EE-93F2-6D9431693919}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{931AF295-AA21-42EE-93F2-6D9431693919}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{931AF295-AA21-42EE-93F2-6D9431693919}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,10 +109,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		FontSettings.Shared\FontSettings.Shared.projitems*{14e62fc5-3554-4307-9349-58b68b7e4a57}*SharedItemsImports = 13
-		FontSettings.Shared\FontSettings.Shared.projitems*{931af295-aa21-42ee-93f2-6d9431693919}*SharedItemsImports = 5
-		SharedCode\SharedCode.projitems*{9347c094-6e2d-425b-8a6c-ddbd5009e2a5}*SharedItemsImports = 5
-		FontSettings.Shared\FontSettings.Shared.projitems*{97390b2e-bbda-4449-b588-bce42d7ef3fe}*SharedItemsImports = 5
-		SharedCode\SharedCode.projitems*{97390b2e-bbda-4449-b588-bce42d7ef3fe}*SharedItemsImports = 5
+		FontSettings.Shared\FontSettings.Shared.projitems*{a11ff721-39be-4ea9-bbb6-8a2d79092965}*SharedItemsImports = 5
+		SharedCode\SharedCode.projitems*{a11ff721-39be-4ea9-bbb6-8a2d79092965}*SharedItemsImports = 5
 		SharedCode\SharedCode.projitems*{ab84ff3c-f7c6-4d02-8988-e46c64d35c7d}*SharedItemsImports = 13
+		FontSettings.Shared\FontSettings.Shared.projitems*{c468cb72-2ee7-4ec4-a1eb-8c3f8303c647}*SharedItemsImports = 5
+		SharedCode\SharedCode.projitems*{fef80594-bd60-4fb8-a8f4-6d70a7688318}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
