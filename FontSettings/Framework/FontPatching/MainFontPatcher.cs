@@ -50,7 +50,16 @@ namespace FontSettings.Framework.FontPatching
 
             else
             {
-                this.PatchBmFont(e);
+                if (e.NameWithoutLocale.IsEquivalentTo(FontHelpers.GetFontFileAssetName()))
+                {
+                    this.PatchBmFontFile(e);
+                }
+
+                else if (this.IsPatchingBmFont(e) 
+                    && this.IsBmFontPage(e, out string pageKey))
+                {
+                    this.PatchBmFontPage(e, pageKey);
+                }
             }
         }
 
@@ -176,21 +185,8 @@ namespace FontSettings.Framework.FontPatching
         }
 
         private IBmFontPatch _bmFontPatch;
-        private void PatchBmFont(AssetRequestedEventArgs e)
-        {
-            string fontFileName = FontHelpers.GetFontFileAssetName();
-            if (e.NameWithoutLocale.IsEquivalentTo(fontFileName))
-            {
-                this.PatchFontFile(e);
-            }
 
-            else if (this._bmFontPatch != null)
-            {
-                this.PatchFontPages(e);
-            }
-        }
-
-        private void PatchFontFile(AssetRequestedEventArgs e)
+        private void PatchBmFontFile(AssetRequestedEventArgs e)
         {
             var bmFontPatch = this.ResolvePatch(GameFontType.SpriteText) as IBmFontPatch;
             if (bmFontPatch != null)
@@ -204,33 +200,47 @@ namespace FontSettings.Framework.FontPatching
             this._bmFontPatch = bmFontPatch;
         }
 
-        private void PatchFontPages(AssetRequestedEventArgs e)
+        private void PatchBmFontPage(AssetRequestedEventArgs e, string pageKey)
+        {
+            var bmFontPatch = this._bmFontPatch;
+
+            var loader = bmFontPatch.PageLoaders[pageKey];
+            if (loader != null)
+                this.LoadAsset(e, loader);
+
+            bmFontPatch.PageLoaders.Remove(pageKey);
+            if (bmFontPatch.PageLoaders.Count == 0)
+            {
+                this._bmFontPatch = null;
+
+                // 设置缩放，放在最后。
+                this.RaiseFontPixelZoomOverride(bmFontPatch.FontPixelZoom);
+            }
+        }
+
+        private bool IsPatchingBmFont(AssetRequestedEventArgs e)
+        {
+            return this._bmFontPatch != null;
+        }
+
+        private bool IsBmFontPage(AssetRequestedEventArgs e, out string pageKey)
         {
             var bmFontPatch = this._bmFontPatch;
 
             if (bmFontPatch.PageLoaders != null)
             {
-                var pairs = bmFontPatch.PageLoaders
-                    .Where(pair => e.NameWithoutLocale.IsEquivalentTo(pair.Key));
-                if (pairs.Any())
+                var key = bmFontPatch.PageLoaders.Keys
+                    .Where(key => e.NameWithoutLocale.IsEquivalentTo(key))
+                    .FirstOrDefault();
+                if (key != null)
                 {
-                    var pair = pairs.First();
-
-                    string pageKey = pair.Key;
-                    var loader = pair.Value;
-                    if (loader != null)
-                        this.LoadAsset(e, loader);
-
-                    bmFontPatch.PageLoaders.Remove(pageKey);
-                    if (bmFontPatch.PageLoaders.Count == 0)
-                    {
-                        this._bmFontPatch = null;
-
-                        // 设置缩放，放在最后。
-                        this.RaiseFontPixelZoomOverride(bmFontPatch.FontPixelZoom);
-                    }
+                    pageKey = key;
+                    return true;
                 }
             }
+
+            pageKey = null;
+            return false;
         }
 
         private void LoadAsset(AssetRequestedEventArgs e, IFontLoader loader, AssetLoadPriority priority = AssetLoadPriority.Exclusive)
