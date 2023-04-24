@@ -594,7 +594,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.IsRefreshingFonts = _asyncIndicator.IsRefreshingFonts;
 
             // 部分语言不支持SpriteText，重置当前字体类型。
-            if (LocalizedContentManager.CurrentLanguageLatin && this.CurrentFontType == GameFontType.SpriteText)
+            if (this.SkipSpriteText() && this.CurrentFontType == GameFontType.SpriteText)
                 this.CurrentFontType = GameFontType.SmallFont;
 
             this.InitAllFonts();
@@ -628,13 +628,13 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private void PreviousFontType()
         {
-            this.CurrentFontType = this.CurrentFontType.Previous(LocalizedContentManager.CurrentLanguageLatin);
+            this.CurrentFontType = this.CurrentFontType.Previous(this.SkipSpriteText());
             this.OnFontTypeChanged(this.CurrentFontType);
         }
 
         private void NextFontType()
         {
-            this.CurrentFontType = this.CurrentFontType.Next(LocalizedContentManager.CurrentLanguageLatin);
+            this.CurrentFontType = this.CurrentFontType.Next(this.SkipSpriteText());
             this.OnFontTypeChanged(this.CurrentFontType);
         }
 
@@ -1003,6 +1003,11 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
                 ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
                 : 0;
+        }
+
+        private bool SkipSpriteText()
+        {
+            return !this._config.EnableLatinDialogueFont && LocalizedContentManager.CurrentLanguageLatin;
         }
 
         [Obsolete("验证字体文件的逻辑需要转移，此方法本身废除。")]

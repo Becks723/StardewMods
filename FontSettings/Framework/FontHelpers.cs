@@ -232,6 +232,7 @@ namespace FontSettings.Framework
                 LocalizedContentManager.LanguageCode.th => "Fonts/Thai",
                 LocalizedContentManager.LanguageCode.ko => "Fonts/Korean",
                 LocalizedContentManager.LanguageCode.mod when !modLanguage.UseLatinFont => modLanguage.FontFile,
+                _ when LocalizedContentManager.CurrentLanguageLatin => "Fonts/Latin",
                 _ => null
             };
         }

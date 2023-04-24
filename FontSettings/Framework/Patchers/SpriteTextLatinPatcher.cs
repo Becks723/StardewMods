@@ -32,11 +32,11 @@ namespace FontSettings.Framework.Patchers
         {
             if (e.NameWithoutLocale.IsEquivalentTo(LatinFontFileAssetName()))
             {
-                e.LoadFromModFile<XmlSource>("assets/fonts/Latin.fnt", AssetLoadPriority.Exclusive);
+                e.LoadFromModFile<XmlSource>("assets/fonts/Latin.fnt", AssetLoadPriority.High);
             }
             else if (IsLatinFontPage(e.NameWithoutLocale, out string pageFile))
             {
-                e.LoadFromModFile<Texture2D>($"assets/fonts/{pageFile}.png", AssetLoadPriority.Exclusive);
+                e.LoadFromModFile<Texture2D>($"assets/fonts/{pageFile}.png", AssetLoadPriority.High);
             }
         }
 
@@ -52,6 +52,24 @@ namespace FontSettings.Framework.Patchers
             harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getColorFromIndex)),
                 postfix: this.HarmonyMethod(nameof(SpriteText_getColorFromIndex_Postfix)));
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getWidthOfString)),
+                transpiler: this.HarmonyMethod(nameof(SpriteText_getWidthOfString_Transpiler)));
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getHeightOfString)),
+                transpiler: this.HarmonyMethod(nameof(SpriteText_getHeightOfString_Transpiler)));
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.positionOfNextSpace)),
+                transpiler: this.HarmonyMethod(nameof(SpriteText_positionOfNextSpace_Transpiler)));
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.IsMissingCharacters)),
+                transpiler: this.HarmonyMethod(nameof(SpriteText_IsMissingCharacters_Transpiler)));
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getSubstringBeyondHeight)),
+                transpiler: this.HarmonyMethod(nameof(SpriteText_getSubstringBeyondHeight_Transpiler)));
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getIndexOfSubstringBeyondHeight)),
+                transpiler: this.HarmonyMethod(nameof(SpriteText_getIndexOfSubstringBeyondHeight_Transpiler)));
         }
 
         private static void SpriteText_drawString_Finalizer(Exception __exception)
@@ -149,6 +167,140 @@ namespace FontSettings.Framework.Patchers
                 __result = new Color(86, 22, 12);
         }
 
+        private static IEnumerable<CodeInstruction> SpriteText_getWidthOfString_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            var oldInstructions = codeInstructions.ToArray();
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                var instruction = oldInstructions[i];
+
+                if (instruction.opcode == OpCodes.Call
+                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
+                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue_S
+                    && oldInstructions[i + 2].opcode == OpCodes.Ldsfld
+                    && oldInstructions[i + 2].operand is FieldInfo { Name: nameof(SpriteText.forceEnglishFont) })
+                    yield return new CodeInstruction(instruction)
+                    {
+                        opcode = OpCodes.Call,
+                        operand = CurrentLanguageLatinPatched_Method.Value
+                    };
+
+                else
+                    yield return instruction;
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> SpriteText_getHeightOfString_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            var oldInstructions = codeInstructions.ToArray();
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                var instruction = oldInstructions[i];
+
+                if (instruction.opcode == OpCodes.Call
+                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
+                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue
+                    && oldInstructions[i + 2].opcode == OpCodes.Ldsfld
+                    && oldInstructions[i + 2].operand is FieldInfo { Name: nameof(SpriteText.forceEnglishFont) })
+                    yield return new CodeInstruction(instruction)
+                    {
+                        opcode = OpCodes.Call,
+                        operand = CurrentLanguageLatinPatched_Method.Value
+                    };
+
+                else
+                    yield return instruction;
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> SpriteText_positionOfNextSpace_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            var oldInstructions = codeInstructions.ToArray();
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                var instruction = oldInstructions[i];
+
+                if (instruction.opcode == OpCodes.Call
+                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
+                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue_S
+                    && oldInstructions[i + 2].opcode == OpCodes.Ldarg_0
+                    && oldInstructions[i + 3].opcode == OpCodes.Ldloc_2)
+                    yield return new CodeInstruction(instruction)
+                    {
+                        opcode = OpCodes.Call,
+                        operand = CurrentLanguageLatinPatched_Method.Value
+                    };
+
+                else
+                    yield return instruction;
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> SpriteText_IsMissingCharacters_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            var oldInstructions = codeInstructions.ToArray();
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                var instruction = oldInstructions[i];
+
+                if (instruction.opcode == OpCodes.Call
+                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
+                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue_S
+                    && oldInstructions[i + 2].opcode == OpCodes.Ldsfld
+                    && oldInstructions[i + 2].operand is FieldInfo { Name: nameof(SpriteText.forceEnglishFont) })
+                    yield return new CodeInstruction(instruction)
+                    {
+                        opcode = OpCodes.Call,
+                        operand = CurrentLanguageLatinPatched_Method.Value
+                    };
+
+                else
+                    yield return instruction;
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> SpriteText_getSubstringBeyondHeight_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            var oldInstructions = codeInstructions.ToArray();
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                var instruction = oldInstructions[i];
+
+                if (instruction.opcode == OpCodes.Call
+                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
+                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue)
+                    yield return new CodeInstruction(instruction)
+                    {
+                        opcode = OpCodes.Call,
+                        operand = CurrentLanguageLatinPatched_Method.Value
+                    };
+
+                else
+                    yield return instruction;
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> SpriteText_getIndexOfSubstringBeyondHeight_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            var oldInstructions = codeInstructions.ToArray();
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                var instruction = oldInstructions[i];
+
+                if (instruction.opcode == OpCodes.Call
+                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
+                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue)
+                    yield return new CodeInstruction(instruction)
+                    {
+                        opcode = OpCodes.Call,
+                        operand = CurrentLanguageLatinPatched_Method.Value
+                    };
+
+                else
+                    yield return instruction;
+            }
+        }
+
         private static readonly Lazy<MethodInfo> CurrentLanguageLatinPatched_Method = new(
             () => AccessTools.Method(typeof(SpriteTextLatinPatcher), nameof(CurrentLanguageLatinPatched)));
         private static bool CurrentLanguageLatinPatched()
@@ -161,12 +313,12 @@ namespace FontSettings.Framework.Patchers
 
         private static string LatinFontFileAssetName()
         {
-            return $"Mods/{_manifest.UniqueID}/Fonts/Latin";
+            return $"Fonts/Latin";
         }
 
         private static string LatinFontPageAssetName(string pageFile)  // pageFile: without file extensions
         {
-            return $"Mods/{_manifest.UniqueID}/Fonts/{pageFile}";
+            return $"Fonts/{pageFile}";
         }
 
         private static bool IsLatinFontPage(IAssetName assetName, out string pageFile)  // pageFile: without file extensions
@@ -174,8 +326,7 @@ namespace FontSettings.Framework.Patchers
             string prefix = $"{LatinFontFileAssetName()}_";
             if (assetName.StartsWith(prefix))
             {
-                int start = $"Mods/{_manifest.UniqueID}/Fonts/".Length;
-                pageFile = assetName.BaseName.Substring(start);
+                pageFile = assetName.BaseName.Split('/').Last();
                 return true;
             }
             else

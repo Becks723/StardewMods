@@ -123,7 +123,7 @@ namespace FontSettings
                 new FontShadowPatcher(this._config)
                     .Patch(Harmony, this.Monitor);
 
-                var spriteTextPatcher = new SpriteTextPatcher();
+                var spriteTextPatcher = new SpriteTextPatcher(this._config);
                 spriteTextPatcher.Patch(Harmony, this.Monitor);
                 this._mainFontPatcher.FontPixelZoomOverride += (s, e) =>
                     spriteTextPatcher.SetOverridePixelZoom(e.PixelZoom);
