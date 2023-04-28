@@ -15,6 +15,8 @@
 	- √ 优化BmFont制作的字体，现在的感觉被裁剪过。
 	- √ 为assets添加assetname，使其可替换。
 	- × SpriteFont的文件保存，方便下次加载。
+	- × BmFont的Kerning？游戏里用不着。
+	- 暂时√ SpriteFont生成的图片太大（指宽高）怎么办？xna自己解决
 	- 暂时√ 字体的生成方案：
 		- SpriteFont：stbtrutype（当前）
 		- BmFont：stbtrutype（当前）、fontbm（备用）、bmfont
@@ -27,8 +29,6 @@
 				 3. 安卓的UI与pc端不一样。
 	- 拉丁语言兼容对话字体。
 	- UI兼容手柄。
-	- SpriteFont生成的图片太大（指宽高）怎么办？
-	- BmFont的Kerning？
 	- 下拉框条目用各自的字体显示。
 	- 代码里的TODO。
 	- assets/vanilla-fonts扩展：新建一个custom-vanilla-fonts给用户配置。
