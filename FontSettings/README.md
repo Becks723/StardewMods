@@ -114,6 +114,10 @@ Lastest version works with Windows, MacOS, Linux.
 
 
 ## Release Notes
+#### 0.9.1 - 2023-04-29
+- Fix no response pressing "Save As New Preset" button.
+- Fix you cannot delete a preset.
+
 #### 0.9.0 - 2023-04-18
 - Add support for [Toolbar Icons](https://www.nexusmods.com/stardewvalley/mods/11026).
 - You can customize this mod's textures (See [edit mod assets](#edit-mod-assets) section).

@@ -41,7 +41,8 @@ namespace FontSettings.Framework.DataAccess
             // when null, delete the preset if exists.
             if (preset == null)
             {
-                DeleteFile(this._rootDir, name);
+                string destPath = Path.Combine(this._rootDir, $"{name}.json");
+                File.Delete(destPath);
             }
 
             else
@@ -75,12 +76,6 @@ namespace FontSettings.Framework.DataAccess
                 preset = default;
                 return false;
             }
-        }
-
-        private static void DeleteFile(string directory, string fileName)
-        {
-            string fullPath = Path.Combine(directory, fileName);
-            File.Delete(fullPath);
         }
 
         private static JsonSerializerSettings GetJsonSerializeSettings()
