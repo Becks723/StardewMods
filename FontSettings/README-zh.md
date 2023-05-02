@@ -96,6 +96,10 @@
 ## 兼容性
 兼容Windows、MacOS、Linux系统。Android版本还在制作中~
 
+#### 和 SpriteMaster 冲突
+触发条件：SpriteMaster版本 >0.14.0, 本模组版本不限。<br/>
+冲突表现：调整参数示例文本不刷新、点击ok键无限加载、cpu爆高。<br/>
+解决方法：在配置菜单中，找到 SpriteMaster > Advanced Settings > Extras.OpenGL，取消勾选 `Enabled` 和 `OptimizeTexture2DSetData` 两项，重进游戏。<small>测试环境：FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
 
 ## 反馈 & 帮助
 #### 反馈/提问
