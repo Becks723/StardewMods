@@ -22,6 +22,7 @@
 
 	<ItemGroup>
 		<Reference Include="BmFont" HintPath="$(GamePath)\BmFont.dll" Private="false" />
+		<Reference Include="Newtonsoft.Json" HintPath="$(GamePath)\smapi-internal\Newtonsoft.Json.dll" Private="false" />
 	</ItemGroup>
 
 	<ItemGroup>
