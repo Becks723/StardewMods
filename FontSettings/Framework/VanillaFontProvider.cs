@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BmFont;
 using FontSettings.Framework.FontPatching;
+using FontSettings.Framework.Fonts;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -28,6 +29,7 @@ namespace FontSettings.Framework
 
         private readonly IModHelper _helper;
         private readonly IMonitor _monitor;
+        private readonly ModConfig _config;
 
         /// <summary>Needs this for BmFont file name.</summary>
         private List<ModLanguage> _modLanguages;
@@ -36,10 +38,11 @@ namespace FontSettings.Framework
 
         public event EventHandler<RecordEventArgs> RecordFinished;
 
-        public VanillaFontProvider(IModHelper helper, IMonitor monitor)
+        public VanillaFontProvider(IModHelper helper, IMonitor monitor, ModConfig config)
         {
             this._helper = helper;
             this._monitor = monitor;
+            this._config = config;
         }
 
         /// <summary>This must be attached earlier than font patch logic.</summary>
@@ -119,12 +122,15 @@ namespace FontSettings.Framework
                             foreach (FontPage fontPage in fontFile.Pages)
                                 pages.Add(Game1.content.Load<Texture2D>($"Fonts/{fontPage.File}"));
 
-                            var bmFont = new GameBitmapSpriteFont()
-                            {
-                                FontFile = fontFile,
-                                Pages = pages,
-                                LanguageCode = language.Code
-                            };
+                            var bmFont = new GameBitmapSpriteFont(
+                                bmFont: new Models.BmFontData 
+                                { 
+                                    FontFile = fontFile,
+                                    Pages = pages.ToArray() 
+                                },
+                                pixelZoom: FontHelpers.GetDefaultFontPixelZoom(language),
+                                language: language,
+                                bmFontInLatinLanguages: _config.EnableLatinDialogueFont);
 
                             this.RecordFont(language, fontType, bmFont);
                             this.RecordCharacterRanges(language, fontType, GetCharacterRanges(bmFont));

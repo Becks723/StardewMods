@@ -78,7 +78,7 @@ namespace FontSettings
             this._config.ValidateValues(this.Monitor);
 
             // init vanilla font provider.
-            this._vanillaFontProvider = new VanillaFontProvider(helper, this.Monitor);
+            this._vanillaFontProvider = new VanillaFontProvider(helper, this.Monitor, this._config);
             this._vanillaFontProvider.RecordStarted += this.OnFontRecordStarted;
             this._vanillaFontProvider.RecordFinished += this.OnFontRecordFinished;
 
@@ -385,7 +385,7 @@ namespace FontSettings
             {
                 stopwatch.Start();
 
-                var gen = new SampleFontGenerator(this._vanillaFontProvider);
+                var gen = new SampleFontGenerator(this._vanillaFontProvider, () => this._config.EnableLatinDialogueFont);
                 IFontGenerator sampleFontGenerator = gen;
                 IAsyncFontGenerator sampleAsyncFontGenerator = gen;
 

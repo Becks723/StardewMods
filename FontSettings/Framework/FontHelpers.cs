@@ -61,18 +61,6 @@ namespace FontSettings.Framework
             return result;
         }
 
-        public static bool IsLatinLanguage(LanguageInfo language)
-        {
-            return language.Code is LocalizedContentManager.LanguageCode.en
-                or LocalizedContentManager.LanguageCode.pt
-                or LocalizedContentManager.LanguageCode.es
-                or LocalizedContentManager.LanguageCode.de
-                or LocalizedContentManager.LanguageCode.fr
-                or LocalizedContentManager.LanguageCode.it
-                or LocalizedContentManager.LanguageCode.tr
-                or LocalizedContentManager.LanguageCode.hu;
-        }
-
         public static bool IsLatinLanguage(LocalizedContentManager.LanguageCode code)
         {
             return code is LocalizedContentManager.LanguageCode.en
@@ -83,6 +71,13 @@ namespace FontSettings.Framework
                 or LocalizedContentManager.LanguageCode.it
                 or LocalizedContentManager.LanguageCode.tr
                 or LocalizedContentManager.LanguageCode.hu;
+        }
+
+        public static bool IsLatinLanguage(this LanguageInfo language)
+        {
+            return language.IsModLanguage()
+                ? GetModLanguage(language)?.UseLatinFont ?? throw new KeyNotFoundException($"language not found: {language}")
+                : IsLatinLanguage(language.Code);
         }
 
         public static float GetDefaultFontPixelZoom()
@@ -111,6 +106,14 @@ namespace FontSettings.Framework
         public static float GetDefaultFontPixelZoom(ModLanguage modLanguage)
         {
             return modLanguage.FontPixelZoom;
+        }
+
+        public static float GetDefaultFontPixelZoom(LanguageInfo language)
+        {
+            if (!language.IsModLanguage())
+                return GetDefaultFontPixelZoom(language.Code);
+            else
+                return GetModLanguage(language)?.FontPixelZoom ?? 1.5f;
         }
 
         public static LanguageInfo GetCurrentLanguage()
@@ -240,6 +243,12 @@ namespace FontSettings.Framework
         private static ModLanguage[] GetModLanguages()
         {
             return Game1.content.Load<List<ModLanguage>>("Data/AdditionalLanguages").ToArray();
+        }
+
+        private static ModLanguage? GetModLanguage(LanguageInfo language)
+        {
+            return GetModLanguages()
+                .FirstOrDefault(lang => lang.LanguageCode == language.Locale);
         }
 
         public static XmlSource ParseFontFile(FontFile fontFile)

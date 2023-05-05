@@ -8,29 +8,23 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using static Microsoft.Xna.Framework.Graphics.SpriteFont;
 
-namespace FontSettings.Framework
+namespace FontSettings.Framework.Fonts
 {
-    internal class XNASpriteFont : ISpriteFont
+    internal class XNASpriteFont : SpriteFontBase
     {
-        private bool _disposed;
-
         public SpriteFont InnerFont { get; }
-
-        public bool IsDisposed => this._disposed;
-
-        string ISpriteFont.LineBreak => Environment.NewLine;
 
         public XNASpriteFont(SpriteFont innerFont)
         {
             this.InnerFont = innerFont ?? throw new ArgumentNullException(nameof(innerFont));
         }
 
-        public void Draw(SpriteBatch b, string text, Vector2 position, Color color)
+        public override void Draw(SpriteBatch b, string text, Vector2 position, Color color)
         {
             b.DrawString(this.InnerFont, text, position, color);
         }
 
-        public unsafe void DrawBounds(SpriteBatch b, string text, Vector2 position, Color color)
+        public override unsafe void DrawBounds(SpriteBatch b, string text, Vector2 position, Color color)
         {
             if (string.IsNullOrEmpty(text)) return;
 
@@ -41,15 +35,11 @@ namespace FontSettings.Framework
             {
                 Glyph glyph;
                 if (!glyphData.TryGetValue(c, out glyph))
-                {
                     if (this.InnerFont.DefaultCharacter.HasValue)
-                    {
                         if (!glyphData.TryGetValue(this.InnerFont.DefaultCharacter.Value, out glyph))
                             continue;
-                    }
                     else
                         continue;
-                }
 
                 switch (c)
                 {
@@ -69,9 +59,7 @@ namespace FontSettings.Framework
                     firstGlyphOfLine = false;
                 }
                 else
-                {
                     offset.X += this.InnerFont.Spacing + glyph.LeftSideBearing;
-                }
 
                 var p = offset;
                 p += position;
@@ -84,18 +72,9 @@ namespace FontSettings.Framework
             }
         }
 
-        public Vector2 MeasureString(string text)
+        public override Vector2 MeasureString(string text)
         {
             return this.InnerFont.MeasureString(text);
-        }
-
-        public void Dispose()
-        {
-            if (!this._disposed)
-            {
-                this.InnerFont.Texture?.Dispose();
-                this._disposed = true;
-            }
         }
     }
 }
