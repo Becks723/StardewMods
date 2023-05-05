@@ -84,7 +84,7 @@ namespace FontSettings.Framework.FontGenerators
 
         private ISpriteFont BmFont(SampleFontGeneratorParameter param)
         {
-            if (FontHelpers.IsLatinLanguage(param.Language) || !param.Enabled)
+            if ((!this._enableLatinDialogueFont() && FontHelpers.IsLatinLanguage(param.Language)) || !param.Enabled)
                 return this.GetVanillaBmFont(param.Language, GameFontType.SpriteText);
 
             else if (param.FontFilePath is null)
