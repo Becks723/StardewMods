@@ -28,6 +28,7 @@ namespace FontSettings.Framework.Menus.Views
         private readonly IFontPresetManager _presetManager;
         private readonly IModRegistry _registry;
         private readonly bool _simplifiedComboBox;
+        private readonly bool _enableLatinDialogueFont;
         private readonly FontSettingsMenuModel _viewModel;
 
         private readonly Texture2D _save;
@@ -40,11 +41,12 @@ namespace FontSettings.Framework.Menus.Views
         private bool _isNewPresetMenu;
         private NewPresetMenu _newPresetMenu;
 
-        public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, bool simplifiedComboBox, FontSettingsMenuModel viewModel)
+        public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, bool simplifiedComboBox, bool enableLatinDialogueFont, FontSettingsMenuModel viewModel)
         {
             this._presetManager = presetManager;
             this._registry = registry;
             this._simplifiedComboBox = simplifiedComboBox;
+            this._enableLatinDialogueFont = enableLatinDialogueFont;
 
             this._save = Textures.Save;
             this._delete = Textures.Delete;
@@ -850,7 +852,7 @@ namespace FontSettings.Framework.Menus.Views
             sb.Append(I18n.Ui_MainMenu_FontTypeHelp_Paragraph());
 
             var lang = FontHelpers.GetCurrentLanguage();
-            if (FontHelpers.IsLatinLanguage(lang))
+            if (!this._enableLatinDialogueFont && FontHelpers.IsLatinLanguage(lang))
             {
                 string locale = FontHelpers.GetCurrentDisplayLocale();
 
