@@ -26,6 +26,12 @@ namespace FontSettings.Framework.FontScanning
 
         public virtual ICollection<IFontFileScanner> Scanners { get; } = new List<IFontFileScanner>();
 
+        public FontFileProvider(IEnumerable<IFontFileScanner> scanners)
+        {
+            foreach (IFontFileScanner scanner in scanners)
+                this.Scanners.Add(scanner);
+        }
+
         public virtual void RescanForFontFiles()
         {
             var stopWatch = new Stopwatch();
@@ -46,7 +52,8 @@ namespace FontSettings.Framework.FontScanning
             this._fontFiles = this.Scanners
                 .Where(scanner => scanner != null)
                 .SelectMany(scanner => scanner.ScanForFontFiles())
-                .Distinct();
+                .Distinct()
+                .ToArray();
         }
     }
 }

@@ -14,6 +14,8 @@ namespace FontSettings.Framework.FontScanning.Scanners
 
         public IEnumerable<string> IgnoredFiles { get; } = GetIgnoredFiles();
 
+        public bool LogDetails { get; set; } = true;
+
         private static IEnumerable<string> GetIgnoredFiles()
         {
             yield return "mstmc.ttf";

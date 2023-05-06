@@ -101,9 +101,9 @@ namespace FontSettings
             // init service objects.
             this._config.Sample = this._sampleDataRepository.ReadSampleData();
             this._vanillaFontConfigProvider = new VanillaFontConfigProvider(this._vanillaFontProvider);
-            this._fontFileProvider = this.CreateInstalledFontFileProvider();
+            this._fontFileProvider = new FontFileProvider(this.YieldFontScanners());
 
-            this._vanillaFontConfigParser = new FontConfigParserForVanilla(this.CreateVanillaFontFileProvider(), this._vanillaFontProvider);
+            this._vanillaFontConfigParser = new FontConfigParserForVanilla(this._fontFileProvider, this._vanillaFontProvider);
             this._userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontProvider, this._vanillaFontConfigProvider);
             this._fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider, this._vanillaFontProvider);
 
@@ -174,7 +174,7 @@ namespace FontSettings
                 uniqueId: this.ModManifest.UniqueID,
                 openFontSettingsMenu: this.OpenFontSettingsMenu)
                 .Integrate();
-            
+
             // init title font button. (must be after `Textures.OnAssetRequested` subscription)
             this._titleFontButton = new TitleFontButton(
                 position: this.GetTitleFontButtonPosition(),
@@ -232,17 +232,7 @@ namespace FontSettings
             this.Helper.WriteConfig(this._config);
         }
 
-        private FontFileProvider CreateInstalledFontFileProvider()
-        {
-            return new FontFileProviderPerformaceImproved(this.YieldInstalledFontScanners());
-        }
-
-        private IFontFileProvider CreateVanillaFontFileProvider()
-        {
-            return new FontFileProviderPerformaceImproved(this.YieldVanillaFontScanners());
-        }
-
-        private IEnumerable<IFontFileScanner> YieldInstalledFontScanners()
+        private IEnumerable<IFontFileScanner> YieldFontScanners()
         {
             var scanSettings = new ScanSettings();
 
@@ -263,6 +253,11 @@ namespace FontSettings
                     break;
             }
 
+            // mod internal 'assets/fonts' folder.
+            string vanillaFontFolder = Path.Combine(this.Helper.DirectoryPath, "assets/fonts");
+            Directory.CreateDirectory(vanillaFontFolder);
+            yield return new BasicFontFileScanner(vanillaFontFolder, scanSettings);
+
             // custom folders specified by user.
             var customFolders = this._config.CustomFontFolders.Distinct().ToArray();
             foreach (string folder in customFolders)
@@ -272,18 +267,6 @@ namespace FontSettings
 
                 yield return new BasicFontFileScanner(folder, scanSettings);
             }
-        }
-
-        private IEnumerable<IFontFileScanner> YieldVanillaFontScanners()
-        {
-            foreach (var scanner in this.YieldInstalledFontScanners())
-                yield return scanner;
-
-            // mod internal 'assets/fonts' folder.
-            var scanSettings = new ScanSettings();
-            string vanillaFontFolder = Path.Combine(this.Helper.DirectoryPath, "assets/fonts");
-            Directory.CreateDirectory(vanillaFontFolder);
-            yield return new BasicFontFileScanner(vanillaFontFolder, scanSettings);
         }
 
         private void OnFontRecordStarted(object sender, RecordEventArgs e)
