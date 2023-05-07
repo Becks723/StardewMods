@@ -114,11 +114,13 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public void DeleteCurrentPreset()
         {
-            if (this.CurrentPresetPrivate == null) return;
+            if (this.CurrentPresetPrivate == null) 
+                return;
 
             var next = GetNextItem(this.Presets, this.CurrentPresetPrivate);
 
             this._presetManager.UpdatePreset(this.CurrentPresetName, null);
+            this.UpdatePresets();
 
             this.CurrentPresetPrivate = next;
 

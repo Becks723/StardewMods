@@ -14,7 +14,10 @@
 	- √ 兼容mod语言。
 	- √ 优化BmFont制作的字体，现在的感觉被裁剪过。
 	- √ 为assets添加assetname，使其可替换。
+	- √ 扫描字体的过程记录日志
 	- × SpriteFont的文件保存，方便下次加载。
+	- × BmFont的Kerning？游戏里用不着。
+	- 暂时√ SpriteFont生成的图片太大（指宽高）怎么办？xna自己解决
 	- 暂时√ 字体的生成方案：
 		- SpriteFont：stbtrutype（当前）
 		- BmFont：stbtrutype（当前）、fontbm（备用）、bmfont
@@ -27,14 +30,11 @@
 				 3. 安卓的UI与pc端不一样。
 	- 拉丁语言兼容对话字体。
 	- UI兼容手柄。
-	- SpriteFont生成的图片太大（指宽高）怎么办？
-	- BmFont的Kerning？
 	- 下拉框条目用各自的字体显示。
 	- 代码里的TODO。
 	- assets/vanilla-fonts扩展：新建一个custom-vanilla-fonts给用户配置。
 		1. 添加更多自定义语言。
 		2. 重写已存在的配置，用于自定义字体。
-	- 扫描字体的过程记录日志
 	- 将第三方dll归入libs目录。
 		目前难点：SMAPI用cecil提前解析依赖，因此无法用AssemblyResolve事件；
 				目前只识别与主dll同一目录的依赖（见AssemblyLoader::GetReferencedLocalAssemblies），可能需要写一份PR。

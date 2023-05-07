@@ -101,6 +101,10 @@ Textures for this mod are stored in the `FontSettings/assets` folder. To edit th
 ## Compatibility:
 Lastest version works with Windows, MacOS, Linux.
 
+#### Conflict with SpriteMaster mod
+Condition: SpriteMaster version >0.14.0, FontSettings version unlimited.<br/>
+Symptom: changes made to fonts do not apply, game becomes laggy, high cpu, etc.<br/>
+**Solution**: In the configuration menu, go to `SpriteMaster > Advanced Settings > Extras.OpenGL`, uncheck `Enabled` and `OptimizeTexture2DSetData`, and restart the game. <small>Test environment: FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
 
 ## Help & Feedback:
 
@@ -114,6 +118,10 @@ Lastest version works with Windows, MacOS, Linux.
 
 
 ## Release Notes
+#### 0.9.1 - 2023-04-29
+- Fix no response pressing "Save As New Preset" button.
+- Fix you cannot delete a preset.
+
 #### 0.9.0 - 2023-04-18
 - Add support for [Toolbar Icons](https://www.nexusmods.com/stardewvalley/mods/11026).
 - You can customize this mod's textures (See [edit mod assets](#edit-mod-assets) section).
