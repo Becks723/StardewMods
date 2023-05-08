@@ -24,8 +24,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private readonly IAsyncFontInfoRetriever _asyncFontInfoRetriever;
 
-        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IAsyncFontInfoRetriever asyncFontInfoRetriever, FontSettingsMenuContextModel stagedValues)
-            : base(config, vanillaFontProvider, sampleFontGenerator, sampleAsyncFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, new FontInfoRetriverPlaceHolder(), stagedValues)
+        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, FontSettingsMenuContextModel stagedValues)
+            : base(config, vanillaFontProvider, sampleFontGenerator, sampleAsyncFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, fontInfoRetriever, stagedValues)
         {
             this._asyncFontInfoRetriever = asyncFontInfoRetriever;
 
@@ -38,11 +38,44 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
             this.RefreshFontsCommand = new AsyncDelegateCommand(this.RefreshAllFontsAsync, this.CanRefreshAllFonts, ex => LogAsyncException(nameof(this.RefreshFontsCommand), ex));
 
-            _ = this.UpdateAllFontsAsync(rescan: false);
+            // 放在最后（所有依赖项都已初始化完）
+            _ = Task.Run(async () =>
+            {
+                var allFonts = await this.LoadAllFontsAsync(rescan: false);
+                this.AllFonts.Clear();
+                foreach (var font in allFonts)
+                    this.AllFonts.Add(font);
+            });
         }
 
-        protected override void InitAllFonts()  // 异步初始化AllFonts，且不要await，就可能先于此类构造器执行，构造器中的依赖项还是null。
-        { }                                     // 于是改成：这里留空，到构造器末尾，依赖项全部初始化完，再执行。
+        /// <summary>仅加载初始化时需要的字体，余下的大部队放异步里加载。</summary>
+        protected override void InitAllFonts()
+        {
+            this.AllFonts = new ObservableCollection<FontViewModel>();
+
+            // single keep-origial
+            this.AllFonts.Add(this.KeepOriginalFont);
+
+            // current user font
+            {
+                if (this._fontConfigManager.TryGetFontConfig(this.Language, this.CurrentFontType, out FontConfig config))
+                {
+                    var fontFiles = this._fontFileProvider.FontFiles;
+                    var userFont = fontFiles.Where(file => file == config.FontFilePath).FirstOrDefault();
+                    if (userFont != null)
+                    {
+                        var userFontModels = this.GetFontInfoOrWarn(userFont);
+                        foreach (FontModel font in userFontModels)
+                        {
+                            this.AllFonts.Add(new FontViewModel(
+                                fontFilePath: font.FullPath,
+                                fontIndex: font.FontIndex,
+                                displayText: $"{font.FamilyName} ({font.SubfamilyName})"));
+                        }
+                    }
+                }
+            }
+        }
 
         private async Task RefreshAllFontsAsync()
         {
@@ -55,7 +88,17 @@ namespace FontSettings.Framework.Menus.ViewModels
 
                 // throw new Exception("Test exception for 'async void'");  // 异常处理测试，确保不能崩游戏。
 #endif
-                await this.UpdateAllFontsAsync(rescan: true);
+                // 重新扫描本地字体文件。
+                var allFonts = await this.LoadAllFontsAsync(rescan: true);
+                this.AllFonts.Clear();
+                foreach (var font in allFonts)
+                    this.AllFonts.Add(font);
+
+                // 更新选中字体。
+                this.CurrentFont = this.FindFont(this.CurrentFontConfig.FontFilePath, this.CurrentFontConfig.FontIndex);
+
+                // 更新示例。
+                this.UpdateExampleCurrent();
             }
             finally
             {
@@ -68,16 +111,20 @@ namespace FontSettings.Framework.Menus.ViewModels
             return !this.IsRefreshingFonts;
         }
 
-        private async Task<IEnumerable<FontViewModel>> LoadInstalledFontsAsync(bool rescan = false)  // rescan: 是否重新扫描本地字体。
+        private async Task<IEnumerable<FontViewModel>> LoadInstalledFontsAsync(bool rescan = false, IEnumerable<string>? skipFontFiles = null)  // rescan: 是否重新扫描本地字体。
         {
             var result = new List<FontViewModel>();
 
             if (rescan)
                 this._fontFileProvider.RescanForFontFiles();
 
+            skipFontFiles ??= Array.Empty<string>();
+
             var fonts = (
                 await Task.WhenAll(
-                    this._fontFileProvider.FontFiles.Select(file => this.GetFontInfoOrWarnAsync(file)))
+                    this._fontFileProvider.FontFiles
+                        .Except(skipFontFiles)
+                        .Select(file => this.GetFontInfoOrWarnAsync(file)))
                 )
                 .SelectMany(x => x)
                 .Select(font => new FontViewModel(
@@ -102,75 +149,30 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
         }
 
-        private FontViewModel FontKeepOriginal()
+        private FontModel[] GetFontInfoOrWarn(string fontFile)
         {
-            FontViewModel vanillaFont;
+            var result = this._fontInfoRetriever.GetFontInfo(fontFile);
+            if (result.IsSuccess)
+                return result.GetData();
+            else
             {
-                var vanillaFontConfig = this._vanillaFontConfigProvider.GetVanillaFontConfig(FontHelpers.GetCurrentLanguage(),
-                    this.CurrentFontType);
-                vanillaFont = new FontViewModel(
-                    fontFilePath: vanillaFontConfig.FontFilePath,
-                    fontIndex: vanillaFontConfig.FontIndex,
-                    displayText: I18n.Ui_MainMenu_Font_KeepOrig());
+                ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
+                ILog.Trace(result.GetError());
+                return Array.Empty<FontModel>();
             }
-            return vanillaFont;
         }
 
-        private async Task UpdateAllFontsAsync(bool rescan)
+        private async Task<IEnumerable<FontViewModel>> LoadAllFontsAsync(bool rescan)
         {
-            lock (this._allFontsLock)
-            {
-                // clear fonts but first one.
-                this.AllFonts.Clear();
-                this.AllFonts.Add(this.FontKeepOriginal());
-            }
+            var newAllFonts = new List<FontViewModel>();
+
+            newAllFonts.Add(this.KeepOriginalFont);
 
             var installedFonts = await this.LoadInstalledFontsAsync(rescan);
+            foreach (FontViewModel font in installedFonts)
+                newAllFonts.Add(font);
 
-            lock (this._allFontsLock)
-                foreach (var font in installedFonts)
-                    this.AllFonts.Add(font);
-
-            this.CurrentFont = this.FindFont(this.CurrentFontConfig.FontFilePath, this.CurrentFontConfig.FontIndex);
-            this.UpdateExampleCurrent();
-        }
-
-        protected override FontViewModel FindFont(string fontFilePath, int fontIndex)
-        {
-            lock (this._allFontsLock)
-            {
-                // 这里我们可能遇到AllFonts还没初始化，确保有一个默认的“保持原版”项。
-                if (this.AllFonts.Count == 0)
-                    this.AllFonts.Add(this.FontKeepOriginal());
-
-                return base.FindFont(fontFilePath, fontIndex);
-            }
-        }
-
-        private class FontInfoRetriverPlaceHolder : IFontInfoRetriever
-        {
-            public IResult<FontModel[]> GetFontInfo(string fontFile)
-            {
-                var fakeFonts = new[]
-                {
-                    new FontModel
-                    {
-                        Name = Path.GetFileNameWithoutExtension(fontFile),
-                        FullPath = fontFile,
-                        FontIndex = 0,
-                        FamilyName = Path.GetFileNameWithoutExtension(fontFile),
-                        SubfamilyName = "未知"
-                    }
-                };
-                return new SuccessResult<FontModel[]>(fakeFonts);
-            }
-
-            private record SuccessResult<TData>(TData Data) : IResult<TData>
-            {
-                public bool IsSuccess => true;
-                public TData GetData() => this.Data;
-                public string GetError() => string.Empty;
-            }
+            return newAllFonts;
         }
     }
 }

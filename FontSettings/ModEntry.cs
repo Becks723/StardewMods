@@ -386,6 +386,7 @@ namespace FontSettings
                             vanillaFontConfigProvider: this._vanillaFontConfigProvider,
                             gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
                             fontFileProvider: this._fontFileProvider,
+                            fontInfoRetriever: new FontInfoRetriever(),
                             asyncFontInfoRetriever: new FontInfoRetriever(),
                             stagedValues: this._menuContextModel);
                     else

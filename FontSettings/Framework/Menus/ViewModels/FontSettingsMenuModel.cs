@@ -532,7 +532,9 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
-        private LanguageInfo Language { get; }
+        protected FontViewModel KeepOriginalFont { get; set; }
+
+        protected LanguageInfo Language { get; }
 
         public ICommand MoveToPrevFontCommand { get; }
 
@@ -597,9 +599,6 @@ namespace FontSettings.Framework.Menus.ViewModels
             if (this.SkipSpriteText() && this.CurrentFontType == GameFontType.SpriteText)
                 this.CurrentFontType = GameFontType.SmallFont;
 
-            this.InitAllFonts();
-            this.OnFontTypeChanged(this.CurrentFontType);
-
             this.MinCharOffsetX = this._config.MinCharOffsetX;
             this.MaxCharOffsetX = this._config.MaxCharOffsetX;
             this.MinCharOffsetY = this._config.MinCharOffsetY;
@@ -624,6 +623,10 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.DeleteCurrentPresetCommand = new DelegateCommand(this._DeleteCurrentPreset);
             this.RefreshFontsCommand = new DelegateCommand(this.RefreshAllFonts);
             this.ResetFontCommand = new DelegateCommand(this.ResetCurrentFont);
+
+            this.KeepOriginalFont = this.FontKeepOriginal();
+            this.InitAllFonts();
+            this.OnFontTypeChanged(this.CurrentFontType);
         }
 
         private void PreviousFontType()
@@ -842,6 +845,9 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 更新标题。
             this.Title = newFontType.LocalizedName();
 
+            // 更新默认字体。
+            this.KeepOriginalFont = this.FontKeepOriginal();
+
             // 更新各个属性。
             FontConfig fontConfig = this.GetOrCreateFontConfig();
             this.CurrentFontConfig = fontConfig;
@@ -982,13 +988,13 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 如果找不到字体文件，保持原版。
 
             if (fontFilePath == null)
-                return this.AllFonts[0];
+                return this.KeepOriginalFont;
 
             var found = this.AllFonts.Where(f => f.FontFilePath == fontFilePath && f.FontIndex == fontIndex);
-            if (!found.Any())
-                return this.AllFonts[0];
+            if (found.Any())
+                return found.FirstOrDefault();
 
-            return found.FirstOrDefault();
+            return this.KeepOriginalFont;
         }
 
         private void FillOptionsWithFontConfig(FontConfig fontConfig)
@@ -1008,6 +1014,20 @@ namespace FontSettings.Framework.Menus.ViewModels
         private bool SkipSpriteText()
         {
             return !this._config.EnableLatinDialogueFont && LocalizedContentManager.CurrentLanguageLatin;
+        }
+
+        private FontViewModel FontKeepOriginal()
+        {
+            FontViewModel vanillaFont;
+            {
+                var vanillaFontConfig = this._vanillaFontConfigProvider.GetVanillaFontConfig(FontHelpers.GetCurrentLanguage(),
+                    this.CurrentFontType);
+                vanillaFont = new FontViewModel(
+                    fontFilePath: vanillaFontConfig.FontFilePath,
+                    fontIndex: vanillaFontConfig.FontIndex,
+                    displayText: I18n.Ui_MainMenu_Font_KeepOrig());
+            }
+            return vanillaFont;
         }
 
         [Obsolete("验证字体文件的逻辑需要转移，此方法本身废除。")]
