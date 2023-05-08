@@ -788,15 +788,21 @@ namespace FontSettings.Framework.Menus.Views
             base.draw(b);
 
 #if DEBUG
-            b.DrawString(Game1.smallFont, $"Enabled: {this._viewModel.FontEnabled}\n"
-                + $"Size: {this._viewModel.FontSize}\n"
-                + $"Spacing: {this._viewModel.Spacing}\n"
-                + $"Line spacing: {this._viewModel.LineSpacing}\n"
-                + $"Font: {this._viewModel.FontFilePath}\n"
-                + $"Font index: {this._viewModel.FontIndex}\n"
-                + $"Offset-x: {this._viewModel.CharOffsetX}\n"
-                + $"Offset-y: {this._viewModel.CharOffsetY}\n"
-                + $"Pixel Zoom: {this._viewModel.PixelZoom}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
+            string GetDebugInfo()
+            {
+                return $"CurrentFontType: {this._viewModel.CurrentFontType}"
+                    + $"\nCurrentLanguage: {FontHelpers.GetCurrentLanguage()}"
+                    + $"\nEnabled: {this._viewModel.FontEnabled}"
+                    + $"\nSize: {this._viewModel.FontSize}"
+                    + $"\nSpacing: {this._viewModel.Spacing}"
+                    + $"\nLine spacing: {this._viewModel.LineSpacing}"
+                    + $"\nFont: {this._viewModel.FontFilePath}"
+                    + $"\nFont index: {this._viewModel.FontIndex}"
+                    + $"\nOffset-x: {this._viewModel.CharOffsetX}"
+                    + $"\nOffset-y: {this._viewModel.CharOffsetY}"
+                    + $"\nPixel Zoom: {this._viewModel.PixelZoom}";
+            }
+            b.DrawString(Game1.smallFont, GetDebugInfo(), new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif
 
             if (this._isNewPresetMenu)
