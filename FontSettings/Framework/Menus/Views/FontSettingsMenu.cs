@@ -78,10 +78,12 @@ namespace FontSettings.Framework.Menus.Views
             if (option == null) throw new InvalidOperationException();
 
             if (on)
+            {
                 if (!container.Children.Contains(option))
                     container.Children.Insert(this._index, option);
-                else
-                    container.Children.Remove(option);
+            }
+            else
+                container.Children.Remove(option);
         }
 
         protected override void OnDataContextChanged(ValueChangedEventArgs e)
