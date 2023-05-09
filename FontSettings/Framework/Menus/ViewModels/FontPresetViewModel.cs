@@ -34,6 +34,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
                 this.RaisePropertyChanged(nameof(this.CurrentPresetName));
                 this.RaisePropertyChanged(nameof(this.CurrentPreset));
+
+                this.RaisePropertyChanged(nameof(this.CanSaveCurrentPreset));
             }
         }
 
@@ -43,6 +45,30 @@ namespace FontSettings.Framework.Menus.ViewModels
                                                                                                   : string.Empty;
 
         public FontConfig CurrentPreset => this.CurrentPresetPrivate?.Settings;
+
+        public bool CanSaveCurrentPreset
+        {
+            get
+            {
+                var currentPreset = this.CurrentPresetPrivate;
+
+                return currentPreset != null                                        // 无选中预设时不可。
+                    && !this._presetManager.IsReadOnlyPreset(currentPreset)         // 只读的预设不可编辑。
+                    && currentPreset?.Settings != this.CurrentFontConfigRealTime;   // 仅在改动时有必要保存。
+            }
+        }
+
+        private FontConfig _currentFontConfigRealTime;
+        public FontConfig CurrentFontConfigRealTime
+        {
+            get => this._currentFontConfigRealTime;
+            set
+            {
+                this.SetField(ref this._currentFontConfigRealTime, value);
+
+                this.RaisePropertyChanged(nameof(this.CanSaveCurrentPreset));
+            }
+        }
 
         public event EventHandler PresetChanged;
 
@@ -96,14 +122,6 @@ namespace FontSettings.Framework.Menus.ViewModels
             return true;
         }
 
-        public bool CanSavePreset()
-        {
-            var currentPreset = this.CurrentPresetPrivate;
-
-            return currentPreset != null                                  // 无选中预设时不可。
-                && !this._presetManager.IsReadOnlyPreset(currentPreset);  // 只读的预设不可编辑。
-        }
-
         public bool CanDeletePreset()
         {
             var currentPreset = this.CurrentPresetPrivate;
@@ -114,7 +132,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public void DeleteCurrentPreset()
         {
-            if (this.CurrentPresetPrivate == null) 
+            if (this.CurrentPresetPrivate == null)
                 return;
 
             var next = GetNextItem(this.Presets, this.CurrentPresetPrivate);
@@ -135,8 +153,18 @@ namespace FontSettings.Framework.Menus.ViewModels
             if (settings is null)
                 throw new ArgumentNullException(nameof(settings));
 
-            this._presetManager.UpdatePreset(this.CurrentPresetName,
-                new FontPresetWithName(FontHelpers.GetCurrentLanguage(), this._fontType, settings, this.CurrentPresetName));   // TODO: 封装preset实例创建过程
+            // 获取保存后的预设。
+            FontPreset newPreset = this.CreateNewPreset(this.CurrentPresetName, settings);
+
+            // 更新数据库。
+            this._presetManager.UpdatePreset(this.CurrentPresetName, newPreset);
+
+            // 更新自己的相关属性。
+            int index = Array.IndexOf(this.Presets, this.CurrentPresetPrivate);
+            this.Presets[index] = newPreset;
+            this.CurrentPresetPrivate = newPreset;
+
+            this.RaisePresetChanged(EventArgs.Empty);
         }
 
         public void SaveCurrentAsNewPreset(string presetName, FontConfig settings)
@@ -145,7 +173,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 throw new ArgumentNullException(nameof(settings));
 
             this._presetManager.UpdatePreset(presetName,
-                new FontPresetWithName(FontHelpers.GetCurrentLanguage(), this._fontType, settings, presetName));   // TODO: 封装preset实例创建过程
+                this.CreateNewPreset(presetName, settings));
 
             this.UpdatePresets();
         }
@@ -161,6 +189,16 @@ namespace FontSettings.Framework.Menus.ViewModels
                 this._presetManager.GetPresets(FontHelpers.GetCurrentLanguage(), this._fontType)
                 )
                 .ToArray();
+        }
+
+        private FontPreset CreateNewPreset(string presetName, FontConfig settings)
+        {
+            // TODO: 封装preset实例创建过程
+            return new FontPresetWithName(
+                language: FontHelpers.GetCurrentLanguage(),
+                fontType: this._fontType,
+                settings: settings,
+                name: presetName);
         }
 
         private static T? GetPreviousItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer = null)

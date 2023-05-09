@@ -105,6 +105,11 @@ namespace FontSettings.Framework.Menus.Views
             }
         }
 
+        private void OnCoreSettingsChanged(object sender, EventArgs e)
+        {
+            this._viewModel.OnSettingsChanged();
+        }
+
         private async void OkButtonClicked(object sender, EventArgs e)
         {
             try
@@ -337,7 +342,9 @@ namespace FontSettings.Framework.Menus.Views
                                         {
                                             var checkbox = new CheckBox();
                                             checkbox.Checked += this.UpdateExampleCurrent;
+                                            checkbox.Checked += this.OnCoreSettingsChanged;
                                             checkbox.Unchecked += this.UpdateExampleCurrent;
+                                            checkbox.Unchecked += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.FontEnabled, () => checkbox.IsChecked);
 
                                             var label = new Label();
@@ -362,6 +369,7 @@ namespace FontSettings.Framework.Menus.Views
                                             context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
                                             context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
                                             fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
+                                            fontComboBox.SelectionChanged += this.OnCoreSettingsChanged;
 
                                             //var refreshButton = new RefreshButton(2.5f);
                                             //refreshButton.AnimationDuration = 300;
@@ -387,6 +395,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxFontSize, () => slider.Maximum);
@@ -432,6 +441,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxSpacing, () => slider.Maximum);
@@ -460,6 +470,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxLineSpacing, () => slider.Maximum);
@@ -488,6 +499,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.CharOffsetX, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinCharOffsetX, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxCharOffsetX, () => slider.Maximum);
@@ -516,6 +528,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.CharOffsetY, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinCharOffsetY, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxCharOffsetY, () => slider.Maximum);
@@ -543,6 +556,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.PixelZoom, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinPixelZoom, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxPixelZoom, () => slider.Maximum);

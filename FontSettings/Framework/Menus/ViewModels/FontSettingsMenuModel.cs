@@ -152,7 +152,32 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
-        protected FontConfig CurrentFontConfig { get; set; }
+        #region CurrentFontConfig Property
+
+        private FontConfig _currentFontConfig;
+        protected FontConfig CurrentFontConfig
+        {
+            get => this._currentFontConfig;
+            set
+            {
+                this.SetField(ref this._currentFontConfig, value);
+
+                this.RaisePropertyChanged(nameof(this.CurrentFontConfigRealTime));
+            }
+        }
+
+        #endregion
+
+        #region CurrentFontConfigRealTime
+
+        private FontConfig _currentFontConfigRealTime;
+        private FontConfig CurrentFontConfigRealTime
+        {
+            get => this._currentFontConfigRealTime;
+            set => this.SetField(ref this._currentFontConfigRealTime, value);
+        }
+
+        #endregion
 
         #region FontEnabled Property
 
@@ -578,8 +603,11 @@ namespace FontSettings.Framework.Menus.ViewModels
             {
                 var vm = new FontPresetViewModel(this._presetManager, type, this._stagedValues.Presets[type]);
                 vm.PresetChanged += this.OnPresetChanged;
+                vm.PropertyChanged += this.OnPresetViewModelPropertyChanged;
                 this._presetViewModels.Add(type, vm);
             }
+
+            PropertyChanged += this.OnPropertyChangedNotifyPresetViewModel;
 
             // 每当部分属性变化时，记录它们的值，以便再次打开菜单时填入。（记忆功能）
             this.RegisterCallbackToStageValues();
@@ -627,6 +655,12 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.KeepOriginalFont = this.FontKeepOriginal();
             this.InitAllFonts();
             this.OnFontTypeChanged(this.CurrentFontType);
+        }
+
+        /// <summary>这里settings指直接影响字体的设置项。</summary>
+        public void OnSettingsChanged()
+        {
+            this.CurrentFontConfigRealTime = this.CreateConfigBasedOnCurrentSettings();
         }
 
         private void PreviousFontType()
@@ -874,8 +908,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             else
                 this.CurrentPresetName = presetName;
 
-            // 更新几个状态：是否能保存、另存为、删除该预设。
-            this.CanSaveCurrentPreset = presetViewModel.CanSavePreset();
+            // 更新几个状态：是否能另存为、删除该预设。
             this.CanSaveCurrentAsNewPreset = presetViewModel.CanSaveAsNewPreset();
             this.CanDeleteCurrentPreset = presetViewModel.CanDeletePreset();
 
@@ -901,6 +934,30 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
 
             this.UpdateExampleCurrent();
+        }
+
+        private void OnPresetViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var presetViewModel = this.PresetViewModel(this.CurrentFontType);
+
+            switch (e.PropertyName)
+            {
+                case nameof(FontPresetViewModel.CanSaveCurrentPreset):
+                    this.CanSaveCurrentPreset = presetViewModel.CanSaveCurrentPreset;
+                    break;
+            }
+        }
+
+        private void OnPropertyChangedNotifyPresetViewModel(object sender, PropertyChangedEventArgs e)
+        {
+            var presetViewModel = this.PresetViewModel(this.CurrentFontType);
+
+            switch (e.PropertyName)
+            {
+                case nameof(this.CurrentFontConfigRealTime):
+                    presetViewModel.CurrentFontConfigRealTime = this.CurrentFontConfigRealTime;
+                    break;
+            }
         }
 
         private FontConfig GetOrCreateFontConfig()
