@@ -55,7 +55,7 @@ namespace FontSettings.Framework.FontPatching
                     this.PatchBmFontFile(e);
                 }
 
-                else if (this.IsPatchingBmFont(e) 
+                else if (this.IsPatchingBmFont(e)
                     && this.IsBmFontPage(e, out string pageKey))
                 {
                     this.PatchBmFontPage(e, pageKey);
@@ -143,7 +143,8 @@ namespace FontSettings.Framework.FontPatching
             {
                 try
                 {
-                    if (this._pendingPatchSlots.TryGetValue(context, out IFontPatch? patch))
+                    if (this._pendingPatchSlots.TryGetValue(context, out IFontPatch? patch) 
+                        && patch != null)
                         return patch;
                 }
                 finally
