@@ -42,6 +42,7 @@ namespace FontSettings.Framework.Patchers
 
         public void Patch(Harmony harmony, IMonitor monitor)
         {
+            LocalizedContentManager.OnLanguageChange += OnLanguageChange_Latin;
             harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), "setUpCharacterMap"),
                 postfix: this.HarmonyMethod(nameof(SpriteText_setUpCharacterMap_Postfix)));
@@ -100,13 +101,14 @@ namespace FontSettings.Framework.Patchers
                     SpriteTextFields.fontPages.Add(
                         Game1.content.Load<Texture2D>(LatinFontPageAssetName(fontPage.File)));
                 }
-
-                LocalizedContentManager.OnLanguageChange += OnLanguageChange_Latin;
             }
         }
 
         private static void OnLanguageChange_Latin(LocalizedContentManager.LanguageCode code)
         {
+            if (!CustomSpriteTextInLatinLanguages())
+                return;
+
             if (LocalizedContentManager.CurrentLanguageLatin)
             {
                 if (SpriteTextFields._characterMap != null)
