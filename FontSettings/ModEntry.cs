@@ -45,10 +45,6 @@ namespace FontSettings
         private VanillaFontDataRepository _vanillaFontDataRepository;
         private SampleDataRepository _sampleDataRepository;
 
-        private FontConfigParserForVanilla _vanillaFontConfigParser;
-        private FontConfigParserForUser _userFontConfigParser;
-        private FontPresetParser _fontPresetParser;
-
         private FontConfigManager _fontConfigManager;
         private VanillaFontConfigProvider _vanillaFontConfigProvider;
         private IFontFileProvider _fontFileProvider;
@@ -85,34 +81,37 @@ namespace FontSettings
             // init migrations.
             this._0_6_0_Migration = new(helper, this.ModManifest);
 
-            // init repositories.
-            this._fontConfigRepository = new FontConfigRepository(helper);
-            this._fontPresetRepository = new FontPresetRepository(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"));
-            this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor);
-            this._sampleDataRepository = new SampleDataRepository(helper, this.Monitor);
+            string presetDirectory = Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets");
 
             // do changes to database.
             this._0_6_0_Migration.ApplyDatabaseChanges(
-                fontConfigRepository: this._fontConfigRepository,
-                fontPresetRepository: this._fontPresetRepository,
+                fontConfigRepository: new FontConfigRepository(helper),
+                fontPresetRepository: new FontPresetRepository(presetDirectory),
                 modConfig: this._config,
                 writeModConfig: this.SaveConfig);
 
             // init service objects.
-            this._config.Sample = this._sampleDataRepository.ReadSampleData();
             this._vanillaFontConfigProvider = new VanillaFontConfigProvider(this._vanillaFontProvider);
             this._fontFileProvider = new FontFileProvider(this.YieldFontScanners());
 
-            this._vanillaFontConfigParser = new FontConfigParserForVanilla(this._fontFileProvider, this._vanillaFontProvider);
-            this._userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontProvider, this._vanillaFontConfigProvider);
-            this._fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider, this._vanillaFontProvider);
+            var vanillaFontConfigParser = new FontConfigParserForVanilla(this._fontFileProvider, this._vanillaFontProvider);
+            var userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontProvider, this._vanillaFontConfigProvider);
+            var fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider, this._vanillaFontProvider);
 
+            // init repositories.
+            this._fontConfigRepository = new FontConfigRepository(helper, this.Monitor, userFontConfigParser);
+            this._fontPresetRepository = new FontPresetRepository(presetDirectory, this.Monitor, fontPresetParser);
+            this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor, vanillaFontConfigParser);
+            this._sampleDataRepository = new SampleDataRepository(helper, this.Monitor);
+            this._config.Sample = this._sampleDataRepository.ReadSampleData();
+
+            // init managers.
             this._fontConfigManager = new FontConfigManager();
             this._fontPresetManager = new Framework.Preset.FontPresetManager();
 
             // connect manager and repository.
-            this._fontConfigManager.ConfigUpdated += this.OnFontConfigUpdated;
-            this._fontPresetManager.PresetUpdated += this.OnFontPresetUpdated;
+            this._fontConfigManager.ConfigUpdated += (s, e) => this._fontConfigRepository.WriteConfig(e.Key, e.Config);
+            this._fontPresetManager.PresetUpdated += (s, e) => this._fontPresetRepository.WritePreset(e.Name, e.Preset);
 
             // init font patching.
             this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), new FontPatchInvalidatorComposition(helper));
@@ -282,73 +281,40 @@ namespace FontSettings
         {
             this.Monitor.Log($"完成记录{e.Language}的{e.FontType}。");
 
+            var key = new FontConfigKey(e.Language, e.FontType);
+
             // parse vanilla configs in context.
             if (this._vanillaFontDataRepository != null
-                && this._vanillaFontConfigParser != null
                 && this._vanillaFontConfigProvider != null)
             {
-                var vanillaConfigs = this._vanillaFontDataRepository.ReadVanillaFontData().Fonts;
-                var parsedConfigs = this._vanillaFontConfigParser.ParseCollection(vanillaConfigs, e.Language, e.FontType);
-                this._vanillaFontConfigProvider.AddVanillaFontConfigs(parsedConfigs);
+                var config = this._vanillaFontDataRepository.ReadVanillaFontConfig(key);
+
+                if (config != null)
+                this._vanillaFontConfigProvider.AddVanillaFontConfigs(new Dictionary<FontConfigKey, FontConfig>() { { key, config } });
             }
 
             // parse configs in context.
             if (this._fontConfigRepository != null
-                && this._userFontConfigParser != null
                 && this._fontConfigManager != null)
             {
-                var fontConfigs = this._fontConfigRepository.ReadAllConfigs();
-                var parsedConfigs = this._userFontConfigParser.ParseCollection(fontConfigs, e.Language, e.FontType);
-                foreach (var pair in parsedConfigs)
-                    this._fontConfigManager.AddFontConfig(pair);
+                var config = this._fontConfigRepository.ReadConfig(key);
+
+                if (config != null)
+                this._fontConfigManager.AddFontConfig(new(key, config));
             }
 
             // parse presets in context.
             if (this._fontPresetRepository != null
-                && this._fontPresetParser != null
                 && this._fontPresetManager != null)
             {
-                var presets = this._fontPresetRepository.ReadAllPresets();
-                var parsedPresets = this._fontPresetParser.ParseCollection(presets.Values, e.Language, e.FontType);
-                this._fontPresetManager.AddPresets(parsedPresets);
+                var presets = this._fontPresetRepository.ReadPresets(key);
+
+                this._fontPresetManager.AddPresets(presets);
             }
 
             this.Monitor.Log($"恢复font patch。");
 
             this._mainFontPatcher.ResumeFontPatch();
-        }
-
-        private void OnFontConfigUpdated(object sender, EventArgs e)
-        {
-            var runtimeConfigs = this._fontConfigManager.GetAllFontConfigs()
-                .Select(pair => this._userFontConfigParser.ParseBack(pair));
-
-            var configObject = new FontConfigs();
-
-            foreach (var config in runtimeConfigs)
-                configObject.Add(config);
-
-            // 由于 文件中的配置 和 运行时产生的配置 并不同步，因此要手动加回部分文件中的配置。
-            var savedConfigs = this._fontConfigRepository.ReadAllConfigs();
-            foreach (var config in savedConfigs)
-            {
-                if (!runtimeConfigs.Any(config.IsSameContextWith))
-                    configObject.Add(config);
-            }
-
-            this._fontConfigRepository.WriteAllConfigs(configObject);
-        }
-
-        private void OnFontPresetUpdated(object sender, PresetUpdatedEventArgs e)
-        {
-            string name = e.Name;
-            var preset = e.Preset;
-
-            var presetObject = preset == null
-                ? null
-                : this._fontPresetParser.ParseBack(preset);
-
-            this._fontPresetRepository.WritePreset(name, presetObject);
         }
 
         private void OpenFontSettingsMenu()

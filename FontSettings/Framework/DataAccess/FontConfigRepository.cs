@@ -4,35 +4,56 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess.Models;
+using FontSettings.Framework.DataAccess.Parsing;
+using FontSettings.Framework.Models;
 using StardewModdingAPI;
 
 namespace FontSettings.Framework.DataAccess
 {
-    internal class FontConfigRepository
+    internal partial class FontConfigRepository : IFontConfigRepository
     {
-        private readonly string _globalFontDataKey = "font-data";
-        private readonly IModHelper _helper;
+        private readonly IMonitor _monitor;
+        private readonly FontConfigParser _parser;
 
-        public FontConfigRepository(IModHelper helper)
+        public FontConfigRepository(IModHelper helper, IMonitor monitor, FontConfigParser parser)
+            : this(helper)
         {
-            this._helper = helper;
+            this._monitor = monitor;
+            this._parser = parser;
         }
 
-        public FontConfigs ReadAllConfigs()
+        public FontConfig? ReadConfig(FontConfigKey key)
         {
-            FontConfigs fonts = this._helper.Data.ReadGlobalData<FontConfigs>(this._globalFontDataKey);
-            if (fonts == null)
+            var rawConfigs = this.ReadAllConfigs();
+            var parsedConfigs = this._parser.ParseCollection(rawConfigs, key.Language, key.FontType);
+            var parsedConfig = parsedConfigs.ContainsKey(key) 
+                ? parsedConfigs[key] 
+                : null;
+
+            this._monitor.Log($"Loaded font config for {key}: {parsedConfig}");
+            return parsedConfig;
+        }
+
+        public void WriteConfig(FontConfigKey key, FontConfig? config)
+        {
+            this._monitor.Log($"Saving font config for {key}: {config}");
+
+            var allConfigs = this.ReadAllConfigs();
+            allConfigs.RemoveAll(config => config.Lang == key.Language.Code
+                                        && config.Locale == key.Language.Locale
+                                        && config.InGameType == key.FontType);
+            if (config != null)
             {
-                fonts = new FontConfigs();
-                this.WriteAllConfigs(fonts);
+                var rawConfig = this._parser.ParseBack(new(key, config));
+                allConfigs.Add(rawConfig);
             }
 
-            return fonts;
-        }
+            var orderedData = new FontConfigs();
+            orderedData.AddRange(allConfigs
+                .OrderBy(data => data.Lang)
+                .ThenBy(data => data.InGameType));
 
-        public void WriteAllConfigs(FontConfigs configs)
-        {
-            this._helper.Data.WriteGlobalData(this._globalFontDataKey, configs);
+            this.WriteAllConfigs(orderedData);
         }
     }
 }

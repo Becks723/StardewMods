@@ -14,7 +14,7 @@ namespace FontSettings.Framework
 
         private readonly IDictionary<FontConfigKey, FontConfig> _fontConfigs = new Dictionary<FontConfigKey, FontConfig>();
 
-        public event EventHandler ConfigUpdated;
+        public event EventHandler<FontConfigUpdatedEventArgs> ConfigUpdated;
 
         public FontConfigManager()
         {
@@ -49,7 +49,7 @@ namespace FontSettings.Framework
                     {
                         this._fontConfigs.Add(key, config);
                         if (raiseConfigUpdated)
-                            this.RaiseConfigUpdated(EventArgs.Empty);
+                            this.RaiseConfigUpdated(key, config);
                     }
                 }
                 else
@@ -60,7 +60,7 @@ namespace FontSettings.Framework
                         this._fontConfigs.Remove(key);
 
                     if (raiseConfigUpdated)
-                        this.RaiseConfigUpdated(EventArgs.Empty);
+                        this.RaiseConfigUpdated(key, config);
                 }
             }
         }
@@ -100,9 +100,26 @@ namespace FontSettings.Framework
             }
         }
 
-        protected virtual void RaiseConfigUpdated(EventArgs e)
+        private void RaiseConfigUpdated(FontConfigKey key, FontConfig config)
+        {
+            this.RaiseConfigUpdated(
+                new FontConfigUpdatedEventArgs(key, config));
+        }
+
+        protected virtual void RaiseConfigUpdated(FontConfigUpdatedEventArgs e)
         {
             ConfigUpdated?.Invoke(this, e);
+        }
+    }
+
+    internal class FontConfigUpdatedEventArgs : EventArgs
+    {
+        public FontConfigKey Key { get; }
+        public FontConfig Config { get; }
+        public FontConfigUpdatedEventArgs(FontConfigKey key, FontConfig config)
+        {
+            this.Key = key;
+            this.Config = config;
         }
     }
 }

@@ -5,102 +5,46 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess.Models;
+using FontSettings.Framework.DataAccess.Parsing;
+using FontSettings.Framework.Models;
+using FontSettings.Framework.Preset;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using StardewModdingAPI;
 
 namespace FontSettings.Framework.DataAccess
 {
-    internal class FontPresetRepository
+    internal partial class FontPresetRepository : IFontPresetRepository
     {
-        private readonly string _rootDir;
+        private readonly IMonitor _monitor;
+        private readonly FontPresetParser _parser;
 
-        public FontPresetRepository(string presetsDir)
+        public FontPresetRepository(string presetsDir, IMonitor monitor, FontPresetParser parser)
+            : this(presetsDir)
         {
-            this._rootDir = presetsDir;
-
-            Directory.CreateDirectory(presetsDir);
+            this._monitor = monitor;
+            this._parser = parser;
         }
 
-        public IDictionary<string, FontPresetData> ReadAllPresets()
+        public IEnumerable<FontPreset> ReadPresets(FontConfigKey key)
         {
-            var result = new Dictionary<string, FontPresetData>();
-
-            string[] potentialPresetFiles = Directory.GetFiles(this._rootDir, "*.json", SearchOption.TopDirectoryOnly);
-            foreach (string file in potentialPresetFiles)
-            {
-                if (TryLoadPreset(file, out var pair))
-                    result.Add(pair.Key, pair.Value);
-            }
-
-            return result;
+            var rawPresets = this.ReadAllPresets();
+            var parsedPresets = this._parser.ParseCollection(rawPresets.Values, key.Language, key.FontType);
+            this._monitor.Log($"Loaded presets in {key}:"
+                + $"\n{string.Join('\n', parsedPresets.Select(preset => preset.Settings?.ToString()))}");
+            return parsedPresets;
         }
 
-        public void WritePreset(string name, FontPresetData? preset)
+        public void WritePreset(string name, FontPreset? preset)
         {
-            // when null, delete the preset if exists.
-            if (preset == null)
-            {
-                string destPath = Path.Combine(this._rootDir, $"{name}.json");
-                File.Delete(destPath);
-            }
+            this._monitor.Log($"Writing preset. Name: {name} Value: {preset.Settings?.ToString()}");
 
-            else
-            {
-                string json = JsonConvert.SerializeObject(preset, GetJsonSerializeSettings());
+            var rawPreset = preset == null
+                ? null
+                : this._parser.ParseBack(preset);
 
-                string destPath = Path.Combine(this._rootDir, $"{name}.json");
-                File.WriteAllText(destPath, json);
-            }
-        }
-
-        private static bool TryLoadPreset(string fullPath, out KeyValuePair<string, FontPresetData> preset)
-        {
-            try
-            {
-                string name = Path.GetFileNameWithoutExtension(fullPath);
-
-                string json = File.ReadAllText(fullPath);
-                FontPresetData value = JsonConvert.DeserializeObject<FontPresetData>(json, GetJsonDeserializeSettings());
-                value.Name = name;
-
-                preset = KeyValuePair.Create(name, value);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                if (ex is JsonSerializationException)
-                    ILog.Trace($"Not a preset file: {fullPath}");
-                ILog.Error($"Failed to load preset: {fullPath}. {ex.Message}\n{ex.StackTrace}");
-
-                preset = default;
-                return false;
-            }
-        }
-
-        private static JsonSerializerSettings GetJsonSerializeSettings()
-        {
-            return new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                Converters = new List<JsonConverter>
-                {
-                    new StringEnumConverter()
-                }
-            };
-        }
-
-        private static JsonSerializerSettings GetJsonDeserializeSettings()
-        {
-            return new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                MissingMemberHandling = MissingMemberHandling.Error,
-                Converters = new List<JsonConverter>
-                {
-                    new StringEnumConverter()
-                }
-            };
+            this.WritePreset(name, rawPreset);
         }
     }
 }
