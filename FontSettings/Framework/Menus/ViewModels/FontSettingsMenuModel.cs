@@ -933,6 +933,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                     : 0;
             }
 
+            this.CurrentFontConfigRealTime = this.CreateConfigBasedOnCurrentSettings();
+
             this.UpdateExampleCurrent();
         }
 
