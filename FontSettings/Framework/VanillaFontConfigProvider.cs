@@ -40,6 +40,9 @@ namespace FontSettings.Framework
 
         private FontConfig CreateFallbackFontConfig(LanguageInfo language, GameFontType fontType)
         {
+            if (language.IsLatinLanguage() && fontType == GameFontType.SpriteText)
+                return this.FallbackLatinBmFontConfig(language, fontType);
+
             if (fontType != GameFontType.SpriteText)
                 return new FontConfig(
                     Enabled: true,
@@ -64,6 +67,21 @@ namespace FontSettings.Framework
                     CharOffsetY: 0,
                     CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType),
                     PixelZoom: FontHelpers.GetDefaultFontPixelZoom());
+        }
+
+        private FontConfig FallbackLatinBmFontConfig(LanguageInfo language, GameFontType fontType)
+        {
+            return new BmFontConfig(
+                Enabled: true,
+                FontFilePath: null,
+                FontIndex: 0,
+                FontSize: 16,
+                Spacing: 0,
+                LineSpacing: 16,
+                CharOffsetX: 0,
+                CharOffsetY: 0,
+                CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType),
+                PixelZoom: 3f);
         }
     }
 }

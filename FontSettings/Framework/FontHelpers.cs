@@ -105,7 +105,12 @@ namespace FontSettings.Framework
 
         public static float GetDefaultFontPixelZoom(ModLanguage modLanguage)
         {
-            return modLanguage.FontPixelZoom;
+            float fontPixelZoom = modLanguage.FontPixelZoom;
+
+            // 一些拉丁文语言没有设置此项，因此默认为0，这里得纠正一下。
+            if (fontPixelZoom == 0)
+                fontPixelZoom = 3f;
+            return fontPixelZoom;
         }
 
         public static float GetDefaultFontPixelZoom(LanguageInfo language)
