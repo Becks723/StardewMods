@@ -50,7 +50,12 @@ namespace FontSettings.Framework.FontPatching.Resolving
         }
 
         public IBmFontPatch ForEditBmFont(FontConfig config)
-            => this.CreateBmPatch(new BmFontFileEditor(config));
+        {
+            float pixelZoom = config.Supports<IWithPixelZoom>()
+                ? config.GetInstance<IWithPixelZoom>().PixelZoom
+                : 1f;
+            return this.CreateBmPatch(new BmFontFileEditor(config), pixelZoom);
+        }
 
         private IFontPatch CreatePatch() => new FontPatch(null, null);
         private IFontPatch CreatePatch(IFontLoader loader) => new FontPatch(loader, null);
@@ -59,7 +64,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
         private IBmFontPatch CreateBmPatch() => new BmFontPatch(null, null, null);
         private IBmFontPatch CreateBmPatch(IFontLoader loader, IDictionary<string, IFontLoader> pageLoaders, float fontPixelZoom) => new BmFontPatch(loader, null, pageLoaders, fontPixelZoom);
-        private IBmFontPatch CreateBmPatch(IFontEditor editor) => new BmFontPatch(null, editor, null);
+        private IBmFontPatch CreateBmPatch(IFontEditor editor, float fontPixelZoom) => new BmFontPatch(null, editor, null, fontPixelZoom);
         private IBmFontPatch CreateBmPatch(IFontReplacer replacer, IDictionary<string, IFontLoader> pageLoaders, float fontPixelZoom) => new BmFontPatch(null, replacer, pageLoaders, fontPixelZoom);
     }
 }
