@@ -20,23 +20,28 @@ namespace FontSettings.Framework.Patchers
     {
         private static ModConfig _config;
         private static IManifest _manifest;
+        private readonly IModHelper _helper;
 
         public SpriteTextLatinPatcher(ModConfig config, IManifest manifest, IModHelper helper)
         {
             _config = config;
             _manifest = manifest;
+            this._helper = helper;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
         }
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            if (e.NameWithoutLocale.IsEquivalentTo(LatinFontFileAssetName()))
+            string latinFontFile = LatinFontFileAssetName();
+            if (e.NameWithoutLocale.IsEquivalentTo(latinFontFile))
             {
-                e.LoadFromModFile<XmlSource>("assets/fonts/Latin.fnt", AssetLoadPriority.High);
+                XmlSource latinXml = this._helper.ModContent.Load<XmlSource>("assets/fonts/Latin.fnt");
+                latinXml = this.ValidateLatinFontPageFile(latinXml, latinFontFile.Split('/').Last());
+                e.LoadFrom(() => latinXml, AssetLoadPriority.High);
             }
-            else if (IsLatinFontPage(e.NameWithoutLocale, out string pageFile))
+            else if (this.IsLatinFontPage(e.NameWithoutLocale, out _))
             {
-                e.LoadFromModFile<Texture2D>($"assets/fonts/{pageFile}.png", AssetLoadPriority.High);
+                e.LoadFromModFile<Texture2D>($"assets/fonts/Latin_0.png", AssetLoadPriority.High);
             }
         }
 
@@ -315,7 +320,7 @@ namespace FontSettings.Framework.Patchers
 
         private static string LatinFontFileAssetName()
         {
-            return $"Fonts/Latin";
+            return FontHelpers.GetFontFileAssetName();
         }
 
         private static string LatinFontPageAssetName(string pageFile)  // pageFile: without file extensions
@@ -323,7 +328,7 @@ namespace FontSettings.Framework.Patchers
             return $"Fonts/{pageFile}";
         }
 
-        private static bool IsLatinFontPage(IAssetName assetName, out string pageFile)  // pageFile: without file extensions
+        private bool IsLatinFontPage(IAssetName assetName, out string pageFile)  // pageFile: without file extensions
         {
             string prefix = $"{LatinFontFileAssetName()}_";
             if (assetName.StartsWith(prefix))
@@ -336,6 +341,16 @@ namespace FontSettings.Framework.Patchers
                 pageFile = null;
                 return false;
             }
+        }
+
+        private XmlSource ValidateLatinFontPageFile(XmlSource latinXml, string fontFile)
+        {
+            FontFile latinFont = FontLoader.Parse(latinXml.Source);
+
+            foreach (FontPage fontPage in latinFont.Pages)
+                fontPage.File = $"{fontFile}_{fontPage.ID}";
+
+            return FontHelpers.ParseFontFile(latinFont);
         }
 
         private static FontFile LoadFontFile(string assetName)

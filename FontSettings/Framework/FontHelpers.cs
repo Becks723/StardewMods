@@ -207,27 +207,16 @@ namespace FontSettings.Framework
 
         public static string GetFontFileAssetName()  // under game current language context
         {
-            return GetFontFileAssetName(
-                code: LocalizedContentManager.CurrentLanguageCode,
-                modLanguage: LocalizedContentManager.CurrentModLanguage);
+            return GetFontFileAssetName(GetCurrentLanguage());
         }
 
         public static string GetFontFileAssetName(LanguageInfo language)
         {
-            var modLanguages = GetModLanguages();
-
             ModLanguage? modLanguage = !IsModLanguage(language)
                 ? null
-                : modLanguages
-                    .Where(lang => lang.LanguageCode == language.Locale)
-                    .FirstOrDefault();
+                : GetModLanguage(language);
 
-            return GetFontFileAssetName(language.Code, modLanguage);
-        }
-
-        public static string GetFontFileAssetName(LocalizedContentManager.LanguageCode code, ModLanguage? modLanguage = null)
-        {
-            return code switch
+            return language.Code switch
             {
                 LocalizedContentManager.LanguageCode.ja => "Fonts/Japanese",
                 LocalizedContentManager.LanguageCode.ru => "Fonts/Russian",
@@ -235,20 +224,52 @@ namespace FontSettings.Framework
                 LocalizedContentManager.LanguageCode.th => "Fonts/Thai",
                 LocalizedContentManager.LanguageCode.ko => "Fonts/Korean",
                 LocalizedContentManager.LanguageCode.mod when !modLanguage.UseLatinFont => modLanguage.FontFile,
-                _ when LocalizedContentManager.CurrentLanguageLatin => "Fonts/Latin",
+                _ when IsLatinLanguage(language) => language == LanguageEn ? "Fonts/Latin"
+                                                                           : $"Fonts/Latin-{language.Locale}",
                 _ => null
             };
         }
 
-        private static ModLanguage[] GetModLanguages()
+        public static IEnumerable<LanguageInfo> GetAllAvailableLanguages()
         {
-            return Game1.content.Load<List<ModLanguage>>("Data/AdditionalLanguages").ToArray();
+            // built in languages (except thai).
+            yield return LanguageEn;
+            yield return LanguageJa;
+            yield return LanguageRu;
+            yield return LanguageZh;
+            yield return LanguagePt;
+            yield return LanguageEs;
+            yield return LanguageDe;
+            yield return LanguageFr;
+            yield return LanguageKo;
+            yield return LanguageIt;
+            yield return LanguageTr;
+            yield return LanguageHu;
+
+            // mod languages.
+            var modLanguages = GetModLanguages();
+            if (modLanguages != null)
+            {
+                foreach (var modLanguage in modLanguages)
+                    yield return GetModLanguage(modLanguage);
+            }
+        }
+
+        private static ModLanguage[]? _modLanguages;
+        private static ModLanguage[]? GetModLanguages()
+        {
+            return _modLanguages;
+        }
+
+        internal static void SetModLanguages(ModLanguage[] value)
+        {
+            _modLanguages = value;
         }
 
         private static ModLanguage? GetModLanguage(LanguageInfo language)
         {
             return GetModLanguages()
-                .FirstOrDefault(lang => lang.LanguageCode == language.Locale);
+                ?.FirstOrDefault(lang => lang.LanguageCode == language.Locale);
         }
 
         public static XmlSource ParseFontFile(FontFile fontFile)

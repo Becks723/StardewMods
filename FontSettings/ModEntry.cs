@@ -56,6 +56,8 @@ namespace FontSettings
 
         private VanillaFontProvider _vanillaFontProvider;
 
+        private readonly DataAdditionalLanguagesWatcher _dataAdditionalLanguagesWatcher = new();
+
         private TitleFontButton _titleFontButton;
 
         internal static IModHelper ModHelper { get; private set; }
@@ -116,6 +118,9 @@ namespace FontSettings
             // init font patching.
             this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), new FontPatchInvalidatorComposition(helper));
             this._vanillaFontProvider.SetInvalidateHelper(this._mainFontPatcher);
+
+            // watch `Data/AdditonalLanguages` asset.
+            this._dataAdditionalLanguagesWatcher.Updated += this.OnDataAdditionalLanguagesUpdated;
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
@@ -200,6 +205,7 @@ namespace FontSettings
         private void OnAssetReady(object sender, AssetReadyEventArgs e)
         {
             this._mainFontPatcher.OnAssetReady(e);
+            this._dataAdditionalLanguagesWatcher.OnAssetReady(e);
         }
 
         private void OnWindowResized(object sender, WindowResizedEventArgs e)
@@ -290,7 +296,7 @@ namespace FontSettings
                 var config = this._vanillaFontDataRepository.ReadVanillaFontConfig(key);
 
                 if (config != null)
-                this._vanillaFontConfigProvider.AddVanillaFontConfigs(new Dictionary<FontConfigKey, FontConfig>() { { key, config } });
+                    this._vanillaFontConfigProvider.AddVanillaFontConfigs(new Dictionary<FontConfigKey, FontConfig>() { { key, config } });
             }
 
             // parse configs in context.
@@ -300,7 +306,7 @@ namespace FontSettings
                 var config = this._fontConfigRepository.ReadConfig(key);
 
                 if (config != null)
-                this._fontConfigManager.AddFontConfig(new(key, config));
+                    this._fontConfigManager.AddFontConfig(new(key, config));
             }
 
             // parse presets in context.
@@ -377,6 +383,11 @@ namespace FontSettings
                 stopwatch.Stop();
                 this.Monitor.Log($"{nameof(FontSettingsMenu)} creation completed in '{stopwatch.ElapsedMilliseconds}ms'");
             }
+        }
+
+        private void OnDataAdditionalLanguagesUpdated(object sender, List<ModLanguage> value)
+        {
+            FontHelpers.SetModLanguages(value.ToArray());
         }
 
         private bool AssertModFileExists(string relativePath, out string? fullPath) // fullPath = null when returns false
