@@ -61,6 +61,16 @@ namespace FontSettings.Framework
             return result;
         }
 
+        public static int GetCharactersCount(IEnumerable<CharacterRange>? ranges)
+        {
+            if (ranges == null)
+                return 0;
+
+            return ranges.SelectMany(r => Enumerable.Range(r.Start, r.End - r.Start + 1))
+                .Distinct()
+                .Count();
+        }
+
         public static bool IsLatinLanguage(LocalizedContentManager.LanguageCode code)
         {
             return code is LocalizedContentManager.LanguageCode.en

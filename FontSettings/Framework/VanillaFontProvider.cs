@@ -116,16 +116,16 @@ namespace FontSettings.Framework
 
                 this.RaiseRecordFinished(language, fontType);
 
-                _ = this.PendPatch(new FontContext(language, fontType));
+                _ = this.PendPatchAsync(new FontContext(language, fontType));
             }
         }
 
         private readonly ISet<InvalidateContext> _invalidateContextList = new HashSet<InvalidateContext>();
-        public async void OnUpdateTicking(UpdateTickingEventArgs e)
+        public void OnUpdateTicking(UpdateTickingEventArgs e)
         {
             try
             {
-                await this.InvalidatePendings();
+                this.InvalidatePendings();
             }
             catch (Exception ex)
             {
@@ -164,8 +164,9 @@ namespace FontSettings.Framework
             return false;
         }
 
-        private async Task InvalidatePendings()
+        private void InvalidatePendings()
         {
+            // 将排队的全复制出来，并清空队列。
             InvalidateContext[] invalidateContexts;
             lock (this._invalidateContextList)
             {
@@ -173,16 +174,17 @@ namespace FontSettings.Framework
                 this._invalidateContextList.Clear();
             }
 
-            if (invalidateContexts.Length == 0)
-                return;
-            IEnumerable<Task> invalidateTasks = invalidateContexts
-                    .Select(context =>
-                        this._mainFontPatcher.InvalidateGameFontAsync(new FontContext(context.Language, context.FontType))
-                    );
-            await Task.WhenAll(invalidateTasks);
+            // 依次invalidate。
+            foreach (var context in invalidateContexts)
+            {
+                var language = context.Language;
+                var fontType = context.FontType;
+
+                this._mainFontPatcher.InvalidateGameFont(new FontContext(language, fontType));
+            }
         }
 
-        private async Task PendPatch(FontContext context)
+        private async Task PendPatchAsync(FontContext context)
         {
             Exception? exception = await this._mainFontPatcher.PendPatchAsync(context);
             if (exception == null)
@@ -191,7 +193,7 @@ namespace FontSettings.Framework
                 {
                     this._invalidateContextList.Add(
                         new InvalidateContext(context.Language, context.FontType));
-                    this._monitor.Log($"To invalidate count: {this._invalidateContextList.Count}");
+                    this._monitor.Log($"To invalidate added: {context.Language},{context.FontType}. Count: {this._invalidateContextList.Count}");
                 }
             }
             else
@@ -250,6 +252,12 @@ namespace FontSettings.Framework
 
         private void RecordCharacterRanges(LanguageInfo language, GameFontType fontType, IEnumerable<CharacterRange> ranges)
         {
+            this._monitor.Log($"记录{language},{fontType}的字符集：{FontHelpers.GetCharactersCount(ranges)}个字符。");
+
+            string RangeToString(CharacterRange range)
+                => $"{range.Start}({(int)range.Start}) - {range.End}({(int)range.End})";
+            this._monitor.VerboseLog(string.Join('\n', ranges.Select(r => RangeToString(r))));
+
             this._cachedCharacterRanges[this.Key(language, fontType)] = ranges;
         }
 
@@ -335,7 +343,7 @@ namespace FontSettings.Framework
             var allLanguages = FontHelpers.GetAllAvailableLanguages();
             foreach (LanguageInfo lang in allLanguages)
             {
-                if(assetName == FontHelpers.GetFontFileAssetName(lang))
+                if (assetName == FontHelpers.GetFontFileAssetName(lang))
                 {
                     language = lang;
                     return true;
