@@ -69,6 +69,7 @@ Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalle
 | ExampleText | Text for font samples. Keep it empty and mod will use built-in text. Otherwise set your own. |
 | OpenFontSettingsMenu | Keybind to open font menu, default `LeftAlt + F`. |
 | DisableTextShadow | Miscellaneous option. Whether to close text shadow, default `false`. |
+| EnableLatinDialogueFont | Whether to enable custom dialogue font in latin languages, default `true`. |
 | MinFontSize | Min reachable value of the font size option, default `5`. |
 | MaxFontSize | Max reachable value of the font size option, default `75`. |
 | MinSpacing | Min reachable value of the spacing option, default `-10`. |
@@ -118,6 +119,12 @@ Symptom: changes made to fonts do not apply, game becomes laggy, high cpu, etc.<
 
 
 ## Release Notes
+#### 0.10.0 - 2023-05-15
+- Supports dialogue font in latin languages.
+- Sample text now aligns better.
+- Adds more log info for troubleshooting.
+- Misc bugfixes.
+
 #### 0.9.1 - 2023-04-29
 - Fix no response pressing "Save As New Preset" button.
 - Fix you cannot delete a preset.
