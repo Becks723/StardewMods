@@ -25,17 +25,6 @@
 		<Reference Include="Newtonsoft.Json" HintPath="$(GamePath)\smapi-internal\Newtonsoft.Json.dll" Private="false" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<!--<ContentWithTargetPath Include="dependencies\fontbm\0.5.0\win\*.*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<TargetPath>fontbm\win\%(FileName)%(Extension)</TargetPath>
-		</ContentWithTargetPath>-->
-
-		<None Update="说明.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-
 	<!--ignored files-->
 	<ItemGroup>
 		<Compile Remove="Framework\FontChangers\LatinSpriteTextChanger.cs" />
