@@ -22,6 +22,8 @@ namespace FontSettings.Framework.Patchers
         private static IManifest _manifest;
         private readonly IModHelper _helper;
 
+        private string? _currentFontFile;
+
         public SpriteTextLatinPatcher(ModConfig config, IManifest manifest, IModHelper helper)
         {
             _config = config;
@@ -32,14 +34,24 @@ namespace FontSettings.Framework.Patchers
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
-            string latinFontFile = LatinFontFileAssetName();
-            if (e.NameWithoutLocale.IsEquivalentTo(latinFontFile))
+            string[] latinFontFileNames = FontHelpers.GetAllAvailableLanguages()
+                .Where(lang => lang.IsLatinLanguage())
+                .Select(lang => FontHelpers.GetFontFileAssetName(lang))
+                .ToArray();
+
+            var latinFontFile = latinFontFileNames
+                .Where(fontFile => e.NameWithoutLocale.IsEquivalentTo(fontFile))
+                .FirstOrDefault();
+            if (latinFontFile != null)
             {
+                this._currentFontFile = latinFontFile;
+
                 XmlSource latinXml = this._helper.ModContent.Load<XmlSource>("assets/fonts/Latin.fnt");
                 latinXml = this.ValidateLatinFontPageFile(latinXml, latinFontFile.Split('/').Last());
                 e.LoadFrom(() => latinXml, AssetLoadPriority.High);
             }
-            else if (this.IsLatinFontPage(e.NameWithoutLocale, out _))
+
+            if (this.IsLatinFontPage(e, this._currentFontFile, out _))
             {
                 e.LoadFromModFile<Texture2D>($"assets/fonts/Latin_0.png", AssetLoadPriority.High);
             }
@@ -47,7 +59,6 @@ namespace FontSettings.Framework.Patchers
 
         public void Patch(Harmony harmony, IMonitor monitor)
         {
-            LocalizedContentManager.OnLanguageChange += OnLanguageChange_Latin;
             harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), "setUpCharacterMap"),
                 postfix: this.HarmonyMethod(nameof(SpriteText_setUpCharacterMap_Postfix)));
@@ -85,10 +96,12 @@ namespace FontSettings.Framework.Patchers
 
         private static void SpriteText_setUpCharacterMap_Postfix()
         {
+            EnsureSubscribedOnLanguageChange();
+
             if (!CustomSpriteTextInLatinLanguages())
                 return;
 
-            if (LocalizedContentManager.CurrentLanguageLatin && SpriteTextFields._characterMap == null)
+            if (LocalizedContentManager.CurrentLanguageLatin && !_hasSubscribedOnLanguageChangeLatin)
             {
                 SpriteTextFields._characterMap = new Dictionary<char, FontChar>();
                 SpriteTextFields.fontPages = new List<Texture2D>();
@@ -104,8 +117,11 @@ namespace FontSettings.Framework.Patchers
                 foreach (FontPage fontPage in SpriteTextFields.FontFile.Pages)
                 {
                     SpriteTextFields.fontPages.Add(
-                        Game1.content.Load<Texture2D>(LatinFontPageAssetName(fontPage.File)));
+                        Game1.content.Load<Texture2D>($"Fonts/{fontPage.File}"));
                 }
+
+                LocalizedContentManager.OnLanguageChange += OnLanguageChange_Latin;
+                _hasSubscribedOnLanguageChangeLatin = true;
             }
         }
 
@@ -136,7 +152,7 @@ namespace FontSettings.Framework.Patchers
                 foreach (FontPage fontPage in SpriteTextFields.FontFile.Pages)
                 {
                     SpriteTextFields.fontPages.Add(
-                        Game1.content.Load<Texture2D>(LatinFontPageAssetName(fontPage.File)));
+                        Game1.content.Load<Texture2D>($"Fonts/{fontPage.File}"));
                 }
             }
         }
@@ -308,6 +324,46 @@ namespace FontSettings.Framework.Patchers
             }
         }
 
+        private static bool _hasSubscribedOnLanguageChangeLatin;
+
+        private static readonly Lazy<FieldInfo> LocalizedContentManager_OnLanguageChange_Field = new(
+            () => typeof(LocalizedContentManager)
+                .GetField(nameof(LocalizedContentManager.OnLanguageChange), BindingFlags.Static | BindingFlags.NonPublic));
+        private static readonly Lazy<EventInfo> LocalizedContentManager_OnLanguageChange_Event = new(
+            () => typeof(LocalizedContentManager).GetEvent(nameof(LocalizedContentManager.OnLanguageChange)));
+        private static readonly Lazy<MethodInfo> SpriteText_OnLanguageChange_Method = new(
+            () => typeof(SpriteText)
+                .GetMethod("OnLanguageChange", BindingFlags.Static | BindingFlags.NonPublic));
+        private static void EnsureSubscribedOnLanguageChange()
+        {
+            var languageEventHandler = (LocalizedContentManager.LanguageChangedHandler)
+                LocalizedContentManager_OnLanguageChange_Field.Value
+                .GetValue(null);
+            var languageEventInfo = LocalizedContentManager_OnLanguageChange_Event.Value;
+
+            bool ok = false;
+            foreach (Delegate d in languageEventHandler.GetInvocationList().ToArray())
+            {
+                if (d.Method is
+                    {
+                        DeclaringType: { Name: nameof(SpriteText) },
+                        Name: "OnLanguageChange"
+                    })
+                {
+                    if (ok)
+                        languageEventInfo.RemoveEventHandler(null, d);
+                    else
+                        ok = true;
+                }
+            }
+
+            if (!ok)
+            {
+                var handler = Delegate.CreateDelegate(languageEventInfo.EventHandlerType, SpriteText_OnLanguageChange_Method.Value);
+                languageEventInfo.AddEventHandler(null, handler);
+            }
+        }
+
         private static readonly Lazy<MethodInfo> CurrentLanguageLatinPatched_Method = new(
             () => AccessTools.Method(typeof(SpriteTextLatinPatcher), nameof(CurrentLanguageLatinPatched)));
         private static bool CurrentLanguageLatinPatched()
@@ -323,17 +379,13 @@ namespace FontSettings.Framework.Patchers
             return FontHelpers.GetFontFileAssetName();
         }
 
-        private static string LatinFontPageAssetName(string pageFile)  // pageFile: without file extensions
+        private bool IsLatinFontPage(AssetRequestedEventArgs e, string? fontFile, out string pageFile)  // pageFile: without 'Fonts/' prefix
         {
-            return $"Fonts/{pageFile}";
-        }
-
-        private bool IsLatinFontPage(IAssetName assetName, out string pageFile)  // pageFile: without file extensions
-        {
-            string prefix = $"{LatinFontFileAssetName()}_";
-            if (assetName.StartsWith(prefix))
+            if (fontFile != null
+                && e.NameWithoutLocale.StartsWith(fontFile + '_')
+                && e.DataType == typeof(Texture2D))
             {
-                pageFile = assetName.BaseName.Split('/').Last();
+                pageFile = e.NameWithoutLocale.BaseName.Split('/').Last();
                 return true;
             }
             else
