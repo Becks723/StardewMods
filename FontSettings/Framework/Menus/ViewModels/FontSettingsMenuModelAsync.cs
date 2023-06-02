@@ -90,9 +90,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 #endif
                 // 重新扫描本地字体文件。
                 var allFonts = await this.LoadAllFontsAsync(rescan: true);
-                this.AllFonts.Clear();
-                foreach (var font in allFonts)
-                    this.AllFonts.Add(font);
+                this.AllFonts = new ObservableCollection<FontViewModel>(allFonts);
 
                 // 更新选中字体。
                 this.CurrentFont = this.FindFont(this.CurrentFontConfig.FontFilePath, this.CurrentFontConfig.FontIndex);
