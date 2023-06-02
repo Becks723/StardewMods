@@ -376,7 +376,7 @@ namespace FontSettings
                             stagedValues: this._menuContextModel);
                 }
 
-                return new FontSettingsMenu(this._fontPresetManager, this.Helper.ModRegistry, this._config.SimplifiedDropDown, this._config.EnableLatinDialogueFont, viewModel);
+                return new FontSettingsMenu(this._fontPresetManager, this.Helper.ModRegistry, this._config.EnableLatinDialogueFont, viewModel);
             }
             finally
             {

@@ -179,14 +179,6 @@ namespace FontSettings.Framework.Integrations
                     max: 10,
                     min: 3,
                     interval: 1
-                )
-
-                // rich drop down
-                .AddCheckbox(
-                    name: I18n.Config_SimplifiedDropDown,
-                    tooltip: I18n.Config_SimplifiedDropDown_Description,
-                    get: () => this.Config.SimplifiedDropDown,
-                    set: val => this.Config.SimplifiedDropDown = val
                 );
         }
 

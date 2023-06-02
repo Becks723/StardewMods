@@ -82,7 +82,6 @@ Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalle
 | MaxCharOffsetY | Max reachable value of the y-offset option, default `10`. |
 | MinPixelZoom | Min reachable value of the pixel zoom option, default `0.5`. |
 | MaxPixelZoom | Max reachable value of the pixel zoom option, default `5`. |
-| SimplifiedDropDown | Set `true` if UI drop down options cause glitches, low-performance, default `true`. |
 
 #### Edit Mod Assets
 Textures for this mod are stored in the `FontSettings/assets` folder. To edit them, you may:
