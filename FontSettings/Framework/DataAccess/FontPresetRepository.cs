@@ -38,7 +38,7 @@ namespace FontSettings.Framework.DataAccess
 
         public void WritePreset(string name, FontPreset? preset)
         {
-            this._monitor.Log($"Writing preset. Name: {name} Value: {preset.Settings?.ToString()}");
+            this._monitor.Log($"Writing preset. Name: {name} Value: {preset?.Settings?.ToString()}");
 
             var rawPreset = preset == null
                 ? null

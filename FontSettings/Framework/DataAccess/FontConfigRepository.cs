@@ -26,8 +26,8 @@ namespace FontSettings.Framework.DataAccess
         {
             var rawConfigs = this.ReadAllConfigs();
             var parsedConfigs = this._parser.ParseCollection(rawConfigs, key.Language, key.FontType);
-            var parsedConfig = parsedConfigs.ContainsKey(key) 
-                ? parsedConfigs[key] 
+            var parsedConfig = parsedConfigs.ContainsKey(key)
+                ? parsedConfigs[key]
                 : null;
 
             this._monitor.Log($"Loaded font config for {key}: {parsedConfig}");
@@ -39,9 +39,9 @@ namespace FontSettings.Framework.DataAccess
             this._monitor.Log($"Saving font config for {key}: {config}");
 
             var allConfigs = this.ReadAllConfigs();
-            allConfigs.RemoveAll(config => config.Lang == key.Language.Code
-                                        && config.Locale == key.Language.Locale
-                                        && config.InGameType == key.FontType);
+            allConfigs.RemoveAll(config => config?.Lang == key.Language.Code
+                                        && config?.Locale == key.Language.Locale
+                                        && config?.InGameType == key.FontType);
             if (config != null)
             {
                 var rawConfig = this._parser.ParseBack(new(key, config));
