@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{A99638DD-6
 		.gitignore = .gitignore
 		LICENSE = LICENSE
 		README.md = README.md
+		README-zh.md = README-zh.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{693A1DFF-145C-4356-A1EF-B098A246E029}"

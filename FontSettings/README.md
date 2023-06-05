@@ -1,4 +1,6 @@
-﻿# Font Settings
+﻿#### English | [中文](./README-zh.md)
+
+# Font Settings
 This mod:
 *	Provides a common font settings interface like many games & softwares do. You can:
 	- Change font size.

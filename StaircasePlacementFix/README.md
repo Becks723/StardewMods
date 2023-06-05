@@ -1,4 +1,6 @@
-﻿# Staircase Placement Fix
+﻿#### English | [中文](./README-zh.md)
+
+# Staircase Placement Fix
 A mod to fix some mine tiles cannot place staircase.
 
 
