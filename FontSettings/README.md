@@ -118,6 +118,11 @@ Symptom: changes made to fonts do not apply, game becomes laggy, high cpu, etc.<
 
 
 ## Release Notes
+#### 0.10.2 - 2023-06-05
+- Fix a menu crash deleting a font preset.
+- Optimize UI drop down under a large data set. Delete `SimplifiedDropDown` option added since [0.8](#080---2023-04-02).
+- Optimize some Russian glyphs outline.
+
 #### 0.10.1 - 2023-05-16
 - Adds back some missing latin characters.
 
