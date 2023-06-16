@@ -9,8 +9,8 @@ namespace FontSettings.Framework
 {
     internal interface IFontConfigRepository
     {
-        FontConfig? ReadConfig(FontConfigKey key);
+        FontConfigModel? ReadConfig(FontConfigKey key);
 
-        void WriteConfig(FontConfigKey key, FontConfig? config);
+        void WriteConfig(FontConfigKey key, FontConfigModel? config);
     }
 }

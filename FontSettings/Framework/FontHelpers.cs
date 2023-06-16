@@ -71,6 +71,37 @@ namespace FontSettings.Framework
                 .Count();
         }
 
+        public static IEnumerable<char> GetCharacters(IEnumerable<CharacterRange>? ranges)
+        {
+            if (ranges == null)
+                return Array.Empty<char>();
+
+            return ranges.SelectMany(r => Enumerable.Range(r.Start, r.End - r.Start + 1))
+                .Distinct()
+                .OrderBy(x => x)
+                .Select(x => (char)x)
+                .ToArray();
+        }
+
+        public static bool AreSameCharacterRanges(IEnumerable<CharacterRange> ranges1, IEnumerable<CharacterRange> ranges2)
+        {
+            var character1 = FontHelpers.GetCharacters(ranges1).ToArray();
+            var character2 = FontHelpers.GetCharacters(ranges2).ToArray();
+
+            if (character1.Length != character2.Length)
+                return false;
+
+            for (int i = 0; i < character1.Length; i++)
+            {
+                char ch1 = character1[i];
+                char ch2 = character2[i];
+                if (ch1 != ch2)
+                    return false;
+            }
+
+            return true;
+        }
+
         public static bool IsLatinLanguage(LocalizedContentManager.LanguageCode code)
         {
             return code is LocalizedContentManager.LanguageCode.en

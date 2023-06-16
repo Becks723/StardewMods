@@ -194,11 +194,10 @@ namespace FontSettings.Framework.Menus.ViewModels
         private FontPreset CreateNewPreset(string presetName, FontConfig settings)
         {
             // TODO: 封装preset实例创建过程
-            return new FontPresetWithName(
+            return new FontPreset(
                 language: FontHelpers.GetCurrentLanguage(),
                 fontType: this._fontType,
-                settings: settings,
-                name: presetName);
+                settings: settings);
         }
 
         private static T? GetPreviousItem<T>(T?[] array, T? item, Func<T?, T?, bool> comparer = null)

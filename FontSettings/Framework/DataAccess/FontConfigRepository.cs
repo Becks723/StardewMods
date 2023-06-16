@@ -15,14 +15,14 @@ namespace FontSettings.Framework.DataAccess
         private readonly IMonitor _monitor;
         private readonly FontConfigParser _parser;
 
-        public FontConfigRepository(IModHelper helper, IMonitor monitor, FontConfigParser parser)
+        public FontConfigRepository(IModHelper helper, IMonitor monitor)
             : this(helper)
         {
             this._monitor = monitor;
-            this._parser = parser;
+            this._parser = new FontConfigParser();
         }
 
-        public FontConfig? ReadConfig(FontConfigKey key)
+        public FontConfigModel? ReadConfig(FontConfigKey key)
         {
             var rawConfigs = this.ReadAllConfigs();
             var parsedConfigs = this._parser.ParseCollection(rawConfigs, key.Language, key.FontType);
@@ -34,7 +34,7 @@ namespace FontSettings.Framework.DataAccess
             return parsedConfig;
         }
 
-        public void WriteConfig(FontConfigKey key, FontConfig? config)
+        public void WriteConfig(FontConfigKey key, FontConfigModel? config)
         {
             this._monitor.Log($"Saving font config for {key}: {config}");
 

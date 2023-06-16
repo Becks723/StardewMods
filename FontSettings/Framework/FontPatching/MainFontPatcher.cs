@@ -15,7 +15,7 @@ namespace FontSettings.Framework.FontPatching
 {
     internal class MainFontPatcher
     {
-        private readonly FontConfigManager _fontConfigManager;
+        private readonly IFontConfigManager _fontConfigManager;
         private readonly FontPatchResolverFactory _resolverFactory;
         private readonly IFontPatchInvalidator _invalidator;
 
@@ -25,7 +25,7 @@ namespace FontSettings.Framework.FontPatching
 
         public event EventHandler<FontPixelZoomOverrideEventArgs> FontPixelZoomOverride;
 
-        public MainFontPatcher(FontConfigManager fontConfigManager, FontPatchResolverFactory resolverFactory,
+        public MainFontPatcher(IFontConfigManager fontConfigManager, FontPatchResolverFactory resolverFactory,
             IFontPatchInvalidator invalidator)
         {
             this._fontConfigManager = fontConfigManager;

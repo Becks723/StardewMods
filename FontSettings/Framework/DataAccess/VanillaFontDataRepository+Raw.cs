@@ -13,6 +13,7 @@ namespace FontSettings.Framework.DataAccess
         public VanillaFontDataRepository(IModHelper helper, IMonitor monitor) 
             : base(helper, monitor)
         {
+            this._monitor = monitor;
         }
 
         public VanillaFontData ReadVanillaFontData()

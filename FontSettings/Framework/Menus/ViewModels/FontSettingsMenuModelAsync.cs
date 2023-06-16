@@ -41,10 +41,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 放在最后（所有依赖项都已初始化完）
             _ = Task.Run(async () =>
             {
-                var allFonts = await this.LoadAllFontsAsync(rescan: false);
-                this.AllFonts.Clear();
-                foreach (var font in allFonts)
-                    this.AllFonts.Add(font);
+                this.AllFonts = new ObservableCollection<FontViewModel>(await this.LoadAllFontsAsync(rescan: false));
             });
         }
 

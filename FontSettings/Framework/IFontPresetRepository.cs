@@ -10,8 +10,8 @@ namespace FontSettings.Framework
 {
     internal interface IFontPresetRepository
     {
-        IEnumerable<FontPreset> ReadPresets(FontConfigKey key);
+        IEnumerable<FontPresetModel> ReadPresets(FontConfigKey key);
 
-        void WritePreset(string name, FontPreset? preset);
+        void WritePreset(string name, FontPresetModel? preset);
     }
 }

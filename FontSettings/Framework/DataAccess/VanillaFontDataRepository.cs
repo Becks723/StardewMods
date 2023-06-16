@@ -12,16 +12,9 @@ namespace FontSettings.Framework.DataAccess
     internal partial class VanillaFontDataRepository
     {
         private readonly IMonitor _monitor;
-        private readonly FontConfigParser _parser;
+        private readonly FontConfigParser _parser = new();
 
-        public VanillaFontDataRepository(IModHelper helper, IMonitor monitor, FontConfigParser parser)
-            : this(helper, monitor)
-        {
-            this._monitor = monitor;
-            this._parser = parser;
-        }
-
-        public FontConfig? ReadVanillaFontConfig(FontConfigKey key)
+        public FontConfigModel? ReadVanillaFontConfig(FontConfigKey key)
         {
             var rawConfigs = this.ReadVanillaFontData().Fonts;
 
