@@ -26,6 +26,10 @@ namespace FontSettings.Framework.FontScanning
 
         public virtual ICollection<IFontFileScanner> Scanners { get; } = new List<IFontFileScanner>();
 
+        public FontFileProvider()
+        {
+        }
+
         public FontFileProvider(IEnumerable<IFontFileScanner> scanners)
         {
             foreach (IFontFileScanner scanner in scanners)

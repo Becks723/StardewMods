@@ -26,17 +26,17 @@ namespace FontSettings.Framework.DataAccess.Parsing
                                         remove = null;
             if (languages.Count() == 1)
             {
-                if (sContentPack.HasFile(contentPack.Character))
+                if (contentPack.Character != null && sContentPack.HasFile(contentPack.Character))
                 {
                     @override = this.ParseCharacterRanges(contentPack.Character, sContentPack);
                     characterPatchMode = CharacterPatchMode.Override;
                 }
                 else
                 {
-                    if (sContentPack.HasFile(contentPack.CharacterAppend))
+                    if (contentPack.CharacterAppend != null && sContentPack.HasFile(contentPack.CharacterAppend))
                         add = this.ParseCharacterRanges(contentPack.CharacterAppend, sContentPack);
 
-                    if (sContentPack.HasFile(contentPack.CharacterRemove))
+                    if (contentPack.CharacterRemove != null && sContentPack.HasFile(contentPack.CharacterRemove))
                         remove = this.ParseCharacterRanges(contentPack.CharacterRemove, sContentPack);
                 }
             }
@@ -64,7 +64,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                             CharacterAdd: add,
                             CharacterRemove: remove));
 
-                    yield return new FontPresetModelExtensible(basePreset, FontPresetModelExtensible.ExtendType.FromContentPack);
+                    yield return new FontPresetModelExtensible(basePreset, FontPresetModelExtensible.ExtendType.FromContentPack) { SContentPack = sContentPack };
                 }
             }
         }
@@ -89,7 +89,10 @@ namespace FontSettings.Framework.DataAccess.Parsing
                         matched |= lang.Equals(language.Code.ToString(), StringComparison.OrdinalIgnoreCase);
 
                     if (matched)
+                    {
                         parsedLanguages.Add(language);
+                        break;
+                    }
                 }
             }
             return parsedLanguages;

@@ -100,7 +100,7 @@ namespace FontSettings
             this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor);
             this._fontConfigRepository = new FontConfigRepository(helper, this.Monitor);
             this._fontPresetRepository = new FontPresetRepository(presetDirectory, this.Monitor);
-            this._contentPackRepository = new ContentPackRepository(helper.ContentPacks, this.Monitor);
+            this._contentPackRepository = new ContentPackRepository(helper.ContentPacks, this.Monitor, this.EnumerateTestContentPacks());
             this._sampleDataRepository = new SampleDataRepository(helper, this.Monitor);
             this._config.Sample = this._sampleDataRepository.ReadSampleData();
 
@@ -335,6 +335,24 @@ namespace FontSettings
             this.Monitor.Log($"完成记录{e.Language}的{e.FontType}。");
             this.Monitor.Log($"恢复font patch。");
             this._mainFontPatcher.ResumeFontPatch();
+        }
+
+        private Lazy<IEnumerable<IContentPack>> _testContentPacks;
+        private IEnumerable<IContentPack> EnumerateTestContentPacks()
+        {
+            this._testContentPacks ??= new(this.CreateTestContentPacks);
+            return this._testContentPacks.Value;
+        }
+
+        private IEnumerable<IContentPack> CreateTestContentPacks()
+        {
+#if DEBUG
+            IContentPack FakeContentPack(string relativeDir) => this.Helper.ContentPacks.CreateFake(Path.Combine(this.Helper.DirectoryPath, relativeDir));
+
+            yield return FakeContentPack("content-packs/single");
+#else
+            return Array.Empty<IContentPack>();
+#endif
         }
 
         private void OpenFontSettingsMenu()

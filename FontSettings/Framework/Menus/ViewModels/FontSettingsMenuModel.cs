@@ -335,14 +335,26 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
-        #region CurrentPresetName Property
+        #region CurrentPresetTitle Property
 
-        private string _currentPresetName;
+        private string _currentPresetTitle;
 
-        public string CurrentPresetName
+        public string CurrentPresetTitle
         {
-            get => this._currentPresetName;
-            set => this.SetField(ref this._currentPresetName, value);
+            get => this._currentPresetTitle;
+            set => this.SetField(ref this._currentPresetTitle, value);
+        }
+
+        #endregion
+
+        #region CurrentPresetSubtitle Property
+
+        private string _currentPresetSubtitle;
+
+        public string CurrentPresetSubtitle
+        {
+            get => this._currentPresetSubtitle;
+            set => this.SetField(ref this._currentPresetSubtitle, value);
         }
 
         #endregion
@@ -898,15 +910,20 @@ namespace FontSettings.Framework.Menus.ViewModels
         private void OnPresetChanged(object sender, EventArgs e)
         {
             var presetViewModel = this.PresetViewModel(this.CurrentFontType);
-            string presetName = presetViewModel.CurrentPresetName;
-            FontConfig preset = presetViewModel.CurrentPreset;
-            bool noPresetSelected = preset == null;
+            FontConfig settings = presetViewModel.CurrentPresetSettings;
+            bool noPresetSelected = settings == null;
 
-            // 更新预设名字。
+            // 更新预设标题。
             if (noPresetSelected)
-                this.CurrentPresetName = "-";
+            {
+                this.CurrentPresetTitle = "-";
+                this.CurrentPresetSubtitle = string.Empty;
+            }
             else
-                this.CurrentPresetName = presetName;
+            {
+                this.CurrentPresetTitle = presetViewModel.CurrentPresetNameOrNull ?? string.Empty;
+                this.CurrentPresetSubtitle = presetViewModel.CurrentPresetAuthorOrNull ?? string.Empty;
+            }
 
             // 更新几个状态：是否能另存为、删除该预设。
             this.CanSaveCurrentAsNewPreset = presetViewModel.CanSaveAsNewPreset();
@@ -922,14 +939,14 @@ namespace FontSettings.Framework.Menus.ViewModels
             else
             {
                 this.FontEnabled = true;
-                this.FontSize = preset.FontSize;
-                this.Spacing = preset.Spacing;
-                this.LineSpacing = preset.LineSpacing;
-                this.CharOffsetX = preset.CharOffsetX;
-                this.CharOffsetY = preset.CharOffsetY;
-                this.CurrentFont = this.FindFont(preset.FontFilePath, preset.FontIndex);
-                this.PixelZoom = preset.Supports<IWithPixelZoom>()
-                    ? preset.GetInstance<IWithPixelZoom>().PixelZoom
+                this.FontSize = settings.FontSize;
+                this.Spacing = settings.Spacing;
+                this.LineSpacing = settings.LineSpacing;
+                this.CharOffsetX = settings.CharOffsetX;
+                this.CharOffsetY = settings.CharOffsetY;
+                this.CurrentFont = this.FindFont(settings.FontFilePath, settings.FontIndex);
+                this.PixelZoom = settings.Supports<IWithPixelZoom>()
+                    ? settings.GetInstance<IWithPixelZoom>().PixelZoom
                     : 0;
             }
 

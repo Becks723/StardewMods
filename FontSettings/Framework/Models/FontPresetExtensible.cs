@@ -7,22 +7,38 @@ using FontSettings.Framework.Preset;
 
 namespace FontSettings.Framework.Models
 {
-    internal class FontPresetExtensible : FontPreset, IPresetWithKey<string>, IPresetWithName, IPresetWithDescription
+    internal sealed class FontPresetExtensible : FontPreset
     {
-        public string Description { get; set; }
+        private readonly IEnumerable<IExtensible> _extensibles;
 
-        public string Name { get; set; }
-
-        public string Key { get; set; }
-
-        public FontPresetExtensible(FontPreset copy) 
-            : base(copy)
+        public FontPresetExtensible(FontPreset basedOn, params IExtensible[] extensibles)
+            : this(basedOn, extensibles.AsEnumerable())
         {
         }
 
-        public FontPresetExtensible(FontContext context, FontConfig settings)
-            : base(context, settings)
+        public FontPresetExtensible(FontPreset basedOn, IEnumerable<IExtensible> extensibles)
+            : base(basedOn)
         {
+            this._extensibles = extensibles;
+        }
+
+        public override bool Supports<T>()
+        {
+            return this.GetInstance<T>() != null;
+        }
+
+        public override T GetInstance<T>()
+        {
+            foreach (IExtensible extensible in this._extensibles)
+            {
+                if (extensible == null)
+                    continue;
+
+                if (extensible.TryGetInstance(out T instance))  // TODO: 当前：如果有多个符合，取第一个。如果想取其他的怎么办？
+                    return instance;
+            }
+
+            return base.GetInstance<T>();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 this.SetField(ref this._currentPresetPrivate, value);
 
                 this.RaisePropertyChanged(nameof(this.CurrentPresetName));
-                this.RaisePropertyChanged(nameof(this.CurrentPreset));
+                this.RaisePropertyChanged(nameof(this.CurrentPresetSettings));
 
                 this.RaisePropertyChanged(nameof(this.CanSaveCurrentPreset));
             }
@@ -44,7 +44,35 @@ namespace FontSettings.Framework.Menus.ViewModels
         public string CurrentPresetName => this.CurrentPresetPrivate is IPresetWithName withName ? withName.Name
                                                                                                   : string.Empty;
 
-        public FontConfig CurrentPreset => this.CurrentPresetPrivate?.Settings;
+        public string? CurrentPresetNameOrNull
+        {
+            get
+            {
+                if (this.NoPresetSelected)
+                    return null;
+
+                if (this.CurrentPresetPrivate.TryGetInstance(out IPresetWithName withName))
+                    return withName.Name;
+                else
+                    return null;
+            }
+        }
+
+        public string? CurrentPresetAuthorOrNull
+        {
+            get
+            {
+                if (this.NoPresetSelected)
+                    return null;
+
+                if (this.CurrentPresetPrivate.TryGetInstance(out IPresetFromContentPack fromContentPack))
+                    return fromContentPack.SContentPack.Manifest.Author;
+                else
+                    return null;
+            }
+        }
+
+        public FontConfig CurrentPresetSettings => this.CurrentPresetPrivate?.Settings;
 
         public bool CanSaveCurrentPreset
         {
@@ -185,10 +213,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private void UpdatePresets()
         {
-            this.Presets = new FontPreset[] { null }.Concat(
-                this._presetManager.GetPresets(FontHelpers.GetCurrentLanguage(), this._fontType)
-                )
-                .ToArray();
+            this.Presets = this.EnumerateAvailablePresets().ToArray();
+        }
+
+        private IEnumerable<FontPreset> EnumerateAvailablePresets()
+        {
+            /* default *not selected* preset */
+            yield return null;
+
+            /* presets from database */
+            var presets = this._presetManager.GetPresets(FontHelpers.GetCurrentLanguage(), this._fontType);  // TODO: 排序
+            foreach (FontPreset preset in presets)
+                yield return preset;
         }
 
         private FontPreset CreateNewPreset(string presetName, FontConfig settings)

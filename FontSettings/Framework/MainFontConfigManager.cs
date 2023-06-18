@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess.Parsing;
+using FontSettings.Framework.FontScanning;
+using FontSettings.Framework.FontScanning.Scanners;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Preset;
 
@@ -16,6 +18,7 @@ namespace FontSettings.Framework
         private readonly IDictionary<FontConfigKey, FontConfigModel> _vanillaConfigs = new Dictionary<FontConfigKey, FontConfigModel>();
         private readonly IDictionary<string, FontPresetModel> _keyedPresets = new Dictionary<string, FontPresetModel>();
         private readonly IList<FontPresetModel> _cpPresets = new List<FontPresetModel>();
+        private readonly IDictionary<string, IFontFileProvider> _cpFontFileProviderLookups = new Dictionary<string, IFontFileProvider>();
 
         private readonly FontFilePathParseHelper _pathHelper = new();
         private readonly IFontFileProvider _fontFileProvider;
@@ -118,8 +121,10 @@ namespace FontSettings.Framework
 
         public bool IsReadOnlyPreset(FontPreset preset)
         {
-            if (preset is IPresetWithKey<string> withKey)
-                return !this._keyedPresets.ContainsKey(withKey.Key);
+            if (preset.TryGetInstance(out IPresetWithKey<string> presetWithKey))
+            {
+                return !this._keyedPresets.ContainsKey(presetWithKey.Key);
+            }
 
             return true;
         }
@@ -144,15 +149,23 @@ namespace FontSettings.Framework
         {
             foreach (var model in presets)
             {
-                if (model.Supports<IPresetWithKey<string>>())
+                if (model.TryGetInstance(out IPresetWithKey<string> modelWithKey))
                 {
-                    var modelWithKey = model.GetInstance<IPresetWithKey<string>>();
                     this._keyedPresets[modelWithKey.Key] = model;
                 }
 
-                if (model.Supports<IPresetFromContentPack>())
+                if (model.TryGetInstance(out IPresetFromContentPack contentPack))
                 {
                     this._cpPresets.Add(model);
+
+                    string cpID = contentPack.SContentPack.Manifest.UniqueID;
+                    if (!this._cpFontFileProviderLookups.ContainsKey(cpID))
+                    {
+                        string cpDir = contentPack.SContentPack.DirectoryPath;
+                        var fontFileProvider = new FontFileProvider();
+                        fontFileProvider.Scanners.Add(new BasicFontFileScanner(cpDir, new ScanSettings()));
+                        this._cpFontFileProviderLookups[cpID] = fontFileProvider;
+                    }
                 }
             }
         }
@@ -160,15 +173,23 @@ namespace FontSettings.Framework
         public void RemoveAllContentPacks()
         {
             this._cpPresets.Clear();
+            this._cpFontFileProviderLookups.Clear();
         }
 
         public void RemoveContentPacks(LanguageInfo language)
         {
             var toRemove = this._cpPresets.Where(preset => preset.Context.Language == language);
             foreach (FontPresetModel preset in toRemove)
-            {
                 this._cpPresets.Remove(preset);
-            }
+
+            string GetContentPackID(FontPresetModel cpPreset) => cpPreset.GetInstance<IPresetFromContentPack>().SContentPack.Manifest.UniqueID;
+            var notRemove = this._cpPresets.SkipWhile(preset => toRemove.Contains(preset));
+            var idToRemove = from presetToRm in toRemove
+                             let idToRm = GetContentPackID(presetToRm)
+                             where notRemove.All(presetNotRm => idToRm != GetContentPackID(presetNotRm))
+                             select idToRm;
+            foreach (string id in idToRemove)
+                this._cpFontFileProviderLookups.Remove(id);
         }
 
         private void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig? config, bool raiseConfigUpdated)
@@ -210,7 +231,7 @@ namespace FontSettings.Framework
 
             var config = new FontConfig(
                 Enabled: model.Enabled,
-                FontFilePath: this._pathHelper.ParseFontFilePath(fontFile, this._fontFileProvider.FontFiles),
+                FontFilePath: this._pathHelper.ParseFontFilePath(fontFile, this.YieldAllPossibleFontFiles()),
                 FontIndex: model.FontIndex,
                 FontSize: model.FontSize,
                 Spacing: model.Spacing,
@@ -235,7 +256,7 @@ namespace FontSettings.Framework
 
         private FontConfigModel MakeConfigModel(FontConfig config, LanguageInfo language, GameFontType fontType)
         {
-            string fontFile = this._pathHelper.ParseBackFontFilePath(config.FontFilePath, this._fontFileProvider.FontFiles);
+            string fontFile = this._pathHelper.ParseBackFontFilePath(config.FontFilePath, this.YieldAllPossibleFontFiles());
             string vFontFile = this.GetVanillaFontFile(language, fontType);
             if (fontFile == vFontFile)
                 fontFile = null;
@@ -359,6 +380,9 @@ namespace FontSettings.Framework
         {
             foreach (var preset in this._keyedPresets.Values)
                 yield return preset;
+
+            foreach (var preset in this._cpPresets)
+                yield return preset;
         }
 
         private FontPreset MakePresetObject(FontPresetModel model)
@@ -366,14 +390,7 @@ namespace FontSettings.Framework
             var settings = this.MakeConfigObject(model.Settings, model.Context.Language, model.Context.FontType);
             var basePreset = new FontPreset(model.Context, settings);
 
-            switch (model)
-            {
-                case IPresetWithKey<string> modelWithKey:
-                    return new FontPresetExtensible(basePreset) { Key = modelWithKey.Key };
-
-                default:
-                    return basePreset;
-            }
+            return new FontPresetExtensible(basePreset, model);
         }
 
         private FontPresetModel MakePresetModel(FontPreset preset)
@@ -405,6 +422,14 @@ namespace FontSettings.Framework
                 var context = new FontContext(language, fontType);
                 return this._vanillaConfigs[context]?.FontFile;
             }
+        }
+
+        private IEnumerable<string> YieldAllPossibleFontFiles()
+        {
+            return this._fontFileProvider.FontFiles
+                .Concat(
+                    this._cpFontFileProviderLookups.Values.SelectMany(provider => provider.FontFiles)
+                );
         }
 
         private void RaiseConfigUpdated(FontConfigKey key, FontConfigModel config)

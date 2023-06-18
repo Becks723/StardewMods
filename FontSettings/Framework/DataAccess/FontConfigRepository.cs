@@ -10,7 +10,7 @@ using StardewModdingAPI;
 
 namespace FontSettings.Framework.DataAccess
 {
-    internal partial class FontConfigRepository : IFontConfigRepository
+    internal partial class FontConfigRepository
     {
         private readonly IMonitor _monitor;
         private readonly FontConfigParser _parser;

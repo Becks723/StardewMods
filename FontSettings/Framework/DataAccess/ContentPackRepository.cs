@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.DataAccess.Parsing;
 using FontSettings.Framework.Models;
+using Newtonsoft.Json;
 using StardewModdingAPI;
 
 namespace FontSettings.Framework.DataAccess
@@ -14,11 +15,13 @@ namespace FontSettings.Framework.DataAccess
     {
         private readonly IContentPackHelper _contentPackHelper;
         private readonly IMonitor _monitor;
+        private readonly IEnumerable<IContentPack> _fakeContentPacks;
 
-        public ContentPackRepository(IContentPackHelper contentPackHelper, IMonitor monitor)
+        public ContentPackRepository(IContentPackHelper contentPackHelper, IMonitor monitor, IEnumerable<IContentPack>? fakeContentPacks = null)
         {
             this._contentPackHelper = contentPackHelper;
             this._monitor = monitor;
+            this._fakeContentPacks = fakeContentPacks ?? Array.Empty<IContentPack>();
         }
 
         public IEnumerable<FontPresetModel> ReadContentPacks(FontContext context)
@@ -32,7 +35,7 @@ namespace FontSettings.Framework.DataAccess
 
         public IEnumerable<FontPresetModel> ReadAllContentPacks()
         {
-            foreach (IContentPack pack in this._contentPackHelper.GetOwned())
+            foreach (IContentPack pack in this._contentPackHelper.GetOwned().Concat(this._fakeContentPacks))
             {
                 this._monitor.Log($"Reading content pack: {pack.Manifest.Name} {pack.Manifest.Version} from {pack.DirectoryPath}");
 
@@ -40,7 +43,24 @@ namespace FontSettings.Framework.DataAccess
                 if (pack.HasFile(contentFile))
                 {
                     ContentPackParser parser = new ContentPackParser();
-                    FontContentPack[] rawContentPacks = pack.ReadJsonFile<FontContentPack[]>(contentFile);
+                    FontContentPack[] rawContentPacks;
+                    try
+                    {
+                        try
+                        {
+                            rawContentPacks = pack.ReadJsonFile<FontContentPack[]>(contentFile);
+                        }
+                        catch (JsonReaderException)
+                        {
+                            rawContentPacks = new[] { pack.ReadJsonFile<FontContentPack>(contentFile) };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this._monitor.Log($"Error reading content pack: {ex}", LogLevel.Error);
+                        continue;
+                    }
+
                     foreach (FontContentPack rawContentPack in rawContentPacks)
                     {
                         IEnumerable<FontPresetModel> presets;

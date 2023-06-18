@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.Preset;
+using StardewModdingAPI;
 
 namespace FontSettings.Framework.Models
 {
@@ -12,6 +13,8 @@ namespace FontSettings.Framework.Models
         private readonly ExtendType _extendType;
 
         public string Key { get; set; }
+
+        public IContentPack SContentPack { get; set; }
 
         public FontPresetModelExtensible(FontPresetModel basedOn, ExtendType extendType)
             : base(basedOn.Context, basedOn.Settings)

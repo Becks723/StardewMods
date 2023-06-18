@@ -36,5 +36,10 @@
 		<None Include="Framework\LatinSpriteFont.cs" />
 		<None Include="Framework\Patchers\GameMenuResizeHandler.cs" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Update="content-packs\**\**" Condition="'$(Configuration)' == 'Debug'">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 
 </Project>

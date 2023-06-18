@@ -632,14 +632,27 @@ namespace FontSettings.Framework.Menus.Views
                                             presetGrid.Children.Add(prevPresetButton);
                                             presetGrid.SetColumn(prevPresetButton, 0);
 
-                                            var label = new Label();
-                                            label.Font = FontType.DialogueFont;
-                                            label.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                            label.HorizontalAlignment = HorizontalAlignment.Center;
-                                            label.VerticalAlignment = VerticalAlignment.Center;
-                                            context.OneWayBinds(() => this._viewModel.CurrentPresetName, () => label.Text);
-                                            presetGrid.Children.Add(label);
-                                            presetGrid.SetColumn(label, 1);
+                                            Grid titleGrid = new Grid();
+                                            titleGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnit.Percent) });
+                                            titleGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                                            titleGrid.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                            titleGrid.HorizontalAlignment = HorizontalAlignment.Center;
+                                            titleGrid.VerticalAlignment = VerticalAlignment.Center;
+                                            presetGrid.Children.Add(titleGrid);
+                                            presetGrid.SetColumn(titleGrid, 1);
+                                            {
+                                                var titleLabel = new Label();
+                                                titleLabel.Font = FontType.DialogueFont;
+                                                context.OneWayBinds(() => this._viewModel.CurrentPresetTitle, () => titleLabel.Text);
+                                                titleGrid.Children.Add(titleLabel);
+                                                titleGrid.SetRow(titleLabel, 0);
+
+                                                var subtitleLabel = new Label();
+                                                subtitleLabel.Font = FontType.DialogueFont;
+                                                context.OneWayBinds(() => this._viewModel.CurrentPresetSubtitle, () => subtitleLabel.Text);
+                                                titleGrid.Children.Add(subtitleLabel);
+                                                titleGrid.SetRow(subtitleLabel, 1);
+                                            }
 
                                             var nextPresetButton = new TextureButton(
                                                 Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);

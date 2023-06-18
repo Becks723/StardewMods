@@ -12,4 +12,19 @@ namespace FontSettings.Framework
 
         T? GetInstance<T>() where T : class;
     }
+
+    internal static class ExtensibleExtensions
+    {
+        public static bool TryGetInstance<T>(this IExtensible extensible, out T instance) where T : class
+        {
+            if (extensible.Supports<T>())
+            {
+                instance = extensible.GetInstance<T>();
+                return true;
+            }
+
+            instance = null;
+            return false;
+        }
+    }
 }
