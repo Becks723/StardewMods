@@ -1,4 +1,5 @@
 {
+  "Name": "{{i18n: TEST_single}}",
   "FontFile": "andyb.ttf",
   "Index": 0,
   "Type": "small",

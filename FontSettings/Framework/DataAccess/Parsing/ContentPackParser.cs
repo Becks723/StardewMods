@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.Models;
@@ -41,6 +42,9 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 }
             }
 
+            Func<string> name = this.ParseLocalizableField(contentPack.Name, sContentPack.Translation);
+            Func<string> notes = this.ParseLocalizableField(contentPack.Notes, sContentPack.Translation);
+
             foreach (LanguageInfo language in languages)
             {
                 foreach (GameFontType fontType in fontTypes)
@@ -64,7 +68,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                             CharacterAdd: add,
                             CharacterRemove: remove));
 
-                    yield return new FontPresetModelExtensible(basePreset, FontPresetModelExtensible.ExtendType.FromContentPack) { SContentPack = sContentPack };
+                    yield return new FontPresetModelForContentPack(basePreset, sContentPack, name, notes);
                 }
             }
         }
@@ -136,6 +140,22 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 return ranges;
 
             return null;
+        }
+
+        private Func<string> ParseLocalizableField(string field, ITranslationHelper translation)
+        {
+            field ??= string.Empty;
+
+            Match match = Regex.Match(field, @"^{{[Ii]18[Nn]:(.*)}}$");
+            if (match.Success)
+            {
+                string key = match.Groups[1].Value;
+                return () => translation.Get(key);
+            }
+            else
+            {
+                return () => field;
+            }
         }
     }
 }

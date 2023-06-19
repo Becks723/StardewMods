@@ -36,8 +36,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
 
             var basePreset = new FontPresetModel(new FontContext(language, fontType), settings);
 
-            var keyedPreset = new FontPresetModelExtensible(basePreset, FontPresetModelExtensible.ExtendType.WithKey) { Key = preset.Name };
-            yield return keyedPreset;
+            yield return new FontPresetModelLocal(basePreset, preset.Name);
         }
 
         public FontPresetData ParseBack(FontPresetModel preset)
