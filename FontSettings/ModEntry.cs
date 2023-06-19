@@ -333,6 +333,18 @@ namespace FontSettings
         private void OnFontRecordFinished(object sender, RecordEventArgs e)
         {
             this.Monitor.Log($"完成记录{e.Language}的{e.FontType}。");
+
+            // 准备好保存的字体设置，马上要修改了。
+            {
+                var context = new FontContext(e.Language, e.FontType);
+
+                FontConfigModel? vanillaConfig = this._vanillaFontDataRepository.ReadVanillaFontConfig(context);
+                FontConfigModel? currentConfig = this._fontConfigRepository.ReadConfig(context);
+
+                this._fontConfigManager.AddVanillaConfig(context, vanillaConfig);
+                this._fontConfigManager.AddFontConfig(context, currentConfig);
+            }
+
             this.Monitor.Log($"恢复font patch。");
             this._mainFontPatcher.ResumeFontPatch();
         }
