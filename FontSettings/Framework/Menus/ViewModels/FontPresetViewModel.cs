@@ -206,6 +206,22 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.UpdatePresets();
         }
 
+        public bool TryGetCurrentPresetIfSupportsDetailedInfo(out FontPreset preset)
+        {
+            preset = null;
+
+            if (this.NoPresetSelected)
+                return false;
+
+            var currentPreset = this.CurrentPresetPrivate;
+            if (currentPreset.Supports<IPresetFromContentPack>())
+            {
+                preset = currentPreset;
+                return true;
+            }
+            return false;
+        }
+
         protected virtual void RaisePresetChanged(EventArgs e)
         {
             PresetChanged?.Invoke(this, e);

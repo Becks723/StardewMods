@@ -48,6 +48,12 @@
   "ui.invalid-preset-name.invalid-char": "Contains invalid chars (/, \\, *, \", |, <, >, ?).",
   "ui.invalid-preset-name.duplicated": "Already in use.",
 
+  "ui.preset-info-menu.name": "Name",
+  "ui.preset-info-menu.notes": "Notes",
+  "ui.preset-info-menu.cp-name": "From Content Pack",
+  "ui.preset-info-menu.cp-author": "Author",
+  "ui.preset-info-menu.cp-ver": "Version",
+
   "config.example-text": "Example Text",
   "config.example-text.description": "Custom sample text. Keep this unset unless you really want yours, the mod has its built-in one.",
   "config.min-font-size": "Min font size",

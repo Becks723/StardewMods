@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FontSettings.Framework.FontInfo;
 using FontSettings.Framework.Menus.ViewModels;
 using FontSettings.Framework.Menus.Views.Components;
 using FontSettings.Framework.Models;
@@ -17,7 +16,6 @@ using StardewValley.Menus;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 using StardewValleyUI.Controls.Primitives;
-using StardewValleyUI.Data;
 using StardewValleyUI.Data.Converters;
 using StardewValleyUI.Menus;
 
@@ -37,8 +35,7 @@ namespace FontSettings.Framework.Menus.Views
         private readonly Texture2D _previewCompare;
         private readonly Texture2D _refresh;
 
-        private bool _isNewPresetMenu;
-        private NewPresetMenu _newPresetMenu;
+        private IClickableMenu _currentSubMenu;
 
         public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, bool enableLatinDialogueFont, FontSettingsMenuModel viewModel)
         {
@@ -154,6 +151,23 @@ namespace FontSettings.Framework.Menus.Views
         private void LogException(string name, Exception exception)
         {
             ILog.Error($"Error when {name}: {exception.Message}\n{exception.StackTrace}");
+        }
+
+        private void OnPresetTitleMousePressed(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButtons.ContainsKey(MouseButtons.LeftButton))
+            {
+                if (this._viewModel.TryGetCurrentPresetIfSupportsDetailedInfo(out var preset))
+                {
+                    Game1.playSound("bigDeSelect");
+
+                    var presetInfoMenu = new PresetInfoMenu(
+                        preset: preset,
+                        onClosed: _ => this.ChangeSubMenu(null));
+
+                    this.ChangeSubMenu(presetInfoMenu);
+                }
+            }
         }
 
         protected override void ResetComponents(MenuInitializationContext context)
@@ -636,22 +650,33 @@ namespace FontSettings.Framework.Menus.Views
                                             titleGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnit.Percent) });
                                             titleGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
                                             titleGrid.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                            titleGrid.HorizontalAlignment = HorizontalAlignment.Center;
-                                            titleGrid.VerticalAlignment = VerticalAlignment.Center;
+                                            titleGrid.MousePressed += this.OnPresetTitleMousePressed;
                                             presetGrid.Children.Add(titleGrid);
                                             presetGrid.SetColumn(titleGrid, 1);
                                             {
+                                                var titleView = new ScrollViewer();
+                                                titleView.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                titleView.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                titleGrid.Children.Add(titleView);
+                                                titleGrid.SetRow(titleView, 0);
+                                                {
                                                 var titleLabel = new Label();
                                                 titleLabel.Font = FontType.DialogueFont;
                                                 context.OneWayBinds(() => this._viewModel.CurrentPresetTitle, () => titleLabel.Text);
-                                                titleGrid.Children.Add(titleLabel);
-                                                titleGrid.SetRow(titleLabel, 0);
+                                                    titleView.Content = titleLabel;
+                                                }
 
+                                                var subtitleView = new ScrollViewer();
+                                                subtitleView.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                subtitleView.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                titleGrid.Children.Add(subtitleView);
+                                                titleGrid.SetRow(subtitleView, 1);
+                                                {
                                                 var subtitleLabel = new Label();
-                                                subtitleLabel.Font = FontType.DialogueFont;
+                                                    subtitleLabel.Font = FontType.SmallFont;
                                                 context.OneWayBinds(() => this._viewModel.CurrentPresetSubtitle, () => subtitleLabel.Text);
-                                                titleGrid.Children.Add(subtitleLabel);
-                                                titleGrid.SetRow(subtitleLabel, 1);
+                                                    subtitleView.Content = subtitleLabel;
+                                            }
                                             }
 
                                             var nextPresetButton = new TextureButton(
@@ -797,16 +822,17 @@ namespace FontSettings.Framework.Menus.Views
         {
             base.Dispose(disposing);
 
-            if (this._isNewPresetMenu)
-                this._newPresetMenu.Dispose();
+            if (this._currentSubMenu is IDisposable disposable)
+                disposable.Dispose();
         }
 
         public override void update(GameTime time)
         {
-            if (!this._isNewPresetMenu)
-                base.update(time);
+            // 在有子菜单的情况下，主菜单停止刷新。
+            if (this._currentSubMenu != null)
+                this._currentSubMenu.update(time);
             else
-                this._newPresetMenu.update(time);
+                base.update(time);
         }
 
         public override void draw(SpriteBatch b)
@@ -832,10 +858,10 @@ namespace FontSettings.Framework.Menus.Views
             b.DrawString(Game1.smallFont, GetDebugInfo(), new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif
 
-            if (this._isNewPresetMenu)
+            if (this._currentSubMenu != null)
             {
                 b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
-                this._newPresetMenu.draw(b);
+                this._currentSubMenu.draw(b);
             }
         }
 
@@ -843,33 +869,33 @@ namespace FontSettings.Framework.Menus.Views
         {
             base.receiveKeyPress(key);
 
-            if (this._isNewPresetMenu)
-                this._newPresetMenu.receiveKeyPress(key);
+            this._currentSubMenu?.receiveKeyPress(key);
         }
 
         protected override bool CanClose()
         {
-            if (!this._isNewPresetMenu)
-                return true;
+            if (this._currentSubMenu is NewPresetMenu newPresetMenu)
+                return newPresetMenu.readyToClose();
             else
-                return this._newPresetMenu.readyToClose();
+                return true;
         }
 
-        private NewPresetMenu CreateNewPresetMenu()
+        private void ChangeSubMenu(IClickableMenu? newSubMenu)
         {
-            void OnMenuOpened(NewPresetMenu menu)
-            {
-                this._isNewPresetMenu = true;
-                this._newPresetMenu = menu;
+            if (object.ReferenceEquals(this._currentSubMenu, newSubMenu))
+                return;
+
+            // clean last submenu
+            if (this._currentSubMenu is IDisposable disposable)
+                disposable.Dispose();
+
+            this._currentSubMenu = newSubMenu;
             }
 
-            void OnMenuClosed(NewPresetMenu menu)
+        private NewPresetMenu CreateNewPresetMenu()
             {
-                menu.Dispose();
-
-                this._isNewPresetMenu = false;
-                this._newPresetMenu = null;
-            }
+            void OnMenuOpened(NewPresetMenu menu) => this.ChangeSubMenu(menu);
+            void OnMenuClosed(NewPresetMenu menu) => this.ChangeSubMenu(null);
 
             var result = new NewPresetMenu(
                 this._presetManager,

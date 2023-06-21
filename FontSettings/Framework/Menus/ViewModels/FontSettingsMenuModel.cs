@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FontSettings.Framework.Models;
+using FontSettings.Framework.Preset;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValleyUI.Mvvm;
@@ -674,6 +675,9 @@ namespace FontSettings.Framework.Menus.ViewModels
         {
             this.CurrentFontConfigRealTime = this.CreateConfigBasedOnCurrentSettings();
         }
+
+        public bool TryGetCurrentPresetIfSupportsDetailedInfo(out FontPreset preset)
+            => this.PresetViewModel(this.CurrentFontType).TryGetCurrentPresetIfSupportsDetailedInfo(out preset);
 
         private void PreviousFontType()
         {
