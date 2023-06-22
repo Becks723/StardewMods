@@ -10,24 +10,47 @@ namespace FontSettings.Framework.DataAccess.Parsing
 {
     internal class ContentPackCharacterFileHelper
     {
-        public bool TryParseJson(string file, IContentPack sContentPack, out IEnumerable<CharacterRange> result)
+        public bool TryParseJson(string file, IContentPack sContentPack, out IEnumerable<CharacterRange> result, out Exception exception)
         {
             try
             {
                 result = sContentPack.ReadJsonFile<IEnumerable<CharacterRange>>(file);
+                exception = null;
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 result = null;
+                exception = ex;
                 return false;
             }
         }
 
-        public bool TryParsePlainText(string file, out IEnumerable<CharacterRange> result)
+        public bool TryParseUnicode(string file, IContentPack sContentPack, out IEnumerable<CharacterRange> result, out Exception exception)
         {
-            string text = File.ReadAllText(file);
+            result = null;
+
+            string fullPath = Path.Combine(sContentPack.DirectoryPath, file);
+
+            if (!File.Exists(fullPath))
+            {
+                exception = new FileNotFoundException(null, file);
+                return false;
+            }
+
+            string text;
+            try
+            {
+                text = File.ReadAllText(file);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+                return false;
+            }
+
             result = FontHelpers.GetCharacterRanges(text);
+            exception = null;
             return true;
         }
     }

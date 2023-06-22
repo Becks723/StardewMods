@@ -66,7 +66,7 @@ namespace FontSettings.Framework.DataAccess
                         IEnumerable<FontPresetModel> presets;
                         try
                         {
-                            presets = parser.Parse(rawContentPack, pack);
+                            presets = parser.Parse(rawContentPack, pack).ToArray();
                         }
                         catch (Exception ex)
                         {

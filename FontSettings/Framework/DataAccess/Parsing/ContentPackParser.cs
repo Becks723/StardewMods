@@ -18,6 +18,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
 
         public IEnumerable<FontPresetModel> Parse(FontContentPack contentPack, IContentPack sContentPack)
         {
+            float size = ParseSize(contentPack.Size);
             IEnumerable<LanguageInfo> languages = this.ParseLanguage(contentPack.Language);
             IEnumerable<GameFontType> fontTypes = this.ParseFontType(contentPack.Type);
 
@@ -27,18 +28,18 @@ namespace FontSettings.Framework.DataAccess.Parsing
                                         remove = null;
             if (languages.Count() == 1)
             {
-                if (contentPack.Character != null && sContentPack.HasFile(contentPack.Character))
+                if (contentPack.Character != null)
                 {
-                    @override = this.ParseCharacterRanges(contentPack.Character, sContentPack);
+                    @override = this.ParseCharacterRanges(contentPack.Character, sContentPack, nameof(contentPack.Character));
                     characterPatchMode = CharacterPatchMode.Override;
                 }
                 else
                 {
-                    if (contentPack.CharacterAppend != null && sContentPack.HasFile(contentPack.CharacterAppend))
-                        add = this.ParseCharacterRanges(contentPack.CharacterAppend, sContentPack);
+                    if (contentPack.CharacterAppend != null)
+                        add = this.ParseCharacterRanges(contentPack.CharacterAppend, sContentPack, nameof(contentPack.CharacterAppend));
 
-                    if (contentPack.CharacterRemove != null && sContentPack.HasFile(contentPack.CharacterRemove))
-                        remove = this.ParseCharacterRanges(contentPack.CharacterRemove, sContentPack);
+                    if (contentPack.CharacterRemove != null)
+                        remove = this.ParseCharacterRanges(contentPack.CharacterRemove, sContentPack, nameof(contentPack.CharacterRemove));
                 }
             }
 
@@ -46,9 +47,9 @@ namespace FontSettings.Framework.DataAccess.Parsing
             else
             {
                 // 仅允许重写，不允许修改。
-                if (contentPack.Character != null && sContentPack.HasFile(contentPack.Character))
+                if (contentPack.Character != null)
                 {
-                    @override = this.ParseCharacterRanges(contentPack.Character, sContentPack);
+                    @override = this.ParseCharacterRanges(contentPack.Character, sContentPack, nameof(contentPack.Character));
                     characterPatchMode = CharacterPatchMode.Override;
                 }
             }
@@ -68,7 +69,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                             Enabled: true,
                             FontFile: contentPack.FontFile,
                             FontIndex: contentPack.Index,
-                            FontSize: contentPack.Size,
+                            FontSize: size,
                             Spacing: contentPack.Spacing,
                             LineSpacing: contentPack.LineSpacing,
                             CharOffsetX: contentPack.OffsetX,
@@ -82,6 +83,17 @@ namespace FontSettings.Framework.DataAccess.Parsing
                     yield return new FontPresetModelForContentPack(basePreset, sContentPack, name, notes);
                 }
             }
+        }
+
+        private float ParseSize(float sizeField)
+        {
+            if (sizeField <= 0)
+            {
+                throw this.ParseFieldException(nameof(FontContentPack.Size),
+                    $"Font size must be bigger than 0. Current: {sizeField}");
+            }
+
+            return sizeField;
         }
 
         private IEnumerable<LanguageInfo> ParseLanguage(string languageField)
@@ -110,6 +122,13 @@ namespace FontSettings.Framework.DataAccess.Parsing
                     }
                 }
             }
+
+            if (parsedLanguages.Count == 0)
+            {
+                throw this.ParseFieldException(nameof(FontContentPack.Language),
+                    $"Cannot get any language from the given value. Value: '{languageField}'");
+            }
+
             return parsedLanguages;
         }
 
@@ -137,20 +156,38 @@ namespace FontSettings.Framework.DataAccess.Parsing
                         break;
                 }
             }
+
+            if (parsedTypes.Count == 0)
+            {
+                throw this.ParseFieldException(nameof(FontContentPack.Type),
+                    $"Cannot get any font type from the given value. Value: '{typeField}'");
+            }
+
             return parsedTypes;
         }
 
-        private IEnumerable<CharacterRange> ParseCharacterRanges(string characterFile, IContentPack sContentPack)
+        private IEnumerable<CharacterRange> ParseCharacterRanges(string characterFile, IContentPack sContentPack, string fieldName)
         {
-            if (this._characterFileHelper.TryParseJson(characterFile, sContentPack, out IEnumerable<CharacterRange> ranges))
-                return ranges;
+            if (sContentPack.HasFile(characterFile))
+            {
+                IEnumerable<CharacterRange> ranges;
 
-            string fullPath = Path.Combine(sContentPack.DirectoryPath, characterFile);
+                if (this._characterFileHelper.TryParseJson(characterFile, sContentPack, out ranges, out Exception jsonEx))
+                    return ranges;
 
-            if (this._characterFileHelper.TryParsePlainText(fullPath, out ranges))
-                return ranges;
+                if (this._characterFileHelper.TryParseUnicode(characterFile, sContentPack, out ranges, out Exception uniEx))
+                    return ranges;
 
-            return null;
+                throw this.ParseFieldException(fieldName,
+                    $"Failed to read the character file ('{characterFile}')"
+                    + $"\nWhen attempts to read in json, the error is: {jsonEx}"
+                    + $"\nWhen attempts to read in unicode, the error is: {uniEx}");
+            }
+            else
+            {
+                throw this.ParseFieldException(fieldName,
+                    $"Cannot find character file in content pack's folder. File: '{characterFile}'");
+            }
         }
 
         private Func<string> ParseLocalizableField(string field, ITranslationHelper translation)
@@ -167,6 +204,11 @@ namespace FontSettings.Framework.DataAccess.Parsing
             {
                 return () => field;
             }
+        }
+
+        private Exception ParseFieldException(string fieldName, string message)
+        {
+            return new Exception($"Error parsing '{fieldName}' field: {message}");
         }
     }
 }
