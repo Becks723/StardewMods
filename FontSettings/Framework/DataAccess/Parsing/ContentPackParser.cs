@@ -42,6 +42,17 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 }
             }
 
+            // 多个语言
+            else
+            {
+                // 仅允许重写，不允许修改。
+                if (contentPack.Character != null && sContentPack.HasFile(contentPack.Character))
+                {
+                    @override = this.ParseCharacterRanges(contentPack.Character, sContentPack);
+                    characterPatchMode = CharacterPatchMode.Override;
+                }
+            }
+
             Func<string> name = this.ParseLocalizableField(contentPack.Name, sContentPack.Translation);
             Func<string> notes = this.ParseLocalizableField(contentPack.Notes, sContentPack.Translation);
 
