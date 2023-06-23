@@ -19,7 +19,7 @@ namespace FontSettings.Framework.DataAccess.Models
         public float OffsetY { get; set; }
         public float PixelZoom { get; set; }
         public string Character { get; set; }  // 自定义字符范围
-        public string CharacterAppend { get; set; }  // 在原有字符的基础上，增加的字符
+        public string CharacterAdd { get; set; }  // 在原有字符的基础上，增加的字符
         public string CharacterRemove { get; set; }  // 在原有字符的基础上，移除的字符
 
         public string Name { get; set; }  // 支持翻译，格式：{{i18n: XXX}}

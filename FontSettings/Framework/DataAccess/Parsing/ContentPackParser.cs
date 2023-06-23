@@ -35,8 +35,8 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 }
                 else
                 {
-                    if (contentPack.CharacterAppend != null)
-                        add = this.ParseCharacterRanges(contentPack.CharacterAppend, sContentPack, nameof(contentPack.CharacterAppend));
+                    if (contentPack.CharacterAdd != null)
+                        add = this.ParseCharacterRanges(contentPack.CharacterAdd, sContentPack, nameof(contentPack.CharacterAdd));
 
                     if (contentPack.CharacterRemove != null)
                         remove = this.ParseCharacterRanges(contentPack.CharacterRemove, sContentPack, nameof(contentPack.CharacterRemove));
