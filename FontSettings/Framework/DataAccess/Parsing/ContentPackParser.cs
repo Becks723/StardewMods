@@ -197,7 +197,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
             Match match = Regex.Match(field, @"^{{[Ii]18[Nn]:(.*)}}$");
             if (match.Success)
             {
-                string key = match.Groups[1].Value;
+                string key = match.Groups[1].Value.Trim();
                 return () => translation.Get(key);
             }
             else
