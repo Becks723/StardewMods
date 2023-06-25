@@ -120,6 +120,9 @@ Symptom: changes made to fonts do not apply, game becomes laggy, high cpu, etc.<
 
 
 ## Release Notes
+#### 0.10.3 - 2023-06-19
+- Adds Russian translation. (Thanks to [h4man](https://www.nexusmods.com/stardewvalley/users/100380428))
+
 #### 0.10.2 - 2023-06-05
 - Fix a menu crash deleting a font preset.
 - Optimize UI drop down under a large data set. Delete `SimplifiedDropDown` option added since [0.8](#080---2023-04-02).
