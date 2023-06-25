@@ -8,6 +8,17 @@ This mod:
 	- Align text spacing.
 	- and so on...
 
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Compatibility](#compatibility)
+  - [Conflict with SpriteMaster](#conflict-with-spritemaster-mod)
+- [For Modders](#for-modders)
+  - [Edit mod assets](#edit-mod-assets)
+  - [Create a Font Settings content pack](#create-a-font-settings-content-pack)
+- [Help & Feedback](#help--feedback)
+- [Release Notes](#release-notes)
 
 ## Installation
 
@@ -85,7 +96,17 @@ Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalle
 | MinPixelZoom | Min reachable value of the pixel zoom option, default `0.5`. |
 | MaxPixelZoom | Max reachable value of the pixel zoom option, default `5`. |
 
-#### Edit Mod Assets
+## Compatibility:
+Lastest version works with Windows, MacOS, Linux.
+
+### Conflict with SpriteMaster mod
+Condition: SpriteMaster version >0.14.0, FontSettings version unlimited.<br/>
+Symptom: changes made to fonts do not apply, game becomes laggy, high cpu, etc.<br/>
+**Solution**: In the configuration menu, go to `SpriteMaster > Advanced Settings > Extras.OpenGL`, uncheck `Enabled` and `OptimizeTexture2DSetData`, and restart the game. <small>Test environment: FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
+
+## For Modders
+
+### Edit Mod Assets
 Textures for this mod are stored in the `FontSettings/assets` folder. To edit them, you may:
 * For own use, draw your own version and replace the texture file. Your own texture must be same size and filename as original one.
 * For shared use, use [Content Patcher](https://www.nexusmods.com/stardewvalley/mods/1915). Each png file is an asset entry. Its name formats as `Mods/Becks723.FontSettings/<filename>`.
@@ -99,27 +120,24 @@ Textures for this mod are stored in the `FontSettings/assets` folder. To edit th
 	}
 	```
 
-
-## Compatibility:
-Lastest version works with Windows, MacOS, Linux.
-
-#### Conflict with SpriteMaster mod
-Condition: SpriteMaster version >0.14.0, FontSettings version unlimited.<br/>
-Symptom: changes made to fonts do not apply, game becomes laggy, high cpu, etc.<br/>
-**Solution**: In the configuration menu, go to `SpriteMaster > Advanced Settings > Extras.OpenGL`, uncheck `Enabled` and `OptimizeTexture2DSetData`, and restart the game. <small>Test environment: FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
+### Create a Font Settings content pack
+Modders can create font packs by editing some json files. See [Font Settings pack guide](./docs/font-pack-guide.md) for more info.
 
 ## Help & Feedback:
 
-#### Where to feedback/ask for help
+### Where to feedback/ask for help
 1. At [Nexus modpage POSTS tab](https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts).
 2. At [Stardew Valley Discord](https://discord.gg/stardewvalley). Ping me _@Becks723#7620_ anytime. I won't be always around but I'll check.
 
-#### Report a bug
+### Report a bug
 1. At [Nexus modpage BUGS tab](https://www.nexusmods.com/stardewvalley/mods/12467?tab=bugs).
 2. At [Github issues](https://github.com/Becks723/StardewMods/issues).
 
 
 ## Release Notes
+#### 0.11.0 - 2023-06-26
+- [Content pack](#create-a-font-settings-content-pack) support.
+
 #### 0.10.3 - 2023-06-19
 - Adds Russian translation. (Thanks to [h4man](https://www.nexusmods.com/stardewvalley/users/100380428))
 

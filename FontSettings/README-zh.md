@@ -3,6 +3,18 @@
 # 字体设置
 设置游戏字体。
 
+## 目录
+- [下载&安装](#下载--安装)
+- [使用说明](#使用说明)
+- [配置](#配置)
+- [兼容性](#兼容性)
+  - [和 SpriteMaster 的冲突](#和-spritemaster-冲突)
+- [给模组制作者看的](#给其他模组作者看的)
+  - [编辑模组素材](#编辑模组素材)
+  - [制作字体包](#制作字体包)
+- [反馈&帮助](#反馈--帮助)
+- [更新日志](#更新日志)
+
 ## 下载 & 安装
 
 1. 下载并安装[SMAPI](https://smapi.io/)。
@@ -80,7 +92,17 @@
 | 最小缩放比例 | MinPixelZoom | 字符的缩放比例 最小值（仅对话字体）。默认`0.5`。 |
 | 最大缩放比例 | MaxPixelZoom | 字符的缩放比例 最大值（仅对话字体）。默认`5`。 |
 
-#### 编辑模组素材
+## 兼容性
+兼容Windows、MacOS、Linux系统。Android版本还在制作中~
+
+#### 和 SpriteMaster 的冲突
+触发条件：SpriteMaster版本 >0.14.0, 本模组版本不限。<br/>
+冲突表现：调整参数示例文本不刷新、点击ok键无限加载、cpu爆高。<br/>
+解决方法：在配置菜单中，找到 SpriteMaster > Advanced Settings > Extras.OpenGL，取消勾选 `Enabled` 和 `OptimizeTexture2DSetData` 两项，重进游戏。<small>测试环境：FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
+
+## 给其他模组作者看的
+
+### 编辑模组素材
 本模组的图片在`FontSettings/assets`文件夹内，可编辑
 * 自用：手动覆盖原先的文件。注意，你的图片必须与原来的**一样大小、文件名**。
 * 共享/做成模组：用[Content Patcher](https://www.nexusmods.com/stardewvalley/mods/1915)做成一个cp包。每张png图片都是一个素材，素材名格式为`Mods/Becks723.FontSettings/<文件名>`。
@@ -93,15 +115,8 @@
 		"FromFile": "path/to/yourtexturefile.png"
 	}
 	```
-
-
-## 兼容性
-兼容Windows、MacOS、Linux系统。Android版本还在制作中~
-
-#### 和 SpriteMaster 冲突
-触发条件：SpriteMaster版本 >0.14.0, 本模组版本不限。<br/>
-冲突表现：调整参数示例文本不刷新、点击ok键无限加载、cpu爆高。<br/>
-解决方法：在配置菜单中，找到 SpriteMaster > Advanced Settings > Extras.OpenGL，取消勾选 `Enabled` 和 `OptimizeTexture2DSetData` 两项，重进游戏。<small>测试环境：FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
+### 制作字体包
+见[字体包制作教程](./docs/字体包制作教程.md)。
 
 ## 反馈 & 帮助
 #### 反馈/提问
@@ -113,6 +128,9 @@
 
 
 ## 更新日志
+#### 0.11.0 - 2023-06-26
+- 支持玩家制作[字体包](#制作字体包)。
+
 #### 0.10.3 - 2023-06-19
 - 添加俄文翻译（来自[h4man](https://www.nexusmods.com/stardewvalley/users/100380428)）。
 - 移除所有历史版本号上的`【测试版】`标签（主要是没啥意义，又容易误导orz）。
