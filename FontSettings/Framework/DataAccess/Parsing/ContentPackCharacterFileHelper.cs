@@ -34,14 +34,14 @@ namespace FontSettings.Framework.DataAccess.Parsing
 
             if (!File.Exists(fullPath))
             {
-                exception = new FileNotFoundException(null, file);
+                exception = new FileNotFoundException(null, fullPath);
                 return false;
             }
 
             string text;
             try
             {
-                text = File.ReadAllText(file);
+                text = File.ReadAllText(fullPath);
             }
             catch (Exception ex)
             {
