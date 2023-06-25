@@ -178,4 +178,4 @@ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789¹²³ªº%$€¥�
 
 ## See Also
 - [Nexusmods modpage](https://www.nexusmods.com/stardewvalley/mods/12467)
-- [README](README.md)
+- [README](../README.md)
