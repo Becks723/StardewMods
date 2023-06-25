@@ -30,7 +30,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
         public IFontPatch ForReplaceSpriteFont(SpriteFont spriteFont)
             => this.CreatePatch(new FontReplacer(spriteFont));
 
-        public IBmFontPatch ForBypassBmFont()
+        public IBmFontPatch ForBypassBmFont()  // TODO：当enabled为false时，pixelZoom应该是原版设置，不一定是1f。
             => this.CreateBmPatch();
 
         public IBmFontPatch ForLoadBmFont(BmFontData bmFont, float fontPixelZoom)
