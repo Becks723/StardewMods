@@ -11,6 +11,7 @@ This mod:
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Font Types in Game](#font-types-in-game)
 - [Configuration](#configuration)
 - [Compatibility](#compatibility)
   - [Conflict with SpriteMaster](#conflict-with-spritemaster-mod)
@@ -68,9 +69,18 @@ Two ways to open font settings menu:
 
 In the menu, configure the fonts, then click OK, your font is set!
 
+### Font Types in Game
+In game there're mainly three font types: **Small**, **Medium**, **Dialogue** font. You need to configure them seperately.
+
+- Small Font: Used for item descriptions, tooltips.
+- Medium Font: Bigger one. Used for item names, quest paragraphs, options.
+- Dialogue Font: Stored in `Content/LooseSprites/font_bold`. Used for titles and dialogues.
+
+<img src="./docs/game-font-types-1.png" width="50%"/> 
+<img src="./docs/game-font-types-2.png" width="50%"/>
+
 #### Some Notes
 * All the fonts available are from your computer. Current supported types are TrueType (.ttf, .ttc), OpenType (.otf, .otc, .ttf, .ttc).
-* In game there're mainly three font types: **Small**, **Medium**, **Dialogue** font. You need to configure them seperately.
 
 
 ## Configuration
