@@ -9,21 +9,30 @@ namespace FontSettings.Framework.Preset
 {
     internal class FontPreset : IExtensible
     {
-        public LanguageInfo Language { get; }
+        [Obsolete]
+        public LanguageInfo Language => this.Context.Language;
 
-        public GameFontType FontType { get; }
+        [Obsolete]
+        public GameFontType FontType => this.Context.FontType;
+
+        public FontContext Context { get; }
 
         public FontConfig Settings { get; }
 
+        [Obsolete]
         public FontPreset(LanguageInfo language, GameFontType fontType, FontConfig settings)
+            : this(new FontContext(language, fontType), settings)
         {
-            this.Language = language;
-            this.FontType = fontType;
+        }
+
+        public FontPreset(FontContext context, FontConfig settings)
+        {
+            this.Context = context;
             this.Settings = settings;
         }
 
         public FontPreset(FontPreset copy)
-            : this(copy.Language, copy.FontType, copy.Settings)
+            : this(copy.Context, copy.Settings)
         {
         }
 

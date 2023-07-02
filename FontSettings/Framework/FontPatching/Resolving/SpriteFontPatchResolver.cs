@@ -10,7 +10,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 {
     internal class SpriteFontPatchResolver : BaseFontPatchResolver
     {
-        public override IResult<IFontPatch, Exception> Resolve(FontConfig config, FontPatchContext context)
+        public override IResult<IFontPatch, Exception> Resolve(FontConfig config, FontContext context)
         {
             try
             {

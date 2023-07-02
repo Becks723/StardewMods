@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BmFont;
+using FontSettings.Framework.Fonts;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FontSettings.Framework.FontGenerators
@@ -14,10 +15,12 @@ namespace FontSettings.Framework.FontGenerators
         private readonly char _defaultChar = '*';
 
         private readonly IVanillaFontProvider _vanillaFontProvider;
+        private readonly Func<bool> _enableLatinDialogueFont;
 
-        public SampleFontGenerator(IVanillaFontProvider vanillaFontProvider)
+        public SampleFontGenerator(IVanillaFontProvider vanillaFontProvider, Func<bool> enableLatinDialogueFont)
         {
             this._vanillaFontProvider = vanillaFontProvider;
+            this._enableLatinDialogueFont = enableLatinDialogueFont;
         }
 
         protected override ISpriteFont GenerateFontCore(SampleFontGeneratorParameter param)
@@ -81,7 +84,7 @@ namespace FontSettings.Framework.FontGenerators
 
         private ISpriteFont BmFont(SampleFontGeneratorParameter param)
         {
-            if (FontHelpers.IsLatinLanguage(param.Language) || !param.Enabled)
+            if ((!this._enableLatinDialogueFont() && FontHelpers.IsLatinLanguage(param.Language)) || !param.Enabled)
                 return this.GetVanillaBmFont(param.Language, GameFontType.SpriteText);
 
             else if (param.FontFilePath is null)
@@ -92,14 +95,15 @@ namespace FontSettings.Framework.FontGenerators
                 fontFile.Common.LineHeight = (int)param.LineSpacing;
                 // TODO: 搞懂其他属性，如Base，Spacing，Padding与SpriteFont的关系。
 
-                return new GameBitmapSpriteFont
-                {
-                    FontFile = fontFile,
-                    Pages = new List<Texture2D>(builtIn.Pages),
-                    CharacterMap = builtIn.CharacterMap,
-                    LanguageCode = builtIn.LanguageCode,
-                    FontPixelZoom = param.PixelZoom,
-                };
+                return new GameBitmapSpriteFont(
+                    bmFont: new Models.BmFontData
+                    {
+                        FontFile = fontFile,
+                        Pages = builtIn.Pages.ToArray()
+                    },
+                    pixelZoom: param.PixelZoom,
+                    language: param.Language,
+                    bmFontInLatinLanguages: this._enableLatinDialogueFont());
             }
             else
             {
@@ -116,13 +120,15 @@ namespace FontSettings.Framework.FontGenerators
                 );
                 fontFile.Common.LineHeight = (int)param.LineSpacing;
 
-                return new GameBitmapSpriteFont
-                {
-                    FontFile = fontFile,
-                    Pages = new List<Texture2D>(pages),
-                    LanguageCode = param.Language.Code,
-                    FontPixelZoom = param.PixelZoom
-                };
+                return new GameBitmapSpriteFont(
+                    bmFont: new Models.BmFontData
+                    {
+                        FontFile = fontFile,
+                        Pages = pages,
+                    },
+                    pixelZoom: param.PixelZoom,
+                    language: param.Language,
+                    bmFontInLatinLanguages: this._enableLatinDialogueFont());
             }
         }
 

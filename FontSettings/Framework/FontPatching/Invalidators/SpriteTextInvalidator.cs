@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ using StardewValley.BellsAndWhistles;
 
 namespace FontSettings.Framework.FontPatching.Invalidators
 {
-    internal class SpriteTextInvalidator : BaseFontPatchInvalidator, ISpriteTextPatchInvalidator
+    internal class SpriteTextInvalidator : BaseFontPatchInvalidator
     {
         private readonly IGameContentHelper _contentHelper;
 
@@ -20,14 +21,18 @@ namespace FontSettings.Framework.FontPatching.Invalidators
             this._contentHelper = modHelper.GameContent;
         }
 
-        protected override void InvalidateCore()
+        protected override void InvalidateCore(FontContext context)
         {
+            Debug.Assert(context.FontType == GameFontType.SpriteText);
+
+            var language = context.Language;
+
             // invalidate.
             {
                 // font file
-                string fontFileName = FontHelpers.GetFontFileAssetName();
+                string fontFileName = FontHelpers.GetFontFileAssetName(language);
                 this._contentHelper.InvalidateCache(fontFileName);
-                this._contentHelper.InvalidateCache(this.LocalizeBaseAssetName(fontFileName));
+                this._contentHelper.InvalidateCache(FontHelpers.LocalizeAssetName(fontFileName, language));
 
                 // pages
                 var fontFile = SpriteText.FontFile;
@@ -36,14 +41,14 @@ namespace FontSettings.Framework.FontPatching.Invalidators
                     string pageName = $"Fonts/{page.File}";
 
                     this._contentHelper.InvalidateCache(pageName);
-                    this._contentHelper.InvalidateCache(this.LocalizeBaseAssetName(pageName));
+                    this._contentHelper.InvalidateCache(FontHelpers.LocalizeAssetName(pageName, language));
                 }
             }
 
             // propagate
             {
                 // fontFile
-                FontFile fontFile = this.LoadFontFile(FontHelpers.GetFontFileAssetName());
+                FontFile fontFile = this.LoadFontFile(FontHelpers.GetFontFileAssetName(language));
 
                 // characterMap
                 var characterMap = new Dictionary<char, FontChar>();
@@ -69,11 +74,6 @@ namespace FontSettings.Framework.FontPatching.Invalidators
         private FontFile LoadFontFile(string assetName)
         {
             return FontLoader.Parse(Game1.content.Load<XmlSource>(assetName).Source);
-        }
-
-        void ISpriteTextPatchInvalidator.UpdateFontFile(FontFile fontFile)
-        {
-
         }
     }
 }

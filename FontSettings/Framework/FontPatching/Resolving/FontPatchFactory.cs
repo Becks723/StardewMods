@@ -30,7 +30,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
         public IFontPatch ForReplaceSpriteFont(SpriteFont spriteFont)
             => this.CreatePatch(new FontReplacer(spriteFont));
 
-        public IBmFontPatch ForBypassBmFont()
+        public IBmFontPatch ForBypassBmFont()  // TODO：当enabled为false时，pixelZoom应该是原版设置，不一定是1f。
             => this.CreateBmPatch();
 
         public IBmFontPatch ForLoadBmFont(BmFontData bmFont, float fontPixelZoom)
@@ -50,7 +50,12 @@ namespace FontSettings.Framework.FontPatching.Resolving
         }
 
         public IBmFontPatch ForEditBmFont(FontConfig config)
-            => this.CreateBmPatch(new BmFontFileEditor(config));
+        {
+            float pixelZoom = config.Supports<IWithPixelZoom>()
+                ? config.GetInstance<IWithPixelZoom>().PixelZoom
+                : 1f;
+            return this.CreateBmPatch(new BmFontFileEditor(config), pixelZoom);
+        }
 
         private IFontPatch CreatePatch() => new FontPatch(null, null);
         private IFontPatch CreatePatch(IFontLoader loader) => new FontPatch(loader, null);
@@ -59,7 +64,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
         private IBmFontPatch CreateBmPatch() => new BmFontPatch(null, null, null);
         private IBmFontPatch CreateBmPatch(IFontLoader loader, IDictionary<string, IFontLoader> pageLoaders, float fontPixelZoom) => new BmFontPatch(loader, null, pageLoaders, fontPixelZoom);
-        private IBmFontPatch CreateBmPatch(IFontEditor editor) => new BmFontPatch(null, editor, null);
+        private IBmFontPatch CreateBmPatch(IFontEditor editor, float fontPixelZoom) => new BmFontPatch(null, editor, null, fontPixelZoom);
         private IBmFontPatch CreateBmPatch(IFontReplacer replacer, IDictionary<string, IFontLoader> pageLoaders, float fontPixelZoom) => new BmFontPatch(null, replacer, pageLoaders, fontPixelZoom);
     }
 }

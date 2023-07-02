@@ -12,28 +12,40 @@
 	- √ 示例美化一下（如：每个字加边框、合并两个示例）。
 	- √ 兼容GMCM。
 	- √ 兼容mod语言。
+	- √ 优化BmFont制作的字体，现在的感觉被裁剪过。
+	- √ 为assets添加assetname，使其可替换。
+	- √ 扫描字体的过程记录日志
+	- √ 拉丁语言兼容对话字体。
 	- × SpriteFont的文件保存，方便下次加载。
+	- × BmFont的Kerning？游戏里用不着。
+	- 暂时√ SpriteFont生成的图片太大（指宽高）怎么办？xna自己解决
 	- 暂时√ 字体的生成方案：
 		- SpriteFont：stbtrutype（当前）
 		- BmFont：stbtrutype（当前）、fontbm（备用）、bmfont
-    - 部分√ 保持原版字体时能够调节字体大小。（目前除了hu, ru, tr都已完成）
+    - 部分√ 保持原版字体时能够调节字体大小。（目前常用字符都已完成，剩下一些查漏补缺）
 
-	- 优化BmFont制作的字体，现在的感觉被裁剪过。
+
 	- 安卓版本
 		主要问题：1. 如何读取系统字体？
 				 2. 如何安装字体进系统？（或者创一个文件夹特别用于堆字体？）
-	- 拉丁语言兼容对话字体。
+				 3. 安卓的UI与pc端不一样。
 	- UI兼容手柄。
-	- SpriteFont生成的图片太大（指宽高）怎么办？
-	- BmFont的Kerning？
 	- 下拉框条目用各自的字体显示。
 	- 代码里的TODO。
-	- 为assets添加assetname，使其可替换。
 	- assets/vanilla-fonts扩展：新建一个custom-vanilla-fonts给用户配置。
 		1. 添加更多自定义语言。
 		2. 重写已存在的配置，用于自定义字体。
-	- 扫描字体的过程记录日志
+	- 将第三方dll归入libs目录。
+		目前难点：SMAPI用cecil提前解析依赖，因此无法用AssemblyResolve事件；
+				目前只识别与主dll同一目录的依赖（见AssemblyLoader::GetReferencedLocalAssemblies），可能需要写一份PR。
+	- 修复enabled=false时对话体的pixelZoom始终为1f的问题。
+	- 修复信中的图标缩水的问题。
+	- 添加阴影&颜色设置
+	- 添加加粗设置。
 
-Dialogue font under latin language:
+Custom Dialogue font under latin language:
 Solution:
-	The core is to patch SpriteText::drawString
+Skip related if check withs `LocalizedContentManager.CurrentLanguageLatin` (use transpiler to change the field into a `false`)
+`SpriteText.setUpCharacterMap`: latin languages do same things as non-latin do. Initialize bmfont related fields, subscribe the `OnLanguageChange` callback.
+`SpriteText.OnLanguageChange`: similar to `setUpCharacterMap`, do the inits.
+`SpriteText.drawString`: Replace the only `CurrentLanguageLatin` with `false`.

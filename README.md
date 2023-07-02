@@ -1,10 +1,13 @@
-## Font Settings
-Download: [Nexus](https://www.nexusmods.com/stardewvalley/mods/12467)
+#### English | [中文](./README-zh.md)
 
+## Font Settings
+Customize fonts for Stardew Valley.<br/>
+( [download](https://www.nexusmods.com/stardewvalley/mods/12467) | [player guide](./FontSettings/README.md) )
 
 ## Phone Traveling Cart
-Download: [Nexus](https://www.nexusmods.com/stardewvalley/mods/12981)
-
+Telephone to traveling cart, preview or buy the goods.<br/>
+( [download](https://www.nexusmods.com/stardewvalley/mods/12981) | player guide )
 
 ## Staircase Placement Fix
-Download: [Nexus](https://www.nexusmods.com/stardewvalley/mods/13381)
+Fix some mine tiles cannot place staircase.<br/>
+( [download](https://www.nexusmods.com/stardewvalley/mods/13381) | [player guide](./StaircasePlacementFix/README.md) )

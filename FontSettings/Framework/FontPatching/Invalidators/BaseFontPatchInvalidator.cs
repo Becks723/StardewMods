@@ -8,27 +8,15 @@ namespace FontSettings.Framework.FontPatching.Invalidators
 {
     internal abstract class BaseFontPatchInvalidator : IFontPatchInvalidator
     {
-        IFontPatch IFontPatchInvalidator.Patch { get; set; }
+        private static readonly object _lock = new();
 
-        public bool IsInProgress { get; private set; }
-
-        public void InvalidateAndPropagate()
+        public void InvalidateAndPropagate(FontContext context)
         {
-            if (this.IsInProgress) return;
-
-            try
-            {
-                this.IsInProgress = true;
-
-                this.InvalidateCore();
-            }
-            finally
-            {
-                this.IsInProgress = false;
-            }
+            lock (_lock)
+                this.InvalidateCore(context);
         }
 
-        protected abstract void InvalidateCore();
+        protected abstract void InvalidateCore(FontContext context);
 
         protected string LocalizeBaseAssetName(string baseName)
         {

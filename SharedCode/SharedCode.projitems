@@ -18,8 +18,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SaveAnywhere\ISaveAnywhereApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SaveAnywhere\SaveAnywhereIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SpaceCore\ISpaceCoreApi.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Integrations\ModIntegration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Integrations\ModIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Integrations\SpaceCore\SpaceCoreIntegrationBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Integrations\ToolbarIcons\IToolbarIconsApi.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Integrations\ToolbarIcons\ToolbarIconsIntegrationBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\GameHelper.cs" />
   </ItemGroup>
 </Project>

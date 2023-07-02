@@ -1,7 +1,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<Reference Include="StardewValleyUI">
-			<HintPath>$(SolutionDir)\_libs\stardewvalleyui\$(Configuration)\StardewValleyUI.dll</HintPath>
+			<HintPath>..\_libs\stardewvalleyui\$(Configuration)\StardewValleyUI.dll</HintPath>
+		</Reference>
+		<Reference Include="StardewValleyUI.DataBinding">
+			<HintPath>..\_libs\stardewvalleyui\$(Configuration)\StardewValleyUI.DataBinding.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 </Project>

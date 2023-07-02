@@ -9,8 +9,8 @@ namespace FontSettings.Framework.FontPatching.Resolving
 {
     internal abstract class BaseFontPatchResolver : IFontPatchResolver
     {
-        public abstract IResult<IFontPatch, Exception> Resolve(FontConfig config, FontPatchContext context);
-        public virtual async Task<IResult<IFontPatch, Exception>> ResolveAsync(FontConfig config, FontPatchContext context)
+        public abstract IResult<IFontPatch, Exception> Resolve(FontConfig config, FontContext context);
+        public virtual async Task<IResult<IFontPatch, Exception>> ResolveAsync(FontConfig config, FontContext context)
             => await Task.Run(() => this.Resolve(config, context));
 
         protected FontPatchFactory PatchFactory { get; } = new();

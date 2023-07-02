@@ -8,15 +8,6 @@ namespace FontSettings.Framework.FontPatching
 {
     internal interface IFontPatchInvalidator
     {
-        IFontPatch? Patch { get; set; }
-
-        bool IsInProgress { get; }
-
-        void InvalidateAndPropagate();
-    }
-
-    internal interface ISpriteTextPatchInvalidator : IFontPatchInvalidator
-    {
-        void UpdateFontFile(BmFont.FontFile fontFile);
+        void InvalidateAndPropagate(FontContext context);
     }
 }

@@ -15,6 +15,12 @@ namespace FontSettings.Framework.Patchers
     internal class SpriteTextPatcher
     {
         private static readonly IDictionary<LanguageInfo, float> _pixelZoomLookup = new Dictionary<LanguageInfo, float>();
+        private static ModConfig _config;
+
+        public SpriteTextPatcher(ModConfig config)
+        {
+            _config = config;
+        }
 
         public void Patch(Harmony harmony, IMonitor monitor)
         {
@@ -46,7 +52,7 @@ namespace FontSettings.Framework.Patchers
 
         private static void OverrideFontPixelZoom()
         {
-            if (!LocalizedContentManager.CurrentLanguageLatin)
+            if (_config.EnableLatinDialogueFont || !LocalizedContentManager.CurrentLanguageLatin)
             {
                 if (_pixelZoomLookup.TryGetValue(FontHelpers.GetCurrentLanguage(), out float pixelZoom))
                     SpriteText.fontPixelZoom = pixelZoom;

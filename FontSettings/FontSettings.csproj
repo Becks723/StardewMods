@@ -1,15 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="..\SharedCode\SharedCode.projitems" Label="Shared" />
+	<Import Project="..\FontSettings.Shared\FontSettings.Shared.projitems" Label="Shared" />
 	<Import Project="..\_build\smapi.targets" />
 	<Import Project="..\_build\translation-builder.targets" />
 	<Import Project="..\_build\stardewvalleyui.targets" />
-	<Import Project="dependencies\StbTrueTypeSharp.targets" />
+	<Import Project="..\_build\stbtruetype-sharp.targets" />
 
 	<PropertyGroup>
-		<Version>0.7.2</Version>
+		<Version>0.11.1</Version>
 		<TargetFramework>net6.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>
+		<Company>Becks723</Company>
 	</PropertyGroup>
 
 	<!--smapi specific-->
@@ -20,27 +22,24 @@
 
 	<ItemGroup>
 		<Reference Include="BmFont" HintPath="$(GamePath)\BmFont.dll" Private="false" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<!--<ContentWithTargetPath Include="dependencies\fontbm\0.5.0\win\*.*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<TargetPath>fontbm\win\%(FileName)%(Extension)</TargetPath>
-		</ContentWithTargetPath>-->
-
-		<None Update="说明.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="README.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		<Reference Include="Newtonsoft.Json" HintPath="$(GamePath)\smapi-internal\Newtonsoft.Json.dll" Private="false" />
 	</ItemGroup>
 
 	<!--ignored files-->
 	<ItemGroup>
-		<Compile Remove="Framework\Legacy\Menus\*.cs" />
-		<None Include="Framework\Legacy\Menus\*.cs" />
+		<Compile Remove="Framework\FontChangers\LatinSpriteTextChanger.cs" />
+		<Compile Remove="Framework\LatinSpriteFont.cs" />
+		<Compile Remove="Framework\Patchers\GameMenuResizeHandler.cs" />
 	</ItemGroup>
-
+	<ItemGroup>
+		<None Include="Framework\FontChangers\LatinSpriteTextChanger.cs" />
+		<None Include="Framework\LatinSpriteFont.cs" />
+		<None Include="Framework\Patchers\GameMenuResizeHandler.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="content-packs\**\**" Condition="'$(Configuration)' == 'Debug'">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 
 </Project>

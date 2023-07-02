@@ -3,7 +3,7 @@ using StardewModdingAPI;
 
 namespace CodeShared.Integrations.GenericModConfigMenu
 {
-    internal abstract class GenericModConfigMenuIntegrationBase : ModIntegration<IGenericModConfigMenuApi>
+    internal abstract class GenericModConfigMenuIntegrationBase : ModIntegrationBase<IGenericModConfigMenuApi>
     {
         private readonly Action _reset;
         private readonly Action _save;

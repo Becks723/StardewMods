@@ -1,6 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
-		<PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.0" />
+		<PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.0" PrivateAssets="all"/>
 	</ItemGroup>
 
 	<PropertyGroup>

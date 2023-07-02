@@ -16,7 +16,6 @@ using StardewValley.Menus;
 using StardewValleyUI;
 using StardewValleyUI.Controls;
 using StardewValleyUI.Controls.Primitives;
-using StardewValleyUI.Data;
 using StardewValleyUI.Data.Converters;
 using StardewValleyUI.Menus;
 
@@ -26,6 +25,7 @@ namespace FontSettings.Framework.Menus.Views
     {
         private readonly IFontPresetManager _presetManager;
         private readonly IModRegistry _registry;
+        private readonly bool _enableLatinDialogueFont;
         private readonly FontSettingsMenuModel _viewModel;
 
         private readonly Texture2D _save;
@@ -35,14 +35,13 @@ namespace FontSettings.Framework.Menus.Views
         private readonly Texture2D _previewCompare;
         private readonly Texture2D _refresh;
 
-        private bool _isNewPresetMenu;
-        private NewPresetMenu _newPresetMenu;
+        private IClickableMenu _currentSubMenu;
 
-        public FontSettingsMenu(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IModRegistry registry,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IGameFontChangerFactory fontChangerFactory, IFontFileProvider fontFileProvider, FontSettingsMenuContextModel stagedValues)
+        public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, bool enableLatinDialogueFont, FontSettingsMenuModel viewModel)
         {
             this._presetManager = presetManager;
             this._registry = registry;
+            this._enableLatinDialogueFont = enableLatinDialogueFont;
 
             this._save = Textures.Save;
             this._delete = Textures.Delete;
@@ -53,18 +52,7 @@ namespace FontSettings.Framework.Menus.Views
 
             this.ResetComponents();
 
-            this._viewModel = new FontSettingsMenuModel(
-                config: config,
-                vanillaFontProvider: vanillaFontProvider,
-                sampleFontGenerator: sampleFontGenerator,
-                sampleAsyncFontGenerator: sampleAsyncFontGenerator,
-                presetManager: presetManager,
-                fontConfigManager: fontConfigManager,
-                vanillaFontConfigProvider: vanillaFontConfigProvider,
-                fontChangerFactory: fontChangerFactory,
-                fontFileProvider: fontFileProvider,
-                stagedValues: stagedValues);
-            this.DataContext = this._viewModel;
+            this.DataContext = this._viewModel = viewModel;
             this._viewModel.PropertyChanged += this.OnPropertyChanged;
         }
 
@@ -85,10 +73,12 @@ namespace FontSettings.Framework.Menus.Views
             if (option == null) throw new InvalidOperationException();
 
             if (on)
+            {
                 if (!container.Children.Contains(option))
                     container.Children.Insert(this._index, option);
-                else
-                    container.Children.Remove(option);
+            }
+            else
+                container.Children.Remove(option);
         }
 
         protected override void OnDataContextChanged(ValueChangedEventArgs e)
@@ -100,14 +90,38 @@ namespace FontSettings.Framework.Menus.Views
 
         private async void UpdateExampleCurrent(object sender, EventArgs e)
         {
-            await this._viewModel.UpdateExampleCurrentAsync();
+            try
+            {
+                await this._viewModel.UpdateExampleCurrentAsync();
+            }
+            catch (Exception ex)
+            {
+                this.LogException("Update sample", ex);
+            }
+        }
+
+        private void OnCoreSettingsChanged(object sender, EventArgs e)
+        {
+            this._viewModel.OnSettingsChanged();
         }
 
         private async void OkButtonClicked(object sender, EventArgs e)
         {
+            try
+            {
+                await this.OkButtonClickedAsync();
+            }
+            catch (Exception ex)
+            {
+                this.LogException("Generate font", ex);
+            }
+        }
+
+        private async Task OkButtonClickedAsync()
+        {
             Game1.playSound("coin");
 
-            var (result, fontType) = await this._viewModel.ChangeFont();
+            var (result, fontType) = await this._viewModel.ChangeFontAsync();
             if (result.IsSuccessful)
             {
                 Game1.playSound("money");
@@ -131,6 +145,28 @@ namespace FontSettings.Framework.Menus.Views
                 // 日志记录错误信息。
                 string error = result.GetErrorMessage();
                 ILog.Error(error);
+            }
+        }
+
+        private void LogException(string name, Exception exception)
+        {
+            ILog.Error($"Error when {name}: {exception.Message}\n{exception.StackTrace}");
+        }
+
+        private void OnPresetTitleMousePressed(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButtons.ContainsKey(MouseButtons.LeftButton))
+            {
+                if (this._viewModel.TryGetCurrentPresetIfSupportsDetailedInfo(out var preset))
+                {
+                    Game1.playSound("bigDeSelect");
+
+                    var presetInfoMenu = new PresetInfoMenu(
+                        preset: preset,
+                        onClosed: _ => this.ChangeSubMenu(null));
+
+                    this.ChangeSubMenu(presetInfoMenu);
+                }
             }
         }
 
@@ -187,7 +223,7 @@ namespace FontSettings.Framework.Menus.Views
                             {
                                 // added.
                                 var backgroundBorder = new TextureBoxBorder();
-                                backgroundBorder.Box = TextureBoxes.ThickBorder;
+                                backgroundBorder.Box = TextureBoxes.Default;
                                 backgroundBorder.DrawShadow = false;
                                 grid.Children.Add(backgroundBorder);
                                 grid.SetColumn(backgroundBorder, 0);
@@ -318,7 +354,9 @@ namespace FontSettings.Framework.Menus.Views
                                         {
                                             var checkbox = new CheckBox();
                                             checkbox.Checked += this.UpdateExampleCurrent;
+                                            checkbox.Checked += this.OnCoreSettingsChanged;
                                             checkbox.Unchecked += this.UpdateExampleCurrent;
+                                            checkbox.Unchecked += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.FontEnabled, () => checkbox.IsChecked);
 
                                             var label = new Label();
@@ -339,9 +377,11 @@ namespace FontSettings.Framework.Menus.Views
                                             var fontComboBox = new ComboBox();
                                             fontComboBox.SuggestedWidth = 400;
                                             fontComboBox.ItemAppearance = Appearance.ForData(new FontAppearance());
+                                            fontComboBox.ItemComparer = new FontViewModelComparer();
                                             context.OneWayBinds(() => this._viewModel.AllFonts, () => fontComboBox.ItemsSource);
                                             context.TwoWayBinds(() => this._viewModel.CurrentFont, () => fontComboBox.SelectedItem);
                                             fontComboBox.SelectionChanged += this.UpdateExampleCurrent;
+                                            fontComboBox.SelectionChanged += this.OnCoreSettingsChanged;
 
                                             //var refreshButton = new RefreshButton(2.5f);
                                             //refreshButton.AnimationDuration = 300;
@@ -350,6 +390,7 @@ namespace FontSettings.Framework.Menus.Views
                                             refreshButton.Margin = new Thickness(optionSpacing, 0, 0, 0);
                                             refreshButton.ToolTip = I18n.Ui_MainMenu_RefreshFonts();
                                             context.OneWayBinds(() => this._viewModel.RefreshFontsCommand, () => refreshButton.Command);
+                                            context.OneWayBinds(() => this._viewModel.IsRefreshingFonts, () => refreshButton.GreyedOut);
 
                                             fontOption.Children.Add(fontComboBox);
                                             fontOption.Children.Add(refreshButton);
@@ -366,6 +407,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.FontSize, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinFontSize, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxFontSize, () => slider.Maximum);
@@ -411,6 +453,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.Spacing, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinSpacing, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxSpacing, () => slider.Maximum);
@@ -439,6 +482,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.LineSpacing, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinLineSpacing, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxLineSpacing, () => slider.Maximum);
@@ -467,6 +511,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.CharOffsetX, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinCharOffsetX, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxCharOffsetX, () => slider.Maximum);
@@ -495,6 +540,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.CharOffsetY, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinCharOffsetY, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxCharOffsetY, () => slider.Maximum);
@@ -522,6 +568,7 @@ namespace FontSettings.Framework.Menus.Views
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
+                                            slider.ValueChanged += this.OnCoreSettingsChanged;
                                             context.TwoWayBinds(() => this._viewModel.PixelZoom, () => slider.Value);
                                             context.OneWayBinds(() => this._viewModel.MinPixelZoom, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxPixelZoom, () => slider.Maximum);
@@ -543,6 +590,25 @@ namespace FontSettings.Framework.Menus.Views
                                         this._pixelZoomOption = pixelZoomOption;
                                         this._index = aStack.Children.Count;
                                     }
+                                }
+
+                                // unsorted
+                                // reset
+                                var resetOption = new Grid();
+                                resetOption.Margin = new Thickness(0, frameSpacing, 0, 0);
+                                stack.Children.Add(resetOption);
+                                {
+                                    var label = new Label();
+                                    label.Font = FontType.SmallFont;
+                                    label.Text = I18n.Ui_MainMenu_ResetFont();
+                                    label.HorizontalAlignment = HorizontalAlignment.Left;
+                                    resetOption.Children.Add(label);
+
+                                    var button = new TextureButton(Game1.mouseCursors, new Rectangle(294, 428, 21, 11), 4f);
+                                    button.HorizontalAlignment = HorizontalAlignment.Right;
+                                    button.ClickSound = "bigDeSelect";
+                                    context.OneWayBinds(() => this._viewModel.ResetFontCommand, () => button.Command);
+                                    resetOption.Children.Add(button);
                                 }
 
                                 // preset
@@ -580,14 +646,38 @@ namespace FontSettings.Framework.Menus.Views
                                             presetGrid.Children.Add(prevPresetButton);
                                             presetGrid.SetColumn(prevPresetButton, 0);
 
-                                            var label = new Label();
-                                            label.Font = FontType.DialogueFont;
-                                            label.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                            label.HorizontalAlignment = HorizontalAlignment.Center;
-                                            label.VerticalAlignment = VerticalAlignment.Center;
-                                            context.OneWayBinds(() => this._viewModel.CurrentPresetName, () => label.Text);
-                                            presetGrid.Children.Add(label);
-                                            presetGrid.SetColumn(label, 1);
+                                            Grid titleGrid = new Grid();
+                                            titleGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnit.Percent) });
+                                            titleGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnit.Percent) });
+                                            titleGrid.Margin = new Thickness(0, 0, borderWidth / 3, 0);
+                                            titleGrid.MousePressed += this.OnPresetTitleMousePressed;
+                                            presetGrid.Children.Add(titleGrid);
+                                            presetGrid.SetColumn(titleGrid, 1);
+                                            {
+                                                var titleView = new ScrollViewer();
+                                                titleView.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                titleView.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                titleGrid.Children.Add(titleView);
+                                                titleGrid.SetRow(titleView, 0);
+                                                {
+                                                var titleLabel = new Label();
+                                                titleLabel.Font = FontType.DialogueFont;
+                                                context.OneWayBinds(() => this._viewModel.CurrentPresetTitle, () => titleLabel.Text);
+                                                    titleView.Content = titleLabel;
+                                                }
+
+                                                var subtitleView = new ScrollViewer();
+                                                subtitleView.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                subtitleView.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                titleGrid.Children.Add(subtitleView);
+                                                titleGrid.SetRow(subtitleView, 1);
+                                                {
+                                                var subtitleLabel = new Label();
+                                                    subtitleLabel.Font = FontType.SmallFont;
+                                                context.OneWayBinds(() => this._viewModel.CurrentPresetSubtitle, () => subtitleLabel.Text);
+                                                    subtitleView.Content = subtitleLabel;
+                                            }
+                                            }
 
                                             var nextPresetButton = new TextureButton(
                                                 Game1.mouseCursors, new Rectangle(365, 495, 12, 11), 4f);
@@ -649,7 +739,7 @@ namespace FontSettings.Framework.Menus.Views
 
                         var okButton = new TextureButton(
                             Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
-                        okButton.HorizontalAlignment = HorizontalAlignment.Right;
+                        okButton.HorizontalAlignment = HorizontalAlignment.Center;
                         okButton.VerticalAlignment = VerticalAlignment.Center;
                         context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
                         okButton.Click += this.OkButtonClicked;
@@ -663,7 +753,7 @@ namespace FontSettings.Framework.Menus.Views
                     mainGrid.Children.Add(previewGrid);
                     mainGrid.SetColumn(previewGrid, 0);
                     {
-                        var previewControl = new FontPreviewGrid(TextureBoxes.Default, 8);
+                        var previewControl = new FontPreviewGrid(TextureBoxes.ThickBorder, 8);
                         context.OneWayBinds(() => this._viewModel.PreviewMode, () => previewControl.Mode);
                         var vanillaTextLabel = previewControl.VanillaFontExample;
                         var currentTextLabel = previewControl.CurrentFontExample;
@@ -680,6 +770,7 @@ namespace FontSettings.Framework.Menus.Views
 
                         var optionsStack = new StackContainer();
                         optionsStack.Orientation = Orientation.Horizontal;
+                        optionsStack.HorizontalAlignment = HorizontalAlignment.Center;
                         previewGrid.Children.Add(optionsStack);
                         previewGrid.SetRow(optionsStack, 1);
                         {
@@ -731,16 +822,17 @@ namespace FontSettings.Framework.Menus.Views
         {
             base.Dispose(disposing);
 
-            if (this._isNewPresetMenu)
-                this._newPresetMenu.Dispose();
+            if (this._currentSubMenu is IDisposable disposable)
+                disposable.Dispose();
         }
 
         public override void update(GameTime time)
         {
-            if (!this._isNewPresetMenu)
-                base.update(time);
+            // 在有子菜单的情况下，主菜单停止刷新。
+            if (this._currentSubMenu != null)
+                this._currentSubMenu.update(time);
             else
-                this._newPresetMenu.update(time);
+                base.update(time);
         }
 
         public override void draw(SpriteBatch b)
@@ -749,21 +841,27 @@ namespace FontSettings.Framework.Menus.Views
             base.draw(b);
 
 #if DEBUG
-            b.DrawString(Game1.smallFont, $"Enabled: {this._viewModel.FontEnabled}\n"
-                + $"Size: {this._viewModel.FontSize}\n"
-                + $"Spacing: {this._viewModel.Spacing}\n"
-                + $"Line spacing: {this._viewModel.LineSpacing}\n"
-                + $"Font: {this._viewModel.FontFilePath}\n"
-                + $"Font index: {this._viewModel.FontIndex}\n"
-                + $"Offset-x: {this._viewModel.CharOffsetX}\n"
-                + $"Offset-y: {this._viewModel.CharOffsetY}\n"
-                + $"Pixel Zoom: {this._viewModel.PixelZoom}", new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
+            string GetDebugInfo()
+            {
+                return $"CurrentFontType: {this._viewModel.CurrentFontType}"
+                    + $"\nCurrentLanguage: {FontHelpers.GetCurrentLanguage()}"
+                    + $"\nEnabled: {this._viewModel.FontEnabled}"
+                    + $"\nSize: {this._viewModel.FontSize}"
+                    + $"\nSpacing: {this._viewModel.Spacing}"
+                    + $"\nLine spacing: {this._viewModel.LineSpacing}"
+                    + $"\nFont: {this._viewModel.FontFilePath}"
+                    + $"\nFont index: {this._viewModel.FontIndex}"
+                    + $"\nOffset-x: {this._viewModel.CharOffsetX}"
+                    + $"\nOffset-y: {this._viewModel.CharOffsetY}"
+                    + $"\nPixel Zoom: {this._viewModel.PixelZoom}";
+            }
+            b.DrawString(Game1.smallFont, GetDebugInfo(), new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif
 
-            if (this._isNewPresetMenu)
+            if (this._currentSubMenu != null)
             {
                 b.Draw(Game1.fadeToBlackRect, Game1.graphics.GraphicsDevice.Viewport.Bounds, Color.Black * 0.4f);
-                this._newPresetMenu.draw(b);
+                this._currentSubMenu.draw(b);
             }
         }
 
@@ -771,33 +869,33 @@ namespace FontSettings.Framework.Menus.Views
         {
             base.receiveKeyPress(key);
 
-            if (this._isNewPresetMenu)
-                this._newPresetMenu.receiveKeyPress(key);
+            this._currentSubMenu?.receiveKeyPress(key);
         }
 
         protected override bool CanClose()
         {
-            if (!this._isNewPresetMenu)
-                return true;
+            if (this._currentSubMenu is NewPresetMenu newPresetMenu)
+                return newPresetMenu.readyToClose();
             else
-                return this._newPresetMenu.readyToClose();
+                return true;
         }
 
-        private NewPresetMenu CreateNewPresetMenu()
+        private void ChangeSubMenu(IClickableMenu? newSubMenu)
         {
-            void OnMenuOpened(NewPresetMenu menu)
-            {
-                this._isNewPresetMenu = true;
-                this._newPresetMenu = menu;
+            if (object.ReferenceEquals(this._currentSubMenu, newSubMenu))
+                return;
+
+            // clean last submenu
+            if (this._currentSubMenu is IDisposable disposable)
+                disposable.Dispose();
+
+            this._currentSubMenu = newSubMenu;
             }
 
-            void OnMenuClosed(NewPresetMenu menu)
+        private NewPresetMenu CreateNewPresetMenu()
             {
-                menu.Dispose();
-
-                this._isNewPresetMenu = false;
-                this._newPresetMenu = null;
-            }
+            void OnMenuOpened(NewPresetMenu menu) => this.ChangeSubMenu(menu);
+            void OnMenuClosed(NewPresetMenu menu) => this.ChangeSubMenu(null);
 
             var result = new NewPresetMenu(
                 this._presetManager,
@@ -813,11 +911,13 @@ namespace FontSettings.Framework.Menus.Views
             sb.Append(I18n.Ui_MainMenu_FontTypeHelp_Paragraph());
 
             var lang = FontHelpers.GetCurrentLanguage();
-            if (FontHelpers.IsLatinLanguage(lang))
+            if (!this._enableLatinDialogueFont && FontHelpers.IsLatinLanguage(lang))
             {
+                string locale = FontHelpers.GetCurrentDisplayLocale();
+
                 sb.AppendLine();
                 sb.AppendLine()
-                    .Append(I18n.Ui_MainMenu_FontTypeHelp_LatinLang_Paragraph(lang.Locale));
+                    .Append(I18n.Ui_MainMenu_FontTypeHelp_LatinLang_Paragraph(locale));
             }
 
             return sb.ToString();

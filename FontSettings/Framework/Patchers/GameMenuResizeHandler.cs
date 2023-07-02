@@ -13,6 +13,7 @@ using StardewValley.Menus;
 
 namespace FontSettings.Framework.Patchers
 {
+    // 已废弃，但是仍然保留代码用于参考逻辑。
     internal class GameMenuResizeHandler
     {
         private static IMonitor _monitor;
@@ -43,7 +44,7 @@ namespace FontSettings.Framework.Patchers
         private static void IClickableMenu_gameWindowSizeChanged_Prefix(IClickableMenu __instance, Rectangle oldBounds, Rectangle newBounds)
         {
             if (__instance is OptionsPage optionsPage)
-                optionsPage.preWindowSizeChange();
+                optionsPage.preWindowSizeChange();    // 此方法安卓上没有，将导致模组加载失败！
         }
 
         private static void IClickableMenu_gameWindowSizeChanged_Postfix(IClickableMenu __instance, Rectangle oldBounds, Rectangle newBounds)
@@ -52,7 +53,7 @@ namespace FontSettings.Framework.Patchers
                 gameMenu.pages[gameMenu.currentTab].gameWindowSizeChanged(oldBounds, newBounds);
 
             else if (__instance is OptionsPage optionsPage)
-                optionsPage.postWindowSizeChange();
+                optionsPage.postWindowSizeChange();    // 此方法安卓上没有，将导致模组加载失败！
         }
 
         private static IEnumerable<CodeInstruction> Game1_SetWindowSize_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)

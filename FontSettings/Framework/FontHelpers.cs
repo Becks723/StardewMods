@@ -53,7 +53,7 @@ namespace FontSettings.Framework
                         result.Add(new CharacterRange(start, current));
                     else
                     {
-                        result.Add(new CharacterRange(last, last));
+                        result.Add(new CharacterRange(start, last));
                         result.Add(new CharacterRange(current, current));
                     }
                 }
@@ -61,16 +61,45 @@ namespace FontSettings.Framework
             return result;
         }
 
-        public static bool IsLatinLanguage(LanguageInfo language)
+        public static int GetCharactersCount(IEnumerable<CharacterRange>? ranges)
         {
-            return language.Code is LocalizedContentManager.LanguageCode.en
-                or LocalizedContentManager.LanguageCode.pt
-                or LocalizedContentManager.LanguageCode.es
-                or LocalizedContentManager.LanguageCode.de
-                or LocalizedContentManager.LanguageCode.fr
-                or LocalizedContentManager.LanguageCode.it
-                or LocalizedContentManager.LanguageCode.tr
-                or LocalizedContentManager.LanguageCode.hu;
+            if (ranges == null)
+                return 0;
+
+            return ranges.SelectMany(r => Enumerable.Range(r.Start, r.End - r.Start + 1))
+                .Distinct()
+                .Count();
+        }
+
+        public static IEnumerable<char> GetCharacters(IEnumerable<CharacterRange>? ranges)
+        {
+            if (ranges == null)
+                return Array.Empty<char>();
+
+            return ranges.SelectMany(r => Enumerable.Range(r.Start, r.End - r.Start + 1))
+                .Distinct()
+                .OrderBy(x => x)
+                .Select(x => (char)x)
+                .ToArray();
+        }
+
+        public static bool AreSameCharacterRanges(IEnumerable<CharacterRange> ranges1, IEnumerable<CharacterRange> ranges2)
+        {
+            var character1 = FontHelpers.GetCharacters(ranges1).ToArray();
+            var character2 = FontHelpers.GetCharacters(ranges2).ToArray();
+
+            if (character1.Length != character2.Length)
+                return false;
+
+            for (int i = 0; i < character1.Length; i++)
+            {
+                char ch1 = character1[i];
+                char ch2 = character2[i];
+                if (ch1 != ch2)
+                    return false;
+            }
+
+            return true;
         }
 
         public static bool IsLatinLanguage(LocalizedContentManager.LanguageCode code)
@@ -83,6 +112,13 @@ namespace FontSettings.Framework
                 or LocalizedContentManager.LanguageCode.it
                 or LocalizedContentManager.LanguageCode.tr
                 or LocalizedContentManager.LanguageCode.hu;
+        }
+
+        public static bool IsLatinLanguage(this LanguageInfo language)
+        {
+            return language.IsModLanguage()
+                ? GetModLanguage(language)?.UseLatinFont ?? throw new KeyNotFoundException($"language not found: {language}")
+                : IsLatinLanguage(language.Code);
         }
 
         public static float GetDefaultFontPixelZoom()
@@ -110,7 +146,20 @@ namespace FontSettings.Framework
 
         public static float GetDefaultFontPixelZoom(ModLanguage modLanguage)
         {
-            return modLanguage.FontPixelZoom;
+            float fontPixelZoom = modLanguage.FontPixelZoom;
+
+            // 一些拉丁文语言没有设置此项，因此默认为0，这里得纠正一下。
+            if (fontPixelZoom == 0)
+                fontPixelZoom = 3f;
+            return fontPixelZoom;
+        }
+
+        public static float GetDefaultFontPixelZoom(LanguageInfo language)
+        {
+            if (!language.IsModLanguage())
+                return GetDefaultFontPixelZoom(language.Code);
+            else
+                return GetModLanguage(language)?.FontPixelZoom ?? 1.5f;
         }
 
         public static LanguageInfo GetCurrentLanguage()
@@ -166,6 +215,23 @@ namespace FontSettings.Framework
             return new LanguageInfo(LocalizedContentManager.LanguageCode.mod, GetModLocale(modLanguage));
         }
 
+        public static string GetCurrentDisplayLocale()
+        {
+            var lang = FontHelpers.GetCurrentLanguage();
+            return lang.Locale != string.Empty
+                ? lang.Locale
+                : "en";
+        }
+
+        public static bool IsCurrentLatinLanguage()
+        {
+            var lang = FontHelpers.GetCurrentLanguage();
+            if (FontHelpers.IsModLanguage(lang))
+                return LocalizedContentManager.CurrentModLanguage.UseLatinFont;
+            else
+                return FontHelpers.IsLatinLanguage(lang.Code);
+        }
+
         public static LanguageInfo LanguageEn => GetLanguage(LocalizedContentManager.LanguageCode.en);
         public static LanguageInfo LanguageJa => GetLanguage(LocalizedContentManager.LanguageCode.ja);
         public static LanguageInfo LanguageRu => GetLanguage(LocalizedContentManager.LanguageCode.ru);
@@ -187,14 +253,16 @@ namespace FontSettings.Framework
 
         public static string GetFontFileAssetName()  // under game current language context
         {
-            return GetFontFileAssetName(
-                code: LocalizedContentManager.CurrentLanguageCode,
-                modLanguage: LocalizedContentManager.CurrentModLanguage);
+            return GetFontFileAssetName(GetCurrentLanguage());
         }
 
-        public static string GetFontFileAssetName(LocalizedContentManager.LanguageCode code, ModLanguage? modLanguage = null)
+        public static string GetFontFileAssetName(LanguageInfo language)
         {
-            return code switch
+            ModLanguage? modLanguage = !IsModLanguage(language)
+                ? null
+                : GetModLanguage(language);
+
+            return language.Code switch
             {
                 LocalizedContentManager.LanguageCode.ja => "Fonts/Japanese",
                 LocalizedContentManager.LanguageCode.ru => "Fonts/Russian",
@@ -202,8 +270,52 @@ namespace FontSettings.Framework
                 LocalizedContentManager.LanguageCode.th => "Fonts/Thai",
                 LocalizedContentManager.LanguageCode.ko => "Fonts/Korean",
                 LocalizedContentManager.LanguageCode.mod when !modLanguage.UseLatinFont => modLanguage.FontFile,
+                _ when IsLatinLanguage(language) => language == LanguageEn ? "Fonts/Latin"
+                                                                           : $"Fonts/Latin-{language.Locale}",
                 _ => null
             };
+        }
+
+        public static IEnumerable<LanguageInfo> GetAllAvailableLanguages()
+        {
+            // built in languages (except thai).
+            yield return LanguageEn;
+            yield return LanguageJa;
+            yield return LanguageRu;
+            yield return LanguageZh;
+            yield return LanguagePt;
+            yield return LanguageEs;
+            yield return LanguageDe;
+            yield return LanguageFr;
+            yield return LanguageKo;
+            yield return LanguageIt;
+            yield return LanguageTr;
+            yield return LanguageHu;
+
+            // mod languages.
+            var modLanguages = GetModLanguages();
+            if (modLanguages != null)
+            {
+                foreach (var modLanguage in modLanguages)
+                    yield return GetModLanguage(modLanguage);
+            }
+        }
+
+        private static ModLanguage[]? _modLanguages;
+        private static ModLanguage[]? GetModLanguages()
+        {
+            return _modLanguages;
+        }
+
+        internal static void SetModLanguages(ModLanguage[] value)
+        {
+            _modLanguages = value;
+        }
+
+        private static ModLanguage? GetModLanguage(LanguageInfo language)
+        {
+            return GetModLanguages()
+                ?.FirstOrDefault(lang => lang.LanguageCode == language.Locale);
         }
 
         public static XmlSource ParseFontFile(FontFile fontFile)

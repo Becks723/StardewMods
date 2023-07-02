@@ -5,88 +5,68 @@ using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.Models;
-using FontSettings.Framework.Preset;
 
 namespace FontSettings.Framework.DataAccess.Parsing
 {
     internal class FontPresetParser
     {
-        private readonly IFontFileProvider _fontFileProvider;
-        private readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
-        private readonly IVanillaFontProvider _vanillaFontProvider;
+        private readonly FontConfigParser _settingsParser = new();
 
-        private readonly FontFilePathParseHelper _fontFilePathParseHelper = new();
-
-        public FontPresetParser(IFontFileProvider fontFileProvider, IVanillaFontConfigProvider vanillaFontConfigProvider, IVanillaFontProvider vanillaFontProvider)
-        {
-            this._fontFileProvider = fontFileProvider;
-            this._vanillaFontConfigProvider = vanillaFontConfigProvider;
-            this._vanillaFontProvider = vanillaFontProvider;
-        }
-
-        public IEnumerable<FontPreset> Parse(FontPresetData preset)
+        public IEnumerable<FontPresetModel> Parse(FontPresetData preset)
         {
             var language = new LanguageInfo(preset.Lang, preset.Locale);
             var fontType = this.ParseFontType(preset.FontType);
 
-            var settings = new FontConfig(
-                Enabled: true,
-                FontFilePath: this.ParseFontFilePath(preset.Requires.FontFileName, language, fontType),
-                FontIndex: preset.FontIndex,
-                FontSize: preset.FontSize,
-                Spacing: preset.Spacing,
-                LineSpacing: preset.LineSpacing,
-                CharOffsetX: preset.CharOffsetX,
-                CharOffsetY: preset.CharOffsetY,
-                CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType));
+            var settings = this._settingsParser.Parse(new FontConfigData
+            {
+                Enabled = true,
+                Lang = preset.Lang,
+                Locale = preset.Locale,
+                InGameType = fontType,
+                FontFilePath = preset.Requires.FontFileName,
+                FontIndex = preset.FontIndex,
+                FontSize = preset.FontSize,
+                Spacing = preset.Spacing,
+                LineSpacing = preset.LineSpacing,
+                CharOffsetX = preset.CharOffsetX,
+                CharOffsetY = preset.CharOffsetY,
+                CharacterRanges = null,
+                PixelZoom = preset.PixelZoom,
+            }).Value;
 
-            if (preset.PixelZoom != 0)
-                settings = new BmFontConfig(
-                    original: settings,
-                    pixelZoom: preset.PixelZoom);
+            var basePreset = new FontPresetModel(new FontContext(language, fontType), settings);
 
-            var fontPreset = new FontPreset(
-                language: language,
-                fontType: fontType,
-                settings: settings);
-
-            // 目前的预设全是withKey的，而key就是name本身。
-            fontPreset = new FontPresetWithKey(
-                copy: new FontPresetWithName(fontPreset, preset.Name),
-                key: preset.Name);
-
-            yield return fontPreset;
+            yield return new FontPresetModelLocal(basePreset, preset.Name);
         }
 
-        public FontPresetData ParseBack(FontPreset preset)
+        public FontPresetData ParseBack(FontPresetModel preset)
         {
-            var font = preset.Settings;
+            var key = new FontConfigKey(preset.Context.Language, preset.Context.FontType);
+            FontConfigData configData = this._settingsParser.ParseBack(new(key, preset.Settings));
 
             return new FontPresetData
             {
-                Requires = new() { FontFileName = this.ParseBackFontFilePath(font.FontFilePath, preset.Language, preset.FontType) },
-                FontType = this.ParseBackFontType(preset.FontType),
-                FontIndex = font.FontIndex,
-                Lang = preset.Language.Code,
-                Locale = preset.Language.Locale,
-                FontSize = font.FontSize,
-                Spacing = font.Spacing,
-                LineSpacing = (int)font.LineSpacing,
-                CharOffsetX = font.CharOffsetX,
-                CharOffsetY = font.CharOffsetY,
-                PixelZoom = font.Supports<IWithPixelZoom>()
-                    ? font.GetInstance<IWithPixelZoom>().PixelZoom
-                    : 0,
+                Requires = new() { FontFileName = configData.FontFilePath },
+                FontType = this.ParseBackFontType(configData.InGameType),
+                FontIndex = configData.FontIndex,
+                Lang = configData.Lang,
+                Locale = configData.Locale,
+                FontSize = configData.FontSize,
+                Spacing = configData.Spacing,
+                LineSpacing = configData.LineSpacing,
+                CharOffsetX = configData.CharOffsetX,
+                CharOffsetY = configData.CharOffsetY,
+                PixelZoom = configData.PixelZoom,
             };
         }
 
-        public IEnumerable<FontPreset> ParseCollection(IEnumerable<FontPresetData> presets)
+        public IEnumerable<FontPresetModel> ParseCollection(IEnumerable<FontPresetData> presets)
         {
             return this.ParseCollection(presets,
                 predicate: _ => true);
         }
 
-        public IEnumerable<FontPreset> ParseCollection(IEnumerable<FontPresetData> presets, LanguageInfo language, GameFontType fontType)
+        public IEnumerable<FontPresetModel> ParseCollection(IEnumerable<FontPresetData> presets, LanguageInfo language, GameFontType fontType)
         {
             return this.ParseCollection(presets,
                 predicate: preset => preset.Lang == language.Code
@@ -94,7 +74,14 @@ namespace FontSettings.Framework.DataAccess.Parsing
                                     && this.ParseFontType(preset.FontType) == fontType);
         }
 
-        public IEnumerable<FontPreset> ParseCollection(IEnumerable<FontPresetData> presets, Func<FontPresetData, bool> predicate)
+        public IEnumerable<FontPresetModel> ParseCollection(IEnumerable<FontPresetData> presets, LanguageInfo language)
+        {
+            return this.ParseCollection(presets,
+                predicate: preset => preset.Lang == language.Code
+                                    && preset.Locale == language.Locale);
+        }
+
+        public IEnumerable<FontPresetModel> ParseCollection(IEnumerable<FontPresetData> presets, Func<FontPresetData, bool> predicate)
         {
             if (predicate is null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -116,11 +103,5 @@ namespace FontSettings.Framework.DataAccess.Parsing
         {
             return (FontPresetFontType)(int)fontType;
         }
-
-        private string? ParseFontFilePath(string? path, LanguageInfo language, GameFontType fontType)
-            => this._fontFilePathParseHelper.ParseFontFilePath(path, this._fontFileProvider.FontFiles, this._vanillaFontConfigProvider, language, fontType);
-
-        private string? ParseBackFontFilePath(string? path, LanguageInfo language, GameFontType fontType)
-            => this._fontFilePathParseHelper.ParseBackFontFilePath(path, this._fontFileProvider.FontFiles, this._vanillaFontConfigProvider, language, fontType);
     }
 }

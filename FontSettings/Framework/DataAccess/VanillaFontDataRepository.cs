@@ -3,21 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FontSettings.Framework.DataAccess.Models;
+using FontSettings.Framework.DataAccess.Parsing;
+using FontSettings.Framework.Models;
 using StardewModdingAPI;
 
 namespace FontSettings.Framework.DataAccess
 {
-    internal class VanillaFontDataRepository : DataInModDirectoryRepository
+    internal partial class VanillaFontDataRepository
     {
-        public VanillaFontDataRepository(IModHelper helper, IMonitor monitor) 
-            : base(helper, monitor)
-        {
-        }
+        private readonly IMonitor _monitor;
+        private readonly FontConfigParser _parser = new();
 
-        public VanillaFontData ReadVanillaFontData()
+        public FontConfigModel? ReadVanillaFontConfig(FontConfigKey key)
         {
-            return this.ReadModJsonFile<VanillaFontData>("assets/vanilla-fonts.json");
+            var rawConfigs = this.ReadVanillaFontData().Fonts;
+
+            var parsedConfigs = this._parser.ParseCollection(rawConfigs, key.Language, key.FontType);
+            var parsedConfig = parsedConfigs.ContainsKey(key)
+                ? parsedConfigs[key]
+                : null;
+
+            this._monitor.Log($"Loaded vanilla font config for {key}: {parsedConfig}");
+            return parsedConfig;
         }
     }
 }

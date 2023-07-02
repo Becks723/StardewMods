@@ -3,6 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{212D1521-0505-47E1-9047-690B2340075A}"
+	ProjectSection(SolutionItems) = preProject
+		_build\common.targets = _build\common.targets
+		_build\smapi.targets = _build\smapi.targets
+		_build\stardewvalleyui.targets = _build\stardewvalleyui.targets
+		_build\stbtruetype-sharp.targets = _build\stbtruetype-sharp.targets
+		_build\translation-builder.targets = _build\translation-builder.targets
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{A99638DD-6D9F-4C29-A8DD-71FADD387727}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -10,23 +19,52 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{A99638DD-6
 		.gitignore = .gitignore
 		LICENSE = LICENSE
 		README.md = README.md
+		README-zh.md = README-zh.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{212D1521-0505-47E1-9047-690B2340075A}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{693A1DFF-145C-4356-A1EF-B098A246E029}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stardewvalleyui", "stardewvalleyui", "{686735C0-AD4C-4505-842E-A5D803B278D8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{90BEB4E3-BF95-4DC7-831D-19FA05DBB305}"
 	ProjectSection(SolutionItems) = preProject
-		_build\common.targets = _build\common.targets
-		_build\smapi.targets = _build\smapi.targets
-		_build\stardewvalleyui.targets = _build\stardewvalleyui.targets
-		_build\translation-builder.targets = _build\translation-builder.targets
+		_libs\stardewvalleyui\Debug\StardewValleyUI.dll = _libs\stardewvalleyui\Debug\StardewValleyUI.dll
+		_libs\stardewvalleyui\Debug\StardewValleyUI.pdb = _libs\stardewvalleyui\Debug\StardewValleyUI.pdb
 	EndProjectSection
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedCode", "SharedCode\SharedCode.shproj", "{AB84FF3C-F7C6-4D02-8988-E46C64D35C7D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{6D395670-AB12-4FA7-AA57-6000F82E4324}"
+	ProjectSection(SolutionItems) = preProject
+		_libs\stardewvalleyui\Release\StardewValleyUI.dll = _libs\stardewvalleyui\Release\StardewValleyUI.dll
+		_libs\stardewvalleyui\Release\StardewValleyUI.pdb = _libs\stardewvalleyui\Release\StardewValleyUI.pdb
+	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhoneTravelingCart", "PhoneTravelingCart\PhoneTravelingCart.csproj", "{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stbtruetype-sharp", "stbtruetype-sharp", "{4DD1D3B0-D0F4-406C-BDB1-B09AD16DC3D9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{BDE1FB57-03B4-4761-90E0-BCFE7744EAD6}"
+	ProjectSection(SolutionItems) = preProject
+		_libs\stbtruetype-sharp\Debug\StbTrueTypeSharp.dll = _libs\stbtruetype-sharp\Debug\StbTrueTypeSharp.dll
+		_libs\stbtruetype-sharp\Debug\StbTrueTypeSharp.pdb = _libs\stbtruetype-sharp\Debug\StbTrueTypeSharp.pdb
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{0C75CE63-9D9C-4D51-AABB-210C9FC69CA8}"
+	ProjectSection(SolutionItems) = preProject
+		_libs\stbtruetype-sharp\Release\StbTrueTypeSharp.dll = _libs\stbtruetype-sharp\Release\StbTrueTypeSharp.dll
+		_libs\stbtruetype-sharp\Release\StbTrueTypeSharp.pdb = _libs\stbtruetype-sharp\Release\StbTrueTypeSharp.pdb
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaircasePlacementFix", "StaircasePlacementFix\StaircasePlacementFix.csproj", "{DE590FC9-929B-4351-A917-3FA17877030D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings", "FontSettings\FontSettings.csproj", "{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedCode", "SharedCode\SharedCode.shproj", "{AB84FF3C-F7C6-4D02-8988-E46C64D35C7D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PhoneTravelingCart", "PhoneTravelingCart\PhoneTravelingCart.csproj", "{FEF80594-BD60-4FB8-A8F4-6D70A7688318}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FontSettings.Shared", "FontSettings.Shared\FontSettings.Shared.shproj", "{14E62FC5-3554-4307-9349-58B68B7E4A57}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings.Cli", "FontSettings.Cli\FontSettings.Cli.csproj", "{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontSettings", "FontSettings\FontSettings.csproj", "{A11FF721-39BE-4EA9-BBB6-8A2D79092965}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InfiniteFarm", "InfiniteFarm\InfiniteFarm.csproj", "{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,28 +72,48 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9347C094-6E2D-425B-8A6C-DDBD5009E2A5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE590FC9-929B-4351-A917-3FA17877030D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97390B2E-BBDA-4449-B588-BCE42D7EF3FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEF80594-BD60-4FB8-A8F4-6D70A7688318}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C468CB72-2EE7-4EC4-A1EB-8C3F8303C647}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A11FF721-39BE-4EA9-BBB6-8A2D79092965}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFE0828E-F4CE-4131-8407-FB2B42FD5DD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{693A1DFF-145C-4356-A1EF-B098A246E029} = {A99638DD-6D9F-4C29-A8DD-71FADD387727}
+		{686735C0-AD4C-4505-842E-A5D803B278D8} = {693A1DFF-145C-4356-A1EF-B098A246E029}
+		{90BEB4E3-BF95-4DC7-831D-19FA05DBB305} = {686735C0-AD4C-4505-842E-A5D803B278D8}
+		{6D395670-AB12-4FA7-AA57-6000F82E4324} = {686735C0-AD4C-4505-842E-A5D803B278D8}
+		{4DD1D3B0-D0F4-406C-BDB1-B09AD16DC3D9} = {693A1DFF-145C-4356-A1EF-B098A246E029}
+		{BDE1FB57-03B4-4761-90E0-BCFE7744EAD6} = {4DD1D3B0-D0F4-406C-BDB1-B09AD16DC3D9}
+		{0C75CE63-9D9C-4D51-AABB-210C9FC69CA8} = {4DD1D3B0-D0F4-406C-BDB1-B09AD16DC3D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EA406B18-90FF-4E2F-A6C6-18874C906F3B}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		SharedCode\SharedCode.projitems*{9347c094-6e2d-425b-8a6c-ddbd5009e2a5}*SharedItemsImports = 5
-		SharedCode\SharedCode.projitems*{97390b2e-bbda-4449-b588-bce42d7ef3fe}*SharedItemsImports = 5
+		FontSettings.Shared\FontSettings.Shared.projitems*{14e62fc5-3554-4307-9349-58b68b7e4a57}*SharedItemsImports = 13
+		FontSettings.Shared\FontSettings.Shared.projitems*{a11ff721-39be-4ea9-bbb6-8a2d79092965}*SharedItemsImports = 5
+		SharedCode\SharedCode.projitems*{a11ff721-39be-4ea9-bbb6-8a2d79092965}*SharedItemsImports = 5
 		SharedCode\SharedCode.projitems*{ab84ff3c-f7c6-4d02-8988-e46c64d35c7d}*SharedItemsImports = 13
+		FontSettings.Shared\FontSettings.Shared.projitems*{c468cb72-2ee7-4ec4-a1eb-8c3f8303c647}*SharedItemsImports = 5
+		SharedCode\SharedCode.projitems*{fef80594-bd60-4fb8-a8f4-6d70a7688318}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

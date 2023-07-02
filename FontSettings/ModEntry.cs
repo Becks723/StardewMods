@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using BmFont;
@@ -8,10 +9,14 @@ using FontSettings.Framework.DataAccess;
 using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.DataAccess.Parsing;
 using FontSettings.Framework.FontGenerators;
+using FontSettings.Framework.FontInfo;
 using FontSettings.Framework.FontPatching;
+using FontSettings.Framework.FontPatching.Invalidators;
 using FontSettings.Framework.FontScanning;
 using FontSettings.Framework.FontScanning.Scanners;
+using FontSettings.Framework.Integrations;
 using FontSettings.Framework.Menus;
+using FontSettings.Framework.Menus.ViewModels;
 using FontSettings.Framework.Menus.Views;
 using FontSettings.Framework.Migrations;
 using FontSettings.Framework.Models;
@@ -39,23 +44,20 @@ namespace FontSettings
         private FontPresetRepository _fontPresetRepository;
         private VanillaFontDataRepository _vanillaFontDataRepository;
         private SampleDataRepository _sampleDataRepository;
+        private ContentPackRepository _contentPackRepository;
 
-        private FontConfigParser _vanillaFontConfigParser;
-        private FontConfigParserForUser _userFontConfigParser;
-        private FontPresetParser _fontPresetParser;
-
-        private FontConfigManager _fontConfigManager;
-        private VanillaFontConfigProvider _vanillaFontConfigProvider;
+        private MainFontConfigManager _fontConfigManager;
         private IFontFileProvider _fontFileProvider;
-        private Framework.Preset.FontPresetManager _fontPresetManager;
-        private IGameFontChangerFactory _fontChangerFactory;
-        private FontPatchInvalidatorManager _invalidatorManager;
+
+        private readonly ISet<LanguageInfo> _languagesWhoseDataIsLoaded = new HashSet<LanguageInfo>();
 
         private readonly FontSettingsMenuContextModel _menuContextModel = new();
 
         private MainFontPatcher _mainFontPatcher;
 
         private VanillaFontProvider _vanillaFontProvider;
+
+        private readonly DataAdditionalLanguagesWatcher _dataAdditionalLanguagesWatcher = new();
 
         private TitleFontButton _titleFontButton;
 
@@ -68,70 +70,66 @@ namespace FontSettings
             ModHelper = this.Helper;
             I18n.Init(helper.Translation);
             Log.Init(this.Monitor);
-            Textures.Init(helper.ModContent);
+            Textures.Init(this.ModManifest);
+            StardewValleyUI.EntryPoint.Main();
 
             this._config = helper.ReadConfig<ModConfig>();
-            this.CheckConfigValid(this._config);
+            this._config.ValidateValues(this.Monitor);
 
             // init vanilla font provider.
-            this._vanillaFontProvider = new VanillaFontProvider(helper, this.Monitor);
+            this._vanillaFontProvider = new VanillaFontProvider(helper, this.Monitor, this._config);
             this._vanillaFontProvider.RecordStarted += this.OnFontRecordStarted;
             this._vanillaFontProvider.RecordFinished += this.OnFontRecordFinished;
 
             // init migrations.
             this._0_6_0_Migration = new(helper, this.ModManifest);
 
-            // init repositories.
-            this._fontConfigRepository = new FontConfigRepository(helper);
-            this._fontPresetRepository = new FontPresetRepository(Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets"));
-            this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor);
-            this._sampleDataRepository = new SampleDataRepository(helper, this.Monitor);
+            string presetDirectory = Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets");
 
             // do changes to database.
             this._0_6_0_Migration.ApplyDatabaseChanges(
-                fontConfigRepository: this._fontConfigRepository,
-                fontPresetRepository: this._fontPresetRepository,
+                fontConfigRepository: new FontConfigRepository(helper),
+                fontPresetRepository: new FontPresetRepository(presetDirectory),
                 modConfig: this._config,
                 writeModConfig: this.SaveConfig);
 
             // init service objects.
+            this._fontFileProvider = new FontFileProvider(this.YieldFontScanners());
+
+            // init repositories.
+            this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor);
+            this._fontConfigRepository = new FontConfigRepository(helper, this.Monitor);
+            this._fontPresetRepository = new FontPresetRepository(presetDirectory, this.Monitor);
+            this._contentPackRepository = new ContentPackRepository(helper.ContentPacks, this.Monitor, this.EnumerateTestContentPacks());
+            this._sampleDataRepository = new SampleDataRepository(helper, this.Monitor);
             this._config.Sample = this._sampleDataRepository.ReadSampleData();
-            this._vanillaFontConfigProvider = new VanillaFontConfigProvider(this._vanillaFontProvider);
-            this._fontFileProvider = this.CreateInstalledFontFileProvider();
 
-            this._vanillaFontConfigParser = new FontConfigParser(this.CreateModFontFileProvider(), this._vanillaFontProvider);
-            this._userFontConfigParser = new FontConfigParserForUser(this._fontFileProvider, this._vanillaFontProvider, this._vanillaFontConfigProvider);
-            this._fontPresetParser = new FontPresetParser(this._fontFileProvider, this._vanillaFontConfigProvider, this._vanillaFontProvider);
-
-            this._fontConfigManager = new FontConfigManager();
-            this._fontPresetManager = new Framework.Preset.FontPresetManager();
-            this._invalidatorManager = new FontPatchInvalidatorManager(helper);
-            this._fontChangerFactory = new FontPatchChangerFactory(new FontPatchResolverFactory(), this._invalidatorManager);
+            // init managers.
+            this._fontConfigManager = new MainFontConfigManager(this._fontFileProvider, this._vanillaFontProvider);
 
             // connect manager and repository.
-            this._fontConfigManager.ConfigUpdated += this.OnFontConfigUpdated;
-            this._fontPresetManager.PresetUpdated += this.OnFontPresetUpdated;
+            this._fontConfigManager.ConfigUpdated += (s, e) => this._fontConfigRepository.WriteConfig(e.Key, e.Config);
+            this._fontConfigManager.PresetUpdated += (s, e) => this._fontPresetRepository.WritePreset(e.Name, e.Preset);
 
             // init font patching.
-            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), this._invalidatorManager);
+            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), new FontPatchInvalidatorComposition(helper));
+            this._vanillaFontProvider.SetInvalidateHelper(this._mainFontPatcher);
 
-            // init title font button.
-            this._titleFontButton = new TitleFontButton(
-                position: this.GetTitleFontButtonPosition(),
-                onClicked: () => this.OpenFontSettingsMenu());
+            // watch `Data/AdditonalLanguages` asset.
+            this._dataAdditionalLanguagesWatcher.Updated += this.OnDataAdditionalLanguagesUpdated;
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                new GameMenuPatcher()
-                    .AddFontSettingsPage(helper, Harmony, this._config, this.SaveConfig);
-
                 new FontShadowPatcher(this._config)
                     .Patch(Harmony, this.Monitor);
 
-                var spriteTextPatcher = new SpriteTextPatcher();
+                var spriteTextPatcher = new SpriteTextPatcher(this._config);
                 spriteTextPatcher.Patch(Harmony, this.Monitor);
                 this._mainFontPatcher.FontPixelZoomOverride += (s, e) =>
                     spriteTextPatcher.SetOverridePixelZoom(e.PixelZoom);
+
+                new SpriteTextLatinPatcher(this._config, this.ModManifest, helper)
+                    .Patch(Harmony, this.Monitor);
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequestedEarly;
@@ -139,6 +137,7 @@ namespace FontSettings
             helper.Events.GameLoop.UpdateTicking += this.OnUpdateTicking;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.AssetReady += this.OnAssetReady;
+            helper.Events.Content.LocaleChanged += this.OnLocaleChanged;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.Display.WindowResized += this.OnWindowResized;
@@ -170,8 +169,23 @@ namespace FontSettings
                 save: () => this.SaveConfig(this._config),
                 modRegistry: this.Helper.ModRegistry,
                 monitor: this.Monitor,
-                manifest: this.ModManifest
-            ).Integrate();
+                manifest: this.ModManifest)
+                .Integrate();
+
+            new ToolbarIconsIntegration(
+                modRegistry: this.Helper.ModRegistry,
+                monitor: this.Monitor,
+                uniqueId: this.ModManifest.UniqueID,
+                openFontSettingsMenu: this.OpenFontSettingsMenu)
+                .Integrate();
+
+            // init title font button. (must be after `Textures.OnAssetRequested` subscription)
+            this._titleFontButton = new TitleFontButton(
+                position: this.GetTitleFontButtonPosition(),
+                onClicked: () => this.OpenFontSettingsMenu());
+
+            // load data for english.
+            this.LoadDataForLanguage(FontHelpers.LanguageEn);
         }
 
         private void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)
@@ -184,29 +198,79 @@ namespace FontSettings
 
         private void OnAssetRequested(object sender, AssetRequestedEventArgs e)
         {
+            Textures.OnAssetRequested(e);
             this._mainFontPatcher.OnAssetRequested(e);
         }
 
         private void OnAssetReady(object sender, AssetReadyEventArgs e)
         {
             this._mainFontPatcher.OnAssetReady(e);
+            this._dataAdditionalLanguagesWatcher.OnAssetReady(e);
+        }
+
+        private void OnLocaleChanged(object sender, LocaleChangedEventArgs e)
+        {
+            this.LoadDataForLanguage(FontHelpers.GetCurrentLanguage());
         }
 
         private void OnWindowResized(object sender, WindowResizedEventArgs e)
         {
-            this._titleFontButton.Position = this.GetTitleFontButtonPosition();
+            if (this._titleFontButton != null)
+                this._titleFontButton.Position = this.GetTitleFontButtonPosition();
         }
 
         private void OnRendered(object sender, RenderedEventArgs e)
         {
             if (this.IsTitleMenuInteractable())
-                this._titleFontButton.Draw(e.SpriteBatch);
+                this._titleFontButton?.Draw(e.SpriteBatch);
         }
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
         {
             if (this.IsTitleMenuInteractable())
-                this._titleFontButton.Update();
+                this._titleFontButton?.Update();
+        }
+
+        private void ReloadContentPacks(bool all)
+        {
+            if (all)
+            {
+                this._fontConfigManager.RemoveAllContentPacks();
+                var cpPresets = this._contentPackRepository.ReadContentPacks(this._languagesWhoseDataIsLoaded);
+                this._fontConfigManager.AddPresets(cpPresets);
+            }
+            else
+            {
+                var currentLanguage = FontHelpers.GetCurrentLanguage();
+                this._fontConfigManager.RemoveContentPacks(currentLanguage);
+                var cpPresets = this._contentPackRepository.ReadContentPacks(currentLanguage);
+                this._fontConfigManager.AddPresets(cpPresets);
+            }
+        }
+
+        private void LoadDataForLanguage(LanguageInfo language)
+        {
+            if (!this._languagesWhoseDataIsLoaded.Contains(language))
+            {
+                this._languagesWhoseDataIsLoaded.Add(language);
+
+                foreach (GameFontType fontType in Enum.GetValues<GameFontType>())
+                {
+                    var context = new FontContext(language, fontType);
+
+                    FontConfigModel? vanillaConfig = this._vanillaFontDataRepository.ReadVanillaFontConfig(context);
+                    FontConfigModel? currentConfig = this._fontConfigRepository.ReadConfig(context);
+
+                    this._fontConfigManager.AddVanillaConfig(context, vanillaConfig);
+                    this._fontConfigManager.AddFontConfig(context, currentConfig);
+                }
+
+                IEnumerable<FontPresetModel> presets = this._fontPresetRepository.ReadPresets(language);
+                IEnumerable<FontPresetModel> cpPresets = this._contentPackRepository.ReadContentPacks(language);
+
+                this._fontConfigManager.AddPresets(presets);
+                this._fontConfigManager.AddPresets(cpPresets);
+            }
         }
 
         private void SaveConfig(ModConfig config)
@@ -223,77 +287,41 @@ namespace FontSettings
             this.Helper.WriteConfig(this._config);
         }
 
-        private void CheckConfigValid(ModConfig config)
+        private IEnumerable<IFontFileScanner> YieldFontScanners()
         {
-            string WarnMessage<T>(string name, T max, T min) => $"{name}：最大值（{max}）小于最小值（{min}）。已重置。";
+            var scanSettings = new ScanSettings();
 
-            // x offset
-            if (config.MaxCharOffsetX < config.MinCharOffsetX)
+            // installation folder for each platform.
+            switch (Constants.TargetPlatform)
             {
-                ILog.Warn(WarnMessage("横轴偏移量", config.MaxCharOffsetX, config.MinCharOffsetX));
-                config.MaxCharOffsetX = 10;
-                config.MinCharOffsetX = -10;
+                case GamePlatform.Windows:
+                    yield return new InstalledFontScannerForWindows(scanSettings);
+                    break;
+                case GamePlatform.Mac:
+                    yield return new InstalledFontScannerForMacOS(scanSettings);
+                    break;
+                case GamePlatform.Linux:
+                    yield return new InstalledFontScannerForLinux(scanSettings);
+                    break;
+                case GamePlatform.Android:
+                    yield return new IntalledFontScannerForAndroid(scanSettings);
+                    break;
             }
 
-            // y offset
-            if (config.MaxCharOffsetY < config.MinCharOffsetY)
-            {
-                ILog.Warn(WarnMessage("纵轴偏移量", config.MaxCharOffsetY, config.MinCharOffsetY));
-                config.MaxCharOffsetY = 10;
-                config.MinCharOffsetY = -10;
-            }
+            // mod internal 'assets/fonts' folder.
+            string vanillaFontFolder = Path.Combine(this.Helper.DirectoryPath, "assets/fonts");
+            Directory.CreateDirectory(vanillaFontFolder);
+            yield return new BasicFontFileScanner(vanillaFontFolder, scanSettings);
 
-            // font size
-            if (config.MaxFontSize < config.MinFontSize)
+            // custom folders specified by user.
+            var customFolders = this._config.CustomFontFolders.Distinct().ToArray();
+            foreach (string folder in customFolders)
             {
-                ILog.Warn(WarnMessage("字体大小", config.MaxFontSize, config.MinFontSize));
-                config.MaxFontSize = 100;
-            }
+                if (!Directory.Exists(folder))
+                    this.Monitor.Log($"Skipped invalid custom font folder: {folder}");
 
-            // spacing
-            if (config.MaxSpacing < config.MinSpacing)
-            {
-                ILog.Warn(WarnMessage("字间距", config.MaxSpacing, config.MinSpacing));
-                config.MaxSpacing = 10;
-                config.MinSpacing = -10;
+                yield return new BasicFontFileScanner(folder, scanSettings);
             }
-
-            // line spacing
-            if (config.MaxLineSpacing < config.MinLineSpacing)
-            {
-                ILog.Warn(WarnMessage("行间距", config.MaxLineSpacing, config.MinLineSpacing));
-                config.MaxLineSpacing = 100;
-            }
-
-            // pixel zoom
-            if (config.MaxPixelZoom < config.MinPixelZoom)
-            {
-                ILog.Warn(WarnMessage("缩放比例", config.MaxPixelZoom, config.MinPixelZoom));
-                config.MaxPixelZoom = 5f;
-                config.MinPixelZoom = 0.1f;
-            }
-        }
-
-        private IFontFileProvider CreateInstalledFontFileProvider()
-        {
-            var fontFileProvider = new FontFileProvider();
-            {
-                var scanSettings = new ScanSettings();
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForWindows(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForMacOS(scanSettings));
-                fontFileProvider.Scanners.Add(new InstalledFontScannerForLinux(scanSettings));
-            }
-            return fontFileProvider;
-        }
-
-        private IFontFileProvider CreateModFontFileProvider()
-        {
-            var fontFileProvider = new FontFileProvider();
-            {
-                var scanSettings = new ScanSettings();
-                fontFileProvider.Scanners.Add(new BasicFontFileScanner(this.Helper.DirectoryPath, scanSettings));
-            }
-            return fontFileProvider;
         }
 
         private void OnFontRecordStarted(object sender, RecordEventArgs e)
@@ -306,73 +334,37 @@ namespace FontSettings
         {
             this.Monitor.Log($"完成记录{e.Language}的{e.FontType}。");
 
-            // parse vanilla configs in context.
-            if (this._vanillaFontDataRepository != null
-                && this._vanillaFontConfigParser != null
-                && this._vanillaFontConfigProvider != null)
+            // 准备好保存的字体设置，马上要修改了。
             {
-                var vanillaConfigs = this._vanillaFontDataRepository.ReadVanillaFontData().Fonts;
-                var parsedConfigs = this._vanillaFontConfigParser.ParseCollection(vanillaConfigs, e.Language, e.FontType);
-                this._vanillaFontConfigProvider.AddVanillaFontConfigs(parsedConfigs);
-            }
+                var context = new FontContext(e.Language, e.FontType);
 
-            // parse configs in context.
-            if (this._fontConfigRepository != null
-                && this._userFontConfigParser != null
-                && this._fontConfigManager != null)
-            {
-                var fontConfigs = this._fontConfigRepository.ReadAllConfigs();
-                var parsedConfigs = this._userFontConfigParser.ParseCollection(fontConfigs, e.Language, e.FontType);
-                foreach (var pair in parsedConfigs)
-                    this._fontConfigManager.AddFontConfig(pair);
-            }
+                FontConfigModel? vanillaConfig = this._vanillaFontDataRepository.ReadVanillaFontConfig(context);
+                FontConfigModel? currentConfig = this._fontConfigRepository.ReadConfig(context);
 
-            // parse presets in context.
-            if (this._fontPresetRepository != null
-                && this._fontPresetParser != null
-                && this._fontPresetManager != null)
-            {
-                var presets = this._fontPresetRepository.ReadAllPresets();
-                var parsedPresets = this._fontPresetParser.ParseCollection(presets.Values, e.Language, e.FontType);
-                this._fontPresetManager.AddPresets(parsedPresets);
+                this._fontConfigManager.AddVanillaConfig(context, vanillaConfig);
+                this._fontConfigManager.AddFontConfig(context, currentConfig);
             }
 
             this.Monitor.Log($"恢复font patch。");
-
             this._mainFontPatcher.ResumeFontPatch();
         }
 
-        private void OnFontConfigUpdated(object sender, EventArgs e)
+        private Lazy<IEnumerable<IContentPack>> _testContentPacks;
+        private IEnumerable<IContentPack> EnumerateTestContentPacks()
         {
-            var runtimeConfigs = this._fontConfigManager.GetAllFontConfigs()
-                .Select(pair => this._userFontConfigParser.ParseBack(pair));
-
-            var configObject = new FontConfigs();
-
-            foreach (var config in runtimeConfigs)
-                configObject.Add(config);
-
-            // 由于 文件中的配置 和 运行时产生的配置 并不同步，因此要手动加回部分文件中的配置。
-            var savedConfigs = this._fontConfigRepository.ReadAllConfigs();
-            foreach (var config in savedConfigs)
-            {
-                if (!runtimeConfigs.Any(config.IsSameContextWith))
-                    configObject.Add(config);
-            }
-
-            this._fontConfigRepository.WriteAllConfigs(configObject);
+            this._testContentPacks ??= new(this.CreateTestContentPacks);
+            return this._testContentPacks.Value;
         }
 
-        private void OnFontPresetUpdated(object sender, PresetUpdatedEventArgs e)
+        private IEnumerable<IContentPack> CreateTestContentPacks()
         {
-            string name = e.Name;
-            var preset = e.Preset;
+#if DEBUG
+            IContentPack FakeContentPack(string relativeDir) => this.Helper.ContentPacks.CreateFake(Path.Combine(this.Helper.DirectoryPath, relativeDir));
 
-            var presetObject = preset == null
-                ? null
-                : this._fontPresetParser.ParseBack(preset);
-
-            this._fontPresetRepository.WritePreset(name, presetObject);
+            yield return FakeContentPack("content-packs/single");
+#else
+            return Array.Empty<IContentPack>();
+#endif
         }
 
         private void OpenFontSettingsMenu()
@@ -387,22 +379,59 @@ namespace FontSettings
 
         private FontSettingsMenu CreateFontSettingsMenu()
         {
-            var gen = new SampleFontGenerator(this._vanillaFontProvider);
-            IFontGenerator sampleFontGenerator = gen;
-            IAsyncFontGenerator sampleAsyncFontGenerator = gen;
+            Stopwatch stopwatch = new Stopwatch();
+            try
+            {
+                stopwatch.Start();
 
-            return new FontSettingsMenu(
-                config: this._config,
-                vanillaFontProvider: this._vanillaFontProvider,
-                sampleFontGenerator: sampleFontGenerator,
-                sampleAsyncFontGenerator: sampleAsyncFontGenerator,
-                presetManager: this._fontPresetManager,
-                registry: this.Helper.ModRegistry,
-                fontConfigManager: this._fontConfigManager,
-                vanillaFontConfigProvider: this._vanillaFontConfigProvider,
-                fontChangerFactory: this._fontChangerFactory,
-                fontFileProvider: this._fontFileProvider,
-                stagedValues: this._menuContextModel);
+                var gen = new SampleFontGenerator(this._vanillaFontProvider, () => this._config.EnableLatinDialogueFont);
+                IFontGenerator sampleFontGenerator = gen;
+                IAsyncFontGenerator sampleAsyncFontGenerator = gen;
+
+                FontSettingsMenuModel viewModel;
+                {
+                    bool async = true;
+                    if (async)
+                        viewModel = new FontSettingsMenuModelAsync(
+                            config: this._config,
+                            vanillaFontProvider: this._vanillaFontProvider,
+                            sampleFontGenerator: sampleFontGenerator,
+                            sampleAsyncFontGenerator: sampleAsyncFontGenerator,
+                            presetManager: this._fontConfigManager,
+                            fontConfigManager: this._fontConfigManager,
+                            vanillaFontConfigProvider: this._fontConfigManager,
+                            gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
+                            fontFileProvider: this._fontFileProvider,
+                            fontInfoRetriever: new FontInfoRetriever(),
+                            asyncFontInfoRetriever: new FontInfoRetriever(),
+                            stagedValues: this._menuContextModel);
+                    else
+                        viewModel = new FontSettingsMenuModel(
+                            config: this._config,
+                            vanillaFontProvider: this._vanillaFontProvider,
+                            sampleFontGenerator: sampleFontGenerator,
+                            sampleAsyncFontGenerator: sampleAsyncFontGenerator,
+                            presetManager: this._fontConfigManager,
+                            fontConfigManager: this._fontConfigManager,
+                            vanillaFontConfigProvider: this._fontConfigManager,
+                            gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
+                            fontFileProvider: this._fontFileProvider,
+                            fontInfoRetriever: new FontInfoRetriever(),
+                            stagedValues: this._menuContextModel);
+                }
+
+                return new FontSettingsMenu(this._fontConfigManager, this.Helper.ModRegistry, this._config.EnableLatinDialogueFont, viewModel);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                this.Monitor.Log($"{nameof(FontSettingsMenu)} creation completed in '{stopwatch.ElapsedMilliseconds}ms'");
+            }
+        }
+
+        private void OnDataAdditionalLanguagesUpdated(object sender, List<ModLanguage> value)
+        {
+            FontHelpers.SetModLanguages(value.ToArray());
         }
 
         private bool AssertModFileExists(string relativePath, out string? fullPath) // fullPath = null when returns false
