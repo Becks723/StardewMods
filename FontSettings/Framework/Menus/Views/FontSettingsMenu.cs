@@ -130,7 +130,7 @@ namespace FontSettings.Framework.Menus.Views
                 if (Game1.gameMode == 0)  // 如果在标题页面，HUD无法显示，
                     ILog.Info(message);   // 写在日志中
                 else
-                    Game1.addHUDMessage(new OverlayHUDMessage(message, null));
+                    Game1.addHUDMessage(new OverlayHUDMessage(message));
             }
             else
             {
