@@ -63,7 +63,7 @@ namespace FontSettings.Framework.FontChangers
                     content.InvalidateCache(GetFontFileAssetName());
                     content.InvalidateCache(this.LocalizeBaseAssetName(GetFontFileAssetName()));
 
-                    var fontFile = SpriteTextFields.FontFile;
+                    var fontFile = SpriteText.FontFile;
                     foreach (FontPage page in fontFile?.Pages ?? Enumerable.Empty<FontPage>())
                     {
                         string pageName = $"Fonts/{page.File}";
@@ -98,7 +98,7 @@ namespace FontSettings.Framework.FontChangers
                     content.InvalidateCache(GetFontFileAssetName());
                     content.InvalidateCache(this.LocalizeBaseAssetName(GetFontFileAssetName()));
 
-                    var fontFile = SpriteTextFields.FontFile;
+                    var fontFile = SpriteText.FontFile;
                     foreach (FontPage page in fontFile?.Pages ?? Enumerable.Empty<FontPage>())
                     {
                         string pageName = $"Fonts/{page.File}";
@@ -142,9 +142,9 @@ namespace FontSettings.Framework.FontChangers
                 fontPages.Add(Game1.content.Load<Texture2D>("Fonts\\" + current2.File));
             }
 
-            SpriteTextFields.FontFile = fontFile;
-            SpriteTextFields._characterMap = characterMap;
-            SpriteTextFields.fontPages = fontPages;
+            SpriteText.FontFile = fontFile;
+            SpriteText.characterMap = characterMap;
+            SpriteText.fontPages = fontPages;
             SpriteText.fontPixelZoom = fontPixelZoom;
         }
 

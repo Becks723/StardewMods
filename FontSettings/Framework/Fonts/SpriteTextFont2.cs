@@ -65,20 +65,20 @@ namespace FontSettings.Framework.Fonts
 
         private void BeforeSpriteTextdrawString()
         {
-            this._cachedFontFile = SpriteTextFields.FontFile;
-            this._cachedFontPages = SpriteTextFields.fontPages;
-            this._cachedCharacterMap = SpriteTextFields._characterMap;
+            this._cachedFontFile = SpriteText.FontFile;
+            this._cachedFontPages = SpriteText.fontPages;
+            this._cachedCharacterMap = SpriteText.characterMap;
 
-            SpriteTextFields.FontFile = this._instanceFontFile;
-            SpriteTextFields.fontPages = this._instanceFontPages;
-            SpriteTextFields._characterMap = this._instanceCharacterMap;
+            SpriteText.FontFile = this._instanceFontFile;
+            SpriteText.fontPages = this._instanceFontPages;
+            SpriteText.characterMap = this._instanceCharacterMap;
         }
 
         private void AfterSpriteTextdrawString()
         {
-            SpriteTextFields.FontFile = this._cachedFontFile;
-            SpriteTextFields.fontPages = this._cachedFontPages;
-            SpriteTextFields._characterMap = this._cachedCharacterMap;
+            SpriteText.FontFile = this._cachedFontFile;
+            SpriteText.fontPages = this._cachedFontPages;
+            SpriteText.characterMap = this._cachedCharacterMap;
         }
     }
 }

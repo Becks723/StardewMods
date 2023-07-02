@@ -103,20 +103,20 @@ namespace FontSettings.Framework.Patchers
 
             if (LocalizedContentManager.CurrentLanguageLatin && !_hasSubscribedOnLanguageChangeLatin)
             {
-                SpriteTextFields._characterMap = new Dictionary<char, FontChar>();
-                SpriteTextFields.fontPages = new List<Texture2D>();
+                SpriteText.characterMap = new Dictionary<char, FontChar>();
+                SpriteText.fontPages = new List<Texture2D>();
 
-                SpriteTextFields.FontFile = LoadFontFile(LatinFontFileAssetName());
+                SpriteText.FontFile = LoadFontFile(LatinFontFileAssetName());
                 SpriteText.fontPixelZoom = 3f;
 
-                foreach (FontChar fontChar in SpriteTextFields.FontFile.Chars)
+                foreach (FontChar fontChar in SpriteText.FontFile.Chars)
                 {
                     char key = (char)fontChar.ID;
-                    SpriteTextFields._characterMap.Add(key, fontChar);
+                    SpriteText.characterMap.Add(key, fontChar);
                 }
-                foreach (FontPage fontPage in SpriteTextFields.FontFile.Pages)
+                foreach (FontPage fontPage in SpriteText.FontFile.Pages)
                 {
-                    SpriteTextFields.fontPages.Add(
+                    SpriteText.fontPages.Add(
                         Game1.content.Load<Texture2D>($"Fonts/{fontPage.File}"));
                 }
 
@@ -132,26 +132,26 @@ namespace FontSettings.Framework.Patchers
 
             if (LocalizedContentManager.CurrentLanguageLatin)
             {
-                if (SpriteTextFields._characterMap != null)
-                    SpriteTextFields._characterMap.Clear();
+                if (SpriteText.characterMap != null)
+                    SpriteText.characterMap.Clear();
                 else
-                    SpriteTextFields._characterMap = new Dictionary<char, FontChar>();
-                if (SpriteTextFields.fontPages != null)
-                    SpriteTextFields.fontPages.Clear();
+                    SpriteText.characterMap = new Dictionary<char, FontChar>();
+                if (SpriteText.fontPages != null)
+                    SpriteText.fontPages.Clear();
                 else
-                    SpriteTextFields.fontPages = new List<Texture2D>();
+                    SpriteText.fontPages = new List<Texture2D>();
 
-                SpriteTextFields.FontFile = LoadFontFile(LatinFontFileAssetName());
+                SpriteText.FontFile = LoadFontFile(LatinFontFileAssetName());
                 SpriteText.fontPixelZoom = 3f;
 
-                foreach (FontChar fontChar in SpriteTextFields.FontFile.Chars)
+                foreach (FontChar fontChar in SpriteText.FontFile.Chars)
                 {
                     char key = (char)fontChar.ID;
-                    SpriteTextFields._characterMap.Add(key, fontChar);
+                    SpriteText.characterMap.Add(key, fontChar);
                 }
-                foreach (FontPage fontPage in SpriteTextFields.FontFile.Pages)
+                foreach (FontPage fontPage in SpriteText.FontFile.Pages)
                 {
-                    SpriteTextFields.fontPages.Add(
+                    SpriteText.fontPages.Add(
                         Game1.content.Load<Texture2D>($"Fonts/{fontPage.File}"));
                 }
             }
