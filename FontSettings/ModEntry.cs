@@ -120,16 +120,23 @@ namespace FontSettings
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                new FontShadowPatcher(this._config)
-                    .Patch(Harmony, this.Monitor);
+                try
+                {
+                    new FontShadowPatcher(this._config)
+                        .Patch(Harmony, this.Monitor);
 
-                var spriteTextPatcher = new SpriteTextPatcher(this._config);
-                spriteTextPatcher.Patch(Harmony, this.Monitor);
-                this._mainFontPatcher.FontPixelZoomOverride += (s, e) =>
-                    spriteTextPatcher.SetOverridePixelZoom(e.PixelZoom);
+                    var spriteTextPatcher = new SpriteTextPatcher(this._config);
+                    spriteTextPatcher.Patch(Harmony, this.Monitor);
+                    this._mainFontPatcher.FontPixelZoomOverride += (s, e) =>
+                        spriteTextPatcher.SetOverridePixelZoom(e.PixelZoom);
 
-                new SpriteTextLatinPatcher(this._config, this.ModManifest, helper)
-                    .Patch(Harmony, this.Monitor);
+                    new SpriteTextLatinPatcher(this._config, this.ModManifest, helper)
+                        .Patch(Harmony, this.Monitor);
+                }
+                catch (Exception ex)
+                {
+                    this.Monitor.Log($"Failed to patch game code. {ex}", LogLevel.Error);
+                }
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequestedEarly;
