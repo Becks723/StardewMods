@@ -55,6 +55,8 @@ namespace FontSettings
 
         private MainFontPatcher _mainFontPatcher;
 
+        private FontPatchChanger _fontChanger;
+
         private VanillaFontProvider _vanillaFontProvider;
 
         private readonly DataAdditionalLanguagesWatcher _dataAdditionalLanguagesWatcher = new();
@@ -112,8 +114,9 @@ namespace FontSettings
             this._fontConfigManager.PresetUpdated += (s, e) => this._fontPresetRepository.WritePreset(e.Name, e.Preset);
 
             // init font patching.
-            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), new FontPatchInvalidatorComposition(helper));
+            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), new FontPatchInvalidatorComposition(helper), this.Monitor);
             this._vanillaFontProvider.SetInvalidateHelper(this._mainFontPatcher);
+            this._fontChanger = new FontPatchChanger(this._mainFontPatcher);
 
             // watch `Data/AdditonalLanguages` asset.
             this._dataAdditionalLanguagesWatcher.Updated += this.OnDataAdditionalLanguagesUpdated;
@@ -152,11 +155,20 @@ namespace FontSettings
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         }
 
-        private void OnUpdateTicking(object sender, UpdateTickingEventArgs e)
+        protected override void Dispose(bool disposing)
         {
-            this._vanillaFontProvider.OnUpdateTicking(e);
+            if (disposing)
+            {
+                this._fontChanger.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
 
+        private void OnUpdateTicking(object sender, UpdateTickingEventArgs e)
+        {
+            this._mainFontPatcher.OnUpdateTicking(e);
+        }
 
         private void OnAssetRequestedEarly(object sender, AssetRequestedEventArgs e)
         {
@@ -407,7 +419,7 @@ namespace FontSettings
                             presetManager: this._fontConfigManager,
                             fontConfigManager: this._fontConfigManager,
                             vanillaFontConfigProvider: this._fontConfigManager,
-                            gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
+                            gameFontChanger: this._fontChanger,
                             fontFileProvider: this._fontFileProvider,
                             fontInfoRetriever: new FontInfoRetriever(),
                             asyncFontInfoRetriever: new FontInfoRetriever(),
@@ -421,7 +433,7 @@ namespace FontSettings
                             presetManager: this._fontConfigManager,
                             fontConfigManager: this._fontConfigManager,
                             vanillaFontConfigProvider: this._fontConfigManager,
-                            gameFontChanger: new FontPatchChanger(this._mainFontPatcher),
+                            gameFontChanger: this._fontChanger,
                             fontFileProvider: this._fontFileProvider,
                             fontInfoRetriever: new FontInfoRetriever(),
                             stagedValues: this._menuContextModel);
