@@ -8,6 +8,7 @@ using FontSettings.Framework.FontPatching.Editors;
 using FontSettings.Framework.FontPatching.Loaders;
 using FontSettings.Framework.FontPatching.Replacers;
 using FontSettings.Framework.Models;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 
@@ -18,19 +19,28 @@ namespace FontSettings.Framework.FontPatching
         private readonly IFontConfigManager _fontConfigManager;
         private readonly FontPatchResolverFactory _resolverFactory;
         private readonly IFontPatchInvalidator _invalidator;
+        private readonly IMonitor _monitor;
 
         private bool _bypassFontPatch;
 
         private readonly IDictionary<FontContext, IFontPatch?> _pendingPatchSlots = new Dictionary<FontContext, IFontPatch?>();
+        private readonly IList<FontContext> _pendingInvalidates = new List<FontContext>();
 
         public event EventHandler<FontPixelZoomOverrideEventArgs> FontPixelZoomOverride;
 
+        /// <summary>Raised after a game font is successfully invalidated.</summary>
+        public event EventHandler<InvalidatedEventArgs> Invalidated;
+
+        /// <summary>Raised after a game font failed to invalidate.</summary>
+        public event EventHandler<InvalidateFailedEventArgs> InvalidateFailed;
+
         public MainFontPatcher(IFontConfigManager fontConfigManager, FontPatchResolverFactory resolverFactory,
-            IFontPatchInvalidator invalidator)
+            IFontPatchInvalidator invalidator, IMonitor monitor)
         {
             this._fontConfigManager = fontConfigManager;
             this._resolverFactory = resolverFactory;
             this._invalidator = invalidator;
+            this._monitor = monitor;
         }
 
         public void OnAssetRequested(AssetRequestedEventArgs e)
@@ -67,6 +77,17 @@ namespace FontSettings.Framework.FontPatching
         {
         }
 
+        public void OnUpdateTicking(UpdateTickingEventArgs e)
+        {
+            lock (this._pendingInvalidates)
+            {
+                foreach (FontContext context in this._pendingInvalidates.Distinct().ToArray())
+                    this.InvalidateGameFont(context);
+
+                this._pendingInvalidates.Clear();
+            }
+        }
+
         public void PauseFontPatch()
         {
             this._bypassFontPatch = true;
@@ -75,6 +96,22 @@ namespace FontSettings.Framework.FontPatching
         public void ResumeFontPatch()
         {
             this._bypassFontPatch = false;
+        }
+
+        public async Task PatchAsync(FontContext context)
+        {
+            Exception? exception = await this.PendPatchAsync(context);
+            if (exception == null)
+            {
+                this.PendInvalidate(context);
+            }
+            else
+            {
+                if (exception is not KeyNotFoundException)
+                {
+                    // TODO
+                }
+            }
         }
 
         public async Task<Exception?> PendPatchAsync(FontContext context)
@@ -104,15 +141,36 @@ namespace FontSettings.Framework.FontPatching
             }
         }
 
+        public void PendInvalidate(FontContext context)
+        {
+            lock (this._pendingInvalidates)
+            {
+                this._pendingInvalidates.Add(context);
+
+                this._monitor.Log($"To invalidate added: {context.Language},{context.FontType}. Count: {this._pendingInvalidates.Count}");
+            }
+        }
+
         /// <summary>Sync one, not thread safe.</summary>
         public void InvalidateGameFont(FontContext context)
         {
-            this._invalidator.InvalidateAndPropagate(context);
-        }
+            try
+            {
+                this._invalidator.InvalidateAndPropagate(context);
 
-        public async Task InvalidateGameFontAsync(FontContext context)
-        {
-            await Task.Run(() => this._invalidator.InvalidateAndPropagate(context));  // here assumes `_invalidator.InvalidateAndPropagate` thread safe
+#if DEBUG
+                // throw new Exception("Test Exception");
+#endif
+            }
+            catch (Exception ex)
+            {
+                this._monitor.Log($"Error when invalidating font {context.Language},{context.FontType}. {ex}");
+                InvalidateFailed?.Invoke(this, 
+                    new InvalidateFailedEventArgs(context, ex));
+                return;
+            }
+
+            Invalidated?.Invoke(this, new InvalidatedEventArgs(context));
         }
 
         /// <summary>Thread safe.</summary>
@@ -143,7 +201,7 @@ namespace FontSettings.Framework.FontPatching
             {
                 try
                 {
-                    if (this._pendingPatchSlots.TryGetValue(context, out IFontPatch? patch) 
+                    if (this._pendingPatchSlots.TryGetValue(context, out IFontPatch? patch)
                         && patch != null)
                         return patch;
                 }
@@ -284,6 +342,26 @@ namespace FontSettings.Framework.FontPatching
         {
             this.NeedsOverride = needsOverride;
             this.PixelZoom = pixelZoom;
+        }
+    }
+
+    internal class InvalidatedEventArgs : EventArgs
+    {
+        public FontContext Context { get; }
+        public InvalidatedEventArgs(FontContext context)
+        {
+            this.Context = context;
+        }
+    }
+
+    internal class InvalidateFailedEventArgs : EventArgs
+    {
+        public FontContext Context { get; }
+        public Exception Exception { get; }
+        public InvalidateFailedEventArgs(FontContext context, Exception exception)
+        {
+            this.Context = context;
+            this.Exception = exception;
         }
     }
 }

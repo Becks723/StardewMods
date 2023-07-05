@@ -116,20 +116,7 @@ namespace FontSettings.Framework
 
                 this.RaiseRecordFinished(language, fontType);
 
-                _ = this.PendPatchAsync(new FontContext(language, fontType));
-            }
-        }
-
-        private readonly ISet<InvalidateContext> _invalidateContextList = new HashSet<InvalidateContext>();
-        public void OnUpdateTicking(UpdateTickingEventArgs e)
-        {
-            try
-            {
-                this.InvalidatePendings();
-            }
-            catch (Exception ex)
-            {
-                this._monitor.Log($"Error when invalidating fonts: {ex.Message}\n{ex.StackTrace}");
+                _ = this._mainFontPatcher.PatchAsync(new FontContext(language, fontType));
             }
         }
 
@@ -164,54 +151,11 @@ namespace FontSettings.Framework
             return false;
         }
 
-        private void InvalidatePendings()
-        {
-            // 将排队的全复制出来，并清空队列。
-            InvalidateContext[] invalidateContexts;
-            lock (this._invalidateContextList)
-            {
-                invalidateContexts = this._invalidateContextList.ToArray();
-                this._invalidateContextList.Clear();
-            }
-
-            // 依次invalidate。
-            foreach (var context in invalidateContexts)
-            {
-                var language = context.Language;
-                var fontType = context.FontType;
-
-                this._mainFontPatcher.InvalidateGameFont(new FontContext(language, fontType));
-            }
-        }
-
-        private async Task PendPatchAsync(FontContext context)
-        {
-            Exception? exception = await this._mainFontPatcher.PendPatchAsync(context);
-            if (exception == null)
-            {
-                lock (this._invalidateContextList)
-                {
-                    this._invalidateContextList.Add(
-                        new InvalidateContext(context.Language, context.FontType));
-                    this._monitor.Log($"To invalidate added: {context.Language},{context.FontType}. Count: {this._invalidateContextList.Count}");
-                }
-            }
-            else
-            {
-                if (exception is not KeyNotFoundException)
-                {
-                    // TODO
-                }
-            }
-        }
-
         private MainFontPatcher _mainFontPatcher;
         public void SetInvalidateHelper(MainFontPatcher mainFontPatcher)
         {
             this._mainFontPatcher = mainFontPatcher;
         }
-
-        private record InvalidateContext(LanguageInfo Language, GameFontType FontType);
 
         public bool HasRecorded(LanguageInfo language, GameFontType fontType)
         {
