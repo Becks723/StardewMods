@@ -10,8 +10,8 @@ namespace FontSettings.Framework.FontPatching.Editors
 {
     internal class SpriteFontEditor : BaseFontEditor<SpriteFont>
     {
-        public SpriteFontEditor(FontConfig config)
-            : base(config)
+        public SpriteFontEditor(FontConfig config, int priority)
+            : base(config, priority)
         {
         }
 

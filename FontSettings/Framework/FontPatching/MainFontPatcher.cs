@@ -244,13 +244,15 @@ namespace FontSettings.Framework.FontPatching
             return false;
         }
 
-        private void LoadAsset(AssetRequestedEventArgs e, IFontLoader loader, AssetLoadPriority priority = AssetLoadPriority.Exclusive)
+        private void LoadAsset(AssetRequestedEventArgs e, IFontLoader loader)
         {
-            e.LoadFrom(() => loader.Load(), priority);
+            e.LoadFrom(() => loader.Load(), (AssetLoadPriority)loader.Priority);
         }
 
-        private void EditAsset(AssetRequestedEventArgs e, IFontEditor editor, AssetEditPriority priority = AssetEditPriority.Default)
+        private void EditAsset(AssetRequestedEventArgs e, IFontEditor editor)
         {
+            AssetEditPriority priority = (AssetEditPriority)editor.Priority;
+
             if (editor is IFontReplacer replacer)
                 e.Edit(asset => asset.ReplaceWith(replacer.Replacement), priority);
             else

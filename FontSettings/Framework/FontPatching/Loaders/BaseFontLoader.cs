@@ -11,9 +11,12 @@ namespace FontSettings.Framework.FontPatching.Loaders
     {
         private readonly FontConfig _config;
 
-        protected BaseFontLoader(FontConfig config)
+        public int Priority { get; }
+
+        protected BaseFontLoader(FontConfig config, int priority)
         {
             this._config = config;
+            this.Priority = priority;
         }
 
         protected abstract T Load(FontConfig config);

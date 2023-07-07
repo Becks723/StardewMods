@@ -18,6 +18,8 @@ namespace FontSettings.Framework.FontPatching.Resolving
             {
                 IBmFontPatch patch;
 
+                var (loadOrReplace, loadPriority, editPriority) = this.GetPatchDetailsForCompat(context);
+
                 if (!config.Enabled)
                 {
                     patch = this.PatchFactory.ForBypassBmFont();
@@ -25,7 +27,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
                 else if (config.FontFilePath == null)  // TODO: 等集齐所有原版字体后弃用
                 {
-                    patch = this.PatchFactory.ForEditBmFont(config);
+                    patch = this.PatchFactory.ForEditBmFont(config, editPriority);
                 }
 
                 else
@@ -50,9 +52,9 @@ namespace FontSettings.Framework.FontPatching.Resolving
                         ? config.GetInstance<IWithPixelZoom>().PixelZoom
                         : 1f;
 
-                    patch = context.Language.Code != StardewValley.LocalizedContentManager.LanguageCode.mod
-                        ? this.PatchFactory.ForLoadBmFont(bmFont, pixelZoom)
-                        : this.PatchFactory.ForReplaceBmFont(bmFont, pixelZoom);
+                    patch = loadOrReplace
+                        ? this.PatchFactory.ForLoadBmFont(bmFont, pixelZoom, loadPriority)
+                        : this.PatchFactory.ForReplaceBmFont(bmFont, pixelZoom, editPriority);
                 }
 
                 return this.SuccessResult(patch);

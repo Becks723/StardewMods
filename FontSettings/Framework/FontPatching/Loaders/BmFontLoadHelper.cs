@@ -12,7 +12,7 @@ namespace FontSettings.Framework.FontPatching.Loaders
 {
     internal class BmFontLoadHelper
     {
-        public void GetLoaders(BmFontData bmFont,
+        public void GetLoaders(BmFontData bmFont, int priority,
             out IFontLoader fontFileLoader,
             out IDictionary<string, IFontLoader> pageLoaders)
         {
@@ -21,7 +21,7 @@ namespace FontSettings.Framework.FontPatching.Loaders
 
             // fontFileLoader
             XmlSource xml = FontHelpers.ParseFontFile(fontFile);
-            fontFileLoader = new SimpleFontLoader(xml);
+            fontFileLoader = new SimpleFontLoader(xml, priority);
 
             // pageLoaders
             pageLoaders = new Dictionary<string, IFontLoader>();
@@ -35,12 +35,14 @@ namespace FontSettings.Framework.FontPatching.Loaders
             }
         }
 
-        public void GetLoaders(BmFontData bmFont,
+        public void GetLoaders(BmFontData bmFont, int priority,
             out IFontReplacer fontFileReplacer,
             out IDictionary<string, IFontLoader> pageLoaders)
         {
-            this.GetLoaders(bmFont, out IFontLoader fontFileLoader, out pageLoaders);
-            fontFileReplacer = new FontReplacer(fontFileLoader);
+            this.GetLoaders(bmFont, int.MaxValue, 
+                out IFontLoader fontFileLoader, out pageLoaders);
+
+            fontFileReplacer = new FontReplacer(fontFileLoader.Load(), priority);
         }
     }
 }

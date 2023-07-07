@@ -9,5 +9,6 @@ namespace FontSettings.Framework.FontPatching.Loaders
     internal interface IFontLoader
     {
         object Load();
+        int Priority { get; }
     }
 }

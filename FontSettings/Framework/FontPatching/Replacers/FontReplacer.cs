@@ -12,14 +12,12 @@ namespace FontSettings.Framework.FontPatching.Replacers
     {
         public object Replacement { get; }
 
-        public FontReplacer(object replacement)
+        public int Priority { get; }
+
+        public FontReplacer(object replacement, int priority)
         {
             this.Replacement = replacement;
-        }
-
-        public FontReplacer(IFontLoader loader)
-            : this(loader.Load())
-        {
+            this.Priority = priority;
         }
 
         void IFontEditor.Edit(object data) => throw new NotSupportedException();

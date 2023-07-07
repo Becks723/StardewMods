@@ -16,6 +16,8 @@ namespace FontSettings.Framework.FontPatching.Resolving
             {
                 IFontPatch patch;
 
+                var (loadOrReplace, loadPriority, editPriority) = this.GetPatchDetailsForCompat(context);
+
                 if (!config.Enabled)
                 {
                     patch = this.PatchFactory.ForBypassSpriteFont();
@@ -23,7 +25,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
                 else if (config.FontFilePath == null)  // TODO: 等集齐所有原版字体后弃用
                 {
-                    patch = this.PatchFactory.ForEditSpriteFont(config);
+                    patch = this.PatchFactory.ForEditSpriteFont(config, editPriority);
                 }
 
                 else
@@ -37,9 +39,9 @@ namespace FontSettings.Framework.FontPatching.Resolving
                         lineSpacing: (int)config.LineSpacing,
                         charOffsetX: config.CharOffsetX,
                         charOffsetY: config.CharOffsetY);
-                    patch = context.Language.Code != StardewValley.LocalizedContentManager.LanguageCode.mod
-                        ? this.PatchFactory.ForLoadSpriteFont(spriteFont)
-                        : this.PatchFactory.ForReplaceSpriteFont(spriteFont);
+                    patch = loadOrReplace
+                        ? this.PatchFactory.ForLoadSpriteFont(spriteFont, loadPriority)
+                        : this.PatchFactory.ForReplaceSpriteFont(spriteFont, editPriority);
                 }
 
                 return this.SuccessResult(patch);

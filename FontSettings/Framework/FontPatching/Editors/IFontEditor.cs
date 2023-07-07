@@ -9,5 +9,6 @@ namespace FontSettings.Framework.FontPatching.Editors
     internal interface IFontEditor
     {
         void Edit(object data);
+        int Priority { get; }
     }
 }
