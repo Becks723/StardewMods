@@ -996,23 +996,21 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private FontConfig CreateConfigBasedOnCurrentSettings()
         {
-            var font = new FontConfig(
-                Enabled: this.FontEnabled,
-                FontFilePath: this.FontFilePath,
-                FontIndex: this.FontIndex,
-                FontSize: this.FontSize,
-                Spacing: this.Spacing,
-                LineSpacing: this.LineSpacing,
-                CharOffsetX: this.CharOffsetX,
-                CharOffsetY: this.CharOffsetY,
-                CharacterRanges: this.CurrentFontConfig.CharacterRanges);
-
+            var builder = new FontConfigBuilder()
+                .BasicConfig(new FontConfig(
+                    Enabled: this.FontEnabled,
+                    FontFilePath: this.FontFilePath,
+                    FontIndex: this.FontIndex,
+                    FontSize: this.FontSize,
+                    Spacing: this.Spacing,
+                    LineSpacing: this.LineSpacing,
+                    CharOffsetX: this.CharOffsetX,
+                    CharOffsetY: this.CharOffsetY,
+                    CharacterRanges: this.CurrentFontConfig.CharacterRanges));
             if (this.CurrentFontType == GameFontType.SpriteText)
-                font = new BmFontConfig(
-                    original: font,
-                    pixelZoom: this.PixelZoom);
+                builder.WithPixelZoom(this.PixelZoom);
 
-            return font;
+            return builder.Build();
         }
 
         private IEnumerable<FontViewModel> LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。

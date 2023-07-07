@@ -221,6 +221,8 @@ namespace FontSettings.Framework
 
         private FontConfig MakeConfigObject(FontConfigModel model, LanguageInfo language, GameFontType fontType)
         {
+            var builder = new FontConfigBuilder();
+
             string fontFile = model.FontFile ?? this.GetVanillaFontFile(language, fontType);
 
             var config = new FontConfig(
@@ -242,10 +244,12 @@ namespace FontSettings.Framework
                     _ => throw new NotSupportedException(),
                 });
 
-            if (fontType == GameFontType.SpriteText)
-                config = new BmFontConfig(config, model.PixelZoom);
+            builder.BasicConfig(config);
 
-            return config;
+            if (fontType == GameFontType.SpriteText)
+                builder.WithPixelZoom(model.PixelZoom);
+
+            return builder.Build();
         }
 
         private FontConfigModel MakeConfigModel(FontConfig config, LanguageInfo language, GameFontType fontType)
@@ -267,7 +271,7 @@ namespace FontSettings.Framework
                 LineSpacing: config.LineSpacing,
                 CharOffsetX: config.CharOffsetX,
                 CharOffsetY: config.CharOffsetY,
-                PixelZoom: config is BmFontConfig bmFont ? bmFont.PixelZoom : 0f,
+                PixelZoom: config.TryGetInstance(out IWithPixelZoom withPixelZoom) ? withPixelZoom.PixelZoom : 0f,
                 CharacterPatchMode: isOriginalRanges ? CharacterPatchMode.BasedOnOriginal : CharacterPatchMode.Override,
                 CharacterOverride: isOriginalRanges ? null : config.CharacterRanges,
                 CharacterAdd: null,
@@ -279,45 +283,40 @@ namespace FontSettings.Framework
             if (language.IsLatinLanguage() && fontType == GameFontType.SpriteText)
                 return this.FallbackLatinBmFontConfig(language, fontType);
 
-            if (fontType != GameFontType.SpriteText)
-                return new FontConfig(
-                    Enabled: true,
-                    FontFilePath: null,
-                    FontIndex: 0,
-                    FontSize: 26,
-                    Spacing: 0,
-                    LineSpacing: 26,
-                    CharOffsetX: 0,
-                    CharOffsetY: 0,
-                    CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType));
+            var builder = new FontConfigBuilder();
 
-            else
-                return new BmFontConfig(
-                    Enabled: true,
-                    FontFilePath: null,
-                    FontIndex: 0,
-                    FontSize: 26,
-                    Spacing: 0,
-                    LineSpacing: 26,
-                    CharOffsetX: 0,
-                    CharOffsetY: 0,
-                    CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType),
-                    PixelZoom: FontHelpers.GetDefaultFontPixelZoom());
+            builder.BasicConfig(new FontConfig(
+                Enabled: true,
+                FontFilePath: null,
+                FontIndex: 0,
+                FontSize: 26,
+                Spacing: 0,
+                LineSpacing: 26,
+                CharOffsetX: 0,
+                CharOffsetY: 0,
+                CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType)));
+
+            if (fontType == GameFontType.SpriteText)
+                builder.WithPixelZoom(FontHelpers.GetDefaultFontPixelZoom());
+
+            return builder.Build();
         }
 
         private FontConfig FallbackLatinBmFontConfig(LanguageInfo language, GameFontType fontType)
         {
-            return new BmFontConfig(
-                Enabled: true,
-                FontFilePath: null,
-                FontIndex: 0,
-                FontSize: 16,
-                Spacing: 0,
-                LineSpacing: 16,
-                CharOffsetX: 0,
-                CharOffsetY: 0,
-                CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType),
-                PixelZoom: 3f);
+            return new FontConfigBuilder()
+                .BasicConfig(new FontConfig(
+                    Enabled: true,
+                    FontFilePath: null,
+                    FontIndex: 0,
+                    FontSize: 16,
+                    Spacing: 0,
+                    LineSpacing: 16,
+                    CharOffsetX: 0,
+                    CharOffsetY: 0,
+                    CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType)))
+                .WithPixelZoom(3f)
+                .Build();
         }
 
         private bool ContainsInvalidChar(string name)
@@ -396,8 +395,8 @@ namespace FontSettings.Framework
         }
 
         private IEnumerable<CharacterRange> PatchCharacterRanges(
-        IEnumerable<CharacterRange> original,
-        IEnumerable<CharacterRange> add,
+            IEnumerable<CharacterRange> original,
+            IEnumerable<CharacterRange> add,
             IEnumerable<CharacterRange> remove)
         {
             var origCh = FontHelpers.GetCharacters(original);
