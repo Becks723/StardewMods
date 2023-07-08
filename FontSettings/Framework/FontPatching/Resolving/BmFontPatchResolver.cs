@@ -22,7 +22,8 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
                 if (!config.Enabled)
                 {
-                    patch = this.PatchFactory.ForBypassBmFont();
+                    patch = this.PatchFactory.ForBypassBmFont(
+                        FontHelpers.GetDefaultFontPixelZoom(context.Language));
                 }
 
                 else if (config.FontFilePath == null)  // TODO: 等集齐所有原版字体后弃用
