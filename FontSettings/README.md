@@ -147,6 +147,7 @@ Modders can create font packs by editing some json files. See [Font Settings pac
 ## Release Notes
 #### 0.11.2 - 2023-07-
 - Fix dialogue font becomes smaller than vanilla if `Enabled` not checked.
+- Fix some special characters (such as icons) in dialogue font scale inproperly, in most case much smaller.
 
 #### 0.11.1 - 2023-06-27
 - Hotfix: Fix error when trying to open font menu for some first time users. **Update recommanded!**
