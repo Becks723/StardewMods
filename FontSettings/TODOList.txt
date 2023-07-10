@@ -43,6 +43,7 @@
 	- 添加阴影&颜色设置
 	- 添加加粗设置。
 	- 添加一个随机骰子
+	- 解决替换字体冲突
 
 Custom Dialogue font under latin language:
 Solution:
