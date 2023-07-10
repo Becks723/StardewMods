@@ -2,7 +2,7 @@
 
 # Font Settings
 This mod:
-*	Provides a common font settings interface like many games & softwares do. You can:
+*	Provides a common font interface. You can:
 	- Change font size.
 	- Pick various fonts.
 	- Align text spacing.
@@ -111,8 +111,13 @@ Lastest version works with Windows, MacOS, Linux.
 
 ### Conflict with SpriteMaster mod
 Condition: SpriteMaster version >0.14.0, FontSettings version unlimited.<br/>
-Symptom: changes made to fonts do not apply, game becomes laggy, high cpu, etc.<br/>
-**Solution**: In the configuration menu, go to `SpriteMaster > Advanced Settings > Extras.OpenGL`, uncheck `Enabled` and `OptimizeTexture2DSetData`, and restart the game. <small>Test environment: FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
+
+Symptom: Changes made to fonts do not apply, game becomes laggy, high cpu, etc.<br/>
+
+**Solution**: In the configuration menu, go to `SpriteMaster > Advanced Settings > Extras.OpenGL`, uncheck `Enabled` and `OptimizeTexture2DSetData`, and restart the game.<br>
+
+<small>Test environment: FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
+
 
 ## For Modders
 
@@ -145,7 +150,7 @@ Modders can create font packs by editing some json files. See [Font Settings pac
 
 
 ## Release Notes
-#### 0.11.2 - 2023-07-
+#### 0.11.2 - 2023-07-11
 - Fix dialogue font becomes smaller than vanilla if `Enabled` not checked.
 - Fix some special characters (such as icons) in dialogue font scale inproperly, in most case much smaller.
 
