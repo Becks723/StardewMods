@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -17,11 +18,20 @@ namespace FontSettings.Framework.Menus.ViewModels
         private readonly FontSettingsMenuPresetContextModel _stagedValues;
 
         /// <summary>获取当前上下文所有可用的预设。第一个是 无预设 ，即null。</summary>
-        private FontPreset[] _presets;
-        private FontPreset[] Presets
+        private ObservableCollection<FontPreset> _presets;
+        private ObservableCollection<FontPreset> Presets
         {
             get => this._presets;
-            set => this.SetField(ref this._presets, value);
+            set
+            {
+                if (this._presets != null)
+                    this._presets.CollectionChanged -= this.OnPresetsCollectionChanged;
+
+                this.SetField(ref this._presets, value);
+
+                if (this._presets != null)
+                    this._presets.CollectionChanged += this.OnPresetsCollectionChanged;
+            }
         }
 
         private FontPreset _currentPresetPrivate;
@@ -41,8 +51,20 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private bool NoPresetSelected => this.CurrentPresetPrivate == null;
 
-        public string CurrentPresetName => this.CurrentPresetPrivate is IPresetWithName withName ? withName.Name
-                                                                                                  : string.Empty;
+        /// <summary>Unique key of current preset. If current preset is null or doesn't have a key, returns null.</summary>
+        public string? CurrentPresetName  // TODO: 更名成 CurrentPresetKeyOrNull
+        {
+            get
+            {
+                if (this.NoPresetSelected)
+                    return null;
+
+                if (this.CurrentPresetPrivate.TryGetInstance(out IPresetWithKey<string> withKey))
+                    return withKey.Key;
+                else
+                    return null;
+            }
+        }
 
         public string? CurrentPresetNameOrNull
         {
@@ -82,7 +104,9 @@ namespace FontSettings.Framework.Menus.ViewModels
 
                 return currentPreset != null                                        // 无选中预设时不可。
                     && !this._presetManager.IsReadOnlyPreset(currentPreset)         // 只读的预设不可编辑。
-                    && currentPreset?.Settings != this.CurrentFontConfigRealTime;   // 仅在改动时有必要保存。
+                    && !new FontConfigValueComparer().Equals(
+                        currentPreset?.Settings,                                    // 仅在改动时有必要保存。
+                        this.CurrentFontConfigRealTime);
             }
         }
 
@@ -108,13 +132,10 @@ namespace FontSettings.Framework.Menus.ViewModels
 
             this.RegisterCallbackToStageValues();
 
-            this.UpdatePresets();
+            this.Presets = new ObservableCollection<FontPreset>(this.EnumerateAvailablePresets());
 
             // 填入之前记录的值。
-            int index = this._stagedValues.PresetIndex;
-            this.CurrentPresetPrivate = this.Presets.Length > index
-                ? this.Presets[index]
-                : null;
+            this.ApplyStagedValues();
         }
 
         private void RegisterCallbackToStageValues()
@@ -125,22 +146,33 @@ namespace FontSettings.Framework.Menus.ViewModels
                 {
                     case nameof(this.Presets):
                     case nameof(this.CurrentPresetPrivate):
-                        this._stagedValues.PresetIndex = Array.IndexOf(this.Presets, this.CurrentPresetPrivate);
+                        this._stagedValues.PresetIndex = Math.Max(0, this.Presets.IndexOf(this.CurrentPresetPrivate));
                         break;
                 }
             };
         }
 
+        private void ApplyStagedValues()
+        {
+            int index = Math.Clamp(this._stagedValues.PresetIndex, 0, this.Presets.Count - 1);
+            this.CurrentPresetPrivate = this.Presets[index];
+        }
+
+        private void OnPresetsCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            this._stagedValues.PresetIndex = Math.Max(0, this.Presets.IndexOf(this.CurrentPresetPrivate));
+        }
+
         public void MoveToPreviousPreset()
         {
-            this.CurrentPresetPrivate = GetPreviousItem(this.Presets, this.CurrentPresetPrivate);
+            this.CurrentPresetPrivate = GetPreviousItem(this.Presets.ToArray(), this.CurrentPresetPrivate);
 
             this.RaisePresetChanged(EventArgs.Empty);
         }
 
         public void MoveToNextPreset()
         {
-            this.CurrentPresetPrivate = GetNextItem(this.Presets, this.CurrentPresetPrivate);
+            this.CurrentPresetPrivate = GetNextItem(this.Presets.ToArray(), this.CurrentPresetPrivate);
 
             this.RaisePresetChanged(EventArgs.Empty);
         }
@@ -160,13 +192,14 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public void DeleteCurrentPreset()
         {
-            if (this.CurrentPresetPrivate == null)
+            if (this.CurrentPresetPrivate == null
+                || this.CurrentPresetName == null)
                 return;
 
-            var next = GetNextItem(this.Presets, this.CurrentPresetPrivate);
+            var next = GetNextItem(this.Presets.ToArray(), this.CurrentPresetPrivate);
 
             this._presetManager.UpdatePreset(this.CurrentPresetName, null);
-            this.UpdatePresets();
+            this.Presets.Remove(this.CurrentPresetPrivate);
 
             this.CurrentPresetPrivate = next;
 
@@ -175,7 +208,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public void SaveCurrentPreset(FontConfig settings)
         {
-            if (this.NoPresetSelected)
+            if (this.NoPresetSelected
+                || this.CurrentPresetName == null)
                 return;
 
             if (settings is null)
@@ -188,7 +222,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._presetManager.UpdatePreset(this.CurrentPresetName, newPreset);
 
             // 更新自己的相关属性。
-            int index = Array.IndexOf(this.Presets, this.CurrentPresetPrivate);
+            int index = this.Presets.IndexOf(this.CurrentPresetPrivate);
             this.Presets[index] = newPreset;
             this.CurrentPresetPrivate = newPreset;
 
@@ -200,10 +234,11 @@ namespace FontSettings.Framework.Menus.ViewModels
             if (settings is null)
                 throw new ArgumentNullException(nameof(settings));
 
-            this._presetManager.UpdatePreset(presetName,
-                this.CreateNewPreset(presetName, settings));
+            FontPreset newPreset = this.CreateNewPreset(presetName, settings);
 
-            this.UpdatePresets();
+            this._presetManager.UpdatePreset(presetName, newPreset);
+
+            this.Presets.Add(newPreset);
         }
 
         public bool TryGetCurrentPresetIfSupportsDetailedInfo(out FontPreset preset)
@@ -225,11 +260,6 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected virtual void RaisePresetChanged(EventArgs e)
         {
             PresetChanged?.Invoke(this, e);
-        }
-
-        private void UpdatePresets()
-        {
-            this.Presets = this.EnumerateAvailablePresets().ToArray();
         }
 
         private IEnumerable<FontPreset> EnumerateAvailablePresets()
@@ -293,7 +323,5 @@ namespace FontSettings.Framework.Menus.ViewModels
 
             return array[nextIndex];
         }
-
-        private record Preset(string Name, FontConfig Config);
     }
 }
