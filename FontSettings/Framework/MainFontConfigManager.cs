@@ -385,13 +385,41 @@ namespace FontSettings.Framework
             var settings = this.MakeConfigObject(model.Settings, model.Context.Language, model.Context.FontType);
             var basePreset = new FontPreset(model.Context, settings);
 
-            return new FontPresetExtensible(basePreset, model);
+            var builder = new FontPresetBuilder()
+                .BasicPreset(basePreset);
+            if (model.TryGetInstance(out IPresetWithName withName))
+                builder.WithName(withName.Name);
+            if (model.TryGetInstance(out IPresetWithDescription withDesc))
+                builder.WithDescription(withDesc.Description);
+            if (model.TryGetInstance(out IPresetWithKey<string> withKey))
+                builder.WithKey(withKey.Key);
+            if (model.TryGetInstance(out IPresetFromContentPack fcp))
+                builder.FromContentPack(fcp.SContentPack);
+            return builder.Build();
         }
 
         private FontPresetModel MakePresetModel(FontPreset preset)
         {
-            var settings = this.MakeConfigModel(preset.Settings, preset.Context.Language, preset.Context.FontType);
-            return new FontPresetModel(preset.Context, settings);
+            var settings = this.MakeConfigModel(preset.Settings,
+                preset.Context.Language, preset.Context.FontType);
+            var basicModel = new FontPresetModel(preset.Context, settings);
+
+            if (preset.TryGetInstance(out IPresetFromContentPack fcp))
+            {
+                return new FontPresetModelForContentPack(basicModel, fcp.SContentPack,
+                    preset.TryGetInstance(out IPresetWithName withName)
+                        ? () => withName.Name
+                        : () => string.Empty,
+                    preset.TryGetInstance(out IPresetWithDescription withDesc)
+                        ? () => withDesc.Description
+                        : () => string.Empty);
+            }
+            else if (preset.TryGetInstance(out IPresetWithKey<string> withKey))
+            {
+                return new FontPresetModelLocal(basicModel, withKey.Key);
+            }
+            else
+                return basicModel;
         }
 
         private IEnumerable<CharacterRange> PatchCharacterRanges(
