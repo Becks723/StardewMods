@@ -98,6 +98,7 @@ namespace FontSettings
 
             // init service objects.
             this._fontFileProvider = new FontFileProvider(this.YieldFontScanners());
+            this.ReloadCpFontFileProviders();
 
             // init repositories.
             this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor);
@@ -246,15 +247,13 @@ namespace FontSettings
 
         private void ReloadContentPacks()
         {
-            // clear
+            // reload presets
             this._fontConfigManager.RemoveAllContentPacks();
-            this._cpFontFileProviders.Clear();
-
-            // load
             IEnumerable<FontPresetModel> cpPresets = this._contentPackRepository.ReadContentPacks(this._languagesWhoseDataIsLoaded);
-
             this._fontConfigManager.AddPresets(cpPresets);
-            this.AddToCpFontFileProviders(cpPresets);
+
+            // reload fontFileProviders
+            this.ReloadCpFontFileProviders();
         }
 
         private void LoadDataForLanguage(LanguageInfo language)
@@ -279,19 +278,13 @@ namespace FontSettings
 
                 this._fontConfigManager.AddPresets(presets);
                 this._fontConfigManager.AddPresets(cpPresets);
-                this.AddToCpFontFileProviders(cpPresets);
             }
         }
 
-        private void AddToCpFontFileProviders(IEnumerable<FontPresetModel> cpPresets)
+        private void ReloadCpFontFileProviders()
         {
-            var packs = cpPresets
-                .Select(model => model.TryGetInstance(out IPresetFromContentPack fcp)
-                                    ? fcp.SContentPack
-                                    : null)
-                .Where(pack => pack != null)
-                .Distinct();
-            foreach (IContentPack pack in packs)
+            this._cpFontFileProviders.Clear();
+            foreach (IContentPack pack in this.Helper.ContentPacks.GetOwned())
             {
                 FontFileProvider fontFileProvider;
                 {
