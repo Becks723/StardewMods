@@ -9,6 +9,7 @@ using FontSettings.Framework.FontScanning;
 using FontSettings.Framework.FontScanning.Scanners;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Preset;
+using StardewModdingAPI;
 
 namespace FontSettings.Framework
 {
@@ -18,19 +19,20 @@ namespace FontSettings.Framework
         private readonly IDictionary<FontConfigKey, FontConfigModel?> _vanillaConfigs = new Dictionary<FontConfigKey, FontConfigModel?>();
         private readonly IDictionary<string, FontPresetModel> _keyedPresets = new Dictionary<string, FontPresetModel>();
         private readonly IList<FontPresetModel> _cpPresets = new List<FontPresetModel>();
-        private readonly IDictionary<string, IFontFileProvider> _cpFontFileProviderLookups = new Dictionary<string, IFontFileProvider>();
 
         private readonly FontFilePathParseHelper _pathHelper = new();
         private readonly IFontFileProvider _fontFileProvider;
         private readonly IVanillaFontProvider _vanillaFontProvider;
+        private readonly IDictionary<IContentPack, IFontFileProvider> _cpFontFileProviders;
 
         public event EventHandler<FontConfigUpdatedEventArgs> ConfigUpdated;
         public event EventHandler<PresetUpdatedEventArgs>? PresetUpdated;
 
-        public MainFontConfigManager(IFontFileProvider fontFileProvider, IVanillaFontProvider vanillaFontProvider)
+        public MainFontConfigManager(IFontFileProvider fontFileProvider, IVanillaFontProvider vanillaFontProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders)
         {
             this._fontFileProvider = fontFileProvider;
             this._vanillaFontProvider = vanillaFontProvider;
+            this._cpFontFileProviders = cpFontFileProviders;
         }
 
         /// <summary>Won't raise <see cref="ConfigUpdated"/>.</summary>
@@ -148,18 +150,9 @@ namespace FontSettings.Framework
                     this._keyedPresets[modelWithKey.Key] = model;
                 }
 
-                if (model.TryGetInstance(out IPresetFromContentPack contentPack))
+                if (model.TryGetInstance(out IPresetFromContentPack _))
                 {
                     this._cpPresets.Add(model);
-
-                    string cpID = contentPack.SContentPack.Manifest.UniqueID;
-                    if (!this._cpFontFileProviderLookups.ContainsKey(cpID))
-                    {
-                        string cpDir = contentPack.SContentPack.DirectoryPath;
-                        var fontFileProvider = new FontFileProvider();
-                        fontFileProvider.Scanners.Add(new BasicFontFileScanner(cpDir, new ScanSettings()));
-                        this._cpFontFileProviderLookups[cpID] = fontFileProvider;
-                    }
                 }
             }
         }
@@ -167,23 +160,6 @@ namespace FontSettings.Framework
         public void RemoveAllContentPacks()
         {
             this._cpPresets.Clear();
-            this._cpFontFileProviderLookups.Clear();
-        }
-
-        public void RemoveContentPacks(LanguageInfo language)
-        {
-            var toRemove = this._cpPresets.Where(preset => preset.Context.Language == language);
-            foreach (FontPresetModel preset in toRemove)
-                this._cpPresets.Remove(preset);
-
-            string GetContentPackID(FontPresetModel cpPreset) => cpPreset.GetInstance<IPresetFromContentPack>().SContentPack.Manifest.UniqueID;
-            var notRemove = this._cpPresets.SkipWhile(preset => toRemove.Contains(preset));
-            var idToRemove = from presetToRm in toRemove
-                             let idToRm = GetContentPackID(presetToRm)
-                             where notRemove.All(presetNotRm => idToRm != GetContentPackID(presetNotRm))
-                             select idToRm;
-            foreach (string id in idToRemove)
-                this._cpFontFileProviderLookups.Remove(id);
         }
 
         private void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig? config, bool raiseConfigUpdated)
@@ -451,7 +427,7 @@ namespace FontSettings.Framework
         {
             return this._fontFileProvider.FontFiles
                 .Concat(
-                    this._cpFontFileProviderLookups.Values.SelectMany(provider => provider.FontFiles)
+                    this._cpFontFileProviders.Values.SelectMany(provider => provider.FontFiles)
                 );
         }
 

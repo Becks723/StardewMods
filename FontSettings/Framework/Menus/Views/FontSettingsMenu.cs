@@ -660,9 +660,9 @@ namespace FontSettings.Framework.Menus.Views
                                                 titleGrid.Children.Add(titleView);
                                                 titleGrid.SetRow(titleView, 0);
                                                 {
-                                                var titleLabel = new Label();
-                                                titleLabel.Font = FontType.DialogueFont;
-                                                context.OneWayBinds(() => this._viewModel.CurrentPresetTitle, () => titleLabel.Text);
+                                                    var titleLabel = new Label();
+                                                    titleLabel.Font = FontType.DialogueFont;
+                                                    context.OneWayBinds(() => this._viewModel.CurrentPresetTitle, () => titleLabel.Text);
                                                     titleView.Content = titleLabel;
                                                 }
 
@@ -672,11 +672,11 @@ namespace FontSettings.Framework.Menus.Views
                                                 titleGrid.Children.Add(subtitleView);
                                                 titleGrid.SetRow(subtitleView, 1);
                                                 {
-                                                var subtitleLabel = new Label();
+                                                    var subtitleLabel = new Label();
                                                     subtitleLabel.Font = FontType.SmallFont;
-                                                context.OneWayBinds(() => this._viewModel.CurrentPresetSubtitle, () => subtitleLabel.Text);
+                                                    context.OneWayBinds(() => this._viewModel.CurrentPresetSubtitle, () => subtitleLabel.Text);
                                                     subtitleView.Content = subtitleLabel;
-                                            }
+                                                }
                                             }
 
                                             var nextPresetButton = new TextureButton(
@@ -890,10 +890,10 @@ namespace FontSettings.Framework.Menus.Views
                 disposable.Dispose();
 
             this._currentSubMenu = newSubMenu;
-            }
+        }
 
         private NewPresetMenu CreateNewPresetMenu()
-            {
+        {
             void OnMenuOpened(NewPresetMenu menu) => this.ChangeSubMenu(menu);
             void OnMenuClosed(NewPresetMenu menu) => this.ChangeSubMenu(null);
 
@@ -944,12 +944,50 @@ namespace FontSettings.Framework.Menus.Views
             {
                 FontViewModel font = context.Target;
 
+                Thickness margin = new Thickness(4, 0, 0, 0);
+                switch (font)
+                {
+                    case null:
+                        return null;
+
+                    case FontFromPackViewModel fontFromPack:
+                        var stack = new StackContainer();
+                        stack.Orientation = Orientation.Vertical;
+                        stack.Margin = margin;
+                        {
+                            Label fontLabel = this.DefaultLabel(font, Thickness.Zero, HorizontalAlignment.Left, VerticalAlignment.Center);
+                            stack.Children.Add(fontLabel);
+
+                            var cpStack = new StackContainer();
+                            cpStack.Orientation = Orientation.Horizontal;
+                            stack.Children.Add(cpStack);
+                            {
+                                // TODO: 加一个表示fontpack的图标
+
+                                Label packLabel = new Label();
+                                packLabel.Font = FontType.SmallFont;
+                                packLabel.Text = I18n.Ui_MainMenu_FontFromPack(fontFromPack.PackManifest.Name);
+                                cpStack.Children.Add(packLabel);
+                            }
+                        }
+                        return stack;
+
+                    default:
+                        return this.DefaultLabel(font, margin, HorizontalAlignment.Left, VerticalAlignment.Center);
+                }
+            }
+
+            private Label DefaultLabel(FontViewModel font,
+                Thickness margin,
+                HorizontalAlignment horizontalAlignment,
+                VerticalAlignment verticalAlignment)
+            {
                 Label l = new Label();
                 l.Text = this.GetText(font);
                 l.Font = FontType.SmallFont;
-                l.Margin = new Thickness(4, 0, 0, 0);
-                l.HorizontalAlignment = HorizontalAlignment.Left;
-                l.VerticalAlignment = VerticalAlignment.Center;
+                l.Margin = margin;
+                l.HorizontalAlignment = horizontalAlignment;
+                l.VerticalAlignment = verticalAlignment;
                 return l;
             }
 

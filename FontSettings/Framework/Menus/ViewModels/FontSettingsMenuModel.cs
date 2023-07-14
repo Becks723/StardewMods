@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Preset;
+using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValleyUI.Mvvm;
@@ -31,6 +32,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
         protected readonly IAsyncGameFontChanger _gameFontChanger;
         protected readonly IFontFileProvider _fontFileProvider;
+        protected readonly IDictionary<IContentPack, IFontFileProvider> _cpFontFileProviders;
         protected readonly IFontInfoRetriever _fontInfoRetriever;
         protected readonly IFontPresetManager _presetManager;
 
@@ -593,7 +595,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         public ICommand ResetFontCommand { get; }
 
         public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
         {
             // 订阅异步完成事件。
             _asyncIndicator.IsGeneratingFontChanged += (_, fontType) => this.IsGeneratingFont = _asyncIndicator.IsGeneratingFont(fontType);
@@ -607,6 +609,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
             this._gameFontChanger = gameFontChanger;
             this._fontFileProvider = fontFileProvider;
+            this._cpFontFileProviders = cpFontFileProviders;
             this._fontInfoRetriever = fontInfoRetriever;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
@@ -1033,9 +1036,10 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
             yield return vanillaFont;
 
-            // general fonts
-            var fonts = this._fontFileProvider.FontFiles
-                .SelectMany(file =>
+            // user fonts
+            {
+                var fonts = this._fontFileProvider.FontFiles
+                    .SelectMany(file =>
                     {
                         var result = this._fontInfoRetriever.GetFontInfo(file);
                         if (result.IsSuccess)
@@ -1047,13 +1051,40 @@ namespace FontSettings.Framework.Menus.ViewModels
                             return Array.Empty<FontModel>();
                         }
                     })
-                .Select(font => new FontViewModel(
-                    fontFilePath: font.FullPath,
-                    fontIndex: font.FontIndex,
-                    displayText: $"{font.FamilyName} ({font.SubfamilyName})")
-                );
-            foreach (var font in fonts)
-                yield return font;
+                    .Select(font => new FontViewModel(
+                        fontFilePath: font.FullPath,
+                        fontIndex: font.FontIndex,
+                        displayText: $"{font.FamilyName} ({font.SubfamilyName})")
+                    );
+                foreach (var font in fonts)
+                    yield return font;
+            }
+
+            // content pack fonts
+            {
+                var fonts = this._cpFontFileProviders
+                    .Select(pair => (Pack: pair.Key, Fonts: pair.Value.FontFiles.SelectMany(file =>
+                    {
+                        var result = this._fontInfoRetriever.GetFontInfo(file);
+                        if (result.IsSuccess)
+                            return result.GetData();
+                        else
+                        {
+                            ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
+                            ILog.Trace(result.GetError());
+                            return Array.Empty<FontModel>();
+                        }
+                    })))
+                    .SelectMany(x => x.Fonts.Select(f => (x.Pack, Font: f)))
+                    .Select(x => new FontFromPackViewModel(
+                        fontFilePath: x.Font.FullPath,
+                        fontIndex: x.Font.FontIndex,
+                        displayText: $"{x.Font.FamilyName} ({x.Font.SubfamilyName})",
+                        packManifest: x.Pack.Manifest)
+                    );
+                foreach (var font in fonts)
+                    yield return font;
+            }
         }
 
         protected virtual void InitAllFonts()

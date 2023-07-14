@@ -48,6 +48,7 @@ namespace FontSettings
 
         private MainFontConfigManager _fontConfigManager;
         private IFontFileProvider _fontFileProvider;
+        private readonly IDictionary<IContentPack, IFontFileProvider> _cpFontFileProviders = new Dictionary<IContentPack, IFontFileProvider>();
 
         private readonly ISet<LanguageInfo> _languagesWhoseDataIsLoaded = new HashSet<LanguageInfo>();
 
@@ -107,7 +108,7 @@ namespace FontSettings
             this._config.Sample = this._sampleDataRepository.ReadSampleData();
 
             // init managers.
-            this._fontConfigManager = new MainFontConfigManager(this._fontFileProvider, this._vanillaFontProvider);
+            this._fontConfigManager = new MainFontConfigManager(this._fontFileProvider, this._vanillaFontProvider, this._cpFontFileProviders);
 
             // connect manager and repository.
             this._fontConfigManager.ConfigUpdated += (s, e) => this._fontConfigRepository.WriteConfig(e.Key, e.Config);
@@ -243,21 +244,17 @@ namespace FontSettings
                 this._titleFontButton?.Update();
         }
 
-        private void ReloadContentPacks(bool all)
+        private void ReloadContentPacks()
         {
-            if (all)
-            {
-                this._fontConfigManager.RemoveAllContentPacks();
-                var cpPresets = this._contentPackRepository.ReadContentPacks(this._languagesWhoseDataIsLoaded);
-                this._fontConfigManager.AddPresets(cpPresets);
-            }
-            else
-            {
-                var currentLanguage = FontHelpers.GetCurrentLanguage();
-                this._fontConfigManager.RemoveContentPacks(currentLanguage);
-                var cpPresets = this._contentPackRepository.ReadContentPacks(currentLanguage);
-                this._fontConfigManager.AddPresets(cpPresets);
-            }
+            // clear
+            this._fontConfigManager.RemoveAllContentPacks();
+            this._cpFontFileProviders.Clear();
+
+            // load
+            IEnumerable<FontPresetModel> cpPresets = this._contentPackRepository.ReadContentPacks(this._languagesWhoseDataIsLoaded);
+
+            this._fontConfigManager.AddPresets(cpPresets);
+            this.AddToCpFontFileProviders(cpPresets);
         }
 
         private void LoadDataForLanguage(LanguageInfo language)
@@ -282,6 +279,27 @@ namespace FontSettings
 
                 this._fontConfigManager.AddPresets(presets);
                 this._fontConfigManager.AddPresets(cpPresets);
+                this.AddToCpFontFileProviders(cpPresets);
+            }
+        }
+
+        private void AddToCpFontFileProviders(IEnumerable<FontPresetModel> cpPresets)
+        {
+            var packs = cpPresets
+                .Select(model => model.TryGetInstance(out IPresetFromContentPack fcp)
+                                    ? fcp.SContentPack
+                                    : null)
+                .Where(pack => pack != null)
+                .Distinct();
+            foreach (IContentPack pack in packs)
+            {
+                FontFileProvider fontFileProvider;
+                {
+                    fontFileProvider = new FontFileProvider();
+                    fontFileProvider.Scanners.Add(
+                        new BasicFontFileScanner(pack.DirectoryPath, new ScanSettings()));
+                }
+                this._cpFontFileProviders[pack] = fontFileProvider;
             }
         }
 
@@ -414,6 +432,7 @@ namespace FontSettings
                             vanillaFontConfigProvider: this._fontConfigManager,
                             gameFontChanger: this._fontChanger,
                             fontFileProvider: this._fontFileProvider,
+                            cpFontFileProviders: this._cpFontFileProviders,
                             fontInfoRetriever: new FontInfoRetriever(),
                             asyncFontInfoRetriever: new FontInfoRetriever(),
                             stagedValues: this._menuContextModel);
@@ -428,6 +447,7 @@ namespace FontSettings
                             vanillaFontConfigProvider: this._fontConfigManager,
                             gameFontChanger: this._fontChanger,
                             fontFileProvider: this._fontFileProvider,
+                            cpFontFileProviders: this._cpFontFileProviders,
                             fontInfoRetriever: new FontInfoRetriever(),
                             stagedValues: this._menuContextModel);
                 }

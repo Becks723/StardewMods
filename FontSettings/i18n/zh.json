@@ -14,6 +14,7 @@
   "ui.main-menu.font": "字体",
   "ui.main-menu.font.keep-orig": "保持原版",
   "ui.main-menu.refresh-fonts": "刷新字体列表",
+  "ui.main-menu.font-from-pack": "(‘{{packName}}’字体包)",
   "ui.main-menu.font-size": "大小",
 
   "ui.main-menu.section.advanced": "高级",

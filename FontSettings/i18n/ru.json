@@ -14,6 +14,7 @@
   "ui.main-menu.font": "Семейство шрифтов",
   "ui.main-menu.font.keep-orig": "По умолчанию",
   "ui.main-menu.refresh-fonts": "Обновить список шрифтов",
+  "ui.main-menu.font-from-pack": "(from '{{packName}}' pack)",  // TODO
   "ui.main-menu.font-size": "Размер шрифта",
 
   "ui.main-menu.section.advanced": "Расширенные",

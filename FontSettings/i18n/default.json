@@ -15,6 +15,7 @@
   "ui.main-menu.font": "Font Family",
   "ui.main-menu.font.keep-orig": "Keep Original",
   "ui.main-menu.refresh-fonts": "Refresh Font List",
+  "ui.main-menu.font-from-pack": "(from '{{packName}}' pack)",
   "ui.main-menu.font-size": "Font Size",
 
   "ui.main-menu.section.advanced": "Advanced",
