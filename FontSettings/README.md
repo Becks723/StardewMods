@@ -150,6 +150,11 @@ Modders can create font packs by editing some json files. See [Font Settings pac
 
 
 ## Release Notes
+#### 0.11.3 - 2023-07-15
+- Fix UI drop down randomly returns to top.
+- Fix bugs in preset interface.
+- Fix font files included in a font pack being ignored.
+
 #### 0.11.2 - 2023-07-11
 - Fix dialogue font becomes smaller than vanilla if `Enabled` not checked.
 - Fix some special characters (such as icons) in dialogue font scale inproperly, in most case much smaller.
