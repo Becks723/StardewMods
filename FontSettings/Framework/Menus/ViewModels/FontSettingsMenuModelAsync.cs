@@ -56,20 +56,38 @@ namespace FontSettings.Framework.Menus.ViewModels
 
             // current user font
             {
-                if (this._fontConfigManager.TryGetFontConfig(this.Language, this.CurrentFontType, out FontConfig config))
+                if (!this._fontConfigManager.TryGetFontConfig(this.Language, this.CurrentFontType, out FontConfig config))
+                    return;
+
+                var userFont = this._fontFileProvider.FontFiles
+                    .Where(file => file == config.FontFilePath)
+                    .FirstOrDefault();
+                var cpFont = this._cpFontFileProviders
+                    .Select(x => new { Pack = x.Key, File = x.Value.FontFiles.Where(file => file == config.FontFilePath).FirstOrDefault() })
+                    .Where(x => x.File != null)
+                    .FirstOrDefault();
+
+                if (userFont != null)
                 {
-                    var fontFiles = this._fontFileProvider.FontFiles;
-                    var userFont = fontFiles.Where(file => file == config.FontFilePath).FirstOrDefault();
-                    if (userFont != null)
+                    var userFontModels = this.GetFontInfoOrWarn(userFont);
+                    foreach (FontModel font in userFontModels)
                     {
-                        var userFontModels = this.GetFontInfoOrWarn(userFont);
-                        foreach (FontModel font in userFontModels)
-                        {
-                            this.AllFonts.Add(new FontViewModel(
-                                fontFilePath: font.FullPath,
-                                fontIndex: font.FontIndex,
-                                displayText: $"{font.FamilyName} ({font.SubfamilyName})"));
-                        }
+                        this.AllFonts.Add(new FontViewModel(
+                            fontFilePath: font.FullPath,
+                            fontIndex: font.FontIndex,
+                            displayText: $"{font.FamilyName} ({font.SubfamilyName})"));
+                    }
+                }
+                else if (cpFont != null)
+                {
+                    var fontModels = this.GetFontInfoOrWarn(cpFont.File);
+                    foreach (FontModel font in fontModels)
+                    {
+                        this.AllFonts.Add(new FontFromPackViewModel(
+                            fontFilePath: font.FullPath,
+                            fontIndex: font.FontIndex,
+                            displayText: $"{font.FamilyName} ({font.SubfamilyName})",
+                            packManifest: cpFont.Pack.Manifest));
                     }
                 }
             }
