@@ -297,6 +297,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
+        #region Characters Property
+
+        private ObservableCollection<char> _characters = new();
+
+        public ObservableCollection<char> Characters
+        {
+            get => this._characters;
+            set => this.SetField(ref this._characters, value);
+        }
+
+        #endregion
+
         #region IsGeneratingFont Property
 
         private bool _isGeneratingFont;
@@ -945,16 +957,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 否则载入预设的值。
             else
             {
-                this.FontEnabled = true;
-                this.FontSize = settings.FontSize;
-                this.Spacing = settings.Spacing;
-                this.LineSpacing = settings.LineSpacing;
-                this.CharOffsetX = settings.CharOffsetX;
-                this.CharOffsetY = settings.CharOffsetY;
-                this.CurrentFont = this.FindFont(settings.FontFilePath, settings.FontIndex);
-                this.PixelZoom = settings.Supports<IWithPixelZoom>()
-                    ? settings.GetInstance<IWithPixelZoom>().PixelZoom
-                    : 0;
+                this.FillOptionsWithFontConfig(settings);
             }
 
             this.CurrentFontConfigRealTime = this.CreateConfigBasedOnCurrentSettings();
@@ -1009,7 +1012,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                     LineSpacing: this.LineSpacing,
                     CharOffsetX: this.CharOffsetX,
                     CharOffsetY: this.CharOffsetY,
-                    CharacterRanges: this.CurrentFontConfig.CharacterRanges));
+                    CharacterRanges: FontHelpers.GetCharacterRanges(this.Characters)));
             if (this.CurrentFontType == GameFontType.SpriteText)
                 builder.WithPixelZoom(this.PixelZoom);
 
@@ -1118,6 +1121,8 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
                 ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
                 : 0;
+            this.Characters = new ObservableCollection<char>(
+                FontHelpers.GetCharacters(fontConfig.CharacterRanges));
         }
 
         private bool SkipSpriteText()
