@@ -57,7 +57,12 @@ namespace FontSettings.Framework.DataAccess.Parsing
             parsedBack.CharOffsetX = configValue.CharOffsetX;
             parsedBack.CharOffsetY = configValue.CharOffsetY;
             parsedBack.PixelZoom = configValue.PixelZoom;
-            parsedBack.CharacterRanges = null;  // TODO: 等允许编辑字符后完善
+            parsedBack.CharacterRanges = configValue.CharacterPatchMode switch
+            {
+                CharacterPatchMode.BasedOnOriginal => null,  // TODO: 有可能需要考虑，不过目前全是override的
+                CharacterPatchMode.Override => configValue.CharacterOverride,
+                _ => throw new NotSupportedException(),
+            };
 
             return parsedBack;
         }
