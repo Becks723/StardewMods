@@ -39,6 +39,13 @@ namespace FontSettings.Framework
             return this;
         }
 
+        /// <summary>Adds support to <see cref="IWithDefaultCharacter"/>.</summary>
+        public FontConfigBuilder WithDefaultCharacter(char? defaultCharacter)
+        {
+            this._config = new FontConfigSpriteFont(this._config, defaultCharacter);
+            return this;
+        }
+
         /// <summary>Adds support to <see cref="IWithPixelZoom"/>.</summary>
         public FontConfigBuilder WithPixelZoom(float pixelZoom)
         {

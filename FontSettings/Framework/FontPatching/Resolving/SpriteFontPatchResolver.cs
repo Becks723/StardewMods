@@ -38,7 +38,10 @@ namespace FontSettings.Framework.FontPatching.Resolving
                         spacing: config.Spacing,
                         lineSpacing: (int)config.LineSpacing,
                         charOffsetX: config.CharOffsetX,
-                        charOffsetY: config.CharOffsetY);
+                        charOffsetY: config.CharOffsetY,
+                        defaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter) 
+                            ? withDefaultCharacter.DefaultCharacter
+                            : '*');
                     patch = loadOrReplace
                         ? this.PatchFactory.ForLoadSpriteFont(spriteFont, loadPriority)
                         : this.PatchFactory.ForReplaceSpriteFont(spriteFont, editPriority);

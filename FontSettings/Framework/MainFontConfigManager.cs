@@ -222,6 +222,9 @@ namespace FontSettings.Framework
 
             builder.BasicConfig(config);
 
+            if (fontType != GameFontType.SpriteText)
+                builder.WithDefaultCharacter(model.DefaultCharacter);
+
             if (fontType == GameFontType.SpriteText)
                 builder.WithPixelZoom(model.PixelZoom);
 
@@ -251,7 +254,8 @@ namespace FontSettings.Framework
                 CharacterPatchMode: isOriginalRanges ? CharacterPatchMode.BasedOnOriginal : CharacterPatchMode.Override,
                 CharacterOverride: isOriginalRanges ? null : config.CharacterRanges,
                 CharacterAdd: null,
-                CharacterRemove: null);
+                CharacterRemove: null,
+                DefaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter) ? withDefaultCharacter.DefaultCharacter : null);
         }
 
         private FontConfig CreateFallbackFontConfig(LanguageInfo language, GameFontType fontType)
@@ -271,6 +275,9 @@ namespace FontSettings.Framework
                 CharOffsetX: 0,
                 CharOffsetY: 0,
                 CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(language, fontType)));
+
+            if (fontType != GameFontType.SpriteText)
+                builder.WithDefaultCharacter('*');
 
             if (fontType == GameFontType.SpriteText)
                 builder.WithPixelZoom(FontHelpers.GetDefaultFontPixelZoom());

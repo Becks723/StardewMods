@@ -136,6 +136,8 @@ namespace FontSettings.Framework
                 throw new Exception("无法初始化字体。");
             try
             {
+                characterRanges = EnsureDefaultCharacter(characterRanges, defaultCharacter);
+
                 float scale = stbtt_ScaleForPixelHeight(fontInfo, fontPixelHeight);
 
                 const int padding = 1;
@@ -229,6 +231,15 @@ namespace FontSettings.Framework
 
             result.SetData(colorData);
             return result;
+        }
+
+        private static IEnumerable<CharacterRange> EnsureDefaultCharacter(IEnumerable<CharacterRange> ranges, char? defaultCharacter)
+        {
+            if (defaultCharacter == null)
+                return ranges;
+
+            return FontHelpers.GetCharacterRanges(
+                FontHelpers.GetCharacters(ranges).Append(defaultCharacter.Value));  // TODO: 性能优化
         }
 
         private static void EstimateTextureSize(stbtt_fontinfo fontInfo, IEnumerable<CharacterRange> ranges, float scale,

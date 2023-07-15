@@ -78,7 +78,8 @@ namespace FontSettings.Framework.DataAccess.Parsing
                             CharacterPatchMode: characterPatchMode,
                             CharacterOverride: @override,
                             CharacterAdd: add,
-                            CharacterRemove: remove));
+                            CharacterRemove: remove,
+                            DefaultCharacter: '*'));  // TODO: contentPack.DefaultCharacter
 
                     yield return new FontPresetModelForContentPack(basePreset, sContentPack, name, notes);
                 }

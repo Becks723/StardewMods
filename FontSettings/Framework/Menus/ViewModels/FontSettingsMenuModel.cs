@@ -309,6 +309,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
+        #region DefaultCharacter Property
+
+        private char? _defaultCharacter;
+
+        public char? DefaultCharacter
+        {
+            get => this._defaultCharacter;
+            set => this.SetField(ref this._defaultCharacter, value);
+        }
+
+        #endregion
+
         #region IsGeneratingFont Property
 
         private bool _isGeneratingFont;
@@ -1013,6 +1025,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                     CharOffsetX: this.CharOffsetX,
                     CharOffsetY: this.CharOffsetY,
                     CharacterRanges: FontHelpers.GetCharacterRanges(this.Characters)));
+            if (this.CurrentFontType != GameFontType.SpriteText)
+                builder.WithDefaultCharacter(this.DefaultCharacter);
             if (this.CurrentFontType == GameFontType.SpriteText)
                 builder.WithPixelZoom(this.PixelZoom);
 
@@ -1118,11 +1132,14 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.CharOffsetX = fontConfig.CharOffsetX;
             this.CharOffsetY = fontConfig.CharOffsetY;
             this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
-            this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
-                ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
+            this.PixelZoom = fontConfig.TryGetInstance(out IWithPixelZoom withPixelZoom)
+                ? withPixelZoom.PixelZoom
                 : 0;
             this.Characters = new ObservableCollection<char>(
                 FontHelpers.GetCharacters(fontConfig.CharacterRanges));
+            this.DefaultCharacter = fontConfig.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter)
+                ? withDefaultCharacter.DefaultCharacter
+                : null;
         }
 
         private bool SkipSpriteText()

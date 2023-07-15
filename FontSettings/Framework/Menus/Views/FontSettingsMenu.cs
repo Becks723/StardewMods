@@ -853,7 +853,9 @@ namespace FontSettings.Framework.Menus.Views
                     + $"\nFont index: {this._viewModel.FontIndex}"
                     + $"\nOffset-x: {this._viewModel.CharOffsetX}"
                     + $"\nOffset-y: {this._viewModel.CharOffsetY}"
-                    + $"\nPixel Zoom: {this._viewModel.PixelZoom}";
+                    + $"\nPixel Zoom: {this._viewModel.PixelZoom}"
+                    + $"\nCharacters: Count = {_viewModel.Characters.Count}"
+                    + $"\nDefault character: {this._viewModel.DefaultCharacter}";
             }
             b.DrawString(Game1.smallFont, GetDebugInfo(), new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif

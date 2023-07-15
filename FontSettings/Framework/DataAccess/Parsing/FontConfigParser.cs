@@ -30,7 +30,8 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 CharacterPatchMode: config.CharacterRanges != null ? CharacterPatchMode.Override : CharacterPatchMode.BasedOnOriginal,
                 CharacterOverride: config.CharacterRanges,
                 CharacterAdd: null,
-                CharacterRemove: null
+                CharacterRemove: null,
+                DefaultCharacter: '*'  // TODO: config.DefaultCharacter
             );
 
             return new(key, parsed);
@@ -63,6 +64,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 CharacterPatchMode.Override => configValue.CharacterOverride,
                 _ => throw new NotSupportedException(),
             };
+            //parsedBack.DefaultCharacter = configValue.DefaultCharacter;  // TODO: 加上
 
             return parsedBack;
         }
