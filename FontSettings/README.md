@@ -150,6 +150,9 @@ Modders can create font packs by editing some json files. See [Font Settings pac
 
 
 ## Release Notes
+#### 0.11.4 - 2023-07-16
+- Fix bugs related to content pack.
+
 #### 0.11.3 - 2023-07-15
 - Fix UI drop down randomly returns to top.
 - Fix bugs in preset interface.
