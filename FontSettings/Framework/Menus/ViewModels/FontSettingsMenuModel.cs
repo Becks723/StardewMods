@@ -802,7 +802,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                     context: this.GetFontContext());
 
                 // 如果成功，更新配置值。
-                if (result.IsSuccessful)
+                if (result.IsSuccess)
                     this._fontConfigManager.UpdateFontConfig(
                         this.Language, fontType, fontConfig);
 
@@ -814,7 +814,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
         }
 
-        internal record FontChangeResult(IGameFontChangeResult InnerResult, GameFontType FontType);
+        internal record FontChangeResult(IResultWithoutData<string> InnerResult, GameFontType FontType);
 
         private FontContext GetFontContext()
         {
@@ -1064,7 +1064,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                         else
                         {
                             ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
-                            ILog.Trace(result.GetError());
+                            ILog.Trace($"{result.GetError()}");
                             return Array.Empty<FontModel>();
                         }
                     })
@@ -1088,7 +1088,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                         else
                         {
                             ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
-                            ILog.Trace(result.GetError());
+                            ILog.Trace($"{result.GetError()}");
                             return Array.Empty<FontModel>();
                         }
                     })))

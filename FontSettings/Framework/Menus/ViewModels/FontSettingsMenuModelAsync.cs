@@ -158,7 +158,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             else
             {
                 ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace(result.GetError());
+                ILog.Trace($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }
@@ -171,7 +171,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             else
             {
                 ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace(result.GetError());
+                ILog.Trace($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }

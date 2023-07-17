@@ -28,15 +28,8 @@ namespace FontSettings.Framework.FontPatching.Resolving
             return new(loadOrReplace, loadPriority, editPriority);
         }
 
-        protected IResult<IFontPatch, Exception> SuccessResult(IFontPatch patch) => new Result(true, patch, null);
+        protected IResult<IFontPatch, Exception> SuccessResult(IFontPatch patch) => ResultFactory.SuccessResult(patch);
 
-        protected IResult<IFontPatch, Exception> ErrorResult(Exception exception) => new Result(false, null, exception);
-
-        private record Result(bool IsSuccess, IFontPatch Patch, Exception Exception) : IResult<IFontPatch, Exception>
-        {
-            public IFontPatch GetData() => this.Patch;
-
-            public Exception GetError() => this.Exception;
-        }
+        protected IResult<IFontPatch, Exception> ErrorResult(Exception exception) => ResultFactory.ErrorResult<IFontPatch>(exception);
     }
 }

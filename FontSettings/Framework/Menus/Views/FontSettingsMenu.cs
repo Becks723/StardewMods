@@ -122,7 +122,7 @@ namespace FontSettings.Framework.Menus.Views
             Game1.playSound("coin");
 
             var (result, fontType) = await this._viewModel.ChangeFontAsync();
-            if (result.IsSuccessful)
+            if (result.IsSuccess)
             {
                 Game1.playSound("money");
 
@@ -143,7 +143,7 @@ namespace FontSettings.Framework.Menus.Views
                     Game1.addHUDMessage(new OverlayHUDMessage(message, HUDMessage.error_type));
 
                 // 日志记录错误信息。
-                string error = result.GetErrorMessage();
+                string error = result.GetError();
                 ILog.Error(error);
             }
         }
