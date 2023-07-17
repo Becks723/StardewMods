@@ -15,8 +15,8 @@ namespace FontSettings.Framework
 {
     internal class MainFontConfigManager : IFontConfigManager, IVanillaFontConfigProvider, IFontPresetManager
     {
-        private readonly IDictionary<FontConfigKey, FontConfigModel?> _fontConfigs = new Dictionary<FontConfigKey, FontConfigModel?>();
-        private readonly IDictionary<FontConfigKey, FontConfigModel?> _vanillaConfigs = new Dictionary<FontConfigKey, FontConfigModel?>();
+        private readonly IDictionary<FontContext, FontConfigModel?> _fontConfigs = new Dictionary<FontContext, FontConfigModel?>();
+        private readonly IDictionary<FontContext, FontConfigModel?> _vanillaConfigs = new Dictionary<FontContext, FontConfigModel?>();
         private readonly IDictionary<string, FontPresetModel> _keyedPresets = new Dictionary<string, FontPresetModel>();
         private readonly IList<FontPresetModel> _cpPresets = new List<FontPresetModel>();
 
@@ -36,11 +36,11 @@ namespace FontSettings.Framework
         }
 
         /// <summary>Won't raise <see cref="ConfigUpdated"/>.</summary>
-        public void AddFontConfig(FontConfigKey key, FontConfigModel? config)
+        public void AddFontConfig(FontContext context, FontConfigModel? config)
         {
             lock (this._fontConfigs)
             {
-                this._fontConfigs[key] = config;
+                this._fontConfigs[context] = config;
             }
         }
 
@@ -53,7 +53,7 @@ namespace FontSettings.Framework
         {
             lock (this._fontConfigs)
             {
-                if (this._fontConfigs.TryGetValue(new FontConfigKey(language, fontType), out FontConfigModel? model))
+                if (this._fontConfigs.TryGetValue(new(language, fontType), out FontConfigModel? model))
                 {
                     if (model != null)
                     {
@@ -67,7 +67,7 @@ namespace FontSettings.Framework
             }
         }
 
-        public IDictionary<FontConfigKey, FontConfig> GetAllFontConfigs()
+        public IDictionary<FontContext, FontConfig> GetAllFontConfigs()
         {
             lock (this._fontConfigs)
             {
@@ -78,11 +78,11 @@ namespace FontSettings.Framework
             }
         }
 
-        public void AddVanillaConfig(FontConfigKey key, FontConfigModel? config)
+        public void AddVanillaConfig(FontContext context, FontConfigModel? config)
         {
             lock (this._vanillaConfigs)
             {
-                this._vanillaConfigs[key] = config;
+                this._vanillaConfigs[context] = config;
             }
         }
 
@@ -90,7 +90,7 @@ namespace FontSettings.Framework
         {
             lock (this._vanillaConfigs)
             {
-                if (this._vanillaConfigs.TryGetValue(new FontConfigKey(language, fontType), out FontConfigModel? model))
+                if (this._vanillaConfigs.TryGetValue(new(language, fontType), out FontConfigModel? model))
                 {
                     if (model != null)
                         return this.MakeConfigObject(model, language, fontType);
@@ -164,33 +164,33 @@ namespace FontSettings.Framework
 
         private void UpdateFontConfig(LanguageInfo language, GameFontType fontType, FontConfig? config, bool raiseConfigUpdated)
         {
-            var key = new FontConfigKey(language, fontType);
+            var context = new FontContext(language, fontType);
 
             lock (this._fontConfigs)
             {
-                if (!this._fontConfigs.ContainsKey(key))
+                if (!this._fontConfigs.ContainsKey(context))
                 {
                     if (config != null)
                     {
                         var model = this.MakeConfigModel(config, language, fontType);
-                        this._fontConfigs.Add(key, model);
+                        this._fontConfigs.Add(context, model);
                         if (raiseConfigUpdated)
-                            this.RaiseConfigUpdated(key, model);
+                            this.RaiseConfigUpdated(context, model);
                     }
                 }
                 else
                 {
                     FontConfigModel model;
                     if (config != null)
-                        this._fontConfigs[key] = (model = this.MakeConfigModel(config, language, fontType));
+                        this._fontConfigs[context] = (model = this.MakeConfigModel(config, language, fontType));
                     else
                     {
-                        this._fontConfigs.Remove(key);
+                        this._fontConfigs.Remove(context);
                         model = null;
                     }
 
                     if (raiseConfigUpdated)
-                        this.RaiseConfigUpdated(key, model);
+                        this.RaiseConfigUpdated(context, model);
                 }
             }
         }
@@ -438,10 +438,10 @@ namespace FontSettings.Framework
                 );
         }
 
-        private void RaiseConfigUpdated(FontConfigKey key, FontConfigModel config)
+        private void RaiseConfigUpdated(FontContext context, FontConfigModel config)
         {
             this.RaiseConfigUpdated(
-                new FontConfigUpdatedEventArgs(key, config));
+                new FontConfigUpdatedEventArgs(context, config));
         }
 
         protected virtual void RaiseConfigUpdated(FontConfigUpdatedEventArgs e)
@@ -463,11 +463,11 @@ namespace FontSettings.Framework
 
     internal class FontConfigUpdatedEventArgs : EventArgs
     {
-        public FontConfigKey Key { get; }
+        public FontContext Context { get; }
         public FontConfigModel Config { get; }
-        public FontConfigUpdatedEventArgs(FontConfigKey key, FontConfigModel config)
+        public FontConfigUpdatedEventArgs(FontContext context, FontConfigModel config)
         {
-            this.Key = key;
+            this.Context = context;
             this.Config = config;
         }
     }

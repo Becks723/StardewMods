@@ -22,11 +22,11 @@ namespace FontSettings.Framework.DataAccess
             this._parser = new FontPresetParser();
         }
 
-        public IEnumerable<FontPresetModel> ReadPresets(FontConfigKey key)
+        public IEnumerable<FontPresetModel> ReadPresets(FontContext context)
         {
             var rawPresets = this.ReadAllPresets();
-            var parsedPresets = this._parser.ParseCollection(rawPresets.Values, key.Language, key.FontType);
-            this._monitor.Log($"Loaded presets in {key}:"
+            var parsedPresets = this._parser.ParseCollection(rawPresets.Values, context.Language, context.FontType);
+            this._monitor.Log($"Loaded presets in {context}:"
                 + $"\n{string.Join('\n', parsedPresets.Select(preset => preset.Settings?.ToString()))}");
             return parsedPresets;
         }

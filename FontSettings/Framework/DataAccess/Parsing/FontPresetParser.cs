@@ -41,8 +41,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
 
         public FontPresetData ParseBack(FontPresetModel preset)
         {
-            var key = new FontConfigKey(preset.Context.Language, preset.Context.FontType);
-            FontConfigData configData = this._settingsParser.ParseBack(new(key, preset.Settings));
+            FontConfigData configData = this._settingsParser.ParseBack(new(preset.Context, preset.Settings));
 
             return new FontPresetData
             {

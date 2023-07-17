@@ -22,29 +22,29 @@ namespace FontSettings.Framework.DataAccess
             this._parser = new FontConfigParser();
         }
 
-        public FontConfigModel? ReadConfig(FontConfigKey key)
+        public FontConfigModel? ReadConfig(FontContext context)
         {
             var rawConfigs = this.ReadAllConfigs();
-            var parsedConfigs = this._parser.ParseCollection(rawConfigs, key.Language, key.FontType);
-            var parsedConfig = parsedConfigs.ContainsKey(key)
-                ? parsedConfigs[key]
+            var parsedConfigs = this._parser.ParseCollection(rawConfigs, context.Language, context.FontType);
+            var parsedConfig = parsedConfigs.ContainsKey(context)
+                ? parsedConfigs[context]
                 : null;
 
-            this._monitor.Log($"Loaded font config for {key}: {parsedConfig}");
+            this._monitor.Log($"Loaded font config for {context}: {parsedConfig}");
             return parsedConfig;
         }
 
-        public void WriteConfig(FontConfigKey key, FontConfigModel? config)
+        public void WriteConfig(FontContext context, FontConfigModel? config)
         {
-            this._monitor.Log($"Saving font config for {key}: {config}");
+            this._monitor.Log($"Saving font config for {context}: {config}");
 
             var allConfigs = this.ReadAllConfigs();
-            allConfigs.RemoveAll(config => config?.Lang == key.Language.Code
-                                        && config?.Locale == key.Language.Locale
-                                        && config?.InGameType == key.FontType);
+            allConfigs.RemoveAll(config => config?.Lang == context.Language.Code
+                                        && config?.Locale == context.Language.Locale
+                                        && config?.InGameType == context.FontType);
             if (config != null)
             {
-                var rawConfig = this._parser.ParseBack(new(key, config));
+                var rawConfig = this._parser.ParseBack(new(context, config));
                 allConfigs.Add(rawConfig);
             }
 

@@ -11,9 +11,9 @@ namespace FontSettings.Framework.DataAccess.Parsing
 {
     internal class FontConfigParser
     {
-        public KeyValuePair<FontConfigKey, FontConfigModel> Parse(FontConfigData config)
+        public KeyValuePair<FontContext, FontConfigModel> Parse(FontConfigData config)
         {
-            var key = new FontConfigKey(
+            var context = new FontContext(
                 Language: new LanguageInfo(config.Lang, config.Locale),
                 FontType: config.InGameType);
 
@@ -34,10 +34,10 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 DefaultCharacter: '*'  // TODO: config.DefaultCharacter
             );
 
-            return new(key, parsed);
+            return new(context, parsed);
         }
 
-        public FontConfigData ParseBack(KeyValuePair<FontConfigKey, FontConfigModel> config)
+        public FontConfigData ParseBack(KeyValuePair<FontContext, FontConfigModel> config)
         {
             var language = config.Key.Language;
             var fontType = config.Key.FontType;
@@ -69,7 +69,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
             return parsedBack;
         }
 
-        public IDictionary<FontConfigKey, FontConfigModel> ParseCollection(FontConfigs configs, LanguageInfo language, GameFontType fontType)
+        public IDictionary<FontContext, FontConfigModel> ParseCollection(FontConfigs configs, LanguageInfo language, GameFontType fontType)
         {
             return this.ParseCollection(configs,
                  predicate: config => config.Lang == language.Code
@@ -77,7 +77,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                                      && config.InGameType == fontType);
         }
 
-        public IDictionary<FontConfigKey, FontConfigModel> ParseCollection(FontConfigs configs, Func<FontConfigData, bool> predicate)
+        public IDictionary<FontContext, FontConfigModel> ParseCollection(FontConfigs configs, Func<FontConfigData, bool> predicate)
         {
             if (predicate is null)
                 throw new ArgumentNullException(nameof(predicate));

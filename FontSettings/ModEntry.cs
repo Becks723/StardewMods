@@ -112,7 +112,7 @@ namespace FontSettings
             this._fontConfigManager = new MainFontConfigManager(this._fontFileProvider, this._vanillaFontProvider, this._cpFontFileProviders);
 
             // connect manager and repository.
-            this._fontConfigManager.ConfigUpdated += (s, e) => this._fontConfigRepository.WriteConfig(e.Key, e.Config);
+            this._fontConfigManager.ConfigUpdated += (s, e) => this._fontConfigRepository.WriteConfig(e.Context, e.Config);
             this._fontConfigManager.PresetUpdated += (s, e) => this._fontPresetRepository.WritePreset(e.Name, e.Preset);
 
             // init font patching.
