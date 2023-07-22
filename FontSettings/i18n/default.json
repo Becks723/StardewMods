@@ -38,6 +38,9 @@
 
   "ui.main-menu.reset-font": "Reset Current Font",
 
+  "ui.main-menu.ok": "Apply",
+  "ui.main-menu.export": "Export Settings",
+
   "ui.main-menu.merge-examples": "Compare",
   "ui.main-menu.show-example-bounds": "Show Bounds",
   "ui.main-menu.show-example-text": "Show Text",

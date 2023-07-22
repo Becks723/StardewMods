@@ -37,6 +37,9 @@
 
   "ui.main-menu.reset-font": "恢复为原版字体",
 
+  "ui.main-menu.ok": "应用",
+  "ui.main-menu.export": "导出设置",
+
   "ui.main-menu.merge-examples": "合并示例",
   "ui.main-menu.show-example-bounds": "显示边框",
   "ui.main-menu.show-example-text": "显示文字",

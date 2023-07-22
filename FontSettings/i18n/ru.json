@@ -6,8 +6,8 @@
   "options-page.font-header": "Шрифт",
   "hud-message.success-set-font": "{{fontType}} установлен!",
   "hud-message.failed-set-font": "{{fontType}} не удалось установить. Подробности в консоли SMAPI.",
-  "hud-message.export-success": "Successfully export font!\nSaved to {{path}}",  // TODO
-  "hud-message.export-fail": "Failed to export font! See SMAPI window for details.",  // TODO
+  "hud-message.export-success": "Successfully export font!\nSaved to {{path}}", // TODO
+  "hud-message.export-fail": "Failed to export font! See SMAPI window for details.", // TODO
 
   "ui.main-menu.title": "Настройки шрифта",
   "ui.main-menu.font-type-help.paragraph": "В Stardew Valley существует три типа шрифтов:\n- Мелкий шрифт (описание)\n- Средний шрифт (имена, названные)\n- Диалоговый шрифт (диалоги, заголовки, письма)\n\nНажмите стрелку влево или вправо для навигации.",
@@ -16,7 +16,7 @@
   "ui.main-menu.font": "Семейство шрифтов",
   "ui.main-menu.font.keep-orig": "По умолчанию",
   "ui.main-menu.refresh-fonts": "Обновить список шрифтов",
-  "ui.main-menu.font-from-pack": "(from '{{packName}}' pack)",  // TODO
+  "ui.main-menu.font-from-pack": "(from '{{packName}}' pack)", // TODO
   "ui.main-menu.font-size": "Размер шрифта",
 
   "ui.main-menu.section.advanced": "Расширенные",
@@ -36,6 +36,10 @@
   "ui.main-menu.del-preset": "Удалить",
 
   "ui.main-menu.reset-font": "Значение по умолчанию",
+
+  // TODO
+  "ui.main-menu.ok": "Apply",
+  "ui.main-menu.export": "Export Settings",
 
   "ui.main-menu.merge-examples": "Сравнить",
   "ui.main-menu.show-example-bounds": "Показать границы",

@@ -119,8 +119,6 @@ namespace FontSettings.Framework.Menus.Views
 
         private async Task OkButtonClickedAsync()
         {
-            Game1.playSound("coin");
-
             var (result, fontType) = await this._viewModel.ChangeFontAsync();
             if (result.IsSuccess)
             {
@@ -755,11 +753,14 @@ namespace FontSettings.Framework.Menus.Views
                             var okButton = new TextureButton(
                                 Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
                             context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
+                            okButton.ClickSound = "coin";
+                            okButton.ToolTip = I18n.Ui_MainMenu_Ok();
                             okButton.Click += this.OkButtonClicked;
                             functionStack.Children.Add(okButton);
 
                             var exportButton = new TextureButton(Textures.Export, null, 4f);
                             exportButton.ClickSound = "bigDeSelect";
+                            exportButton.ToolTip = I18n.Ui_MainMenu_Export();
                             exportButton.Click += this.OnExportButtonClicked;
                             functionStack.Children.Add(exportButton);
                         }
