@@ -65,6 +65,8 @@
   "ui.export-menu.section.xnb": "XNB设置",
   "ui.export-menu.profile": "图形配置",
   "ui.export-menu.compress": "压缩",
+  "ui.export-menu.export": "导出",
+  "ui.export-menu.cancel": "返回",
 
   "config.example-text": "示例文本",
   "config.example-text.description": "设置自定义的文本。将覆盖内置文本，所以一般留空即可。",

@@ -67,6 +67,8 @@
   "ui.export-menu.section.xnb": "XNB Settings",
   "ui.export-menu.profile": "Graphics Profile",
   "ui.export-menu.compress": "Compressed",
+  "ui.export-menu.export": "Export",
+  "ui.export-menu.cancel": "Cancel",
 
   "config.example-text": "Example Text",
   "config.example-text.description": "Custom sample text. Keep this unset unless you really want yours, the mod has its built-in one.",

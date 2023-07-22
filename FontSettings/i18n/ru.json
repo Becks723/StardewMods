@@ -69,6 +69,8 @@
   "ui.export-menu.section.xnb": "XNB Settings",
   "ui.export-menu.profile": "Graphics Profile",
   "ui.export-menu.compress": "Compressed",
+  "ui.export-menu.export": "Export",
+  "ui.export-menu.cancel": "Cancel",
 
   "config.example-text": "Пользовательский текст примера",
   "config.example-text.description": "Заменяет текст для сравнения и настройки отображения шрифтов в игре.\nЕсли поле оставить пустым, будет используется предустановленный текст.",

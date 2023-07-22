@@ -166,12 +166,14 @@ namespace FontSettings.Framework.Menus.Views
                     {
                         var exportButton = new TextureButton(Textures.Export, null, 4f);
                         exportButton.ClickSound = "coin";
+                        exportButton.ToolTip = I18n.Ui_ExportMenu_Export();
                         context.OneWayBinds(() => this._viewModel.IsExporting, () => exportButton.GreyedOut);
                         context.OneWayBinds(() => this._viewModel.ExportCommand, () => exportButton.Command);
                         buttonStack.Children.Add(exportButton);
 
                         var cancelButton = new TextureButton(Game1.mouseCursors, new Rectangle(192, 256, 64, 64));
                         cancelButton.ClickSound = "bigDeSelect";
+                        cancelButton.ToolTip = I18n.Ui_ExportMenu_Cancel();
                         cancelButton.Click += this.OnCanelButtonClicked;
                         buttonStack.Children.Add(cancelButton);
                     }
