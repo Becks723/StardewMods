@@ -6,6 +6,8 @@
   "options-page.font-header": "Шрифт",
   "hud-message.success-set-font": "{{fontType}} установлен!",
   "hud-message.failed-set-font": "{{fontType}} не удалось установить. Подробности в консоли SMAPI.",
+  "hud-message.export-success": "Successfully export font!\nSaved to {{path}}",  // TODO
+  "hud-message.export-fail": "Failed to export font! See SMAPI window for details.",  // TODO
 
   "ui.main-menu.title": "Настройки шрифта",
   "ui.main-menu.font-type-help.paragraph": "В Stardew Valley существует три типа шрифтов:\n- Мелкий шрифт (описание)\n- Средний шрифт (имена, названные)\n- Диалоговый шрифт (диалоги, заголовки, письма)\n\nНажмите стрелку влево или вправо для навигации.",
@@ -54,6 +56,15 @@
   "ui.preset-info-menu.cp-name": "Font Pack",
   "ui.preset-info-menu.cp-author": "Author",
   "ui.preset-info-menu.cp-ver": "Version",
+
+  // TODO
+  "ui.export-menu.title": "Export Settings",
+  "ui.export-menu.out-in-xnb": "XNB format",
+  "ui.export-menu.out-dir": "Output folder",
+  "ui.export-menu.out-name": "Output name",
+  "ui.export-menu.section.xnb": "XNB Settings",
+  "ui.export-menu.profile": "Graphics Profile",
+  "ui.export-menu.compress": "Compressed",
 
   "config.example-text": "Пользовательский текст примера",
   "config.example-text.description": "Заменяет текст для сравнения и настройки отображения шрифтов в игре.\nЕсли поле оставить пустым, будет используется предустановленный текст.",

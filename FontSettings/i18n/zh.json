@@ -6,6 +6,8 @@
   "options-page.font-header": "字体",
   "hud-message.success-set-font": "{{fontType}}设置成功！",
   "hud-message.failed-set-font": "{{fontType}}设置失败，详见SMAPI窗口。",
+  "hud-message.export-success": "导出成功！保存至 {{path}}",
+  "hud-message.export-fail": "导出失败，详见SMAPI窗口。",
 
   "ui.main-menu.title": "字体设置",
   "ui.main-menu.font-type-help.paragraph": "星露谷物语的字体大致分为三类：\n- 小字体\n- 中字体\n- 对话字体\n点击左右箭头切换当前设置的字体类型。\n根据喜好，你可以全部设置，也可以只设置其中的几个。",
@@ -52,6 +54,14 @@
   "ui.preset-info-menu.cp-name": "字体包",
   "ui.preset-info-menu.cp-author": "作者",
   "ui.preset-info-menu.cp-ver": "版本",
+
+  "ui.export-menu.title": "导出设置",
+  "ui.export-menu.out-in-xnb": "XNB格式",
+  "ui.export-menu.out-dir": "导出路径",
+  "ui.export-menu.out-name": "文件名",
+  "ui.export-menu.section.xnb": "XNB设置",
+  "ui.export-menu.profile": "图形配置",
+  "ui.export-menu.compress": "压缩",
 
   "config.example-text": "示例文本",
   "config.example-text.description": "设置自定义的文本。将覆盖内置文本，所以一般留空即可。",

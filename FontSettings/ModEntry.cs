@@ -8,6 +8,7 @@ using FontSettings.Framework;
 using FontSettings.Framework.DataAccess;
 using FontSettings.Framework.DataAccess.Models;
 using FontSettings.Framework.DataAccess.Parsing;
+using FontSettings.Framework.Exporting;
 using FontSettings.Framework.FontGenerators;
 using FontSettings.Framework.FontInfo;
 using FontSettings.Framework.FontPatching;
@@ -59,6 +60,8 @@ namespace FontSettings
         private FontPatchChanger _fontChanger;
 
         private VanillaFontProvider _vanillaFontProvider;
+
+        private readonly FontExporter _exporter = new();
 
         private readonly DataAdditionalLanguagesWatcher _dataAdditionalLanguagesWatcher = new();
 
@@ -123,6 +126,11 @@ namespace FontSettings
             // watch `Data/AdditonalLanguages` asset.
             this._dataAdditionalLanguagesWatcher.Updated += this.OnDataAdditionalLanguagesUpdated;
 
+            // TODO: 当前使用'export'文件夹作为唯一输出路径。
+            string exportDir = Path.Combine(this.Helper.DirectoryPath, "export");
+            foreach (var exporting in this._menuContextModel.Exporting.Values)
+                exporting.OutputDirectory = exportDir;
+
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
                 new FontShadowPatcher(this._config)
@@ -148,6 +156,10 @@ namespace FontSettings
             helper.Events.Display.WindowResized += this.OnWindowResized;
             helper.Events.Display.Rendered += this.OnRendered;
             helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
+
+#if DEBUG
+            helper.ConsoleCommands.Add("export", "export font", (_, args) => this.ExportCommand(args));
+#endif
         }
 
         protected override void Dispose(bool disposing)
@@ -254,6 +266,45 @@ namespace FontSettings
 
             // reload fontFileProviders
             this.ReloadCpFontFileProviders();
+        }
+
+        private async void ExportCommand(string[] args)
+        {
+            var spriteFontConfig = new FontConfigBuilder()
+                .BasicConfig(new FontConfig(
+                    Enabled: true,
+                    FontFilePath: @"C:\Windows\Fonts\micross.ttf",
+                    FontIndex: 0,
+                    FontSize: 26f,
+                    Spacing: 0f,
+                    LineSpacing: 26,
+                    CharOffsetX: 0f,
+                    CharOffsetY: 0f,
+                    CharacterRanges: this._vanillaFontProvider.GetVanillaCharacterRanges(FontHelpers.LanguageEn, GameFontType.SmallFont)))
+                .WithDefaultCharacter('*')
+                .Build();
+            var settings = new FontExportSettings(
+                format: Framework.FontFormat.BmFont,
+                inXnb: true,
+                outputDirectory: Path.Combine(this.Helper.DirectoryPath, "export"),
+                outputFileName: Path.GetRandomFileName(),
+                xnbPlatform: XnbPlatform.Windows,
+                gameFramework: Framework.GameFramework.Monogame,
+                graphicsProfile: GraphicsProfile.HiDef,
+                isCompressed: true,
+                pageWidth: 0,
+                pageHeight: 0);
+
+            IResultWithoutData result = await new FontExporter().Export(spriteFontConfig, settings);
+
+            if (result.IsSuccess)
+            {
+                Game1.playSound("money");
+            }
+            else
+            {
+                this.Monitor.Log($"{result.GetError()}", LogLevel.Error);
+            }
         }
 
         private void LoadDataForLanguage(LanguageInfo language)
@@ -428,6 +479,7 @@ namespace FontSettings
                             cpFontFileProviders: this._cpFontFileProviders,
                             fontInfoRetriever: new FontInfoRetriever(),
                             asyncFontInfoRetriever: new FontInfoRetriever(),
+                            exporter: this._exporter,
                             stagedValues: this._menuContextModel);
                     else
                         viewModel = new FontSettingsMenuModel(
@@ -442,6 +494,7 @@ namespace FontSettings
                             fontFileProvider: this._fontFileProvider,
                             cpFontFileProviders: this._cpFontFileProviders,
                             fontInfoRetriever: new FontInfoRetriever(),
+                            exporter: this._exporter,
                             stagedValues: this._menuContextModel);
                 }
 

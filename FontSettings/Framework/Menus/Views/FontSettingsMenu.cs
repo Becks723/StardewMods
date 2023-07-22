@@ -170,6 +170,15 @@ namespace FontSettings.Framework.Menus.Views
             }
         }
 
+        private void OnExportButtonClicked(object sender, EventArgs e)
+        {
+            var exportMenu = new ExportMenu(
+                onClosed: () => this.ChangeSubMenu(null),
+                viewModel: this._viewModel.GetCurrentExportViewModel());
+
+            this.ChangeSubMenu(exportMenu);
+        }
+
         protected override void ResetComponents(MenuInitializationContext context)
         {
             Grid rootGrid = new Grid();
@@ -737,14 +746,23 @@ namespace FontSettings.Framework.Menus.Views
                             }
                         }
 
-                        var okButton = new TextureButton(
-                            Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
-                        okButton.HorizontalAlignment = HorizontalAlignment.Center;
-                        okButton.VerticalAlignment = VerticalAlignment.Center;
-                        context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
-                        okButton.Click += this.OkButtonClicked;
-                        settingsGrid.Children.Add(okButton);
-                        settingsGrid.SetRow(okButton, 1);
+                        StackContainer functionStack = new StackContainer();
+                        functionStack.Orientation = Orientation.Horizontal;
+                        functionStack.HorizontalAlignment = HorizontalAlignment.Center;
+                        settingsGrid.Children.Add(functionStack);
+                        settingsGrid.SetRow(functionStack, 1);
+                        {
+                            var okButton = new TextureButton(
+                                Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
+                            context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
+                            okButton.Click += this.OkButtonClicked;
+                            functionStack.Children.Add(okButton);
+
+                            var exportButton = new TextureButton(Textures.Export, null, 4f);
+                            exportButton.ClickSound = "bigDeSelect";
+                            exportButton.Click += this.OnExportButtonClicked;
+                            functionStack.Children.Add(exportButton);
+                        }
                     }
 
                     Grid previewGrid = new Grid();
@@ -854,7 +872,7 @@ namespace FontSettings.Framework.Menus.Views
                     + $"\nOffset-x: {this._viewModel.CharOffsetX}"
                     + $"\nOffset-y: {this._viewModel.CharOffsetY}"
                     + $"\nPixel Zoom: {this._viewModel.PixelZoom}"
-                    + $"\nCharacters: Count = {_viewModel.Characters.Count}"
+                    + $"\nCharacters: Count = {this._viewModel.Characters.Count}"
                     + $"\nDefault character: {this._viewModel.DefaultCharacter}";
             }
             b.DrawString(Game1.smallFont, GetDebugInfo(), new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);

@@ -25,8 +25,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private readonly IAsyncFontInfoRetriever _asyncFontInfoRetriever;
 
-        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, FontSettingsMenuContextModel stagedValues)
-            : base(config, vanillaFontProvider, sampleFontGenerator, sampleAsyncFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, cpFontFileProviders, fontInfoRetriever, stagedValues)
+        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
+            : base(config, vanillaFontProvider, sampleFontGenerator, sampleAsyncFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, cpFontFileProviders, fontInfoRetriever, exporter, stagedValues)
         {
             this._asyncFontInfoRetriever = asyncFontInfoRetriever;
 

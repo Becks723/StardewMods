@@ -34,6 +34,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly IFontFileProvider _fontFileProvider;
         protected readonly IDictionary<IContentPack, IFontFileProvider> _cpFontFileProviders;
         protected readonly IFontInfoRetriever _fontInfoRetriever;
+        protected readonly IFontExporter _exporter;
         protected readonly IFontPresetManager _presetManager;
 
 
@@ -619,7 +620,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         public ICommand ResetFontCommand { get; }
 
         public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
         {
             // 订阅异步完成事件。
             _asyncIndicator.IsGeneratingFontChanged += (_, fontType) => this.IsGeneratingFont = _asyncIndicator.IsGeneratingFont(fontType);
@@ -635,6 +636,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._fontFileProvider = fontFileProvider;
             this._cpFontFileProviders = cpFontFileProviders;
             this._fontInfoRetriever = fontInfoRetriever;
+            this._exporter = exporter;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
 
@@ -705,6 +707,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public bool TryGetCurrentPresetIfSupportsDetailedInfo(out FontPreset preset)
             => this.PresetViewModel(this.CurrentFontType).TryGetCurrentPresetIfSupportsDetailedInfo(out preset);
+
+        public ExportMenuModel GetCurrentExportViewModel()
+            => this.GetExportViewModel(this.CurrentFontType);
+
+        public ExportMenuModel GetExportViewModel(GameFontType fontType)
+        {
+            return new ExportMenuModel(
+                exporter: this._exporter,
+                fontConfig: this.CreateConfigBasedOnCurrentSettings(),
+                context: new FontContext(this.Language, fontType),
+                staged: this._stagedValues.Exporting[fontType]);
+        }
 
         private void PreviousFontType()
         {
