@@ -17,7 +17,16 @@ namespace FontSettings.Framework.Exporting
         {
             try
             {
+                // 检查文件夹。
                 Directory.CreateDirectory(settings.OutputDirectory);
+
+                // 检查文件名。
+                {
+                    char[] invalidNameChars = Path.GetInvalidFileNameChars();
+                    var invalidChars = invalidNameChars.Where(c => settings.OutputFileName.Contains(c));
+                    if (invalidChars.Any())
+                        throw new ArgumentException($"Filename '{settings.OutputFileName}' cannot contain the following char(s): {string.Join(", ", invalidChars)}");
+                }
 
                 if (settings.Format == FontFormat.SpriteFont)
                 {
