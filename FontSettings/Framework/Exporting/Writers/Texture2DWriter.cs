@@ -25,7 +25,7 @@ namespace FontSettings.Framework.Exporting.Writers
             byte[] data = new byte[texture.Width * texture.Height * 4];
             for (int i = 0; i < levelCount; i++)
             {
-                BlockOnUIThread(() => texture.GetData(i, null, data, 0, data.Length));
+                FontHelpers.BlockOnUIThread(() => texture.GetData(i, null, data, 0, data.Length));
                 //texture.GetData(i, null, data, 0, data.Length);
                 writer.Write(data.Length);
                 writer.Write(data);
@@ -35,19 +35,6 @@ namespace FontSettings.Framework.Exporting.Writers
         protected override string GetTypeReaderName()
         {
             return "Microsoft.Xna.Framework.Content.Texture2DReader, Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553";
-        }
-
-        private static void BlockOnUIThread(Action action)
-        {
-            Type? threading = typeof(Game).Assembly.GetTypes()
-                .Where(type => type is { Name: "Threading" })
-                .FirstOrDefault();
-            var blockOnUIThread = threading?.GetMethod("BlockOnUIThread", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Action) }, null);
-
-            if (blockOnUIThread != null)
-                blockOnUIThread.Invoke(null, new object[] { action });
-            else
-                throw new NotImplementedException();
         }
     }
 }

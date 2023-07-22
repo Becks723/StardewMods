@@ -8,6 +8,7 @@ using BmFont;
 using FontSettings.Framework.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 
 namespace FontSettings.Framework.Exporting
 {
@@ -50,8 +51,33 @@ namespace FontSettings.Framework.Exporting
                         using var writer = new XnbWriter(stream, settings.XnbPlatform, settings.GameFramework, settings.GraphicsProfile, settings.IsCompressed);
 
                         writer.WritePrimaryObject(spriteFont);
+                    }
+                    else
+                    {
+                        // png for texture
+                        {
+                            string pngPath = Path.Combine(settings.OutputDirectory, $"{settings.OutputFileName}.png");
+                            using Stream stream = File.Open(pngPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
+                            Texture2D texture = spriteFont.Texture;
+                            FontHelpers.BlockOnUIThread(
+                                () => texture.SaveAsPng(stream, texture.Width, texture.Height));
+                        }
 
-                        return ResultFactory.SuccessResultWithoutData();
+                        // json for font info
+                        {
+                            var fontInfo = new
+                            {
+                                spriteFont.LineSpacing,
+                                spriteFont.Spacing,
+                                spriteFont.DefaultCharacter,
+                                spriteFont.Characters,
+                                Glyphs = spriteFont.GetGlyphs()
+                            };
+                            string json = JsonConvert.SerializeObject(fontInfo, Formatting.Indented);
+
+                            string jsonPath = Path.Combine(settings.OutputDirectory, $"{settings.OutputFileName}.json");
+                            File.WriteAllText(jsonPath, json);
+                        }
                     }
                 }
 
@@ -91,14 +117,32 @@ namespace FontSettings.Framework.Exporting
                             Texture2D page = pages[index++];
                             pageWriter.WritePrimaryObject(page);
                         }
+                    }
+                    else
+                    {
+                        // .fnt (font file)
+                        {
+                            string xml = FontHelpers.ParseFontFile(fontFile).Source;
+                            string fntPath = Path.Combine(settings.OutputDirectory, $"{settings.OutputFileName}.fnt");
+                            File.WriteAllText(fntPath, xml);
+                        }
 
-                        return ResultFactory.SuccessResultWithoutData();
+                        // .png (pages)
+                        {
+                            int index = 0;
+                            foreach (FontPage fontPage in fontFile.Pages)
+                            {
+                                string pngPath = Path.Combine(settings.OutputDirectory, $"{fontPage.File}.png");
+                                using Stream pageStream = File.Open(pngPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
+                                Texture2D page = pages[index++];
+                                FontHelpers.BlockOnUIThread(() =>
+                                    page.SaveAsPng(pageStream, page.Width, page.Height));
+                            }
+                        }
                     }
                 }
 
-                return ResultFactory.ErrorResultWithoutData(
-                    exception: new NotSupportedException());
-
+                return ResultFactory.SuccessResultWithoutData();
             }
             catch (Exception ex)
             {

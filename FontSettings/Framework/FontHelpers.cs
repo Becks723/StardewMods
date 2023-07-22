@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using BmFont;
+using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.GameData;
 
@@ -442,6 +444,19 @@ namespace FontSettings.Framework
             }
             return returnString + line;
 
+        }
+
+        public static void BlockOnUIThread(Action action)
+        {
+            Type? threading = typeof(Game).Assembly.GetTypes()
+                .Where(type => type is { Name: "Threading" })
+                .FirstOrDefault();
+            var blockOnUIThread = threading?.GetMethod("BlockOnUIThread", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Action) }, null);
+
+            if (blockOnUIThread != null)
+                blockOnUIThread.Invoke(null, new object[] { action });
+            else
+                throw new NotImplementedException("Threading.BlockOnUIThread()");
         }
     }
 }
