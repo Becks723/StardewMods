@@ -17,7 +17,8 @@ namespace FontSettings.Framework
             CharacterRange[] chars, string[] charsFiles,
             int paddingUp, int paddingRight, int paddingDown, int paddingLeft,
             int spacingHoriz, int spacingVert,
-            float charOffsetX, float charOffsetY)
+            float charOffsetX, float charOffsetY,
+            string pageName)
         {
             var bmfont = new BmFontCS.BmFont();
             bmfont.GenerateIntoMemory(fontFilePath, out fontFile, out pages, new BmFontSettings
@@ -27,7 +28,8 @@ namespace FontSettings.Framework
                 Chars = chars.Select(range => new UnicodeRange { Start = range.Start, End = range.End }).ToArray(),
                 CharsFiles = charsFiles,
                 Padding = new Padding(paddingUp, paddingRight, paddingDown, paddingLeft),
-                Spacing = new Spacing(spacingHoriz, spacingVert)
+                Spacing = new Spacing(spacingHoriz, spacingVert),
+                Name = pageName
             });
 
             // offset

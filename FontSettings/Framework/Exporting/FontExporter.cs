@@ -68,7 +68,8 @@ namespace FontSettings.Framework.Exporting
                         charRanges: config.CharacterRanges,
                         spacingHoriz: (int)config.Spacing,
                         charOffsetX: config.CharOffsetX,
-                        charOffsetY: config.CharOffsetY));
+                        charOffsetY: config.CharOffsetY,
+                        pageName: settings.OutputFileName));
 
                     if (settings.InXnb)
                     {
