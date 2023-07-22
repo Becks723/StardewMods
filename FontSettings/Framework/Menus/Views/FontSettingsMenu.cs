@@ -901,6 +901,15 @@ namespace FontSettings.Framework.Menus.Views
                 return true;
         }
 
+        protected override void OnGameWindowSizeChanged(Point oldSize, Point newSize)
+        {
+            base.OnGameWindowSizeChanged(oldSize, newSize);
+
+            this._currentSubMenu?.gameWindowSizeChanged(
+                new Rectangle(Point.Zero, oldSize),
+                new Rectangle(Point.Zero, newSize));
+        }
+
         private void ChangeSubMenu(IClickableMenu? newSubMenu)
         {
             if (object.ReferenceEquals(this._currentSubMenu, newSubMenu))
