@@ -14,7 +14,6 @@ namespace FontSettings.Framework.Models.Builder
         }
 
         public override bool Supports<T>() => this is T;
-
         public override T GetInstance<T>() => this as T;
     }
 }

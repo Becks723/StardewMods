@@ -9,7 +9,7 @@ namespace FontSettings.Framework.Models.Builder
 {
     internal class FontPresetDecorator : FontPreset
     {
-        private FontPreset _preset;
+        private readonly FontPreset _preset;
 
         protected FontPresetDecorator(FontPreset copy)
             : base(copy)
@@ -30,12 +30,8 @@ namespace FontSettings.Framework.Models.Builder
 
         public override T GetInstance<T>()
         {
-            T t = this._preset.GetInstance<T>();
-            if (t != null)
-                return t;
-
-            t = base.GetInstance<T>();
-            return t;
+            return this._preset.GetInstance<T>()
+                ?? base.GetInstance<T>();
         }
     }
 }

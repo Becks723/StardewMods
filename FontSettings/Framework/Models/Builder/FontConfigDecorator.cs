@@ -23,12 +23,14 @@ namespace FontSettings.Framework.Models.Builder
 
         public override bool Supports<T>()
         {
-            return this._config.Supports<T>();
+            return this._config.Supports<T>() 
+                || base.Supports<T>();
         }
 
         public override T GetInstance<T>()
         {
-            return this._config.GetInstance<T>();
+            return this._config.GetInstance<T>() 
+                ?? base.GetInstance<T>();
         }
     }
 }

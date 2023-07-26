@@ -15,19 +15,5 @@ namespace FontSettings.Framework.Models.Builder
         {
             this.PixelZoom = pixelZoom;
         }
-
-        public override bool Supports<T>()
-        {
-            return typeof(T).IsAssignableFrom(typeof(IWithPixelZoom))
-                || base.Supports<T>();
-        }
-
-        public override T GetInstance<T>()
-        {
-            if (typeof(T).IsAssignableFrom(typeof(IWithPixelZoom)))
-                return this as T;
-
-            return base.GetInstance<T>();
-        }
     }
 }

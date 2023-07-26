@@ -15,19 +15,5 @@ namespace FontSettings.Framework.Models.Builder
         {
             this.DefaultCharacter = defaultCharacter;
         }
-
-        public override bool Supports<T>()
-        {
-            return typeof(T).IsAssignableFrom(typeof(IWithDefaultCharacter))
-                || base.Supports<T>();
-        }
-
-        public override T GetInstance<T>()
-        {
-            if (typeof(T).IsAssignableFrom(typeof(IWithDefaultCharacter)))
-                return this as T;
-
-            return base.GetInstance<T>();
-        }
     }
 }
