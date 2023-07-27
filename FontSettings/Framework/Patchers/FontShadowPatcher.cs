@@ -13,7 +13,11 @@ namespace FontSettings.Framework.Patchers
 {
     internal class FontShadowPatcher
     {
+        private static Func<Color> _textShadowColorOverride;
+
         private static ModConfig _config;
+
+        public static event EventHandler Game1textShadowColorAssigned;
 
         public FontShadowPatcher(ModConfig config)
         {
@@ -35,10 +39,17 @@ namespace FontSettings.Framework.Patchers
                 prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithColoredShadow_Prefix))
             );
             harmony.Patch(
-                original: AccessTools.Method(typeof(IClickableMenu), nameof(IClickableMenu.drawHoverText), new[] { typeof(SpriteBatch), typeof(StringBuilder), typeof(SpriteFont), typeof(int), typeof(int), typeof(int), typeof(string), typeof(int), typeof(string[]), typeof(Item), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(float), typeof(CraftingRecipe), typeof(IList<Item>) }),
-                prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(IClickableMenu_drawHoverText_Prefix)),
-                postfix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(IClickableMenu_drawHoverText_Postfix))
+                original: AccessTools.Method(typeof(Game1), "CleanupReturningToTitle"),
+                postfix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Game1_CleanupReturningToTitle_Postfix))
             );
+            Game1textShadowColorAssigned += this.OnGame1textShadowColorAssigned;
+        }
+
+        public void SetOverrideTextShadowColor(Color textShadowColor)
+        {
+            _textShadowColorOverride = () => textShadowColor;
+
+            RaiseGame1textShadowColorAssigned(EventArgs.Empty);
         }
 
         private static void Utility_drawTextWithShadow_Prefix(ref float shadowIntensity)
@@ -53,19 +64,19 @@ namespace FontSettings.Framework.Patchers
                 shadowColor = Color.Transparent;
         }
 
-        private static void IClickableMenu_drawHoverText_Prefix(out Color __state)  // __state里记录了原来的阴影颜色
+        private static void Game1_CleanupReturningToTitle_Postfix()
         {
-            __state = Game1.textShadowColor;
-
-            // 在方法开始前，将阴影颜色设置为透明。
-            if (_config.DisableTextShadow)
-                Game1.textShadowColor = Color.Transparent;
+            RaiseGame1textShadowColorAssigned(EventArgs.Empty);
         }
 
-        private static void IClickableMenu_drawHoverText_Postfix(Color __state)
+        private static void RaiseGame1textShadowColorAssigned(EventArgs e)
         {
-            // 在方法结束后，恢复原来的阴影颜色。
-            Game1.textShadowColor = __state;
+            Game1textShadowColorAssigned?.Invoke(null, e);
+        }
+
+        private void OnGame1textShadowColorAssigned(object sender, EventArgs e)
+        {
+            Game1.textShadowColor = _textShadowColorOverride();
         }
     }
 }

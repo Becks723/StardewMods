@@ -24,6 +24,7 @@ using FontSettings.Framework.Models;
 using FontSettings.Framework.Patchers;
 using FontSettings.Framework.Preset;
 using HarmonyLib;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -40,6 +41,7 @@ namespace FontSettings
         private MigrateTo_0_6_0 _0_6_0_Migration;
 
         private ModConfig _config;
+        private ModConfigWatcher _configWatcher;
 
         private FontConfigRepository _fontConfigRepository;
         private FontPresetRepository _fontPresetRepository;
@@ -81,6 +83,7 @@ namespace FontSettings
 
             this._config = helper.ReadConfig<ModConfig>();
             this._config.ValidateValues(this.Monitor);
+            this._configWatcher = new ModConfigWatcher(this._config);
 
             // init vanilla font provider.
             this._vanillaFontProvider = new VanillaFontProvider(helper, this.Monitor, this._config);
@@ -133,8 +136,12 @@ namespace FontSettings
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                new FontShadowPatcher(this._config)
-                    .Patch(Harmony, this.Monitor);
+                var fontShadowPatcher = new FontShadowPatcher(this._config);
+                fontShadowPatcher.Patch(Harmony, this.Monitor);
+                this._configWatcher.TextShadowToggled += (s, e) =>
+                    fontShadowPatcher.SetOverrideTextShadowColor(this._config.DisableTextShadow
+                        ? Color.Transparent
+                        : new Color(206, 156, 95));
 
                 var spriteTextPatcher = new SpriteTextPatcher(this._config);
                 spriteTextPatcher.Patch(Harmony, this.Monitor);
@@ -175,6 +182,7 @@ namespace FontSettings
         private void OnUpdateTicking(object sender, UpdateTickingEventArgs e)
         {
             this._mainFontPatcher.OnUpdateTicking(e);
+            this._configWatcher.Update();
         }
 
         private void OnAssetRequestedEarly(object sender, AssetRequestedEventArgs e)
