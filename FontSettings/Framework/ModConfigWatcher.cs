@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace FontSettings.Framework
 {
@@ -13,6 +14,7 @@ namespace FontSettings.Framework
         private ModConfigSnapshot _snapshot;
 
         public event EventHandler TextShadowToggled;
+        public event EventHandler ShadowColorGame1Changed;
 
         public ModConfigWatcher(ModConfig config)
         {
@@ -28,6 +30,11 @@ namespace FontSettings.Framework
                 TextShadowToggled?.Invoke(this, EventArgs.Empty);
             }
 
+            if (snapshot.ChangedIn(x => x.ShadowColorGame1, this._snapshot))
+            {
+                ShadowColorGame1Changed?.Invoke(this, EventArgs.Empty);
+            }
+
             this._snapshot = snapshot;
         }
 
@@ -35,13 +42,15 @@ namespace FontSettings.Framework
         {
             return new ModConfigSnapshot()
             {
-                DisableTextShadow = config.DisableTextShadow
+                DisableTextShadow = config.DisableTextShadow,
+                ShadowColorGame1 = config.ShadowColorGame1
             };
         }
 
         private class ModConfigSnapshot
         {
             public bool DisableTextShadow;
+            public Color ShadowColorGame1;
 
             public bool ChangedIn<TField>(Func<ModConfigSnapshot, TField> field, ModConfigSnapshot? contrast,
                 IEqualityComparer<TField>? comparer = null)

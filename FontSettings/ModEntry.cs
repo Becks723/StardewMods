@@ -136,12 +136,8 @@ namespace FontSettings
 
             Harmony = new Harmony(this.ModManifest.UniqueID);
             {
-                var fontShadowPatcher = new FontShadowPatcher(this._config);
-                fontShadowPatcher.Patch(Harmony, this.Monitor);
-                this._configWatcher.TextShadowToggled += (s, e) =>
-                    fontShadowPatcher.SetOverrideTextShadowColor(this._config.DisableTextShadow
-                        ? Color.Transparent
-                        : new Color(206, 156, 95));
+                new FontShadowPatcher(this._config, this._configWatcher)
+                    .Patch(Harmony, this.Monitor);
 
                 var spriteTextPatcher = new SpriteTextPatcher(this._config);
                 spriteTextPatcher.Patch(Harmony, this.Monitor);
