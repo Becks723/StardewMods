@@ -9,6 +9,7 @@ using FontSettings.Framework.FontScanning;
 using FontSettings.Framework.FontScanning.Scanners;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Preset;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 
 namespace FontSettings.Framework
@@ -228,6 +229,8 @@ namespace FontSettings.Framework
             if (fontType == GameFontType.SpriteText)
                 builder.WithPixelZoom(model.PixelZoom);
 
+            builder.WithSolidColorMask(model.Mask);
+
             return builder.Build();
         }
 
@@ -255,7 +258,10 @@ namespace FontSettings.Framework
                 CharacterOverride: isOriginalRanges ? null : config.CharacterRanges,
                 CharacterAdd: null,
                 CharacterRemove: null,
-                DefaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter) ? withDefaultCharacter.DefaultCharacter : null);
+                DefaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter)
+                    ? withDefaultCharacter.DefaultCharacter : '*',
+                Mask: config.TryGetInstance(out IWithSolidColor withSolidColor)
+                    ? withSolidColor.SolidColor : Color.White);
         }
 
         private FontConfig CreateFallbackFontConfig(LanguageInfo language, GameFontType fontType)

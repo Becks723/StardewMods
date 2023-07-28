@@ -42,7 +42,10 @@ namespace FontSettings.Framework.Exporting
                         charOffsetY: config.CharOffsetY,
                         defaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter)
                             ? withDefaultCharacter.DefaultCharacter
-                            : '*'));
+                            : '*',
+                        mask: config.TryGetInstance(out IWithSolidColor withSolidColor)
+                            ? withSolidColor.SolidColor
+                            : Color.White));
 
                     if (settings.InXnb)
                     {
@@ -95,7 +98,10 @@ namespace FontSettings.Framework.Exporting
                         spacingHoriz: (int)config.Spacing,
                         charOffsetX: config.CharOffsetX,
                         charOffsetY: config.CharOffsetY,
-                        pageName: settings.OutputFileName));
+                        pageName: settings.OutputFileName,
+                        textColorMask: config.TryGetInstance(out IWithSolidColor withSolidColor)
+                            ? withSolidColor.SolidColor
+                            : Color.White));
 
                     if (settings.InXnb)
                     {

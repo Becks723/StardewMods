@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BmFont;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 
@@ -25,6 +26,7 @@ namespace FontSettings.Framework
         private static readonly IEnumerable<CharacterRange> DefaultCharRanges = new[] { new CharacterRange(32, 126) };
         private static readonly string[] DefaultCharsFiles = Array.Empty<string>();
         private static readonly string DefaultPageName = Guid.NewGuid().ToString().Substring(0, 8);
+        private static readonly Color DefaultTextColorMask = Color.White;
 
         private static string _baseDir;
         private static string _tmpDir;
@@ -36,7 +38,7 @@ namespace FontSettings.Framework
             int? paddingUp = null, int? paddingRight = null, int? paddingDown = null, int? paddingLeft = null,
             int? spacingHoriz = null, int? spacingVert = null,
             float charOffsetX = 0, float charOffsetY = 0,
-            string? pageName = null)
+            string? pageName = null, Color? textColorMask = null)
         {
             string finalFontFile = fontFilePath ?? throw new ArgumentNullException(nameof(fontFilePath));
             int finalFontIndex = fontIndex ?? DefaultFontIndex;
@@ -52,6 +54,7 @@ namespace FontSettings.Framework
             float finalOffsetX = charOffsetX;
             float finalOffsetY = charOffsetY;
             string finalPageName = pageName ?? DefaultPageName;
+            Color finalTextMask = textColorMask ?? DefaultTextColorMask;
 
             InternalGenerateIntoMemory(finalFontFile,
                 out fontFile, out pages,
@@ -60,7 +63,8 @@ namespace FontSettings.Framework
                 finalPaddingUp, finalPaddingRight, finalPaddingDown, finalPaddingLeft,
                 finalSpacingHoriz, finalSpacingVert,
                 finalOffsetX, finalOffsetY,
-                finalPageName);
+                finalPageName,
+                finalTextMask);
         }
 
         public static void LoadBmFont(string fntPathWithoutExtension, out FontFile fontFile, out Texture2D[] pages)

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Preset;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -597,6 +598,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
+        #region Mask Property
+
+        private Color _mask;
+
+        public Color Mask
+        {
+            get => this._mask;
+            set => this.SetField(ref this._mask, value);
+        }
+
+        #endregion
+
         protected FontViewModel KeepOriginalFont { get; set; }
 
         protected LanguageInfo Language { get; }
@@ -1038,7 +1051,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                     LineSpacing: this.LineSpacing,
                     CharOffsetX: this.CharOffsetX,
                     CharOffsetY: this.CharOffsetY,
-                    CharacterRanges: FontHelpers.GetCharacterRanges(this.Characters)));
+                    CharacterRanges: FontHelpers.GetCharacterRanges(this.Characters)))
+                .WithSolidColorMask(this.Mask);
             if (this.CurrentFontType != GameFontType.SpriteText)
                 builder.WithDefaultCharacter(this.DefaultCharacter);
             if (this.CurrentFontType == GameFontType.SpriteText)
@@ -1154,6 +1168,9 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.DefaultCharacter = fontConfig.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter)
                 ? withDefaultCharacter.DefaultCharacter
                 : null;
+            this.Mask = fontConfig.TryGetInstance(out IWithSolidColor withSolidColor)
+                ? withSolidColor.SolidColor
+                : Color.White;
         }
 
         private bool SkipSpriteText()

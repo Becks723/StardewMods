@@ -92,11 +92,12 @@ namespace FontSettings.Framework
             float spacing = 0,
             int? lineSpacing = null,
             float charOffsetX = 0,
-            float charOffsetY = 0)
+            float charOffsetY = 0,
+            Color? mask = null)
         {
             var data = GenerateMetadata(ttfPath, fontIndex, fontPixelHeight, characterRanges, bitmapWidth, bitmapHeight, defaultCharacter, spacing, lineSpacing, charOffsetX, charOffsetY);
 
-            Texture2D texture = MakeFontUtils.GenerateTexture2D(data.Pixels, data.Width, data.Height);
+            Texture2D texture = MakeFontUtils.GenerateTexture2D(data.Pixels, data.Width, data.Height, mask);
             return new SpriteFont(
                 texture: texture,
                 glyphBounds: data.Bounds,

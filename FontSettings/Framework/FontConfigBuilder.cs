@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Models.Builder;
+using Microsoft.Xna.Framework;
 
 namespace FontSettings.Framework
 {
@@ -50,6 +51,13 @@ namespace FontSettings.Framework
         public FontConfigBuilder WithPixelZoom(float pixelZoom)
         {
             this._config = new FontConfigBm(this._config, pixelZoom);
+            return this;
+        }
+
+        /// <summary>Adds support to <see cref="IWithSolidColor"/>.</summary>
+        public FontConfigBuilder WithSolidColorMask(Color mask)
+        {
+            this._config = new FontConfigSolidColor(this._config, mask);
             return this;
         }
     }

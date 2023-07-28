@@ -23,7 +23,7 @@ namespace BmFontCS
             this.GenerateIntoMemory(fontFilePath, out fontFile, out Page[] pgs, settings);
 
             pages = pgs
-                .Select(p => MakeFontUtils.GenerateTexture2D(p.Buffer, p.Width, p.Height))
+                .Select(p => MakeFontUtils.GenerateTexture2D(p.Buffer, p.Width, p.Height, settings.Mask))
                 .ToArray();
         }
 
@@ -363,6 +363,7 @@ namespace BmFontCS
         public Spacing Spacing { get; set; } = new Spacing(1, 1);
         /// <summary>Name of the font file (.fnt), if exported. Also base name of pages.</summary>
         public string Name { get; set; } = Guid.NewGuid().ToString().Substring(0, 8);
+        public Color Mask { get; set; } = Color.White;
     }
 
     public struct UnicodeRange

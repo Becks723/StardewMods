@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace FontSettings.Framework.Models
 {
@@ -20,5 +21,6 @@ namespace FontSettings.Framework.Models
         IEnumerable<CharacterRange>? CharacterOverride,
         IEnumerable<CharacterRange>? CharacterAdd,
         IEnumerable<CharacterRange>? CharacterRemove,
-        char? DefaultCharacter);
+        char? DefaultCharacter,
+        Color Mask);
 }

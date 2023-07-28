@@ -13,7 +13,7 @@ namespace FontSettings.Framework
 {
     internal static class MakeFontUtils
     {
-        public static Texture2D GenerateTexture2D(byte[] pixels, int width, int height, GraphicsDevice? graphicsDevice = null)
+        public static Texture2D GenerateTexture2D(byte[] pixels, int width, int height, Color? mask = null, GraphicsDevice? graphicsDevice = null)
         {
             if (graphicsDevice == null)
             {
@@ -24,16 +24,18 @@ namespace FontSettings.Framework
                 graphicsDevice = game1Device;
             }
 
+            mask ??= Color.White;
+
             Texture2D result = new Texture2D(graphicsDevice, width, height);
 
             Color[] colorData = new Color[width * height];
             for (int i = 0; i < pixels.Length; i++)
             {
                 byte b = pixels[i];
-                colorData[i].R = b;
-                colorData[i].G = b;
-                colorData[i].B = b;
-                colorData[i].A = b;
+                colorData[i].R = (byte)((b / 255f) * (mask.Value.R / 255f) * 255);
+                colorData[i].G = (byte)((b / 255f) * (mask.Value.G / 255f) * 255);
+                colorData[i].B = (byte)((b / 255f) * (mask.Value.B / 255f) * 255);
+                colorData[i].A = (byte)((b / 255f) * (mask.Value.A / 255f) * 255);
             }
 
             result.SetData(colorData);

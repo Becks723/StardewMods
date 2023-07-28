@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontSettings.Framework.Models;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FontSettings.Framework.FontPatching.Resolving
@@ -41,7 +42,10 @@ namespace FontSettings.Framework.FontPatching.Resolving
                         charOffsetY: config.CharOffsetY,
                         defaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter) 
                             ? withDefaultCharacter.DefaultCharacter
-                            : '*');
+                            : '*',
+                        mask: config.TryGetInstance(out IWithSolidColor withSolidColor)
+                            ? withSolidColor.SolidColor
+                            : Color.White);
                     patch = loadOrReplace
                         ? this.PatchFactory.ForLoadSpriteFont(spriteFont, loadPriority)
                         : this.PatchFactory.ForReplaceSpriteFont(spriteFont, editPriority);

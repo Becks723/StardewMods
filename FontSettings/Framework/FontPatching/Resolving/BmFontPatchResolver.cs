@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BmFont;
 using FontSettings.Framework.Models;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FontSettings.Framework.FontPatching.Resolving
@@ -42,7 +43,10 @@ namespace FontSettings.Framework.FontPatching.Resolving
                         charRanges: config.CharacterRanges,
                         spacingHoriz: (int)config.Spacing,
                         charOffsetX: config.CharOffsetX,
-                        charOffsetY: config.CharOffsetY);
+                        charOffsetY: config.CharOffsetY,
+                        textColorMask: config.TryGetInstance(out IWithSolidColor withSolidColor)
+                            ? withSolidColor.SolidColor
+                            : Color.White);
 
                     var bmFont = new BmFontData()
                     {

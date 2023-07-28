@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using StardewValley;
 
 namespace FontSettings.Framework.DataAccess.Models
@@ -47,6 +48,11 @@ namespace FontSettings.Framework.DataAccess.Models
 
         /// <summary>缩放倍数。仅当<see cref="InGameType"/>为<see cref="GameFontType.SpriteText"/>时用到。对应<see cref="StardewValley.BellsAndWhistles.SpriteText.fontPixelZoom"/>字段。</summary>
         public float PixelZoom { get; set; }
+
+        public Color Mask { get; set; }
+
+        /// <summary>默认值为'*'。</summary>
+        public char? DefaultCharacter { get; set; }
 
         internal bool IsSameContextWith(FontConfigData other)
         {

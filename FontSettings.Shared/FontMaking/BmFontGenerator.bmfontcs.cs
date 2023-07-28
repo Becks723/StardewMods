@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BmFont;
 using BmFontCS;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace FontSettings.Framework
@@ -18,7 +19,8 @@ namespace FontSettings.Framework
             int paddingUp, int paddingRight, int paddingDown, int paddingLeft,
             int spacingHoriz, int spacingVert,
             float charOffsetX, float charOffsetY,
-            string pageName)
+            string pageName, 
+            Color mask)
         {
             var bmfont = new BmFontCS.BmFont();
             bmfont.GenerateIntoMemory(fontFilePath, out fontFile, out pages, new BmFontSettings
@@ -29,7 +31,8 @@ namespace FontSettings.Framework
                 CharsFiles = charsFiles,
                 Padding = new Padding(paddingUp, paddingRight, paddingDown, paddingLeft),
                 Spacing = new Spacing(spacingHoriz, spacingVert),
-                Name = pageName
+                Name = pageName,
+                Mask = mask
             });
 
             // offset
