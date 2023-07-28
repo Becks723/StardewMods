@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FontSettings.Framework.FontPatching.Editors;
 
-namespace FontSettings.Framework.FontPatching.Replacers
+namespace FontSettings.Framework.FontPatching
 {
     internal interface IFontReplacer : IFontEditor
     {

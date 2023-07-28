@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework.FontPatching.Editors
+namespace FontSettings.Framework.FontPatching
 {
     internal interface IFontEditor
     {
