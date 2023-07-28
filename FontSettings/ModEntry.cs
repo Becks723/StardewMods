@@ -120,7 +120,7 @@ namespace FontSettings
             this._fontConfigManager.PresetUpdated += (s, e) => this._fontPresetRepository.WritePreset(e.Name, e.Preset);
 
             // init font patching.
-            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(), new FontPatchInvalidatorComposition(helper), this.Monitor);
+            this._mainFontPatcher = new MainFontPatcher(this._fontConfigManager, new FontPatchResolverFactory(this._config), new FontPatchInvalidatorComposition(helper), this.Monitor);
             this._vanillaFontProvider.SetInvalidateHelper(this._mainFontPatcher);
             this._fontChanger = new FontPatchChanger(this._mainFontPatcher);
 

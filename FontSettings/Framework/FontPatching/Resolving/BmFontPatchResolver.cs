@@ -12,6 +12,11 @@ namespace FontSettings.Framework.FontPatching.Resolving
 {
     internal class BmFontPatchResolver : BaseFontPatchResolver
     {
+        public BmFontPatchResolver(Func<PatchModeInfo> patchModeInfo) 
+            : base(patchModeInfo)
+        {
+        }
+
         // must return IBmFontPatch.
         public override IResult<IFontPatch, Exception> Resolve(FontConfig config, FontContext context)
         {
@@ -19,7 +24,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
             {
                 IBmFontPatch patch;
 
-                var (loadOrReplace, loadPriority, editPriority) = this.GetPatchDetailsForCompat(context);
+                var info = this.GetPatchModeInfo(context);
 
                 if (!config.Enabled)
                 {
@@ -29,7 +34,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
                 else if (config.FontFilePath == null)  // TODO: 等集齐所有原版字体后弃用
                 {
-                    patch = this.PatchFactory.ForEditBmFont(config, editPriority);
+                    patch = this.PatchFactory.ForEditBmFont(config, info.EditPriority);
                 }
 
                 else
@@ -57,9 +62,9 @@ namespace FontSettings.Framework.FontPatching.Resolving
                         ? config.GetInstance<IWithPixelZoom>().PixelZoom
                         : 1f;
 
-                    patch = loadOrReplace
-                        ? this.PatchFactory.ForLoadBmFont(bmFont, pixelZoom, loadPriority)
-                        : this.PatchFactory.ForReplaceBmFont(bmFont, pixelZoom, editPriority);
+                    patch = info.LoadOrReplace
+                        ? this.PatchFactory.ForLoadBmFont(bmFont, pixelZoom, info.LoadPriority)
+                        : this.PatchFactory.ForReplaceBmFont(bmFont, pixelZoom, info.EditPriority);
                 }
 
                 return this.SuccessResult(patch);

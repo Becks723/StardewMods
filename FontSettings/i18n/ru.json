@@ -110,6 +110,10 @@
   "config.text-color.description": "Configues game default text color.",
   "config.shadow-color": "Text shadow color",
   "config.shadow-color.description": "Configues game default text shadow color.",
+  "config.edit-mode": "Edit mode",
+  "config.edit-mode.description": "Edit mode if checked, or load mode.\nEdit mode enhances mod compatibility, avoids conflicts when multiple mods load same font.",
+  "config.edit-prio": "Edit priority",
+  "config.edit-prio.description": "Priority to edit fonts. The large the value, the later fonts get edited.\nRange: [{{minValue}}, {{maxValue}}]\nDefault: 0",
 
   "misc.mod-file-not-found": "Не удаётся найти \"{{filePath}}\", который является частью файлов мода. Переустановка мода может устранить ошибку."
 }

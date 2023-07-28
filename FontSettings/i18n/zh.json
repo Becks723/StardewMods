@@ -105,6 +105,10 @@
   "config.text-color.description": "设置默认文本颜色。",
   "config.shadow-color": "文本阴影颜色",
   "config.shadow-color.description": "设置默认文本阴影颜色。",
+  "config.edit-mode": "编辑模式",
+  "config.edit-mode.description": "勾选进入编辑（Edit）模式，否则加载（Load）模式。\n编辑模式能提高兼容性，尤其在多个模组同时修改字体的时候。",
+  "config.edit-prio": "编辑优先级",
+  "config.edit-prio.description": "值越大，越晚编辑。晚的将覆盖早的编辑结果。\n取值范围：[{{minValue}}, {{maxValue}}]\n默认值：0",
 
   "misc.mod-file-not-found": "未能找到指定的模组文件\"{{filePath}}\"，请重新下载此模组以找回。"
 }

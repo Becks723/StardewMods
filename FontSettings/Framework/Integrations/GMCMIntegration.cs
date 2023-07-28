@@ -64,6 +64,25 @@ namespace FontSettings.Framework.Integrations
                     set: val => this.Config.EnableLatinDialogueFont = val
                 )
 
+                // edit mode
+                .AddCheckbox(
+                    name: I18n.Config_EditMode,
+                    tooltip: I18n.Config_EditMode_Description,
+                    get: () => this.Config.EditMode,
+                    set: val => this.Config.EditMode = val
+                )
+
+                // edit priority
+                .AddSlider(
+                    name: I18n.Config_EditPrio,
+                    tooltip: () => I18n.Config_EditPrio_Description(int.MinValue, int.MaxValue),
+                    get: () => this.Config.EditPriority,
+                    set: val => this.Config.EditPriority = val,
+                    max: null,
+                    min: null,     // null for allow any integer.
+                    interval: null
+                )
+
                 .AddTextBox(
                     name: I18n.Config_ExampleText,
                     tooltip: I18n.Config_ExampleText_Description,

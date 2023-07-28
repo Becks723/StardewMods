@@ -52,6 +52,10 @@ namespace FontSettings.Framework
 
         public IList<string> CustomFontFolders { get; set; }
 
+        public bool EditMode { get; set; }
+
+        public int EditPriority { get; set; }
+
         private readonly int DEFAULT_MinFontSize = 5;
         private readonly int DEFAULT_MaxFontSize = 75;
         private readonly int DEFAULT_MinSpacing = -10;
@@ -71,6 +75,8 @@ namespace FontSettings.Framework
         private readonly bool DEFAULT_EnableLatinDialogueFont = true;
         private readonly KeybindList DEFAULT_OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
         private readonly string[] DEFAULT_CustomFontFolders = GetDefaultCustomFontFolders().ToArray();
+        private readonly bool DEFAULT_EditMode = false;
+        private readonly int DEFAULT_EditPriority = 0;
 
         public ModConfig()
         {
@@ -101,6 +107,8 @@ namespace FontSettings.Framework
             this.CustomFontFolders = new List<string>(this.DEFAULT_CustomFontFolders);
             foreach (string folder in this.CustomFontFolders)
                 Directory.CreateDirectory(folder);
+            this.EditMode = this.DEFAULT_EditMode;
+            this.EditPriority = this.DEFAULT_EditPriority;
         }
 
         public void ValidateValues(IMonitor? monitor)
