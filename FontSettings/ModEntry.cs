@@ -38,8 +38,6 @@ namespace FontSettings
 {
     internal class ModEntry : Mod
     {
-        private MigrateTo_0_6_0 _0_6_0_Migration;
-
         private ModConfig _config;
         private ModConfigWatcher _configWatcher;
 
@@ -90,17 +88,17 @@ namespace FontSettings
             this._vanillaFontProvider.RecordStarted += this.OnFontRecordStarted;
             this._vanillaFontProvider.RecordFinished += this.OnFontRecordFinished;
 
-            // init migrations.
-            this._0_6_0_Migration = new(helper, this.ModManifest);
-
             string presetDirectory = Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets");
 
-            // do changes to database.
-            this._0_6_0_Migration.ApplyDatabaseChanges(
-                fontConfigRepository: new FontConfigRepository(helper),
-                fontPresetRepository: new FontPresetRepository(presetDirectory),
-                modConfig: this._config,
-                writeModConfig: this.SaveConfig);
+            // do migrations
+            new MigrateTo_0_6_0(helper, this.ModManifest)
+                .ApplyDatabaseChanges(
+                    fontConfigRepository: new FontConfigRepository(helper),
+                    fontPresetRepository: new FontPresetRepository(presetDirectory),
+                    modConfig: this._config,
+                    writeModConfig: this.SaveConfig);
+            new MigrateTo_0_12_0(helper)
+                .ApplyDatabaseChanges(new FontConfigRepository(helper));
 
             // init service objects.
             this._fontFileProvider = new FontFileProvider(this.YieldFontScanners());
