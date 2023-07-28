@@ -104,6 +104,12 @@
   "config.font-menu-key.description": "Сочетание клавиш для открытия меню настроек шрифта.",
   "config.font-settings-in-game-menu": "Вкладка настроек шрифта в игровом меню",
   "config.font-settings-in-game-menu.description": "Добавляет в игровое меню вкладку для настройки шрифтов.",
+  //TODO
+  "config.hex-format": "\n\nEnter a hexadecimal value:\nAABBGGRR\ne.g. Indigo Blue (R=63, G=72, B=204, A=255)\n => FFCC483F",
+  "config.text-color": "Text color",
+  "config.text-color.description": "Configues game default text color.",
+  "config.shadow-color": "Text shadow color",
+  "config.shadow-color.description": "Configues game default text shadow color.",
 
   "misc.mod-file-not-found": "Не удаётся найти \"{{filePath}}\", который является частью файлов мода. Переустановка мода может устранить ошибку."
 }

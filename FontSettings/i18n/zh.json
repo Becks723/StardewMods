@@ -100,6 +100,11 @@
   "config.font-menu-key.description": "绑定打开字体菜单的按键。",
   "config.font-settings-in-game-menu": "在游戏内置菜单中设置字体",
   "config.font-settings-in-game-menu.description": "是否在游戏内置菜单（点E或Esc）中添加一栏，用以设置字体。",
+  "config.hex-format": "\n\n输入十六进制颜色值：\nAABBGGRR\n例：靛蓝色 (R=63, G=72, B=204, A=255)\n => FFCC483F",
+  "config.text-color": "文本颜色",
+  "config.text-color.description": "设置默认文本颜色。",
+  "config.shadow-color": "文本阴影颜色",
+  "config.shadow-color.description": "设置默认文本阴影颜色。",
 
   "misc.mod-file-not-found": "未能找到指定的模组文件\"{{filePath}}\"，请重新下载此模组以找回。"
 }

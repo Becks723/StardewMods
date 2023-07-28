@@ -202,7 +202,8 @@ namespace FontSettings
                 save: () => this.SaveConfig(this._config),
                 modRegistry: this.Helper.ModRegistry,
                 monitor: this.Monitor,
-                manifest: this.ModManifest)
+                manifest: this.ModManifest,
+                isGMCMOptionsRequired: false)
                 .Integrate();
 
             new ToolbarIconsIntegration(

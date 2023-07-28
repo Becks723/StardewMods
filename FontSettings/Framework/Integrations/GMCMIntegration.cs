@@ -8,8 +8,8 @@ namespace FontSettings.Framework.Integrations
     {
         private ModConfig Config { get; }
 
-        public GMCMIntegration(ModConfig config, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest)
-            : base(reset, save, modRegistry, monitor, manifest)
+        public GMCMIntegration(ModConfig config, Action reset, Action save, IModRegistry modRegistry, IMonitor monitor, IManifest manifest, bool isGMCMOptionsRequired = false)
+            : base(reset, save, modRegistry, monitor, manifest, isGMCMOptionsRequired)
         {
             this.Config = config;
         }
@@ -30,6 +30,28 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_DisableTextShadow_Description,
                     get: () => this.Config.DisableTextShadow,
                     set: val => this.Config.DisableTextShadow = val
+                )
+
+                // text color
+                .AddColorPickerOrHexBox(
+                    name: I18n.Config_TextColor,
+                    description: I18n.Config_TextColor_Description,
+                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_TextColor_Description),
+                    get: () => this.Config.TextColor,
+                    set: val => this.Config.TextColor = val
+                )
+
+                // text shadow color (2 in 1)
+                .AddColorPickerOrHexBox(
+                    name: I18n.Config_ShadowColor,
+                    description: I18n.Config_ShadowColor_Description,
+                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_ShadowColor_Description),
+                    get: () => this.Config.ShadowColorGame1,
+                    set: val =>
+                    {
+                        this.Config.ShadowColorGame1 = val;
+                        this.Config.ShadowColorUtility = val;
+                    }
                 )
 
                 // enable latin dialogue font
@@ -196,6 +218,11 @@ namespace FontSettings.Framework.Integrations
                 return string.Empty;
 
             return value.Replace("\\n", "\n");
+        }
+
+        private Func<string> HexFormatSuffix(Func<string> text)
+        {
+            return () => text() + I18n.Config_HexFormat();
         }
     }
 }

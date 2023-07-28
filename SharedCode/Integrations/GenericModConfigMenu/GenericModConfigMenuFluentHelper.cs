@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using CodeShared.Integrations.GenericModConfigMenu.Options;
+using CodeShared.Integrations.GMCMOptions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -14,13 +15,15 @@ namespace CodeShared.Integrations.GenericModConfigMenu
         private readonly IManifest _manifest;
         private readonly Action _reset;
         private readonly Action _save;
+        private readonly IGMCMOptionsAPI? _gmcmOptionsApi;
 
-        public GenericModConfigMenuFluentHelper(IGenericModConfigMenuApi api, IManifest manifest, Action reset, Action save)
+        public GenericModConfigMenuFluentHelper(IGenericModConfigMenuApi api, IManifest manifest, Action reset, Action save, IGMCMOptionsAPI? gmcmOptionsApi)
         {
             this._api = api ?? throw new ArgumentNullException(nameof(api));
             this._manifest = manifest;
             this._reset = reset;
             this._save = save;
+            this._gmcmOptionsApi = gmcmOptionsApi;
         }
 
         public GenericModConfigMenuFluentHelper Register(bool titleScreenOnly = false)
@@ -294,6 +297,41 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                 null,
                 new SpacingOption(height)
             );
+        }
+
+        public GenericModConfigMenuFluentHelper AddColorPickerOrHexBox(Func<Color> get, Action<Color> set, Func<string> name, Func<string> description, Func<string> descriptionHexBox)
+        {
+            if (this._gmcmOptionsApi != null)
+                this._gmcmOptionsApi.AddColorOption(
+                    mod: this._manifest,
+                    getValue: get,
+                    setValue: set,
+                    name: name,
+                    tooltip: description,
+                    showAlpha: true,
+                    colorPickerStyle: (uint)IGMCMOptionsAPI.ColorPickerStyle.Default,
+                    fieldId: null);
+            else
+                this.AddTextBox(
+                    name: name,
+                    get: () =>
+                    {
+                        Color color = get();
+                        return color.PackedValue.ToString("X8");
+                    },
+                    set: hexString =>
+                    {
+                        if (uint.TryParse(hexString, System.Globalization.NumberStyles.HexNumber, null, out uint packValue))
+                        {
+                            Color color = new Color(packValue);
+                            set(color);
+                        }
+                        else
+                            throw new FormatException($"Cannot read string '{hexString}' as a Color's packedValue. Format: AABBGGRR");
+                    },
+                    tooltip: descriptionHexBox);
+
+            return this;
         }
 
         /// <summary>Subscribe to field change event.</summary>
