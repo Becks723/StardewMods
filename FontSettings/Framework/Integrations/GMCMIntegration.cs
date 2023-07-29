@@ -41,6 +41,15 @@ namespace FontSettings.Framework.Integrations
                     set: val => this.Config.TextColor = val
                 )
 
+                // text color dialogue
+                .AddColorPickerOrHexBox(
+                    name: I18n.Config_TextColorDialogue,
+                    description: I18n.Config_TextColorDialogue_Description,
+                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_TextColorDialogue_Description),
+                    get: () => this.Config.TextColorDialogue,
+                    set: val => this.Config.TextColorDialogue = val
+                )
+
                 // text shadow color (2 in 1)
                 .AddColorPickerOrHexBox(
                     name: I18n.Config_ShadowColor,

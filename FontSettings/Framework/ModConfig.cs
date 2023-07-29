@@ -42,6 +42,8 @@ namespace FontSettings.Framework
 
         public Color TextColor { get; set; }
 
+        public Color TextColorDialogue { get; set; }
+
         public Color ShadowColorGame1 { get; set; }
 
         public Color ShadowColorUtility { get; set; }
@@ -70,6 +72,7 @@ namespace FontSettings.Framework
         private readonly float DEFAULT_MaxPixelZoom = 5f;
         private readonly bool DEFAULT_DisableTextShadow = false;
         private readonly Color DEFAULT_TextColor = new Color(34, 17, 34);  // from `Game1.textColor`
+        private readonly Color DEFAULT_TextColorDialogue = new Color(86, 22, 12);  // from `SpriteText.getColorFromIndex`
         private readonly Color DEFAULT_ShadowColorGame1 = new Color(206, 156, 95);  // from `Game1.textShadowColor`
         private readonly Color DEFAULT_ShadowColorUtility = new Color(221, 148, 84);  // from `Utility.drawTextWithShadow()`
         private readonly bool DEFAULT_EnableLatinDialogueFont = true;
@@ -100,6 +103,7 @@ namespace FontSettings.Framework
             this.MaxPixelZoom = this.DEFAULT_MaxPixelZoom;
             this.DisableTextShadow = this.DEFAULT_DisableTextShadow;
             this.TextColor = this.DEFAULT_TextColor;
+            this.TextColorDialogue = this.DEFAULT_TextColorDialogue;
             this.ShadowColorGame1 = this.DEFAULT_ShadowColorGame1;
             this.ShadowColorUtility = this.DEFAULT_ShadowColorUtility;
             this.EnableLatinDialogueFont = this.DEFAULT_EnableLatinDialogueFont;

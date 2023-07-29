@@ -107,6 +107,8 @@
   "config.hex-format": "\n\nEnter a hexadecimal value:\nAABBGGRR\ne.g. Indigo Blue (R=63, G=72, B=204, A=255)\n => FFCC483F",
   "config.text-color": "Text color",
   "config.text-color.description": "Configues game default text color.",
+  "config.text-color-dialogue": "Text color Dialogue",
+  "config.text-color-dialogue.description": "Configues game default dialogue text color.",
   "config.shadow-color": "Text shadow color",
   "config.shadow-color.description": "Configues game default text shadow color.",
   "config.edit-mode": "Edit mode",

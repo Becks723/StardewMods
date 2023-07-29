@@ -68,7 +68,7 @@ namespace FontSettings.Framework.Patchers
                 finalizer: this.HarmonyMethod(nameof(SpriteText_drawString_Finalizer)));
             harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getColorFromIndex)),
-                postfix: this.HarmonyMethod(nameof(SpriteText_getColorFromIndex_Postfix)));
+                transpiler: this.HarmonyMethod(nameof(SpriteText_getColorFromIndex_Transpiler)));
             harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getWidthOfString)),
                 transpiler: this.HarmonyMethod(nameof(SpriteText_getWidthOfString_Transpiler)));
@@ -181,13 +181,27 @@ namespace FontSettings.Framework.Patchers
             }
         }
 
-        private static void SpriteText_getColorFromIndex_Postfix(int index, ref Color __result)
+        private static IEnumerable<CodeInstruction> SpriteText_getColorFromIndex_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
-            if (!CustomSpriteTextInLatinLanguages())
-                return;
+            var oldInstructions = codeInstructions.ToArray();
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                var instruction = oldInstructions[i];
 
-            if (index == -1 && LocalizedContentManager.CurrentLanguageLatin)
-                __result = new Color(86, 22, 12);
+                if (instruction.opcode == OpCodes.Call
+                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
+                    && oldInstructions[i + 1].opcode == OpCodes.Brfalse_S
+                    && oldInstructions[i + 2].opcode == OpCodes.Call
+                    && oldInstructions[i + 2].operand is MethodInfo { Name: "get_White" })
+                    yield return new CodeInstruction(instruction)
+                    {
+                        opcode = OpCodes.Call,
+                        operand = CurrentLanguageLatinPatched_Method.Value
+                    };
+
+                else
+                    yield return instruction;
+            }
         }
 
         private static IEnumerable<CodeInstruction> SpriteText_getWidthOfString_Transpiler(IEnumerable<CodeInstruction> codeInstructions)

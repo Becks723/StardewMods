@@ -7,6 +7,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 
 namespace FontSettings.Framework.Patchers
 {
@@ -31,6 +32,10 @@ namespace FontSettings.Framework.Patchers
                 original: AccessTools.Method(typeof(Game1), "CleanupReturningToTitle"),
                 postfix: new HarmonyMethod(typeof(TextColorPatcher), nameof(Game1_CleanupReturningToTitle_Postfix))
             );
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getColorFromIndex)),
+                postfix: new HarmonyMethod(typeof(TextColorPatcher), nameof(SpriteText_getColorFromIndex_Postfix))
+            );
             Game1textColorAssigned += this.OnGame1textColorAssigned;
             _configWatcher.TextColorChanged += this.OnTextColorChanged;
         }
@@ -38,6 +43,12 @@ namespace FontSettings.Framework.Patchers
         private static void Game1_CleanupReturningToTitle_Postfix()
         {
             RaiseGame1textColorAssigned(EventArgs.Empty);
+        }
+
+        private static void SpriteText_getColorFromIndex_Postfix(int index, ref Color __result)
+        {
+            if (index == -1 && (_config.EnableLatinDialogueFont || !LocalizedContentManager.CurrentLanguageLatin))
+                __result = _config.TextColorDialogue;
         }
 
         private void OnGame1textColorAssigned(object sender, EventArgs e)

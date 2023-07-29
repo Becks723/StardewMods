@@ -103,6 +103,8 @@
   "config.hex-format": "\n\n输入十六进制颜色值：\nAABBGGRR\n例：靛蓝色 (R=63, G=72, B=204, A=255)\n => FFCC483F",
   "config.text-color": "文本颜色",
   "config.text-color.description": "设置默认文本颜色。",
+  "config.text-color-dialogue": "文本颜色（对话）",
+  "config.text-color-dialogue.description": "设置对话字体的默认文本颜色。",
   "config.shadow-color": "文本阴影颜色",
   "config.shadow-color.description": "设置默认文本阴影颜色。",
   "config.edit-mode": "编辑模式",
