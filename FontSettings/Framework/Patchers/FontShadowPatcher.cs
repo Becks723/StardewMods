@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.Menus;
 
 namespace FontSettings.Framework.Patchers
@@ -16,11 +17,13 @@ namespace FontSettings.Framework.Patchers
     internal class FontShadowPatcher
     {
         private static Func<Color> _textShadowColorOverride;
+        private static Func<float> _shadowAlphaOverride;
 
         private static ModConfig _config;
         private static ModConfigWatcher _configWatcher;
 
         public static event EventHandler Game1textShadowColorAssigned;
+        public static event EventHandler SpriteTextshadowAlphaAssigned;
 
         public FontShadowPatcher(ModConfig config, ModConfigWatcher configWatcher)
         {
@@ -48,6 +51,7 @@ namespace FontSettings.Framework.Patchers
                 postfix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Game1_CleanupReturningToTitle_Postfix))
             );
             Game1textShadowColorAssigned += this.OnGame1textShadowColorAssigned;
+            SpriteTextshadowAlphaAssigned += this.OnSpriteTextshadowAlphaAssigned;
             _configWatcher.TextShadowToggled += this.OnTextShadowToggled;
             _configWatcher.ShadowColorGame1Changed += this.OnShadowColorGame1Changed;
         }
@@ -57,11 +61,19 @@ namespace FontSettings.Framework.Patchers
             Game1.textShadowColor = _textShadowColorOverride();
         }
 
+        private void OnSpriteTextshadowAlphaAssigned(object sender, EventArgs e)
+        {
+            SpriteText.shadowAlpha = _shadowAlphaOverride();
+        }
+
         private void OnTextShadowToggled(object sender, EventArgs e)
         {
             this.SetOverrideTextShadowColor(_config.DisableTextShadow
                 ? Color.Transparent
                 : _config.ShadowColorGame1);
+            this.SetOverrideShadowAlpha(_config.DisableTextShadow
+                ? 0f
+                : 0.15f);
         }
 
         private void OnShadowColorGame1Changed(object sender, EventArgs e)
@@ -76,6 +88,13 @@ namespace FontSettings.Framework.Patchers
             _textShadowColorOverride = () => textShadowColor;
 
             RaiseGame1textShadowColorAssigned(EventArgs.Empty);
+        }
+
+        public void SetOverrideShadowAlpha(float shadowAlpha)
+        {
+            _shadowAlphaOverride = () => shadowAlpha;
+
+            RaiseSpriteTextshadowAlphaAssigned(EventArgs.Empty);
         }
 
         private static void Utility_drawTextWithShadow_Prefix(ref float shadowIntensity)
@@ -132,6 +151,11 @@ namespace FontSettings.Framework.Patchers
         private static void RaiseGame1textShadowColorAssigned(EventArgs e)
         {
             Game1textShadowColorAssigned?.Invoke(null, e);
+        }
+
+        private static void RaiseSpriteTextshadowAlphaAssigned(EventArgs e)
+        {
+            SpriteTextshadowAlphaAssigned?.Invoke(null, e);
         }
     }
 }
