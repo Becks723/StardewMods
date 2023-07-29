@@ -96,11 +96,7 @@ namespace FontSettings.Framework.FontGenerators
                 // TODO: 搞懂其他属性，如Base，Spacing，Padding与SpriteFont的关系。
 
                 return new GameBitmapSpriteFont(
-                    bmFont: new Models.BmFontData
-                    {
-                        FontFile = fontFile,
-                        Pages = builtIn.Pages.ToArray()
-                    },
+                    bmFont: new Models.BmFontData(fontFile, builtIn.Pages.ToArray()),
                     pixelZoom: param.PixelZoom,
                     language: param.Language,
                     bmFontInLatinLanguages: this._enableLatinDialogueFont());
@@ -121,11 +117,7 @@ namespace FontSettings.Framework.FontGenerators
                 fontFile.Common.LineHeight = (int)param.LineSpacing;
 
                 return new GameBitmapSpriteFont(
-                    bmFont: new Models.BmFontData
-                    {
-                        FontFile = fontFile,
-                        Pages = pages,
-                    },
+                    bmFont: new Models.BmFontData(fontFile, pages),
                     pixelZoom: param.PixelZoom,
                     language: param.Language,
                     bmFontInLatinLanguages: this._enableLatinDialogueFont());

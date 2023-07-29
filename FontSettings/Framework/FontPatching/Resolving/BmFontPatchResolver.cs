@@ -53,11 +53,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
                             ? withSolidColor.SolidColor
                             : Color.White);
 
-                    var bmFont = new BmFontData()
-                    {
-                        FontFile = fontFile,
-                        Pages = pages
-                    };
+                    var bmFont = new BmFontData(fontFile, pages);
                     float pixelZoom = config.Supports<IWithPixelZoom>()
                         ? config.GetInstance<IWithPixelZoom>().PixelZoom
                         : 1f;

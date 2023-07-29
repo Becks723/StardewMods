@@ -97,11 +97,7 @@ namespace FontSettings.Framework
                                 pages.Add(Game1.content.Load<Texture2D>($"Fonts/{fontPage.File}"));
 
                             var bmFont = new GameBitmapSpriteFont(
-                                bmFont: new Models.BmFontData
-                                {
-                                    FontFile = fontFile,
-                                    Pages = pages.ToArray()
-                                },
+                                bmFont: new Models.BmFontData(fontFile, pages.ToArray()),
                                 pixelZoom: FontHelpers.GetDefaultFontPixelZoom(language),
                                 language: language,
                                 bmFontInLatinLanguages: this._config.EnableLatinDialogueFont);
