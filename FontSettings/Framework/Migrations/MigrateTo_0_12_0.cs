@@ -14,6 +14,7 @@ namespace FontSettings.Framework.Migrations
     /// 迁移至0.12.0<br/>
     /// · 在<see cref="FontConfigData"/>中添加了一个属性<see cref="FontConfigData.Mask"/>。需要给原有设置添加该字段，并设置为<see cref="Color.White"/>。<br/>
     /// · 在<see cref="FontConfigData"/>中添加了一个属性<see cref="FontConfigData.DefaultCharacter"/>。需要给原有设置添加该字段，并设置为<see langword="*"/>。<br/>
+    /// · <see cref="FontPresetData"/>中同样上述两项更改。
     /// </summary>
     internal class MigrateTo_0_12_0
     {
@@ -25,7 +26,7 @@ namespace FontSettings.Framework.Migrations
             this._helper = helper;
         }
 
-        public void ApplyDatabaseChanges(FontConfigRepository fontConfigRepository)
+        public void ApplyDatabaseChanges(FontConfigRepository fontConfigRepository, FontPresetRepository presetRepository)
         {
             var data = this.ReadOrCreateMigrationData(this._helper);
             if (!data.HasMigratedTo_0_12_0)
@@ -34,6 +35,7 @@ namespace FontSettings.Framework.Migrations
                 // 添加Mask字段，并赋值为Color.White。
                 // 添加DefaultCharacter字段，并赋值为*。
                 {
+                    // 数据
                     var fontSettings = fontConfigRepository.ReadAllConfigs();
                     foreach (FontConfigData config in fontSettings)
                     {
@@ -41,6 +43,19 @@ namespace FontSettings.Framework.Migrations
                         config.DefaultCharacter = '*';
                     }
                     fontConfigRepository.WriteAllConfigs(fontSettings);
+
+                    // 预设
+                    var presets = presetRepository.ReadAllPresets();
+                    foreach (var pair in presets)
+                    {
+                        string key = pair.Key;
+                        FontPresetData preset = pair.Value;
+
+                        preset.Mask = Color.White;
+                        preset.DefaultCharacter = '*';
+
+                        presetRepository.WritePreset(key, preset);
+                    }
                 }
 
                 data.HasMigratedTo_0_12_0 = true;

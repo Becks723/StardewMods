@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using StardewValley;
 
 namespace FontSettings.Framework.DataAccess.Models
@@ -32,5 +33,9 @@ namespace FontSettings.Framework.DataAccess.Models
         public float CharOffsetY { get; set; }
 
         public float PixelZoom { get; set; }
+
+        public Color Mask { get; set; }
+
+        public char? DefaultCharacter { get; set; }
     }
 }

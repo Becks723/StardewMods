@@ -91,14 +91,21 @@ namespace FontSettings
             string presetDirectory = Path.Combine(Constants.DataPath, ".smapi", "mod-data", this.ModManifest.UniqueID.ToLower(), "Presets");
 
             // do migrations
-            new MigrateTo_0_6_0(helper, this.ModManifest)
-                .ApplyDatabaseChanges(
-                    fontConfigRepository: new FontConfigRepository(helper),
-                    fontPresetRepository: new FontPresetRepository(presetDirectory),
-                    modConfig: this._config,
-                    writeModConfig: this.SaveConfig);
-            new MigrateTo_0_12_0(helper)
-                .ApplyDatabaseChanges(new FontConfigRepository(helper));
+            {
+                FontConfigRepository configRepo = new FontConfigRepository(helper);
+                FontPresetRepository presetRepo = new FontPresetRepository(presetDirectory);
+
+                new MigrateTo_0_6_0(helper, this.ModManifest)
+                    .ApplyDatabaseChanges(
+                        fontConfigRepository: configRepo,
+                        fontPresetRepository: presetRepo,
+                        modConfig: this._config,
+                        writeModConfig: this.SaveConfig);
+                new MigrateTo_0_12_0(helper)
+                    .ApplyDatabaseChanges(
+                        fontConfigRepository: configRepo,
+                        presetRepository: presetRepo);
+            }
 
             // init service objects.
             this._fontFileProvider = new FontFileProvider(this.YieldFontScanners());
