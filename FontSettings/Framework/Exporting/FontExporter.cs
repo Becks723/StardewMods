@@ -31,21 +31,7 @@ namespace FontSettings.Framework.Exporting
 
                 if (settings.Format == FontFormat.SpriteFont)
                 {
-                    SpriteFont spriteFont = await Task.Run(() => SpriteFontGenerator.FromTtf(
-                        ttfPath: config.FontFilePath,
-                        fontIndex: config.FontIndex,
-                        fontPixelHeight: config.FontSize,
-                        characterRanges: config.CharacterRanges,
-                        spacing: config.Spacing,
-                        lineSpacing: (int)config.LineSpacing,
-                        charOffsetX: config.CharOffsetX,
-                        charOffsetY: config.CharOffsetY,
-                        defaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter)
-                            ? withDefaultCharacter.DefaultCharacter
-                            : '*',
-                        mask: config.TryGetInstance(out IWithSolidColor withSolidColor)
-                            ? withSolidColor.SolidColor
-                            : Color.White));
+                    SpriteFont spriteFont = await SpriteFontGenerator.GenerateAsync(config);
 
                     if (settings.InXnb)
                     {
@@ -86,22 +72,9 @@ namespace FontSettings.Framework.Exporting
 
                 else if (settings.Format == FontFormat.BmFont)
                 {
-                    FontFile fontFile = null;
-                    Texture2D[] pages = null;
-                    await Task.Run(() => BmFontGenerator.GenerateIntoMemory(
-                        fontFilePath: config.FontFilePath,
-                        fontFile: out fontFile,
-                        pages: out pages,
-                        fontIndex: config.FontIndex,
-                        fontSize: (int)config.FontSize,
-                        charRanges: config.CharacterRanges,
-                        spacingHoriz: (int)config.Spacing,
-                        charOffsetX: config.CharOffsetX,
-                        charOffsetY: config.CharOffsetY,
-                        pageName: settings.OutputFileName,
-                        textColorMask: config.TryGetInstance(out IWithSolidColor withSolidColor)
-                            ? withSolidColor.SolidColor
-                            : Color.White));
+                    var bmFont = await BmFontGenerator.GenerateAsync(config);
+                    FontFile fontFile = bmFont.FontFile;
+                    Texture2D[] pages = bmFont.Pages;
 
                     if (settings.InXnb)
                     {

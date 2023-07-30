@@ -464,9 +464,7 @@ namespace FontSettings
             {
                 stopwatch.Start();
 
-                var gen = new SampleFontGenerator(this._vanillaFontProvider, () => this._config.EnableLatinDialogueFont);
-                IFontGenerator sampleFontGenerator = gen;
-                IAsyncFontGenerator sampleAsyncFontGenerator = gen;
+                ISampleFontGenerator sampleFontGenerator = new SampleFontGenerator2(this._vanillaFontProvider, () => this._config.EnableLatinDialogueFont);
 
                 FontSettingsMenuModel viewModel;
                 {
@@ -476,7 +474,6 @@ namespace FontSettings
                             config: this._config,
                             vanillaFontProvider: this._vanillaFontProvider,
                             sampleFontGenerator: sampleFontGenerator,
-                            sampleAsyncFontGenerator: sampleAsyncFontGenerator,
                             presetManager: this._fontConfigManager,
                             fontConfigManager: this._fontConfigManager,
                             vanillaFontConfigProvider: this._fontConfigManager,
@@ -492,7 +489,6 @@ namespace FontSettings
                             config: this._config,
                             vanillaFontProvider: this._vanillaFontProvider,
                             sampleFontGenerator: sampleFontGenerator,
-                            sampleAsyncFontGenerator: sampleAsyncFontGenerator,
                             presetManager: this._fontConfigManager,
                             fontConfigManager: this._fontConfigManager,
                             vanillaFontConfigProvider: this._fontConfigManager,

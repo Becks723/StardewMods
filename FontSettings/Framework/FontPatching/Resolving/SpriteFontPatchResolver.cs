@@ -36,21 +36,8 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
                 else
                 {
-                    SpriteFont spriteFont = SpriteFontGenerator.FromTtf(  // TODO: processing
-                        ttfPath: config.FontFilePath,
-                        fontIndex: config.FontIndex,
-                        fontPixelHeight: config.FontSize,
-                        characterRanges: config.CharacterRanges,
-                        spacing: config.Spacing,
-                        lineSpacing: (int)config.LineSpacing,
-                        charOffsetX: config.CharOffsetX,
-                        charOffsetY: config.CharOffsetY,
-                        defaultCharacter: config.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter) 
-                            ? withDefaultCharacter.DefaultCharacter
-                            : '*',
-                        mask: config.TryGetInstance(out IWithSolidColor withSolidColor)
-                            ? withSolidColor.SolidColor
-                            : Color.White);
+                    SpriteFont spriteFont = SpriteFontGenerator.Generate(config);
+
                     patch = info.LoadOrReplace
                         ? this.PatchFactory.ForLoadSpriteFont(spriteFont, info.LoadPriority)
                         : this.PatchFactory.ForReplaceSpriteFont(spriteFont, info.EditPriority);

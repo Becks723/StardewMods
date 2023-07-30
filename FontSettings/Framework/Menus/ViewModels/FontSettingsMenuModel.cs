@@ -27,8 +27,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
         protected readonly ModConfig _config;
         protected readonly IVanillaFontProvider _vanillaFontProvider;
-        protected readonly IFontGenerator _sampleFontGenerator;
-        protected readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
+        protected readonly ISampleFontGenerator _sampleFontGenerator;
         protected readonly IFontConfigManager _fontConfigManager;
         protected readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
         protected readonly IAsyncGameFontChanger _gameFontChanger;
@@ -632,7 +631,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public ICommand ResetFontCommand { get; }
 
-        public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
+        public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
         {
             // 订阅异步完成事件。
@@ -642,7 +641,6 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._config = config;
             this._vanillaFontProvider = vanillaFontProvider;
             this._sampleFontGenerator = sampleFontGenerator;
-            this._sampleAsyncFontGenerator = sampleAsyncFontGenerator;
             this._fontConfigManager = fontConfigManager;
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
             this._gameFontChanger = gameFontChanger;
@@ -866,20 +864,10 @@ namespace FontSettings.Framework.Menus.ViewModels
         {
             try
             {
-                var param = new SampleFontGeneratorParameter(
-                    Enabled: this.FontEnabled,
-                    FontFilePath: this.FontFilePath,
-                    FontSize: this.FontSize,
-                    Spacing: this.Spacing,
-                    LineSpacing: this.LineSpacing,
-                    SampleText: this.ExampleText,
-                    FontType: this.CurrentFontType,
-                    Language: FontHelpers.GetCurrentLanguage(),
-                    PixelZoom: this.PixelZoom,
-                    FontIndex: this.FontIndex,
-                    CharOffsetX: this.CharOffsetX,
-                    CharOffsetY: this.CharOffsetY);
-                this.ExampleCurrentFont = this._sampleFontGenerator.GenerateFont(param);
+                var config = this.CreateConfigBasedOnCurrentSettings(forSample: true);
+                var context = new FontContext(this.Language, this.CurrentFontType);
+
+                this.ExampleCurrentFont = this._sampleFontGenerator.Generate(config, context);
             }
             catch (Exception ex)
             {
@@ -892,30 +880,19 @@ namespace FontSettings.Framework.Menus.ViewModels
         private CancellationTokenSource _tokenSource;
         public async Task UpdateExampleCurrentAsync()
         {
-            var param = new SampleFontGeneratorParameter(
-                Enabled: this.FontEnabled,
-                FontFilePath: this.FontFilePath,
-                FontSize: this.FontSize,
-                Spacing: this.Spacing,
-                LineSpacing: this.LineSpacing,
-                SampleText: this.ExampleText,
-                FontType: this.CurrentFontType,
-                Language: FontHelpers.GetCurrentLanguage(),
-                PixelZoom: this.PixelZoom,
-                FontIndex: this.FontIndex,
-                CharOffsetX: this.CharOffsetX,
-                CharOffsetY: this.CharOffsetY);
-
             if (this._isUpdatingExampleCurrent)
             {
                 this._tokenSource.Cancel();
                 this._tokenSource.Dispose();
             }
 
-            await this.RestartUpdateExampleCurrent(param);
+            var config = this.CreateConfigBasedOnCurrentSettings(forSample: true);
+            var context = new FontContext(this.Language, this.CurrentFontType);
+
+            await this.RestartUpdateExampleCurrent(config, context);
         }
 
-        private async Task RestartUpdateExampleCurrent(SampleFontGeneratorParameter param)
+        private async Task RestartUpdateExampleCurrent(FontConfig config, FontContext context)
         {
             this._tokenSource = new CancellationTokenSource();
             var token = this._tokenSource.Token;
@@ -924,7 +901,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._isUpdatingExampleCurrent = true;
             try
             {
-                this.ExampleCurrentFont = await this._sampleAsyncFontGenerator.GenerateFontAsync(param, token);
+                this.ExampleCurrentFont = await this._sampleFontGenerator.GenerateAsync(config, context, token);
                 ILog.Trace("Sample: Set");
             }
             catch (OperationCanceledException)
@@ -1039,7 +1016,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             return this._vanillaFontConfigProvider.GetVanillaFontConfig(langugage, fontType);
         }
 
-        private FontConfig CreateConfigBasedOnCurrentSettings()
+        private FontConfig CreateConfigBasedOnCurrentSettings(bool forSample = false)
         {
             var builder = new FontConfigBuilder()
                 .BasicConfig(new FontConfig(
@@ -1051,7 +1028,9 @@ namespace FontSettings.Framework.Menus.ViewModels
                     LineSpacing: this.LineSpacing,
                     CharOffsetX: this.CharOffsetX,
                     CharOffsetY: this.CharOffsetY,
-                    CharacterRanges: FontHelpers.GetCharacterRanges(this.Characters)))
+                    CharacterRanges: forSample
+                        ? FontHelpers.GetCharRange(this.ExampleText, this.DefaultCharacter)
+                        : FontHelpers.GetCharacterRanges(this.Characters)))
                 .WithSolidColorMask(this.Mask);
             if (this.CurrentFontType != GameFontType.SpriteText)
                 builder.WithDefaultCharacter(this.DefaultCharacter);

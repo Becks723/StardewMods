@@ -12,7 +12,7 @@ using static StbTrueTypeSharp.StbTrueType;
 
 namespace FontSettings.Framework
 {
-    internal class SpriteFontGenerator
+    internal partial class SpriteFontGenerator
     {
         // TODO: 支持size和charRange
         public static SpriteFont FromExisting(SpriteFont existingFont,

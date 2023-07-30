@@ -39,21 +39,7 @@ namespace FontSettings.Framework.FontPatching.Resolving
 
                 else
                 {
-                    BmFontGenerator.GenerateIntoMemory(  // TODO: processing
-                        fontFilePath: config.FontFilePath,
-                        fontFile: out FontFile fontFile,
-                        pages: out Texture2D[] pages,
-                        fontIndex: config.FontIndex,
-                        fontSize: (int)config.FontSize,
-                        charRanges: config.CharacterRanges,
-                        spacingHoriz: (int)config.Spacing,
-                        charOffsetX: config.CharOffsetX,
-                        charOffsetY: config.CharOffsetY,
-                        textColorMask: config.TryGetInstance(out IWithSolidColor withSolidColor)
-                            ? withSolidColor.SolidColor
-                            : Color.White);
-
-                    var bmFont = new BmFontData(fontFile, pages);
+                    var bmFont = BmFontGenerator.Generate(config);
                     float pixelZoom = config.Supports<IWithPixelZoom>()
                         ? config.GetInstance<IWithPixelZoom>().PixelZoom
                         : 1f;
