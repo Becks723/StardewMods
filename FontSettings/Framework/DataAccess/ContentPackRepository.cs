@@ -43,17 +43,10 @@ namespace FontSettings.Framework.DataAccess
                 if (pack.HasFile(contentFile))
                 {
                     ContentPackParser parser = new ContentPackParser();
-                    FontContentPack[] rawContentPacks;
+                    FontContentPack contentPack;
                     try
                     {
-                        try
-                        {
-                            rawContentPacks = pack.ReadJsonFile<FontContentPack[]>(contentFile);
-                        }
-                        catch (JsonReaderException)
-                        {
-                            rawContentPacks = new[] { pack.ReadJsonFile<FontContentPack>(contentFile) };
-                        }
+                        contentPack = pack.ReadJsonFile<FontContentPack>(contentFile);
                     }
                     catch (Exception ex)
                     {
@@ -61,12 +54,12 @@ namespace FontSettings.Framework.DataAccess
                         continue;
                     }
 
-                    foreach (FontContentPack rawContentPack in rawContentPacks)
+                    foreach (FontContentPackItem item in contentPack.Fonts)
                     {
                         IEnumerable<FontPresetModel> presets;
                         try
                         {
-                            presets = parser.Parse(rawContentPack, pack).ToArray();
+                            presets = parser.Parse(item, contentPack.Format, pack).ToArray();
                         }
                         catch (Exception ex)
                         {
