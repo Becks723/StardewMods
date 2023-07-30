@@ -99,7 +99,7 @@ namespace FontSettings.Framework.FontGenerators
                     bmFont: new Models.BmFontData(fontFile, builtIn.Pages.ToArray()),
                     pixelZoom: param.PixelZoom,
                     language: param.Language,
-                    bmFontInLatinLanguages: this._enableLatinDialogueFont());
+                    bmFontInLatinLanguages: this._enableLatinDialogueFont);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace FontSettings.Framework.FontGenerators
                     bmFont: new Models.BmFontData(fontFile, pages),
                     pixelZoom: param.PixelZoom,
                     language: param.Language,
-                    bmFontInLatinLanguages: this._enableLatinDialogueFont());
+                    bmFontInLatinLanguages: this._enableLatinDialogueFont);
             }
         }
 

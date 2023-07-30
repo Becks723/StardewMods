@@ -79,8 +79,8 @@ namespace FontSettings.Framework.Fonts
 
         private readonly BmFontData _bmFont;
         private readonly LanguageInfo _language;
-        private readonly bool _bmFontInLatinLanguages;
-        public SpriteTextObject(BmFontData? bmFont, float pixelZoom, LanguageInfo language, bool bmFontInLatinLanguages)
+        private readonly Func<bool> _bmFontInLatinLanguages;
+        public SpriteTextObject(BmFontData? bmFont, float pixelZoom, LanguageInfo language, Func<bool> bmFontInLatinLanguages)
         {
             this._bmFont = bmFont;
             this._language = language;
@@ -852,7 +852,7 @@ namespace FontSettings.Framework.Fonts
 
         private bool CurrentLanguageLatinPatched()
         {
-            if (this._bmFontInLatinLanguages)
+            if (this._bmFontInLatinLanguages())
                 return false;
             else
                 return FontHelpers.IsLatinLanguage(this._language);

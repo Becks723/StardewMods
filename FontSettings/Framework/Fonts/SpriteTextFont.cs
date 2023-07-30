@@ -13,7 +13,7 @@ namespace FontSettings.Framework.Fonts
     {
         private readonly SpriteTextObject _spriteText;
 
-        public SpriteTextFont(BmFontData? bmFont, float pixelZoom, LanguageInfo language, bool bmFontInLatinLanguages)
+        public SpriteTextFont(BmFontData? bmFont, float pixelZoom, LanguageInfo language, Func<bool> bmFontInLatinLanguages)
         {
             this._spriteText = new SpriteTextObject(bmFont, pixelZoom, language, bmFontInLatinLanguages);
         }

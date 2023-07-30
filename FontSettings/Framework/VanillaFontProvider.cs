@@ -100,7 +100,7 @@ namespace FontSettings.Framework
                                 bmFont: new Models.BmFontData(fontFile, pages.ToArray()),
                                 pixelZoom: FontHelpers.GetDefaultFontPixelZoom(language),
                                 language: language,
-                                bmFontInLatinLanguages: this._config.EnableLatinDialogueFont);
+                                bmFontInLatinLanguages: () => this._config.EnableLatinDialogueFont);
 
                             this.RecordFont(language, fontType, bmFont);
                             this.RecordCharacterRanges(language, fontType, GetCharacterRanges(bmFont));

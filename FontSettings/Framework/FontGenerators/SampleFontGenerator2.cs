@@ -74,7 +74,7 @@ namespace FontSettings.Framework.FontGenerators
                         ? withPixelZoom.PixelZoom
                         : 1f,
                     language: context.Language,
-                    bmFontInLatinLanguages: this._enableLatinDialogueFont());
+                    bmFontInLatinLanguages: this._enableLatinDialogueFont);
             }
         }
 
@@ -135,7 +135,7 @@ namespace FontSettings.Framework.FontGenerators
                     ? withPixelZoom.PixelZoom
                     : 1f,
                 language: context.Language,
-                bmFontInLatinLanguages: this._enableLatinDialogueFont());
+                bmFontInLatinLanguages: this._enableLatinDialogueFont);
         }
 
         private SpriteFont? GetVanillaSpriteFont(FontContext context)
