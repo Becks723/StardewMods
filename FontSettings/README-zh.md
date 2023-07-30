@@ -13,6 +13,8 @@
 - [给模组制作者看的](#给其他模组作者看的)
   - [编辑模组素材](#编辑模组素材)
   - [制作字体包](#制作字体包)
+- [疑难解答](#疑难解答)
+  - [SMAPI黄字 "Multiple mods want to provide the 'xxx' asset..."](#smapi黄字-multiple-mods-want-to-provide-the-xxx-asset)
 - [反馈&帮助](#反馈--帮助)
 - [更新日志](#更新日志)
 
@@ -85,10 +87,16 @@
 
 | 选项 | 英文名 | 简介 |
 | --- | --- | --- |
-| 示例文本 | ExampleText | 设置自定义的文本。将覆盖内置文本，所以一般留空即可。 |
 | 字体菜单 | OpenFontSettingsMenu | 绑定打开字体菜单的按键，默认`LeftAlt + F`。 |
 | 禁用字体阴影 | DisableTextShadow | 是否禁用字体阴影，默认`false`。 |
+| 文本颜色 | TextColor | 设置默认文本颜色。 |
+| 文本颜色（对话） | TextColorDialogue | 设置对话字体默认文本颜色。 |
+| 阴影颜色1 | ShadowColorGame1 | 设置默认阴影颜色。 |
+| 阴影颜色2 | ShadowColorUtility | 设置默认阴影颜色。 |
 | 略 | EnableLatinDialogueFont | **（仅针对拉丁文语言，中文无视就好）** 是否允许设置对话字体，默认`true`。 |
+| 编辑模式 | EditMode | 勾选进入编辑（Edit）模式，否则加载（Load）模式。编辑模式能提高兼容性，尤其在多个模组同时修改字体的时候。 |
+| 编辑优先级 | EditPriority | 值越大，越晚编辑。晚的将覆盖早的编辑结果。<br>取值范围：[-2147483648, 2147483647]<br>默认值：0 |
+| 示例文本 | ExampleText | 设置自定义的文本。将覆盖内置文本，所以一般留空即可。 |
 | 最小字体大小 | MinFontSize | 字体的像素大小 最小值。默认`5`。 |
 | 最大字体大小 | MaxFontSize | 字体的像素大小 最大值。默认`75`。 |
 | 最小字间距 | MinSpacing | 字间距 最小值。默认`-10`。 |
@@ -106,12 +114,11 @@
 兼容Windows、MacOS、Linux系统。Android版本还在制作中~
 
 #### 和 SpriteMaster 的冲突
-触发条件：SpriteMaster版本 >0.14.0, 本模组版本不限。<br/>
+触发条件：SpriteMaster版本 > 0.14.0, 本模组版本不限。<br/>
 冲突表现：调整参数示例文本不刷新、点击ok键无限加载、cpu爆高。<br/>
 解决方法：在配置菜单中，找到 SpriteMaster > Advanced Settings > Extras.OpenGL，取消勾选 `Enabled` 和 `OptimizeTexture2DSetData` 两项，重进游戏。<small>测试环境：FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
 
 ## 给其他模组作者看的
-
 ### 编辑模组素材
 本模组的图片在`FontSettings/assets`文件夹内，可编辑
 * 自用：手动覆盖原先的文件。注意，你的图片必须与原来的**一样大小、文件名**。
@@ -128,6 +135,17 @@
 ### 制作字体包
 见[字体包制作教程](./docs/字体包制作教程.md)。
 
+## 疑难解答
+### SMAPI黄字 "Multiple mods want to provide the 'xxx' asset..."
+和其他同样修改字体的模组冲突了。解决方案：
+- 如果要用本模组，有以下选项：
+  - 直接删除冲突的模组。
+  - 修改字体的一般都是UI界面美化，用的Content Patcher。因此如果你会写CP代码，可以自己编辑JSON文件解决。
+  - 本模组提供了两个配置项：`编辑模式`和`编辑优先级`（见[配置](#配置)）。启用编辑模式即可。
+
+- 如果要用其他模组，有以下选项：
+  - 在菜单里取消勾选“启用字体”。
+
 ## 反馈 & 帮助
 #### 反馈/提问
 1. [N网模组页面POSTS栏](https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts)
@@ -138,6 +156,21 @@
 
 
 ## 更新日志
+#### 0.12.0 - 2023-07-31
+- 新增：
+  - 导出功能，导出文体为xnb或可读文件。
+  - 颜色设置，文本颜色和阴影颜色两项。
+
+- 优化：
+  - 字体包引入版本控制（`Format`）。
+  - 添加`编辑模式`和`编辑优先级`两项配置，提升兼容性。
+  - 补充更多“禁用阴影”没有覆盖到的地方。
+  - 文档添加[疑难解答](#疑难解答)板块。
+
+- Bug修复：
+  - 修复 行间距没有实际应用到对话字体 的问题。
+  - 修复 窗口大小调整后菜单不居中 的问题。
+
 #### 0.11.4 - 2023-07-16
 - 修复字体包的bug。
 

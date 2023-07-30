@@ -6,6 +6,9 @@ This mod:
 	- Change font size.
 	- Pick various fonts.
 	- Align text spacing.
+	- Recolor text and text shadow.
+	- Select character ranges.
+	- Export fonts into xnb or readable files.
 	- and so on...
 
 ## Table of Contents
@@ -18,6 +21,9 @@ This mod:
 - [For Modders](#for-modders)
   - [Edit mod assets](#edit-mod-assets)
   - [Create a Font Settings content pack](#create-a-font-settings-content-pack)
+- [Troubleshooting](#troubleshooting)
+  - [Forever applying font change. Sometimes with high CPU usage.](#forever-applying-font-change-sometimes-with-high-cpu-usage)
+  - [SMAPI says "Multiple mods want to provide the 'xxx' asset..."](#smapi-says-multiple-mods-want-to-provide-the-xxx-asset)
 - [Help & Feedback](#help--feedback)
 - [Release Notes](#release-notes)
 
@@ -89,10 +95,16 @@ Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalle
 
 | Field	| Description |
 | --- | --- |
-| ExampleText | Text for font samples. Keep it empty and mod will use built-in text. Otherwise set your own. |
 | OpenFontSettingsMenu | Keybind to open font menu, default `LeftAlt + F`. |
-| DisableTextShadow | Miscellaneous option. Whether to close text shadow, default `false`. |
+| DisableTextShadow | Whether to close text shadow, default `false`. |
+| TextColor | Configues game most common text color. |
+| TextColorDialogue | Configues dialogue text color. |
+| ShadowColorGame1 | Configues game most common text shadow color 1. |
+| ShadowColorUtility | Configues game most common text shadow color 2. |
 | EnableLatinDialogueFont | Whether to enable custom dialogue font in latin languages, default `true`. **When there comes mod conflicts, turn it off for better compatibility.** |
+| EditMode | If checked, edit mode, or load mode. Edit mode enhances mod compatibility, avoids conflicts when multiple mods load same font. |
+| EditPriority | Priority to edit fonts. The large the value, the later fonts get edited.<br>Range: [-2147483648, 2147483647]<br>Default: 0 |
+| ExampleText | Text for font samples. Keep it empty and mod will use built-in text. Otherwise set your own. |
 | MinFontSize | Min reachable value of the font size option, default `5`. |
 | MaxFontSize | Max reachable value of the font size option, default `75`. |
 | MinSpacing | Min reachable value of the spacing option, default `-10`. |
@@ -110,17 +122,14 @@ Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalle
 Lastest version works with Windows, MacOS, Linux.
 
 ### Conflict with SpriteMaster mod
-Condition: SpriteMaster version >0.14.0, FontSettings version unlimited.<br/>
-
+Condition: SpriteMaster version > 0.14.0, FontSettings version unlimited.<br/>
 Symptom: Changes made to fonts do not apply, game becomes laggy, high cpu, etc.<br/>
-
 **Solution**: In the configuration menu, go to `SpriteMaster > Advanced Settings > Extras.OpenGL`, uncheck `Enabled` and `OptimizeTexture2DSetData`, and restart the game.<br>
 
-<small>Test environment: FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
+<small>(Test environment: FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0)</small>
 
 
 ## For Modders
-
 ### Edit Mod Assets
 Textures for this mod are stored in the `FontSettings/assets` folder. To edit them, you may:
 * For own use, draw your own version and replace the texture file. Your own texture must be same size and filename as original one.
@@ -138,11 +147,24 @@ Textures for this mod are stored in the `FontSettings/assets` folder. To edit th
 ### Create a Font Settings content pack
 Modders can create font packs by editing some json files. See [Font Settings pack guide](./docs/font-pack-guide.md) for more info.
 
-## Help & Feedback:
+## Troubleshooting
+### Forever applying font change. Sometimes with high CPU usage.
+That's because of SpriteMaster, another mod. But thankfully, they provide some settings to solve this issue. See [Compatibility - Conflict With SpriteMaster](#conflict-with-spritemaster-mod) for solution.
 
+### SMAPI says "Multiple mods want to provide the 'xxx' asset..."
+Here runs into the case when multiple mods load same font. In most cases, those UI interface mods do this.<br>
+So, **to use Font Settings fonts**, you have these solutions:
+- Remove the conflicted mods, directly.
+- Since most UI mods use Content Patcher, edit their content JSON files to stop their font(s). This assumes you have CP knowledge.
+- Font Settings also has options for compatibility: `EditMode`, `EditPriority` in [Cofiguration](#configuration). Mostly, you open EditMode, then increase EditPriority value, to delay the edits.
+
+And, **to use other mods' fonts**, you have these solutions:
+- In UI, uncheck 'Enabled' of target font.
+
+## Help & Feedback:
 ### Where to feedback/ask for help
 1. At [Nexus modpage POSTS tab](https://www.nexusmods.com/stardewvalley/mods/12467?tab=posts).
-2. At [Stardew Valley Discord](https://discord.gg/stardewvalley). Ping me _@Becks723#7620_ anytime. I won't be always around but I'll check.
+2. At [Discord](https://discord.gg/stardewvalley). Ping _@becks723_ anytime.
 
 ### Report a bug
 1. At [Nexus modpage BUGS tab](https://www.nexusmods.com/stardewvalley/mods/12467?tab=bugs).
@@ -150,6 +172,21 @@ Modders can create font packs by editing some json files. See [Font Settings pac
 
 
 ## Release Notes
+#### 0.12.0 - 2023-07-31
+- New features:
+  - Export. Lets you export font as xnb or normal files.
+  - Color settings. Both text and text shadow color.
+
+- Improvements:
+  - Adds version control to content pack ([`Format` field](./docs/font-pack-guide.md#format)).
+  - Adds `EditMode` and `EditPriority` to reduce mod conflicts.
+  - `DisableTextShadow` covers more locations.
+  - Docs improved. Adds a [Troubleshooting](#troubleshooting) topic.
+
+- Bugfixes:
+  - Fix line spacing not actually applied to dialogue font.
+  - Centers UI menus after window resized.
+
 #### 0.11.4 - 2023-07-16
 - Fix bugs related to content pack.
 

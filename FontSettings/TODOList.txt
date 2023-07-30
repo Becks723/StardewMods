@@ -18,6 +18,8 @@
 	- √ 拉丁语言兼容对话字体。
 	- √ 修复enabled=false时对话体的pixelZoom始终为1f的问题。
 	- √ 修复信中的图标缩水的问题。
+	- √ 添加阴影&颜色设置
+	- √ 解决替换字体冲突
 	- × SpriteFont的文件保存，方便下次加载。
 	- × BmFont的Kerning？游戏里用不着。
 	- 暂时√ SpriteFont生成的图片太大（指宽高）怎么办？xna自己解决
@@ -40,10 +42,8 @@
 	- 将第三方dll归入libs目录。
 		目前难点：SMAPI用cecil提前解析依赖，因此无法用AssemblyResolve事件；
 				目前只识别与主dll同一目录的依赖（见AssemblyLoader::GetReferencedLocalAssemblies），可能需要写一份PR。
-	- 添加阴影&颜色设置
 	- 添加加粗设置。
 	- 添加一个随机骰子
-	- 解决替换字体冲突
 
 Custom Dialogue font under latin language:
 Solution:
