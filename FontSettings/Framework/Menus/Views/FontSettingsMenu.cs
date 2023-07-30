@@ -860,6 +860,7 @@ namespace FontSettings.Framework.Menus.Views
             base.draw(b);
 
 #if DEBUG
+            string FormatColor(Color color) => $"R={color.R} G={color.G} B={color.B} A={color.A}";
             string GetDebugInfo()
             {
                 return $"CurrentFontType: {this._viewModel.CurrentFontType}"
@@ -874,7 +875,8 @@ namespace FontSettings.Framework.Menus.Views
                     + $"\nOffset-y: {this._viewModel.CharOffsetY}"
                     + $"\nPixel Zoom: {this._viewModel.PixelZoom}"
                     + $"\nCharacters: Count = {this._viewModel.Characters.Count}"
-                    + $"\nDefault character: {this._viewModel.DefaultCharacter}";
+                    + $"\nDefault character: {this._viewModel.DefaultCharacter}"
+                    + $"\nMask: {FormatColor(this._viewModel.Mask)}";
             }
             b.DrawString(Game1.smallFont, GetDebugInfo(), new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif
