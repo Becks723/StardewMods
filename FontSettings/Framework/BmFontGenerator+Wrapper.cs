@@ -25,6 +25,7 @@ namespace FontSettings.Framework
                 spacingHoriz: (int)config.Spacing,
                 charOffsetX: config.CharOffsetX,
                 charOffsetY: config.CharOffsetY,
+                lineHeightOverride: (int)config.LineSpacing,
                 textColorMask: config.TryGetInstance(out IWithSolidColor withSolidColor)
                     ? withSolidColor.SolidColor
                     : Color.White);

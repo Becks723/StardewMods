@@ -19,7 +19,8 @@ namespace FontSettings.Framework
             int paddingUp, int paddingRight, int paddingDown, int paddingLeft,
             int spacingHoriz, int spacingVert,
             float charOffsetX, float charOffsetY,
-            string pageName, 
+            bool overrideLineHeight, int lineHeight,
+            string pageName,
             Color mask)
         {
             var bmfont = new BmFontCS.BmFont();
@@ -32,7 +33,9 @@ namespace FontSettings.Framework
                 Padding = new Padding(paddingUp, paddingRight, paddingDown, paddingLeft),
                 Spacing = new Spacing(spacingHoriz, spacingVert),
                 Name = pageName,
-                Mask = mask
+                Mask = mask,
+                OverrideLineHeight = overrideLineHeight,
+                LineHeight = lineHeight,
             });
 
             // offset

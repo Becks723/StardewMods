@@ -115,7 +115,9 @@ namespace BmFontCS
                 },
                 Common = new FontCommon
                 {
-                    LineHeight = (int)Math.Round(this._lineHeight),
+                    LineHeight = settings.OverrideLineHeight 
+                        ? settings.LineHeight 
+                        : (int)Math.Round(this._lineHeight),
                     Base = (int)Math.Round(this._ascender),
                     ScaleW = settings.TextureSize.Width,
                     ScaleH = settings.TextureSize.Height,
@@ -364,6 +366,10 @@ namespace BmFontCS
         /// <summary>Name of the font file (.fnt), if exported. Also base name of pages.</summary>
         public string Name { get; set; } = Guid.NewGuid().ToString().Substring(0, 8);
         public Color Mask { get; set; } = Color.White;
+        /// <summary>Whether to override font's default line height.</summary>
+        public bool OverrideLineHeight { get; set; } = false;
+        /// <summary>The line height value to override.</summary>
+        public int LineHeight { get; set; }
     }
 
     public struct UnicodeRange

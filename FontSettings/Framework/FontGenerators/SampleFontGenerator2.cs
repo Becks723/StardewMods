@@ -66,7 +66,6 @@ namespace FontSettings.Framework.FontGenerators
                 else
                 {
                     bmFont = BmFontGenerator.Generate(config);
-                    bmFont.FontFile.Common.LineHeight = (int)config.LineSpacing;
                 }
 
                 return new GameBitmapSpriteFont(
@@ -128,7 +127,6 @@ namespace FontSettings.Framework.FontGenerators
             else
             {
                 bmFont = await BmFontGenerator.GenerateAsync(config, cancellationToken);
-                bmFont.FontFile.Common.LineHeight = (int)config.LineSpacing;
             }
 
             return new GameBitmapSpriteFont(

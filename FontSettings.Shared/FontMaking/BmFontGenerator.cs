@@ -38,7 +38,9 @@ namespace FontSettings.Framework
             int? paddingUp = null, int? paddingRight = null, int? paddingDown = null, int? paddingLeft = null,
             int? spacingHoriz = null, int? spacingVert = null,
             float charOffsetX = 0, float charOffsetY = 0,
-            string? pageName = null, Color? textColorMask = null)
+            int? lineHeightOverride = null,
+            string? pageName = null, 
+            Color? textColorMask = null)
         {
             string finalFontFile = fontFilePath ?? throw new ArgumentNullException(nameof(fontFilePath));
             int finalFontIndex = fontIndex ?? DefaultFontIndex;
@@ -53,6 +55,8 @@ namespace FontSettings.Framework
             string[] finalCharsFiles = charsFiles ?? DefaultCharsFiles;
             float finalOffsetX = charOffsetX;
             float finalOffsetY = charOffsetY;
+            bool overrideLineHeight = lineHeightOverride != null;
+            int finalLineHeight = lineHeightOverride ?? 0;
             string finalPageName = pageName ?? DefaultPageName;
             Color finalTextMask = textColorMask ?? DefaultTextColorMask;
 
@@ -63,6 +67,7 @@ namespace FontSettings.Framework
                 finalPaddingUp, finalPaddingRight, finalPaddingDown, finalPaddingLeft,
                 finalSpacingHoriz, finalSpacingVert,
                 finalOffsetX, finalOffsetY,
+                overrideLineHeight, finalLineHeight,
                 finalPageName,
                 finalTextMask);
         }
