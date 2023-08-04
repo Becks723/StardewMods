@@ -171,6 +171,7 @@ namespace FontSettings
 #if DEBUG
             helper.ConsoleCommands.Add("export", "export font", (_, args) => this.ExportCommand(args));
 #endif
+            helper.ConsoleCommands.Add("local", this.LocalCommandDocs(), (_, args) => this.LocalCommand(args));
         }
 
         protected override void Dispose(bool disposing)
@@ -317,6 +318,27 @@ namespace FontSettings
             else
             {
                 this.Monitor.Log($"{result.GetError()}", LogLevel.Error);
+            }
+        }
+
+        private string LocalCommandDocs()
+        {
+            return "Command for local data (saved settings & presets)."
+                + "\n"
+                + "\nlocal data"
+                + "\nUsage: local data <options>"
+                + "\nOptions:"
+                + "\n--clear                Clears all saved settings.";
+        }
+
+        private void LocalCommand(string[] args)
+        {
+            if (args.Length == 2
+                && args[0] == "data"
+                && args[1] == "--clear")
+            {
+                var configRepo = new FontConfigRepository(this.Helper);
+                configRepo.ClearAllConfigs();
             }
         }
 
