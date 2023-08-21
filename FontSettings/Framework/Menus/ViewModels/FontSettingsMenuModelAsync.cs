@@ -25,8 +25,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private readonly IAsyncFontInfoRetriever _asyncFontInfoRetriever;
 
-        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
-            : base(config, vanillaFontProvider, sampleFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, cpFontFileProviders, fontInfoRetriever, exporter, stagedValues)
+        public FontSettingsMenuModelAsync(ModConfig config, IMonitor monitor, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
+            : base(config, monitor, vanillaFontProvider, sampleFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, cpFontFileProviders, fontInfoRetriever, exporter, stagedValues)
         {
             this._asyncFontInfoRetriever = asyncFontInfoRetriever;
 
@@ -35,7 +35,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 int length = commandName.Length - "Command".Length;
                 string name = commandName.Substring(0, length);
 
-                ILog.Error($"Error when {name}: {ex.Message}\n{ex.StackTrace}");
+                this._monitor.Log($"Error when {name}: {ex.Message}\n{ex.StackTrace}", LogLevel.Error);
             }
             this.RefreshFontsCommand = new AsyncDelegateCommand(this.RefreshAllFontsAsync, this.CanRefreshAllFonts, ex => LogAsyncException(nameof(this.RefreshFontsCommand), ex));
 
@@ -157,8 +157,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                 return result.GetData();
             else
             {
-                ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace($"{result.GetError()}");
+                this._monitor.Log(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile), LogLevel.Warn);
+                this._monitor.Log($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }
@@ -170,8 +170,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                 return result.GetData();
             else
             {
-                ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace($"{result.GetError()}");
+                this._monitor.Log(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile), LogLevel.Warn);
+                this._monitor.Log($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }

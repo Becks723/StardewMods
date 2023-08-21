@@ -501,6 +501,7 @@ namespace FontSettings
                     if (async)
                         viewModel = new FontSettingsMenuModelAsync(
                             config: this._config,
+                            monitor: this.Monitor,
                             vanillaFontProvider: this._vanillaFontProvider,
                             sampleFontGenerator: sampleFontGenerator,
                             presetManager: this._fontConfigManager,
@@ -516,6 +517,7 @@ namespace FontSettings
                     else
                         viewModel = new FontSettingsMenuModel(
                             config: this._config,
+                            monitor: this.Monitor,
                             vanillaFontProvider: this._vanillaFontProvider,
                             sampleFontGenerator: sampleFontGenerator,
                             presetManager: this._fontConfigManager,
