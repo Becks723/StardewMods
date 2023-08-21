@@ -162,30 +162,32 @@ namespace FontSettings.Framework
                 var chars = new List<char>();
                 var kerning = new List<Vector3>();
 
-                byte[] pixels = new byte[finalTexWidth * finalTexHeight];
                 stbtt_pack_context ctx = new stbtt_pack_context();
+                byte[] pixels = new byte[finalTexWidth * finalTexHeight];
                 fixed (byte* pxPtr = pixels)
+                {
                     stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, padding, null);
 
-                foreach (CharacterRange range in characterRanges)
-                {
-                    stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
-                    fixed (stbtt_packedchar* cPtr = arr)
-                        stbtt_PackFontRange(ctx, fontInfo.data, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
-
-                    for (int i = 0; i < arr.Length; i++)
+                    foreach (CharacterRange range in characterRanges)
                     {
-                        var pc = arr[i];
+                        stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
+                        fixed (stbtt_packedchar* cPtr = arr)
+                            stbtt_PackFontRange(ctx, fontInfo.data, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
 
-                        float yOff = pc.yoff;
-                        yOff += ascent * scale;
+                        for (int i = 0; i < arr.Length; i++)
+                        {
+                            var pc = arr[i];
 
-                        int width = pc.x1 - pc.x0;
-                        int height = pc.y1 - pc.y0;
-                        chars.Add((char)(range.Start + i));
-                        bounds.Add(new Rectangle(pc.x0, pc.y0, width, height));
-                        cropping.Add(new Rectangle((int)Math.Round(charOffsetX), (int)Math.Round(yOff + charOffsetY), width, height));
-                        kerning.Add(new Vector3(pc.xoff, width, pc.xadvance - pc.xoff - width));
+                            float yOff = pc.yoff;
+                            yOff += ascent * scale;
+
+                            int width = pc.x1 - pc.x0;
+                            int height = pc.y1 - pc.y0;
+                            chars.Add((char)(range.Start + i));
+                            bounds.Add(new Rectangle(pc.x0, pc.y0, width, height));
+                            cropping.Add(new Rectangle((int)Math.Round(charOffsetX), (int)Math.Round(yOff + charOffsetY), width, height));
+                            kerning.Add(new Vector3(pc.xoff, width, pc.xadvance - pc.xoff - width));
+                        }
                     }
                 }
 
@@ -205,33 +207,6 @@ namespace FontSettings.Framework
             {
                 fontInfo.Dispose();
             }
-        }
-
-        private static Texture2D GenerateTexture(byte[] pixels, int width, int height, GraphicsDevice? graphicsDevice = null)
-        {
-            if (graphicsDevice == null)
-            {
-                var game1Device = Game1.graphics?.GraphicsDevice;
-                if (game1Device == null)
-                    throw new InvalidOperationException($"The game is not running! Needs 'Game1.graphics?.GraphicsDevice' but it's null.");
-
-                graphicsDevice = game1Device;
-            }
-
-            Texture2D result = new Texture2D(graphicsDevice, width, height);
-
-            Color[] colorData = new Color[width * height];
-            for (int i = 0; i < pixels.Length; i++)
-            {
-                byte b = pixels[i];
-                colorData[i].R = b;
-                colorData[i].G = b;
-                colorData[i].B = b;
-                colorData[i].A = b;
-            }
-
-            result.SetData(colorData);
-            return result;
         }
 
         private static IEnumerable<CharacterRange> EnsureDefaultCharacter(IEnumerable<CharacterRange> ranges, char? defaultCharacter)
