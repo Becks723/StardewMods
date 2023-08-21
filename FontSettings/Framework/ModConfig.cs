@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using FontSettings.Framework.DataAccess.Models;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 
@@ -39,11 +40,23 @@ namespace FontSettings.Framework
 
         public bool DisableTextShadow { get; set; }
 
+        public Color TextColor { get; set; }
+
+        public Color TextColorDialogue { get; set; }
+
+        public Color ShadowColorGame1 { get; set; }
+
+        public Color ShadowColorUtility { get; set; }
+
         public bool EnableLatinDialogueFont { get; set; }
 
         public KeybindList OpenFontSettingsMenu { get; set; }
 
         public IList<string> CustomFontFolders { get; set; }
+
+        public bool EditMode { get; set; }
+
+        public int EditPriority { get; set; }
 
         private readonly int DEFAULT_MinFontSize = 5;
         private readonly int DEFAULT_MaxFontSize = 75;
@@ -58,9 +71,15 @@ namespace FontSettings.Framework
         private readonly float DEFAULT_MinPixelZoom = 0.5f;
         private readonly float DEFAULT_MaxPixelZoom = 5f;
         private readonly bool DEFAULT_DisableTextShadow = false;
+        private readonly Color DEFAULT_TextColor = new Color(34, 17, 34);  // from `Game1.textColor`
+        private readonly Color DEFAULT_TextColorDialogue = new Color(86, 22, 12);  // from `SpriteText.getColorFromIndex`
+        private readonly Color DEFAULT_ShadowColorGame1 = new Color(206, 156, 95);  // from `Game1.textShadowColor`
+        private readonly Color DEFAULT_ShadowColorUtility = new Color(221, 148, 84);  // from `Utility.drawTextWithShadow()`
         private readonly bool DEFAULT_EnableLatinDialogueFont = true;
         private readonly KeybindList DEFAULT_OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
         private readonly string[] DEFAULT_CustomFontFolders = GetDefaultCustomFontFolders().ToArray();
+        private readonly bool DEFAULT_EditMode = false;
+        private readonly int DEFAULT_EditPriority = 0;
 
         public ModConfig()
         {
@@ -83,11 +102,17 @@ namespace FontSettings.Framework
             this.MinPixelZoom = this.DEFAULT_MinPixelZoom;
             this.MaxPixelZoom = this.DEFAULT_MaxPixelZoom;
             this.DisableTextShadow = this.DEFAULT_DisableTextShadow;
+            this.TextColor = this.DEFAULT_TextColor;
+            this.TextColorDialogue = this.DEFAULT_TextColorDialogue;
+            this.ShadowColorGame1 = this.DEFAULT_ShadowColorGame1;
+            this.ShadowColorUtility = this.DEFAULT_ShadowColorUtility;
             this.EnableLatinDialogueFont = this.DEFAULT_EnableLatinDialogueFont;
             this.OpenFontSettingsMenu = this.DEFAULT_OpenFontSettingsMenu;
             this.CustomFontFolders = new List<string>(this.DEFAULT_CustomFontFolders);
             foreach (string folder in this.CustomFontFolders)
                 Directory.CreateDirectory(folder);
+            this.EditMode = this.DEFAULT_EditMode;
+            this.EditPriority = this.DEFAULT_EditPriority;
         }
 
         public void ValidateValues(IMonitor? monitor)

@@ -10,8 +10,8 @@ namespace FontSettings.Framework.FontPatching.Editors
 {
     internal class BmFontFileEditor : BaseFontEditor<XmlSource>
     {
-        public BmFontFileEditor(FontConfig config)
-            : base(config)
+        public BmFontFileEditor(FontConfig config, int priority)
+            : base(config, priority)
         {
         }
 

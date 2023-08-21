@@ -1,30 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.Menus;
 
 namespace FontSettings.Framework.Patchers
 {
     internal class FontShadowPatcher
     {
-        private static ModConfig _config;
+        private static Func<Color> _textShadowColorOverride;
+        private static Func<float> _shadowAlphaOverride;
 
-        public FontShadowPatcher(ModConfig config)
+        private static ModConfig _config;
+        private static ModConfigWatcher _configWatcher;
+
+        public static event EventHandler Game1textShadowColorAssigned;
+        public static event EventHandler SpriteTextshadowAlphaAssigned;
+
+        public FontShadowPatcher(ModConfig config, ModConfigWatcher configWatcher)
         {
             _config = config;
+            _configWatcher = configWatcher;
         }
 
         public void Patch(Harmony harmony, IMonitor monitor)
         {
             harmony.Patch(
                 original: AccessTools.Method(typeof(Utility), nameof(Utility.drawTextWithShadow), new[] { typeof(SpriteBatch), typeof(string), typeof(SpriteFont), typeof(Vector2), typeof(Color), typeof(float), typeof(float), typeof(int), typeof(int), typeof(float), typeof(int) }),
-                prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithShadow_Prefix))
+                prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithShadow_Prefix)),
+                transpiler: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithShadow_Transpiler))
             );
             harmony.Patch(
                 original: AccessTools.Method(typeof(Utility), nameof(Utility.drawTextWithShadow), new[] { typeof(SpriteBatch), typeof(StringBuilder), typeof(SpriteFont), typeof(Vector2), typeof(Color), typeof(float), typeof(float), typeof(int), typeof(int), typeof(float), typeof(int) }),
@@ -35,10 +47,54 @@ namespace FontSettings.Framework.Patchers
                 prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithColoredShadow_Prefix))
             );
             harmony.Patch(
-                original: AccessTools.Method(typeof(IClickableMenu), nameof(IClickableMenu.drawHoverText), new[] { typeof(SpriteBatch), typeof(StringBuilder), typeof(SpriteFont), typeof(int), typeof(int), typeof(int), typeof(string), typeof(int), typeof(string[]), typeof(Item), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(float), typeof(CraftingRecipe), typeof(IList<Item>) }),
-                prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(IClickableMenu_drawHoverText_Prefix)),
-                postfix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(IClickableMenu_drawHoverText_Postfix))
+                original: AccessTools.Method(typeof(Game1), "CleanupReturningToTitle"),
+                postfix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Game1_CleanupReturningToTitle_Postfix))
             );
+            Game1textShadowColorAssigned += this.OnGame1textShadowColorAssigned;
+            SpriteTextshadowAlphaAssigned += this.OnSpriteTextshadowAlphaAssigned;
+            _configWatcher.TextShadowToggled += this.OnTextShadowToggled;
+            _configWatcher.ShadowColorGame1Changed += this.OnShadowColorGame1Changed;
+        }
+
+        private void OnGame1textShadowColorAssigned(object sender, EventArgs e)
+        {
+            Game1.textShadowColor = _textShadowColorOverride();
+        }
+
+        private void OnSpriteTextshadowAlphaAssigned(object sender, EventArgs e)
+        {
+            SpriteText.shadowAlpha = _shadowAlphaOverride();
+        }
+
+        private void OnTextShadowToggled(object sender, EventArgs e)
+        {
+            this.SetOverrideTextShadowColor(_config.DisableTextShadow
+                ? Color.Transparent
+                : _config.ShadowColorGame1);
+            this.SetOverrideShadowAlpha(_config.DisableTextShadow
+                ? 0f
+                : 0.15f);
+        }
+
+        private void OnShadowColorGame1Changed(object sender, EventArgs e)
+        {
+            this.SetOverrideTextShadowColor(_config.DisableTextShadow
+                ? Color.Transparent
+                : _config.ShadowColorGame1);
+        }
+
+        public void SetOverrideTextShadowColor(Color textShadowColor)
+        {
+            _textShadowColorOverride = () => textShadowColor;
+
+            RaiseGame1textShadowColorAssigned(EventArgs.Empty);
+        }
+
+        public void SetOverrideShadowAlpha(float shadowAlpha)
+        {
+            _shadowAlphaOverride = () => shadowAlpha;
+
+            RaiseSpriteTextshadowAlphaAssigned(EventArgs.Empty);
         }
 
         private static void Utility_drawTextWithShadow_Prefix(ref float shadowIntensity)
@@ -53,19 +109,53 @@ namespace FontSettings.Framework.Patchers
                 shadowColor = Color.Transparent;
         }
 
-        private static void IClickableMenu_drawHoverText_Prefix(out Color __state)  // __state里记录了原来的阴影颜色
+        private static IEnumerable<CodeInstruction> Utility_drawTextWithShadow_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            __state = Game1.textShadowColor;
+            var oldInstructions = instructions.ToArray();
+            int slide = 0;
+            for (int i = 0; i < oldInstructions.Length; i++)
+            {
+                if (oldInstructions[i + slide].opcode == OpCodes.Ldc_I4
+                    && oldInstructions[i + slide].operand is 221
+                    && oldInstructions[i + slide + 1].opcode == OpCodes.Ldc_I4
+                    && oldInstructions[i + slide + 1].operand is 148
+                    && oldInstructions[i + slide + 2].opcode == OpCodes.Ldc_I4_S
+                    && oldInstructions[i + slide + 2].operand is (sbyte)84  // 这里不是int，而是sbyte，很奇怪
+                    && oldInstructions[i + slide + 3].opcode == OpCodes.Newobj
+                    && oldInstructions[i + slide + 3].operand is ConstructorInfo { Name: ".ctor" })
+                {
+                    if (slide == 0)
+                        yield return new CodeInstruction(OpCodes.Call,
+                            AccessTools.Method(typeof(FontShadowPatcher), nameof(PatchedShadowColor)));
 
-            // 在方法开始前，将阴影颜色设置为透明。
-            if (_config.DisableTextShadow)
-                Game1.textShadowColor = Color.Transparent;
+                    --slide;
+                    if (slide == -4)
+                        slide = 0;
+                }
+
+                else
+                    yield return oldInstructions[i];
+            }
         }
 
-        private static void IClickableMenu_drawHoverText_Postfix(Color __state)
+        private static Color PatchedShadowColor()
         {
-            // 在方法结束后，恢复原来的阴影颜色。
-            Game1.textShadowColor = __state;
+            return _config.ShadowColorUtility;
+        }
+
+        private static void Game1_CleanupReturningToTitle_Postfix()
+        {
+            RaiseGame1textShadowColorAssigned(EventArgs.Empty);
+        }
+
+        private static void RaiseGame1textShadowColorAssigned(EventArgs e)
+        {
+            Game1textShadowColorAssigned?.Invoke(null, e);
+        }
+
+        private static void RaiseSpriteTextshadowAlphaAssigned(EventArgs e)
+        {
+            SpriteTextshadowAlphaAssigned?.Invoke(null, e);
         }
     }
 }

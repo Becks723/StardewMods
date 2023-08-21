@@ -119,10 +119,8 @@ namespace FontSettings.Framework.Menus.Views
 
         private async Task OkButtonClickedAsync()
         {
-            Game1.playSound("coin");
-
             var (result, fontType) = await this._viewModel.ChangeFontAsync();
-            if (result.IsSuccessful)
+            if (result.IsSuccess)
             {
                 Game1.playSound("money");
 
@@ -143,7 +141,7 @@ namespace FontSettings.Framework.Menus.Views
                     Game1.addHUDMessage(new OverlayHUDMessage(message, HUDMessage.error_type));
 
                 // 日志记录错误信息。
-                string error = result.GetErrorMessage();
+                string error = result.GetError();
                 ILog.Error(error);
             }
         }
@@ -168,6 +166,15 @@ namespace FontSettings.Framework.Menus.Views
                     this.ChangeSubMenu(presetInfoMenu);
                 }
             }
+        }
+
+        private void OnExportButtonClicked(object sender, EventArgs e)
+        {
+            var exportMenu = new ExportMenu(
+                onClosed: () => this.ChangeSubMenu(null),
+                viewModel: this._viewModel.GetCurrentExportViewModel());
+
+            this.ChangeSubMenu(exportMenu);
         }
 
         protected override void ResetComponents(MenuInitializationContext context)
@@ -660,9 +667,9 @@ namespace FontSettings.Framework.Menus.Views
                                                 titleGrid.Children.Add(titleView);
                                                 titleGrid.SetRow(titleView, 0);
                                                 {
-                                                var titleLabel = new Label();
-                                                titleLabel.Font = FontType.DialogueFont;
-                                                context.OneWayBinds(() => this._viewModel.CurrentPresetTitle, () => titleLabel.Text);
+                                                    var titleLabel = new Label();
+                                                    titleLabel.Font = FontType.DialogueFont;
+                                                    context.OneWayBinds(() => this._viewModel.CurrentPresetTitle, () => titleLabel.Text);
                                                     titleView.Content = titleLabel;
                                                 }
 
@@ -672,11 +679,11 @@ namespace FontSettings.Framework.Menus.Views
                                                 titleGrid.Children.Add(subtitleView);
                                                 titleGrid.SetRow(subtitleView, 1);
                                                 {
-                                                var subtitleLabel = new Label();
+                                                    var subtitleLabel = new Label();
                                                     subtitleLabel.Font = FontType.SmallFont;
-                                                context.OneWayBinds(() => this._viewModel.CurrentPresetSubtitle, () => subtitleLabel.Text);
+                                                    context.OneWayBinds(() => this._viewModel.CurrentPresetSubtitle, () => subtitleLabel.Text);
                                                     subtitleView.Content = subtitleLabel;
-                                            }
+                                                }
                                             }
 
                                             var nextPresetButton = new TextureButton(
@@ -737,14 +744,26 @@ namespace FontSettings.Framework.Menus.Views
                             }
                         }
 
-                        var okButton = new TextureButton(
-                            Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
-                        okButton.HorizontalAlignment = HorizontalAlignment.Center;
-                        okButton.VerticalAlignment = VerticalAlignment.Center;
-                        context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
-                        okButton.Click += this.OkButtonClicked;
-                        settingsGrid.Children.Add(okButton);
-                        settingsGrid.SetRow(okButton, 1);
+                        StackContainer functionStack = new StackContainer();
+                        functionStack.Orientation = Orientation.Horizontal;
+                        functionStack.HorizontalAlignment = HorizontalAlignment.Center;
+                        settingsGrid.Children.Add(functionStack);
+                        settingsGrid.SetRow(functionStack, 1);
+                        {
+                            var okButton = new TextureButton(
+                                Game1.mouseCursors, Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46));
+                            context.OneWayBinds(() => this._viewModel.CanGenerateFont, () => okButton.GreyedOut, new TrueFalseConverter());
+                            okButton.ClickSound = "coin";
+                            okButton.ToolTip = I18n.Ui_MainMenu_Ok();
+                            okButton.Click += this.OkButtonClicked;
+                            functionStack.Children.Add(okButton);
+
+                            var exportButton = new TextureButton(Textures.Export, null, 4f);
+                            exportButton.ClickSound = "bigDeSelect";
+                            exportButton.ToolTip = I18n.Ui_MainMenu_Export();
+                            exportButton.Click += this.OnExportButtonClicked;
+                            functionStack.Children.Add(exportButton);
+                        }
                     }
 
                     Grid previewGrid = new Grid();
@@ -841,6 +860,7 @@ namespace FontSettings.Framework.Menus.Views
             base.draw(b);
 
 #if DEBUG
+            string FormatColor(Color color) => $"R={color.R} G={color.G} B={color.B} A={color.A}";
             string GetDebugInfo()
             {
                 return $"CurrentFontType: {this._viewModel.CurrentFontType}"
@@ -853,7 +873,10 @@ namespace FontSettings.Framework.Menus.Views
                     + $"\nFont index: {this._viewModel.FontIndex}"
                     + $"\nOffset-x: {this._viewModel.CharOffsetX}"
                     + $"\nOffset-y: {this._viewModel.CharOffsetY}"
-                    + $"\nPixel Zoom: {this._viewModel.PixelZoom}";
+                    + $"\nPixel Zoom: {this._viewModel.PixelZoom}"
+                    + $"\nCharacters: Count = {this._viewModel.Characters.Count}"
+                    + $"\nDefault character: {this._viewModel.DefaultCharacter}"
+                    + $"\nMask: {FormatColor(this._viewModel.Mask)}";
             }
             b.DrawString(Game1.smallFont, GetDebugInfo(), new Vector2(this.xPositionOnScreen, this.yPositionOnScreen), Color.Blue);
 #endif
@@ -880,6 +903,15 @@ namespace FontSettings.Framework.Menus.Views
                 return true;
         }
 
+        protected override void OnGameWindowSizeChanged(Point oldSize, Point newSize)
+        {
+            base.OnGameWindowSizeChanged(oldSize, newSize);
+
+            this._currentSubMenu?.gameWindowSizeChanged(
+                new Rectangle(Point.Zero, oldSize),
+                new Rectangle(Point.Zero, newSize));
+        }
+
         private void ChangeSubMenu(IClickableMenu? newSubMenu)
         {
             if (object.ReferenceEquals(this._currentSubMenu, newSubMenu))
@@ -890,10 +922,10 @@ namespace FontSettings.Framework.Menus.Views
                 disposable.Dispose();
 
             this._currentSubMenu = newSubMenu;
-            }
+        }
 
         private NewPresetMenu CreateNewPresetMenu()
-            {
+        {
             void OnMenuOpened(NewPresetMenu menu) => this.ChangeSubMenu(menu);
             void OnMenuClosed(NewPresetMenu menu) => this.ChangeSubMenu(null);
 
@@ -944,12 +976,50 @@ namespace FontSettings.Framework.Menus.Views
             {
                 FontViewModel font = context.Target;
 
+                Thickness margin = new Thickness(4, 0, 0, 0);
+                switch (font)
+                {
+                    case null:
+                        return null;
+
+                    case FontFromPackViewModel fontFromPack:
+                        var stack = new StackContainer();
+                        stack.Orientation = Orientation.Vertical;
+                        stack.Margin = margin;
+                        {
+                            Label fontLabel = this.DefaultLabel(font, Thickness.Zero, HorizontalAlignment.Left, VerticalAlignment.Center);
+                            stack.Children.Add(fontLabel);
+
+                            var cpStack = new StackContainer();
+                            cpStack.Orientation = Orientation.Horizontal;
+                            stack.Children.Add(cpStack);
+                            {
+                                // TODO: 加一个表示fontpack的图标
+
+                                Label packLabel = new Label();
+                                packLabel.Font = FontType.SmallFont;
+                                packLabel.Text = I18n.Ui_MainMenu_FontFromPack(fontFromPack.PackManifest.Name);
+                                cpStack.Children.Add(packLabel);
+                            }
+                        }
+                        return stack;
+
+                    default:
+                        return this.DefaultLabel(font, margin, HorizontalAlignment.Left, VerticalAlignment.Center);
+                }
+            }
+
+            private Label DefaultLabel(FontViewModel font,
+                Thickness margin,
+                HorizontalAlignment horizontalAlignment,
+                VerticalAlignment verticalAlignment)
+            {
                 Label l = new Label();
                 l.Text = this.GetText(font);
                 l.Font = FontType.SmallFont;
-                l.Margin = new Thickness(4, 0, 0, 0);
-                l.HorizontalAlignment = HorizontalAlignment.Left;
-                l.VerticalAlignment = VerticalAlignment.Center;
+                l.Margin = margin;
+                l.HorizontalAlignment = horizontalAlignment;
+                l.VerticalAlignment = verticalAlignment;
                 return l;
             }
 

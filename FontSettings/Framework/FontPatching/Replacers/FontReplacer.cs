@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FontSettings.Framework.FontPatching.Editors;
-using FontSettings.Framework.FontPatching.Loaders;
 
 namespace FontSettings.Framework.FontPatching.Replacers
 {
@@ -12,14 +10,12 @@ namespace FontSettings.Framework.FontPatching.Replacers
     {
         public object Replacement { get; }
 
-        public FontReplacer(object replacement)
+        public int Priority { get; }
+
+        public FontReplacer(object replacement, int priority)
         {
             this.Replacement = replacement;
-        }
-
-        public FontReplacer(IFontLoader loader)
-            : this(loader.Load())
-        {
+            this.Priority = priority;
         }
 
         void IFontEditor.Edit(object data) => throw new NotSupportedException();

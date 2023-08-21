@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework.FontPatching.Editors
+namespace FontSettings.Framework
 {
-    internal interface IFontEditor
+    internal enum XnbPlatform
     {
-        void Edit(object data);
+        Windows,
+        DesktopGL,
+        Android
     }
 }

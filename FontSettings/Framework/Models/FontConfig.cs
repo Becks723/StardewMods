@@ -30,8 +30,8 @@ namespace FontSettings.Framework.Models
         float CharOffsetY,
         IEnumerable<CharacterRange> CharacterRanges) : IExtensible
     {
-        public T GetInstance<T>() where T : class => this as T;
+        public virtual T GetInstance<T>() where T : class => this as T;
 
-        public bool Supports<T>() where T : class => this is T;
+        public virtual bool Supports<T>() where T : class => this is T;
     }
 }

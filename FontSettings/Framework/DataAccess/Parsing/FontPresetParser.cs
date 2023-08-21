@@ -32,6 +32,8 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 CharOffsetY = preset.CharOffsetY,
                 CharacterRanges = null,
                 PixelZoom = preset.PixelZoom,
+                DefaultCharacter = preset.DefaultCharacter,
+                Mask = preset.Mask
             }).Value;
 
             var basePreset = new FontPresetModel(new FontContext(language, fontType), settings);
@@ -41,8 +43,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
 
         public FontPresetData ParseBack(FontPresetModel preset)
         {
-            var key = new FontConfigKey(preset.Context.Language, preset.Context.FontType);
-            FontConfigData configData = this._settingsParser.ParseBack(new(key, preset.Settings));
+            FontConfigData configData = this._settingsParser.ParseBack(new(preset.Context, preset.Settings));
 
             return new FontPresetData
             {
@@ -57,6 +58,8 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 CharOffsetX = configData.CharOffsetX,
                 CharOffsetY = configData.CharOffsetY,
                 PixelZoom = configData.PixelZoom,
+                DefaultCharacter = configData.DefaultCharacter,
+                Mask = configData.Mask
             };
         }
 

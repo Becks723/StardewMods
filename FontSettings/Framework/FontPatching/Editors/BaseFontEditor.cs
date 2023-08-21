@@ -11,6 +11,8 @@ namespace FontSettings.Framework.FontPatching.Editors
     {
         private readonly FontConfig _config;
 
+        public int Priority { get; }
+
         public void Edit(object data)
         {
             if (data is T tData)
@@ -19,9 +21,10 @@ namespace FontSettings.Framework.FontPatching.Editors
 
         protected abstract void Edit(T data, FontConfig config);
 
-        protected BaseFontEditor(FontConfig config)
+        protected BaseFontEditor(FontConfig config, int priority)
         {
             this._config = config;
+            this.Priority = priority;
         }
     }
 }

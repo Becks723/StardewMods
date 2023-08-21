@@ -8,6 +8,7 @@ This guide helps mod authors create a Font Settings pack.
   - [Folder structure](#folder-structure)
   - [`content.json`](#contentjson)
 - [Create your first Font Settings pack](#create-your-first-pack)
+- [History](#history)
 - [See Also](#see-also)
 
 ## Overview
@@ -39,7 +40,12 @@ Root Folder
 </small>
 
 ### `content.json`
-Main file. You will spend most of time editing this. It consists of an array of [settings object](#settings).
+Main file. You will spend most of time editing this. It consists of a [version declaration](#format), and an array of [settings object](#settings).
+
+#### Format
+This field is for version control. Program reads this value to automatically compat your pack with newest feature.
+
+Setting it to the latest [mod version](../README.md#release-notes) is highly recommanded.
 
 #### Settings
 A group of parameters of font.
@@ -61,6 +67,8 @@ A group of parameters of font.
 | Character | `string` | Custom character range. This will override the vanilla range. See [character range](#character-range) section. | |
 | CharacterAdd | `string` | An addtional range based on vanilla. See [character range](#character-range) section. | |
 | CharacterRemove | `string` | An reduced range based on vanilla. See [character range](#character-range) section. | |
+| DefaultCharacter | `char?` | A fallback character to be substituted when a given character is missing in this font. Default `'*'`. | |
+| Mask | `Color` | A color to be masked onto this font texture. | |
 
 #### Translation (i18n)
 Use `{{i18n: <key>}}` format. Replace `<key>` with certain key in i18n file.
@@ -121,33 +129,37 @@ The following steps gives you a basic font pack.
 1. Create a folder named `MyFontPack`. This is your mod root folder. 
 2. In root folder, create `content.json` file. Copy following json into content file, then save.
 ```json
-[
-  // a settings with andy; 30px; small font and english in game.
-  {
-    "Name": "andy",
-    "FontFile": "andyb.ttf",
-    "Size": 30,
-    "Spacing": 0,
-    "LineSpacing": 30,
-    "Type": "small",
-    "Language": "en"
-  },
+{
+  "Format": "0.12.0",  // TODO: Replace with latest version at your time.
+  "Fonts": [
 
-  // a settings with Microsoft Sans Serif; 26px; small font and English, German, French in game; use custom character range.
-  {
-    "Name": "{{i18n: microsoft-sans-serif}}",
-    "FontFile": "micross.ttf",
-    "Size": 26,
-    "Spacing": 0,
-    "LineSpacing": 30,
-    "Type": "small",
-    "Language": "en,de,fr",
-    "Character": "custom-range.txt"
-  }
-]
+    // a settings with andy; 30px; small font and english in game.
+    {
+      "Name": "andy",
+      "FontFile": "andyb.ttf",
+      "Size": 30,
+      "Spacing": 0,
+      "LineSpacing": 30,
+      "Type": "small",
+      "Language": "en"
+    },
+
+    // a settings with Microsoft Sans Serif; 26px; small font and English, German, French in game; use custom character range.
+    {
+      "Name": "{{i18n: microsoft-sans-serif}}",
+      "FontFile": "micross.ttf",
+      "Size": 26,
+      "Spacing": 0,
+      "LineSpacing": 30,
+      "Type": "small",
+      "Language": "en,de,fr",
+      "Character": "custom-range.txt"
+    }
+  ]
+}
 ```
 
-3. In root folder, create a `custom-range.txt` file. Copy following letters in it, then save in UTF-8. This is character file of the second settings in last step.
+3. In root folder, create a `custom-range.txt` file. Copy following letters in it, then save in UTF-8. This is character file of the second settings.
 ```
 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789¹²³ªº%$€¥£¢&*@#|áâàäåãæçéêèëíîìïıñóôòöõøœšßúûùüýÿžÂÀÄÅÃÆÇÉÊÈËÍÎÌÏÑÓÔÒÖÕØŒŠÛÙÜÝŸ,:;-–—•.…“‘’‘ ‚ “”„‹›«»/\?!¿¡()[]{}©®§+×=_°
 ```
@@ -174,7 +186,17 @@ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789¹²³ªº%$€¥�
 }
 ```
 
-6. Put the pack into `Mods` folder and run the game. You should see it in Font Settings presets.
+6. Put the pack into `Mods` folder and run the game. You should see it in presets.
+
+## History
+This topic states all changes made to content pack format. Authors may refer to this when updating their packs.
+
+#### 0.12.0
+- Introduced `Format` field for backward compatibility. So all packs earlier than this version needs a manual migration.
+- Added two fields: `DefaultCharacter` and `Mask`.
+
+#### 0.11.0
+- First introduced.
 
 ## See Also
 - [Nexusmods modpage](https://www.nexusmods.com/stardewvalley/mods/12467)

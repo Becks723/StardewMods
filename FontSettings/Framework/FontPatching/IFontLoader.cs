@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FontSettings.Framework.FontPatching.Loaders
+namespace FontSettings.Framework.FontPatching
 {
     internal interface IFontLoader
     {
         object Load();
+        int Priority { get; }
     }
 }

@@ -11,9 +11,9 @@ namespace FontSettings.Framework.DataAccess.Parsing
 {
     internal class FontConfigParser
     {
-        public KeyValuePair<FontConfigKey, FontConfigModel> Parse(FontConfigData config)
+        public KeyValuePair<FontContext, FontConfigModel> Parse(FontConfigData config)
         {
-            var key = new FontConfigKey(
+            var context = new FontContext(
                 Language: new LanguageInfo(config.Lang, config.Locale),
                 FontType: config.InGameType);
 
@@ -30,13 +30,15 @@ namespace FontSettings.Framework.DataAccess.Parsing
                 CharacterPatchMode: config.CharacterRanges != null ? CharacterPatchMode.Override : CharacterPatchMode.BasedOnOriginal,
                 CharacterOverride: config.CharacterRanges,
                 CharacterAdd: null,
-                CharacterRemove: null
+                CharacterRemove: null,
+                DefaultCharacter: config.DefaultCharacter,
+                Mask: config.Mask
             );
 
-            return new(key, parsed);
+            return new(context, parsed);
         }
 
-        public FontConfigData ParseBack(KeyValuePair<FontConfigKey, FontConfigModel> config)
+        public FontConfigData ParseBack(KeyValuePair<FontContext, FontConfigModel> config)
         {
             var language = config.Key.Language;
             var fontType = config.Key.FontType;
@@ -57,12 +59,19 @@ namespace FontSettings.Framework.DataAccess.Parsing
             parsedBack.CharOffsetX = configValue.CharOffsetX;
             parsedBack.CharOffsetY = configValue.CharOffsetY;
             parsedBack.PixelZoom = configValue.PixelZoom;
-            parsedBack.CharacterRanges = null;  // TODO: 等允许编辑字符后完善
+            parsedBack.CharacterRanges = configValue.CharacterPatchMode switch
+            {
+                CharacterPatchMode.BasedOnOriginal => null,  // TODO: 有可能需要考虑，不过目前全是override的
+                CharacterPatchMode.Override => configValue.CharacterOverride,
+                _ => throw new NotSupportedException(),
+            };
+            parsedBack.DefaultCharacter = configValue.DefaultCharacter;
+            parsedBack.Mask = configValue.Mask;
 
             return parsedBack;
         }
 
-        public IDictionary<FontConfigKey, FontConfigModel> ParseCollection(FontConfigs configs, LanguageInfo language, GameFontType fontType)
+        public IDictionary<FontContext, FontConfigModel> ParseCollection(FontConfigs configs, LanguageInfo language, GameFontType fontType)
         {
             return this.ParseCollection(configs,
                  predicate: config => config.Lang == language.Code
@@ -70,7 +79,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
                                      && config.InGameType == fontType);
         }
 
-        public IDictionary<FontConfigKey, FontConfigModel> ParseCollection(FontConfigs configs, Func<FontConfigData, bool> predicate)
+        public IDictionary<FontContext, FontConfigModel> ParseCollection(FontConfigs configs, Func<FontConfigData, bool> predicate)
         {
             if (predicate is null)
                 throw new ArgumentNullException(nameof(predicate));

@@ -10,8 +10,8 @@ namespace FontSettings.Framework.FontPatching.Loaders
 {
     internal class SpriteFontLoader : BaseFontLoader<SpriteFont>
     {
-        public SpriteFontLoader(FontConfig config) 
-            : base(config)
+        public SpriteFontLoader(FontConfig config, int priority) 
+            : base(config, priority)
         {
         }
 

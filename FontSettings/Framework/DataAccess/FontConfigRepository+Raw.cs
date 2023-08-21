@@ -34,5 +34,10 @@ namespace FontSettings.Framework.DataAccess
         {
             this._helper.Data.WriteGlobalData(this._globalFontDataKey, configs);
         }
+
+        public void ClearAllConfigs()
+        {
+            this.WriteAllConfigs(new FontConfigs());
+        }
     }
 }

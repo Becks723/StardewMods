@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using FontSettings.Framework.Models;
+using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValleyUI.Mvvm;
@@ -24,8 +25,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private readonly IAsyncFontInfoRetriever _asyncFontInfoRetriever;
 
-        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, FontSettingsMenuContextModel stagedValues)
-            : base(config, vanillaFontProvider, sampleFontGenerator, sampleAsyncFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, fontInfoRetriever, stagedValues)
+        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
+            : base(config, vanillaFontProvider, sampleFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, cpFontFileProviders, fontInfoRetriever, exporter, stagedValues)
         {
             this._asyncFontInfoRetriever = asyncFontInfoRetriever;
 
@@ -55,20 +56,38 @@ namespace FontSettings.Framework.Menus.ViewModels
 
             // current user font
             {
-                if (this._fontConfigManager.TryGetFontConfig(this.Language, this.CurrentFontType, out FontConfig config))
+                if (!this._fontConfigManager.TryGetFontConfig(this.Language, this.CurrentFontType, out FontConfig config))
+                    return;
+
+                var userFont = this._fontFileProvider.FontFiles
+                    .Where(file => file == config.FontFilePath)
+                    .FirstOrDefault();
+                var cpFont = this._cpFontFileProviders
+                    .Select(x => new { Pack = x.Key, File = x.Value.FontFiles.Where(file => file == config.FontFilePath).FirstOrDefault() })
+                    .Where(x => x.File != null)
+                    .FirstOrDefault();
+
+                if (userFont != null)
                 {
-                    var fontFiles = this._fontFileProvider.FontFiles;
-                    var userFont = fontFiles.Where(file => file == config.FontFilePath).FirstOrDefault();
-                    if (userFont != null)
+                    var userFontModels = this.GetFontInfoOrWarn(userFont);
+                    foreach (FontModel font in userFontModels)
                     {
-                        var userFontModels = this.GetFontInfoOrWarn(userFont);
-                        foreach (FontModel font in userFontModels)
-                        {
-                            this.AllFonts.Add(new FontViewModel(
-                                fontFilePath: font.FullPath,
-                                fontIndex: font.FontIndex,
-                                displayText: $"{font.FamilyName} ({font.SubfamilyName})"));
-                        }
+                        this.AllFonts.Add(new FontViewModel(
+                            fontFilePath: font.FullPath,
+                            fontIndex: font.FontIndex,
+                            displayText: $"{font.FamilyName} ({font.SubfamilyName})"));
+                    }
+                }
+                else if (cpFont != null)
+                {
+                    var fontModels = this.GetFontInfoOrWarn(cpFont.File);
+                    foreach (FontModel font in fontModels)
+                    {
+                        this.AllFonts.Add(new FontFromPackViewModel(
+                            fontFilePath: font.FullPath,
+                            fontIndex: font.FontIndex,
+                            displayText: $"{font.FamilyName} ({font.SubfamilyName})",
+                            packManifest: cpFont.Pack.Manifest));
                     }
                 }
             }
@@ -139,7 +158,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             else
             {
                 ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace(result.GetError());
+                ILog.Trace($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }
@@ -152,7 +171,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             else
             {
                 ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace(result.GetError());
+                ILog.Trace($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }
@@ -160,14 +179,36 @@ namespace FontSettings.Framework.Menus.ViewModels
         private async Task<IEnumerable<FontViewModel>> LoadAllFontsAsync(bool rescan)
         {
             var newAllFonts = new List<FontViewModel>();
-
             newAllFonts.Add(this.KeepOriginalFont);
-
-            var installedFonts = await this.LoadInstalledFontsAsync(rescan);
-            foreach (FontViewModel font in installedFonts)
-                newAllFonts.Add(font);
-
+            newAllFonts.AddRange(await this.LoadInstalledFontsAsync(rescan));
+            newAllFonts.AddRange(await this.LoadPackFontsAsync(_ => rescan));
             return newAllFonts;
+        }
+
+        private async Task<IEnumerable<FontFromPackViewModel>> LoadPackFontsAsync(Func<IContentPack, bool> rescan)
+        {
+            foreach (var pair in this._cpFontFileProviders)
+            {
+                if (rescan(pair.Key))
+                    pair.Value.RescanForFontFiles();
+            }
+
+            return (await Task.WhenAll(
+                this._cpFontFileProviders
+                    .Select(async pair => (
+                        await Task.WhenAll(
+                            pair.Value.FontFiles.Select(file => this.GetFontInfoOrWarnAsync(file)))
+                        )
+                        .SelectMany(font => font)
+                        .Select(font => new { Pack = pair.Key, Font = font })
+                    ))
+                )
+                .SelectMany(x => x)
+                .Select(x => new FontFromPackViewModel(
+                    fontFilePath: x.Font.FullPath,
+                    fontIndex: x.Font.FontIndex,
+                    displayText: $"{x.Font.FamilyName} ({x.Font.SubfamilyName})",
+                    packManifest: x.Pack.Manifest));
         }
     }
 }

@@ -7,7 +7,7 @@
 	<Import Project="..\_build\stbtruetype-sharp.targets" />
 
 	<PropertyGroup>
-		<Version>0.11.1</Version>
+		<Version>0.12.1</Version>
 		<TargetFramework>net6.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>
@@ -23,6 +23,7 @@
 	<ItemGroup>
 		<Reference Include="BmFont" HintPath="$(GamePath)\BmFont.dll" Private="false" />
 		<Reference Include="Newtonsoft.Json" HintPath="$(GamePath)\smapi-internal\Newtonsoft.Json.dll" Private="false" />
+		<PackageReference Include="K4os.Compression.LZ4" Version="1.3.5" />
 	</ItemGroup>
 
 	<!--ignored files-->

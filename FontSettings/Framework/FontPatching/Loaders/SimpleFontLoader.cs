@@ -10,10 +10,14 @@ namespace FontSettings.Framework.FontPatching.Loaders
     {
         private readonly object _data;
 
-        public SimpleFontLoader(object data)
+        public int Priority { get; }
+
+        public SimpleFontLoader(object data, int priority = int.MaxValue)
         {
             this._data = data;
+            this.Priority = priority;
         }
+
 
         public object Load()
         {

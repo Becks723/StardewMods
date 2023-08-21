@@ -14,6 +14,6 @@ namespace FontSettings.Framework
 
         bool TryGetFontConfig(LanguageInfo language, GameFontType fontType, out FontConfig? config);
 
-        IDictionary<FontConfigKey, FontConfig> GetAllFontConfigs();
+        IDictionary<FontContext, FontConfig> GetAllFontConfigs();
     }
 }

@@ -26,7 +26,7 @@ namespace FontSettings.Framework.Fonts
 
         protected override string LineBreak => SpriteText.newLine.ToString();
 
-        public GameBitmapSpriteFont(BmFontData? bmFont, float pixelZoom, LanguageInfo language, bool bmFontInLatinLanguages)
+        public GameBitmapSpriteFont(BmFontData? bmFont, float pixelZoom, LanguageInfo language, Func<bool> bmFontInLatinLanguages)
         {
             this._spriteText = new SpriteTextObject(bmFont, pixelZoom, language, bmFontInLatinLanguages);
 

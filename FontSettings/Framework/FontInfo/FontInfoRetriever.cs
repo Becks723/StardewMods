@@ -127,19 +127,7 @@ namespace FontSettings.Framework.FontInfo
                 return FontFormat.Unknown;
         }
 
-        private static IResult<FontModel[]> SuccessResult(FontModel[] data) => new Result(true, data, null);
-        private static IResult<FontModel[]> ErrorResult(Exception ex) => new Result(false, null, ex);
-        private record Result(bool IsSuccess, FontModel[] Data, Exception Exception) : IResult<FontModel[]>
-        {
-            public FontModel[] GetData() => this.Data;
-
-            public string GetError()
-            {
-                var ex = this.Exception;
-                return ex != null
-                    ? $"{ex.Message}\n{ex.StackTrace}"
-                    : null;
-            }
-        }
+        private static IResult<FontModel[]> SuccessResult(FontModel[] data) => ResultFactory.SuccessResult(data);
+        private static IResult<FontModel[]> ErrorResult(Exception ex) => ResultFactory.ErrorResult<FontModel[]>(ex);
     }
 }

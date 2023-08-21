@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using FontSettings.Framework.Models;
 using FontSettings.Framework.Preset;
+using Microsoft.Xna.Framework;
+using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValleyUI.Mvvm;
@@ -25,13 +27,14 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
         protected readonly ModConfig _config;
         protected readonly IVanillaFontProvider _vanillaFontProvider;
-        protected readonly IFontGenerator _sampleFontGenerator;
-        protected readonly IAsyncFontGenerator _sampleAsyncFontGenerator;
+        protected readonly ISampleFontGenerator _sampleFontGenerator;
         protected readonly IFontConfigManager _fontConfigManager;
         protected readonly IVanillaFontConfigProvider _vanillaFontConfigProvider;
         protected readonly IAsyncGameFontChanger _gameFontChanger;
         protected readonly IFontFileProvider _fontFileProvider;
+        protected readonly IDictionary<IContentPack, IFontFileProvider> _cpFontFileProviders;
         protected readonly IFontInfoRetriever _fontInfoRetriever;
+        protected readonly IFontExporter _exporter;
         protected readonly IFontPresetManager _presetManager;
 
 
@@ -292,6 +295,30 @@ namespace FontSettings.Framework.Menus.ViewModels
         #region FontIndex Property
 
         public int FontIndex => this.CurrentFont.FontIndex;
+
+        #endregion
+
+        #region Characters Property
+
+        private ObservableCollection<char> _characters = new();
+
+        public ObservableCollection<char> Characters
+        {
+            get => this._characters;
+            set => this.SetField(ref this._characters, value);
+        }
+
+        #endregion
+
+        #region DefaultCharacter Property
+
+        private char? _defaultCharacter;
+
+        public char? DefaultCharacter
+        {
+            get => this._defaultCharacter;
+            set => this.SetField(ref this._defaultCharacter, value);
+        }
 
         #endregion
 
@@ -570,6 +597,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         #endregion
 
+        #region Mask Property
+
+        private Color _mask;
+
+        public Color Mask
+        {
+            get => this._mask;
+            set => this.SetField(ref this._mask, value);
+        }
+
+        #endregion
+
         protected FontViewModel KeepOriginalFont { get; set; }
 
         protected LanguageInfo Language { get; }
@@ -592,8 +631,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public ICommand ResetFontCommand { get; }
 
-        public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, IFontGenerator sampleFontGenerator, IAsyncFontGenerator sampleAsyncFontGenerator, IFontPresetManager presetManager,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IFontInfoRetriever fontInfoRetriever, FontSettingsMenuContextModel stagedValues)
+        public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager,
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
         {
             // 订阅异步完成事件。
             _asyncIndicator.IsGeneratingFontChanged += (_, fontType) => this.IsGeneratingFont = _asyncIndicator.IsGeneratingFont(fontType);
@@ -602,12 +641,13 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._config = config;
             this._vanillaFontProvider = vanillaFontProvider;
             this._sampleFontGenerator = sampleFontGenerator;
-            this._sampleAsyncFontGenerator = sampleAsyncFontGenerator;
             this._fontConfigManager = fontConfigManager;
             this._vanillaFontConfigProvider = vanillaFontConfigProvider;
             this._gameFontChanger = gameFontChanger;
             this._fontFileProvider = fontFileProvider;
+            this._cpFontFileProviders = cpFontFileProviders;
             this._fontInfoRetriever = fontInfoRetriever;
+            this._exporter = exporter;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
 
@@ -678,6 +718,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public bool TryGetCurrentPresetIfSupportsDetailedInfo(out FontPreset preset)
             => this.PresetViewModel(this.CurrentFontType).TryGetCurrentPresetIfSupportsDetailedInfo(out preset);
+
+        public ExportMenuModel GetCurrentExportViewModel()
+            => this.GetExportViewModel(this.CurrentFontType);
+
+        public ExportMenuModel GetExportViewModel(GameFontType fontType)
+        {
+            return new ExportMenuModel(
+                exporter: this._exporter,
+                fontConfig: this.CreateConfigBasedOnCurrentSettings(),
+                context: new FontContext(this.Language, fontType),
+                staged: this._stagedValues.Exporting[fontType]);
+        }
 
         private void PreviousFontType()
         {
@@ -775,7 +827,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                     context: this.GetFontContext());
 
                 // 如果成功，更新配置值。
-                if (result.IsSuccessful)
+                if (result.IsSuccess)
                     this._fontConfigManager.UpdateFontConfig(
                         this.Language, fontType, fontConfig);
 
@@ -787,7 +839,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
         }
 
-        internal record FontChangeResult(IGameFontChangeResult InnerResult, GameFontType FontType);
+        internal record FontChangeResult(IResultWithoutData<string> InnerResult, GameFontType FontType);
 
         private FontContext GetFontContext()
         {
@@ -812,20 +864,10 @@ namespace FontSettings.Framework.Menus.ViewModels
         {
             try
             {
-                var param = new SampleFontGeneratorParameter(
-                    Enabled: this.FontEnabled,
-                    FontFilePath: this.FontFilePath,
-                    FontSize: this.FontSize,
-                    Spacing: this.Spacing,
-                    LineSpacing: this.LineSpacing,
-                    SampleText: this.ExampleText,
-                    FontType: this.CurrentFontType,
-                    Language: FontHelpers.GetCurrentLanguage(),
-                    PixelZoom: this.PixelZoom,
-                    FontIndex: this.FontIndex,
-                    CharOffsetX: this.CharOffsetX,
-                    CharOffsetY: this.CharOffsetY);
-                this.ExampleCurrentFont = this._sampleFontGenerator.GenerateFont(param);
+                var config = this.CreateConfigBasedOnCurrentSettings(forSample: true);
+                var context = new FontContext(this.Language, this.CurrentFontType);
+
+                this.ExampleCurrentFont = this._sampleFontGenerator.Generate(config, context);
             }
             catch (Exception ex)
             {
@@ -838,30 +880,19 @@ namespace FontSettings.Framework.Menus.ViewModels
         private CancellationTokenSource _tokenSource;
         public async Task UpdateExampleCurrentAsync()
         {
-            var param = new SampleFontGeneratorParameter(
-                Enabled: this.FontEnabled,
-                FontFilePath: this.FontFilePath,
-                FontSize: this.FontSize,
-                Spacing: this.Spacing,
-                LineSpacing: this.LineSpacing,
-                SampleText: this.ExampleText,
-                FontType: this.CurrentFontType,
-                Language: FontHelpers.GetCurrentLanguage(),
-                PixelZoom: this.PixelZoom,
-                FontIndex: this.FontIndex,
-                CharOffsetX: this.CharOffsetX,
-                CharOffsetY: this.CharOffsetY);
-
             if (this._isUpdatingExampleCurrent)
             {
                 this._tokenSource.Cancel();
                 this._tokenSource.Dispose();
             }
 
-            await this.RestartUpdateExampleCurrent(param);
+            var config = this.CreateConfigBasedOnCurrentSettings(forSample: true);
+            var context = new FontContext(this.Language, this.CurrentFontType);
+
+            await this.RestartUpdateExampleCurrent(config, context);
         }
 
-        private async Task RestartUpdateExampleCurrent(SampleFontGeneratorParameter param)
+        private async Task RestartUpdateExampleCurrent(FontConfig config, FontContext context)
         {
             this._tokenSource = new CancellationTokenSource();
             var token = this._tokenSource.Token;
@@ -870,7 +901,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._isUpdatingExampleCurrent = true;
             try
             {
-                this.ExampleCurrentFont = await this._sampleAsyncFontGenerator.GenerateFontAsync(param, token);
+                this.ExampleCurrentFont = await this._sampleFontGenerator.GenerateAsync(config, context, token);
                 ILog.Trace("Sample: Set");
             }
             catch (OperationCanceledException)
@@ -942,16 +973,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             // 否则载入预设的值。
             else
             {
-                this.FontEnabled = true;
-                this.FontSize = settings.FontSize;
-                this.Spacing = settings.Spacing;
-                this.LineSpacing = settings.LineSpacing;
-                this.CharOffsetX = settings.CharOffsetX;
-                this.CharOffsetY = settings.CharOffsetY;
-                this.CurrentFont = this.FindFont(settings.FontFilePath, settings.FontIndex);
-                this.PixelZoom = settings.Supports<IWithPixelZoom>()
-                    ? settings.GetInstance<IWithPixelZoom>().PixelZoom
-                    : 0;
+                this.FillOptionsWithFontConfig(settings);
             }
 
             this.CurrentFontConfigRealTime = this.CreateConfigBasedOnCurrentSettings();
@@ -994,25 +1016,28 @@ namespace FontSettings.Framework.Menus.ViewModels
             return this._vanillaFontConfigProvider.GetVanillaFontConfig(langugage, fontType);
         }
 
-        private FontConfig CreateConfigBasedOnCurrentSettings()
+        private FontConfig CreateConfigBasedOnCurrentSettings(bool forSample = false)
         {
-            var font = new FontConfig(
-                Enabled: this.FontEnabled,
-                FontFilePath: this.FontFilePath,
-                FontIndex: this.FontIndex,
-                FontSize: this.FontSize,
-                Spacing: this.Spacing,
-                LineSpacing: this.LineSpacing,
-                CharOffsetX: this.CharOffsetX,
-                CharOffsetY: this.CharOffsetY,
-                CharacterRanges: this.CurrentFontConfig.CharacterRanges);
-
+            var builder = new FontConfigBuilder()
+                .BasicConfig(new FontConfig(
+                    Enabled: this.FontEnabled,
+                    FontFilePath: this.FontFilePath,
+                    FontIndex: this.FontIndex,
+                    FontSize: this.FontSize,
+                    Spacing: this.Spacing,
+                    LineSpacing: this.LineSpacing,
+                    CharOffsetX: this.CharOffsetX,
+                    CharOffsetY: this.CharOffsetY,
+                    CharacterRanges: forSample
+                        ? FontHelpers.GetCharRange(this.ExampleText, this.DefaultCharacter)
+                        : FontHelpers.GetCharacterRanges(this.Characters)))
+                .WithSolidColorMask(this.Mask);
+            if (this.CurrentFontType != GameFontType.SpriteText)
+                builder.WithDefaultCharacter(this.DefaultCharacter);
             if (this.CurrentFontType == GameFontType.SpriteText)
-                font = new BmFontConfig(
-                    original: font,
-                    pixelZoom: this.PixelZoom);
+                builder.WithPixelZoom(this.PixelZoom);
 
-            return font;
+            return builder.Build();
         }
 
         private IEnumerable<FontViewModel> LoadAllFonts(bool rescan = false)  // rescan: 是否重新扫描本地字体。
@@ -1035,9 +1060,10 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
             yield return vanillaFont;
 
-            // general fonts
-            var fonts = this._fontFileProvider.FontFiles
-                .SelectMany(file =>
+            // user fonts
+            {
+                var fonts = this._fontFileProvider.FontFiles
+                    .SelectMany(file =>
                     {
                         var result = this._fontInfoRetriever.GetFontInfo(file);
                         if (result.IsSuccess)
@@ -1045,17 +1071,44 @@ namespace FontSettings.Framework.Menus.ViewModels
                         else
                         {
                             ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
-                            ILog.Trace(result.GetError());
+                            ILog.Trace($"{result.GetError()}");
                             return Array.Empty<FontModel>();
                         }
                     })
-                .Select(font => new FontViewModel(
-                    fontFilePath: font.FullPath,
-                    fontIndex: font.FontIndex,
-                    displayText: $"{font.FamilyName} ({font.SubfamilyName})")
-                );
-            foreach (var font in fonts)
-                yield return font;
+                    .Select(font => new FontViewModel(
+                        fontFilePath: font.FullPath,
+                        fontIndex: font.FontIndex,
+                        displayText: $"{font.FamilyName} ({font.SubfamilyName})")
+                    );
+                foreach (var font in fonts)
+                    yield return font;
+            }
+
+            // content pack fonts
+            {
+                var fonts = this._cpFontFileProviders
+                    .Select(pair => (Pack: pair.Key, Fonts: pair.Value.FontFiles.SelectMany(file =>
+                    {
+                        var result = this._fontInfoRetriever.GetFontInfo(file);
+                        if (result.IsSuccess)
+                            return result.GetData();
+                        else
+                        {
+                            ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
+                            ILog.Trace($"{result.GetError()}");
+                            return Array.Empty<FontModel>();
+                        }
+                    })))
+                    .SelectMany(x => x.Fonts.Select(f => (x.Pack, Font: f)))
+                    .Select(x => new FontFromPackViewModel(
+                        fontFilePath: x.Font.FullPath,
+                        fontIndex: x.Font.FontIndex,
+                        displayText: $"{x.Font.FamilyName} ({x.Font.SubfamilyName})",
+                        packManifest: x.Pack.Manifest)
+                    );
+                foreach (var font in fonts)
+                    yield return font;
+            }
         }
 
         protected virtual void InitAllFonts()
@@ -1086,9 +1139,17 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.CharOffsetX = fontConfig.CharOffsetX;
             this.CharOffsetY = fontConfig.CharOffsetY;
             this.CurrentFont = this.FindFont(fontConfig.FontFilePath, fontConfig.FontIndex);
-            this.PixelZoom = fontConfig.Supports<IWithPixelZoom>()
-                ? fontConfig.GetInstance<IWithPixelZoom>().PixelZoom
+            this.PixelZoom = fontConfig.TryGetInstance(out IWithPixelZoom withPixelZoom)
+                ? withPixelZoom.PixelZoom
                 : 0;
+            this.Characters = new ObservableCollection<char>(
+                FontHelpers.GetCharacters(fontConfig.CharacterRanges));
+            this.DefaultCharacter = fontConfig.TryGetInstance(out IWithDefaultCharacter withDefaultCharacter)
+                ? withDefaultCharacter.DefaultCharacter
+                : null;
+            this.Mask = fontConfig.TryGetInstance(out IWithSolidColor withSolidColor)
+                ? withSolidColor.SolidColor
+                : Color.White;
         }
 
         private bool SkipSpriteText()

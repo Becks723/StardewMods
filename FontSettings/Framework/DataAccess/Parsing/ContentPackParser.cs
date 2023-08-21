@@ -16,11 +16,11 @@ namespace FontSettings.Framework.DataAccess.Parsing
     {
         private readonly ContentPackCharacterFileHelper _characterFileHelper = new();
 
-        public IEnumerable<FontPresetModel> Parse(FontContentPack contentPack, IContentPack sContentPack)
+        public IEnumerable<FontPresetModel> Parse(FontContentPackItem settings, ISemanticVersion format, IContentPack sContentPack)
         {
-            float size = ParseSize(contentPack.Size);
-            IEnumerable<LanguageInfo> languages = this.ParseLanguage(contentPack.Language);
-            IEnumerable<GameFontType> fontTypes = this.ParseFontType(contentPack.Type);
+            float size = ParseSize(settings.Size);
+            IEnumerable<LanguageInfo> languages = this.ParseLanguage(settings.Language);
+            IEnumerable<GameFontType> fontTypes = this.ParseFontType(settings.Type);
 
             CharacterPatchMode characterPatchMode = CharacterPatchMode.BasedOnOriginal;
             IEnumerable<CharacterRange> @override = null,
@@ -28,18 +28,18 @@ namespace FontSettings.Framework.DataAccess.Parsing
                                         remove = null;
             if (languages.Count() == 1)
             {
-                if (contentPack.Character != null)
+                if (settings.Character != null)
                 {
-                    @override = this.ParseCharacterRanges(contentPack.Character, sContentPack, nameof(contentPack.Character));
+                    @override = this.ParseCharacterRanges(settings.Character, sContentPack, nameof(settings.Character));
                     characterPatchMode = CharacterPatchMode.Override;
                 }
                 else
                 {
-                    if (contentPack.CharacterAdd != null)
-                        add = this.ParseCharacterRanges(contentPack.CharacterAdd, sContentPack, nameof(contentPack.CharacterAdd));
+                    if (settings.CharacterAdd != null)
+                        add = this.ParseCharacterRanges(settings.CharacterAdd, sContentPack, nameof(settings.CharacterAdd));
 
-                    if (contentPack.CharacterRemove != null)
-                        remove = this.ParseCharacterRanges(contentPack.CharacterRemove, sContentPack, nameof(contentPack.CharacterRemove));
+                    if (settings.CharacterRemove != null)
+                        remove = this.ParseCharacterRanges(settings.CharacterRemove, sContentPack, nameof(settings.CharacterRemove));
                 }
             }
 
@@ -47,15 +47,15 @@ namespace FontSettings.Framework.DataAccess.Parsing
             else
             {
                 // 仅允许重写，不允许修改。
-                if (contentPack.Character != null)
+                if (settings.Character != null)
                 {
-                    @override = this.ParseCharacterRanges(contentPack.Character, sContentPack, nameof(contentPack.Character));
+                    @override = this.ParseCharacterRanges(settings.Character, sContentPack, nameof(settings.Character));
                     characterPatchMode = CharacterPatchMode.Override;
                 }
             }
 
-            Func<string> name = this.ParseLocalizableField(contentPack.Name, sContentPack.Translation);
-            Func<string> notes = this.ParseLocalizableField(contentPack.Notes, sContentPack.Translation);
+            Func<string> name = this.ParseLocalizableField(settings.Name, sContentPack.Translation);
+            Func<string> notes = this.ParseLocalizableField(settings.Notes, sContentPack.Translation);
 
             foreach (LanguageInfo language in languages)
             {
@@ -67,18 +67,20 @@ namespace FontSettings.Framework.DataAccess.Parsing
                         context: context,
                         settings: new FontConfigModel(
                             Enabled: true,
-                            FontFile: contentPack.FontFile,
-                            FontIndex: contentPack.Index,
+                            FontFile: settings.FontFile,
+                            FontIndex: settings.Index,
                             FontSize: size,
-                            Spacing: contentPack.Spacing,
-                            LineSpacing: contentPack.LineSpacing,
-                            CharOffsetX: contentPack.OffsetX,
-                            CharOffsetY: contentPack.OffsetY,
-                            PixelZoom: contentPack.PixelZoom,
+                            Spacing: settings.Spacing,
+                            LineSpacing: settings.LineSpacing,
+                            CharOffsetX: settings.OffsetX,
+                            CharOffsetY: settings.OffsetY,
+                            PixelZoom: settings.PixelZoom,
                             CharacterPatchMode: characterPatchMode,
                             CharacterOverride: @override,
                             CharacterAdd: add,
-                            CharacterRemove: remove));
+                            CharacterRemove: remove,
+                            DefaultCharacter: settings.DefaultCharacter,
+                            Mask: settings.Mask));
 
                     yield return new FontPresetModelForContentPack(basePreset, sContentPack, name, notes);
                 }
@@ -89,7 +91,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
         {
             if (sizeField <= 0)
             {
-                throw this.ParseFieldException(nameof(FontContentPack.Size),
+                throw this.ParseFieldException(nameof(FontContentPackItem.Size),
                     $"Font size must be bigger than 0. Current: {sizeField}");
             }
 
@@ -125,7 +127,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
 
             if (parsedLanguages.Count == 0)
             {
-                throw this.ParseFieldException(nameof(FontContentPack.Language),
+                throw this.ParseFieldException(nameof(FontContentPackItem.Language),
                     $"Cannot get any language from the given value. Value: '{languageField}'");
             }
 
@@ -159,7 +161,7 @@ namespace FontSettings.Framework.DataAccess.Parsing
 
             if (parsedTypes.Count == 0)
             {
-                throw this.ParseFieldException(nameof(FontContentPack.Type),
+                throw this.ParseFieldException(nameof(FontContentPackItem.Type),
                     $"Cannot get any font type from the given value. Value: '{typeField}'");
             }
 

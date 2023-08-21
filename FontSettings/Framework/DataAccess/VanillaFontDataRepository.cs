@@ -14,16 +14,16 @@ namespace FontSettings.Framework.DataAccess
         private readonly IMonitor _monitor;
         private readonly FontConfigParser _parser = new();
 
-        public FontConfigModel? ReadVanillaFontConfig(FontConfigKey key)
+        public FontConfigModel? ReadVanillaFontConfig(FontContext context)
         {
             var rawConfigs = this.ReadVanillaFontData().Fonts;
 
-            var parsedConfigs = this._parser.ParseCollection(rawConfigs, key.Language, key.FontType);
-            var parsedConfig = parsedConfigs.ContainsKey(key)
-                ? parsedConfigs[key]
+            var parsedConfigs = this._parser.ParseCollection(rawConfigs, context.Language, context.FontType);
+            var parsedConfig = parsedConfigs.ContainsKey(context)
+                ? parsedConfigs[context]
                 : null;
 
-            this._monitor.Log($"Loaded vanilla font config for {key}: {parsedConfig}");
+            this._monitor.Log($"Loaded vanilla font config for {context}: {parsedConfig}");
             return parsedConfig;
         }
     }

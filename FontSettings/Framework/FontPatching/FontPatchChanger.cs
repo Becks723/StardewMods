@@ -26,7 +26,7 @@ namespace FontSettings.Framework.FontPatching
             this._mainThreadId = Environment.CurrentManagedThreadId;
         }
 
-        public async Task<IGameFontChangeResult> ChangeGameFontAsync(FontConfig font, FontContext context)
+        public async Task<IResultWithoutData<string>> ChangeGameFontAsync(FontConfig font, FontContext context)
         {
             Exception? exception = await this._mainFontPatcher.PendPatchAsync(font, context);
 
@@ -153,17 +153,10 @@ namespace FontSettings.Framework.FontPatching
             public Exception? Exception;
         }
 
-        private IGameFontChangeResult SuccessResult() => new ChangeResult(true, null);
+        private IResultWithoutData<string> SuccessResult() => ResultFactory.SuccessResultWithoutData<string>();
 
-        private IGameFontChangeResult ErrorResult(string errorMessage) => new ChangeResult(false, errorMessage);
+        private IResultWithoutData<string> ErrorResult(string errorMessage) => ResultFactory.ErrorResultWithoutData(errorMessage);
 
-        private IGameFontChangeResult ErrorResult(Exception exception, Func<Exception, string> getErrorMessage) => this.ErrorResult(getErrorMessage(exception));
-
-        private record ChangeResult(bool IsSuccess, string? ErrorMessage) : IGameFontChangeResult
-        {
-            bool IGameFontChangeResult.IsSuccessful => this.IsSuccess;
-
-            string? IGameFontChangeResult.GetErrorMessage() => this.ErrorMessage;
-        }
+        private IResultWithoutData<string> ErrorResult(Exception exception, Func<Exception, string> getErrorMessage) => this.ErrorResult(getErrorMessage(exception));
     }
 }
