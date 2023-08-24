@@ -172,6 +172,9 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.12.2 - 2023-08-24
+- Fix an issue where partof/all characters are missing from font bitmap, and in worst case violates memory and crashes game.
+
 #### 0.12.1 - 2023-08-04
 - Fix text becomes invisible after applied changes (**only happened to first-time users in 0.12**). Users encountered this bug may:
   1. Update to 0.12.1.
