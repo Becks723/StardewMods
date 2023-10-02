@@ -17,12 +17,8 @@ namespace FontSettings.Framework.Integrations
         protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)
         {
             helper.Register()
-                .AddKeyBindList(
-                    name: I18n.Config_FontMenuKey,
-                    tooltip: I18n.Config_FontMenuKey_Description,
-                    get: () => this.Config.OpenFontSettingsMenu,
-                    set: val => this.Config.OpenFontSettingsMenu = val
-                )
+                // color & shadow section
+                .AddSectionTitle(I18n.Config_SectionColorAndShadow)
 
                 // diable font shadow
                 .AddCheckbox(
@@ -63,6 +59,9 @@ namespace FontSettings.Framework.Integrations
                     }
                 )
 
+                // compatibility section
+                .AddSectionTitle(I18n.Config_SectionCompatibility)
+
                 // enable latin dialogue font
                 .AddCheckbox(
                     name: I18n.Config_EnableLatinDialogueFont,
@@ -92,6 +91,18 @@ namespace FontSettings.Framework.Integrations
                     interval: null
                 )
 
+                // ui section
+                .AddSectionTitle(I18n.Config_SectionUi)
+
+                // menu key
+                .AddKeyBindList(
+                    name: I18n.Config_FontMenuKey,
+                    tooltip: I18n.Config_FontMenuKey_Description,
+                    get: () => this.Config.OpenFontSettingsMenu,
+                    set: val => this.Config.OpenFontSettingsMenu = val
+                )
+
+                // sample text
                 .AddTextBox(
                     name: I18n.Config_ExampleText,
                     tooltip: I18n.Config_ExampleText_Description,
