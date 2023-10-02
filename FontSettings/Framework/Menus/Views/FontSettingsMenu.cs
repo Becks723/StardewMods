@@ -728,9 +728,9 @@ namespace FontSettings.Framework.Menus.Views
                                         newPresetButton.HorizontalAlignment = HorizontalAlignment.Left;
                                         newPresetButton.Margin = new Thickness(0, optionSpacing, 0, 0);
                                         newPresetButton.ClickSound = "coin";
+                                        newPresetButton.CommandParameter = (Func<IOverlayMenu>)this.CreateNewPresetMenu;
                                         //context.OneWayBinds(() => this._viewModel.CanSaveCurrentAsNewPreset, () => newPresetButton.GreyedOut, new TrueFalseConverter());
                                         context.OneWayBinds(() => this._viewModel.SaveCurrentAsNewPresetCommand, () => newPresetButton.Command);
-                                        context.OneWayBinds<Func<IOverlayMenu>, object>(() => this.CreateNewPresetMenu, () => newPresetButton.CommandParameter);
                                         pStack.Children.Add(newPresetButton);
                                         {
                                             Label label = new Label();

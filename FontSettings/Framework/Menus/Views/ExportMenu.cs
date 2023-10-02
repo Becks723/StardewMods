@@ -189,7 +189,7 @@ namespace FontSettings.Framework.Menus.Views
 
         private class OutputExtensionsConverter : BindingConverter<string[], string>
         {
-            public override string Convert(string[] extensions)
+            protected override string Convert(string[] extensions, object? parameter)
             {
                 if (extensions == null)
                     return ".";
@@ -200,7 +200,7 @@ namespace FontSettings.Framework.Menus.Views
                     .ToString();
             }
 
-            public override string[] ConvertBack(string targetValue)
+            protected override string[] ConvertBack(string targetValue, object? parameter)
             {
                 throw new NotSupportedException();
             }
