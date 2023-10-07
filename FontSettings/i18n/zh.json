@@ -71,7 +71,7 @@
   "config.section-color-and-shadow": "颜色和阴影",
   "config.disable-text-shadow": "禁用字体阴影",
   "config.disable-text-shadow.description": "禁用字体阴影。",
-  "config.hex-format": "\n\n输入十六进制颜色值：\nAABBGGRR\n例：靛蓝色 (R=63, G=72, B=204, A=255)\n => FFCC483F",
+  "config.color-format": "\n\n格式：R G B A\n例：靛蓝色 (R=63, G=72, B=204, A=255)\n => 63 72 204 255",
   "config.text-color": "文本颜色",
   "config.text-color.description": "设置默认文本颜色。",
   "config.text-color-dialogue": "文本颜色（对话）",

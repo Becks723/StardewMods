@@ -32,7 +32,7 @@ namespace FontSettings.Framework.Integrations
                 .AddColorPickerOrHexBox(
                     name: I18n.Config_TextColor,
                     description: I18n.Config_TextColor_Description,
-                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_TextColor_Description),
+                    descriptionHexBox: this.ColorFormatSuffix(I18n.Config_TextColor_Description),
                     get: () => this.Config.TextColor,
                     set: val => this.Config.TextColor = val
                 )
@@ -41,7 +41,7 @@ namespace FontSettings.Framework.Integrations
                 .AddColorPickerOrHexBox(
                     name: I18n.Config_TextColorDialogue,
                     description: I18n.Config_TextColorDialogue_Description,
-                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_TextColorDialogue_Description),
+                    descriptionHexBox: this.ColorFormatSuffix(I18n.Config_TextColorDialogue_Description),
                     get: () => this.Config.TextColorDialogue,
                     set: val => this.Config.TextColorDialogue = val
                 )
@@ -50,7 +50,7 @@ namespace FontSettings.Framework.Integrations
                 .AddColorPickerOrHexBox(
                     name: I18n.Config_ShadowColor,
                     description: I18n.Config_ShadowColor_Description,
-                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_ShadowColor_Description),
+                    descriptionHexBox: this.ColorFormatSuffix(I18n.Config_ShadowColor_Description),
                     get: () => this.Config.ShadowColorGame1,
                     set: val =>
                     {
@@ -259,9 +259,9 @@ namespace FontSettings.Framework.Integrations
             return value.Replace("\\n", "\n");
         }
 
-        private Func<string> HexFormatSuffix(Func<string> text)
+        private Func<string> ColorFormatSuffix(Func<string> text)
         {
-            return () => text() + I18n.Config_HexFormat();
+            return () => text() + I18n.Config_ColorFormat();
         }
     }
 }

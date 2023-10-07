@@ -73,7 +73,7 @@
   "config.section-color-and-shadow": "Color & Shadow", // TODO
   "config.disable-text-shadow": "Desativar sombra de texto",
   "config.disable-text-shadow.description": "Se deve ocultar a sombra da fonte.",
-  "config.hex-format": "\n\nInsira um valor hexadecimal:\nAABBGGRR\nexemplo: Azul Índigo (R=63, G=72, B=204, A=255)\n => FFCC483F",
+  "config.color-format": "\n\nInsira um valor hexadecimal:\nAABBGGRR\nexemplo: Azul Índigo (R=63, G=72, B=204, A=255)\n => FFCC483F", // TODO: edit
   "config.text-color": "Cor do Texto",
   "config.text-color.description": "Configura a cor do texto padrão do jogo.",
   "config.text-color-dialogue": "Cor do texto de diálogo",

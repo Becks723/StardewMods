@@ -299,7 +299,7 @@ namespace CodeShared.Integrations.GenericModConfigMenu
             );
         }
 
-        public GenericModConfigMenuFluentHelper AddColorPickerOrHexBox(Func<Color> get, Action<Color> set, Func<string> name, Func<string> description, Func<string> descriptionHexBox)
+        public GenericModConfigMenuFluentHelper AddColorPickerOrHexBox(Func<Color> get, Action<Color> set, Func<string> name, Func<string> description, Func<string> descriptionHexBox, IGMCMOptionsAPI.ColorPickerStyle colorPickerStyle = IGMCMOptionsAPI.ColorPickerStyle.RGBSliders)
         {
             if (this._gmcmOptionsApi != null)
                 this._gmcmOptionsApi.AddColorOption(
@@ -309,7 +309,7 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                     name: name,
                     tooltip: description,
                     showAlpha: true,
-                    colorPickerStyle: (uint)IGMCMOptionsAPI.ColorPickerStyle.Default,
+                    colorPickerStyle: (uint)colorPickerStyle,
                     fieldId: null);
             else
                 this.AddTextBox(
@@ -317,17 +317,27 @@ namespace CodeShared.Integrations.GenericModConfigMenu
                     get: () =>
                     {
                         Color color = get();
-                        return color.PackedValue.ToString("X8");
+                        return $"{color.R} {color.G} {color.B} {color.A}";
                     },
-                    set: hexString =>
+                    set: s =>
                     {
-                        if (uint.TryParse(hexString, System.Globalization.NumberStyles.HexNumber, null, out uint packValue))
+                        string[] rgba = s.Split(' ', StringSplitOptions.TrimEntries);
+                        int a = 255;
+                        if ((rgba.Length == 4
+                            && int.TryParse(rgba[0], out int r)
+                            && int.TryParse(rgba[1], out int g)
+                            && int.TryParse(rgba[2], out int b)
+                            && int.TryParse(rgba[3], out a))
+                         || (rgba.Length == 3
+                            && int.TryParse(rgba[0], out r)
+                            && int.TryParse(rgba[1], out g)
+                            && int.TryParse(rgba[2], out b)))
                         {
-                            Color color = new Color(packValue);
+                            Color color = new Color(r, g, b, a);
                             set(color);
                         }
                         else
-                            throw new FormatException($"Cannot read string '{hexString}' as a Color's packedValue. Format: AABBGGRR");
+                            throw new FormatException($"Cannot read string '{s}' as RGBA. Format: 'R G B A'");
                     },
                     tooltip: descriptionHexBox);
 

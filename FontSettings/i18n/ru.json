@@ -72,11 +72,11 @@
   "ui.export-menu.export": "Export",
   "ui.export-menu.cancel": "Cancel",
 
-  "config.section-color-and-shadow": "Color & Shadow",  // TODO
+  "config.section-color-and-shadow": "Color & Shadow", // TODO
   "config.disable-text-shadow": "Отключить тень у текста",
   "config.disable-text-shadow.description": "Отключает отображение тени у всего текста в игре.",
   // TODO
-  "config.hex-format": "\n\nEnter a hexadecimal value:\nAABBGGRR\ne.g. Indigo Blue (R=63, G=72, B=204, A=255)\n => FFCC483F",
+  "config.color-format": "\n\nFormat: R G B A\ne.g. Indigo Blue (R=63, G=72, B=204, A=255)\n => 63 72 204 255",
   "config.text-color": "Text color",
   "config.text-color.description": "Configues game default text color.",
   "config.text-color-dialogue": "Text color Dialogue",
@@ -91,7 +91,7 @@
   "config.edit-prio": "Edit priority",
   "config.edit-prio.description": "Priority to edit fonts. The large the value, the later fonts get edited.\nRange: [{{minValue}}, {{maxValue}}]\nDefault: 0",
 
-  "config.section-ui": "UI",  // TODO
+  "config.section-ui": "UI", // TODO
   "config.font-menu-key": "Открыть меню шрифтов",
   "config.font-menu-key.description": "Сочетание клавиш для открытия меню настроек шрифта.",
   "config.example-text": "Пользовательский текст примера",
