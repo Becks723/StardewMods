@@ -97,29 +97,29 @@
   "config.example-text": "Пользовательский текст примера",
   "config.example-text.description": "Заменяет текст для сравнения и настройки отображения шрифтов в игре.\nЕсли поле оставить пустым, будет используется предустановленный текст.",
   "config.min-font-size": "Максимальный размер шрифта",
-  "config.min-font-size.description": "Максимальный размер шрифта (в пикселях).",
+  "config.min-font-size.description": "Min reachable value of font size UI control.", // TODO
   "config.max-font-size": "Максимальный размер шрифта",
-  "config.max-font-size.description": "Максимальный размер шрифта (в пикселях).",
-  "config.max-spacing": "Максимальное расстояние",
-  "config.max-spacing.description": "Максимальный горизонтальный промежуток между символами.",
+  "config.max-font-size.description": "Max reachable value of font size UI control.", // TODO
   "config.min-spacing": "Минимальный расстояние",
-  "config.min-spacing.description": "Минимальный горизонтальный интервал между символами.",
+  "config.min-spacing.description": "Min reachable value of spacing UI control.", // TODO
+  "config.max-spacing": "Максимальное расстояние",
+  "config.max-spacing.description": "Max reachable value of spacing UI control.", // TODO
   "config.min-line-spacing": "Мин. расстояние между строками",
-  "config.min-line-spacing.description": "Минимальное расстояние между двумя символами.",
+  "config.min-line-spacing.description": "Min reachable value of line spacing UI control.", // TODO
   "config.max-line-spacing": "Макc. расстояние между строками",
-  "config.max-line-spacing.description": "Максимальное расстояние между двумя символами.",
-  "config.max-offset-x": "Макс. смещение символов по оси-X",
-  "config.max-offset-x.description": "Максимальное смещение по оси-X для всех символов.",
+  "config.max-line-spacing.description": "Max reachable value of line spacing UI control.", // TODO
   "config.min-offset-x": "Макс. смещение символов по оси-X",
-  "config.min-offset-x.description": "Минимальное смещение по оси-X для всех символов.",
-  "config.max-offset-y": "Макс. смещение символов по оси-Y",
-  "config.max-offset-y.description": "Максимальное смещение по оси-Y для всех символов.",
+  "config.min-offset-x.description": "Min reachable value of X-offset UI control.", // TODO
+  "config.max-offset-x": "Макс. смещение символов по оси-X",
+  "config.max-offset-x.description": "Max reachable value of X-offset UI control.", // TODO
   "config.min-offset-y": "Мин. смещение символов по оси-Y",
-  "config.min-offset-y.description": "Минимальное смещение по оси-Y для всех символов.",
-  "config.max-pixel-zoom": "Максимальный попиксельный зум",
-  "config.max-pixel-zoom.description": "Максимальное попиксельное масштабирование для каждого символа. (только диалоговый шрифт)",
+  "config.min-offset-y.description": "Min reachable value of Y-offset UI control.", // TODO
+  "config.max-offset-y": "Макс. смещение символов по оси-Y",
+  "config.max-offset-y.description": "Max reachable value of Y-offset UI control.", // TODO
   "config.min-pixel-zoom": "Минимальный попиксельный зум",
-  "config.min-pixel-zoom.description": "Минимальное попиксельное масштабирование для каждого символа. (только диалоговый шрифт)",
+  "config.min-pixel-zoom.description": "Min reachable value of pixel zoom UI control.", // TODO
+  "config.max-pixel-zoom": "Максимальный попиксельный зум",
+  "config.max-pixel-zoom.description": "Max reachable value of pixel zoom UI control.", // TODO
 
   "misc.mod-file-not-found": "Не удаётся найти \"{{filePath}}\", который является частью файлов мода. Переустановка мода может устранить ошибку."
 }

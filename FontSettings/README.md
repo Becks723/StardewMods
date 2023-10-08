@@ -105,18 +105,18 @@ Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalle
 | EditMode | If checked, edit mode, or load mode. Edit mode enhances mod compatibility, avoids conflicts when multiple mods load same font. |
 | EditPriority | Priority to edit fonts. The large the value, the later fonts get edited.<br>Range: [-2147483648, 2147483647]<br>Default: 0 |
 | ExampleText | Text for font samples. Keep it empty and mod will use built-in text. Otherwise set your own. |
-| MinFontSize | Min reachable value of the font size option, default `5`. |
-| MaxFontSize | Max reachable value of the font size option, default `75`. |
-| MinSpacing | Min reachable value of the spacing option, default `-10`. |
-| MaxSpacing | Max reachable value of the spacing option, default `10`. |
-| MinLineSpacing | Min reachable value of the line spacing option, default `5`. |
-| MaxLineSpacing | Max reachable value of the line spacing option, default `75`. |
-| MinCharOffsetX | Min reachable value of the x-offset option, default `-10`. |
-| MaxCharOffsetX | Max reachable value of the x-offset option, default `10`. |
-| MinCharOffsetY | Min reachable value of the y-offset option, default `-10`. |
-| MaxCharOffsetY | Max reachable value of the y-offset option, default `10`. |
-| MinPixelZoom | Min reachable value of the pixel zoom option, default `0.5`. |
-| MaxPixelZoom | Max reachable value of the pixel zoom option, default `5`. |
+| MinFontSize | Min reachable value of the font size UI control, default `5`. |
+| MaxFontSize | Max reachable value of the font size UI control, default `75`. |
+| MinSpacing | Min reachable value of the spacing UI control, default `-10`. |
+| MaxSpacing | Max reachable value of the spacing UI control, default `10`. |
+| MinLineSpacing | Min reachable value of the line spacing UI control, default `5`. |
+| MaxLineSpacing | Max reachable value of the line spacing UI control, default `75`. |
+| MinCharOffsetX | Min reachable value of the x-offset UI control, default `-10`. |
+| MaxCharOffsetX | Max reachable value of the x-offset UI control, default `10`. |
+| MinCharOffsetY | Min reachable value of the y-offset UI control, default `-10`. |
+| MaxCharOffsetY | Max reachable value of the y-offset UI control, default `10`. |
+| MinPixelZoom | Min reachable value of the pixel zoom UI control, default `0.5`. |
+| MaxPixelZoom | Max reachable value of the pixel zoom UI control, default `5`. |
 
 ## Compatibility:
 Lastest version works with Windows, MacOS, Linux.
