@@ -182,8 +182,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MinOffsetX_Description,
                     get: () => this.Config.MinCharOffsetX,
                     set: val => this.Config.MinCharOffsetX = val,
-                    max: -5,
-                    min: -25,
+                    max: -10,
+                    min: -200,
                     interval: 1
                 )
 
@@ -193,8 +193,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MaxOffsetX_Description,
                     get: () => this.Config.MaxCharOffsetX,
                     set: val => this.Config.MaxCharOffsetX = val,
-                    max: 25,
-                    min: 5,
+                    max: 200,
+                    min: 10,
                     interval: 1
                 )
 
@@ -204,8 +204,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MinOffsetY_Description,
                     get: () => this.Config.MinCharOffsetY,
                     set: val => this.Config.MinCharOffsetY = val,
-                    max: -5,
-                    min: -25,
+                    max: -10,
+                    min: -200,
                     interval: 1
                 )
 
@@ -215,8 +215,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MaxOffsetY_Description,
                     get: () => this.Config.MaxCharOffsetY,
                     set: val => this.Config.MaxCharOffsetY = val,
-                    max: 25,
-                    min: 5,
+                    max: 200,
+                    min: 10,
                     interval: 1
                 )
 
@@ -228,7 +228,7 @@ namespace FontSettings.Framework.Integrations
                     set: val => this.Config.MinPixelZoom = val,
                     max: 3,
                     min: 0.1f,
-                    interval: 0.1f
+                    interval: 0.05f
                 )
 
                 // max pixel zoom
@@ -239,7 +239,7 @@ namespace FontSettings.Framework.Integrations
                     set: val => this.Config.MaxPixelZoom = val,
                     max: 10,
                     min: 3,
-                    interval: 1
+                    interval: 0.05f
                 );
         }
 

@@ -334,7 +334,7 @@ namespace FontSettings.Framework.Menus.Views
                                     Label valuelabel = new Label();
                                     valuelabel.Font = FontType.DialogueFont;
                                     valuelabel.MinWidth = FontHelper.MeasureString(FontType.DialogueFont, "999").X;
-                                    context.OneWayBinds(() => slider.Value, () => valuelabel.Text, new ToStringConverter<float>(val => val % 1 == 0 ? val.ToString() : val.ToString("N1")));
+                                    context.OneWayBinds(() => slider.Value, () => valuelabel.Text, new ToStringConverter<float>());
                                     return valuelabel;
                                 }
 
@@ -571,7 +571,7 @@ namespace FontSettings.Framework.Menus.Views
                                         pixelZoomOption.Margin = new Thickness(0, optionSpacing, 0, 0);
                                         {
                                             var slider = new Slider();
-                                            slider.Interval = 0.1f;
+                                            slider.Interval = 0.05f;
                                             slider.RaiseEventOccasion = RaiseOccasion.WhenValueChanged;
                                             slider.SuggestedWidth = 300;
                                             slider.ValueChanged += this.UpdateExampleCurrent;
