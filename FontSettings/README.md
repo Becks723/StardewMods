@@ -172,6 +172,9 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.12.4 - 2023-10-11
+- Fix a bug where you cannot Save as new preset.
+
 #### 0.12.3 - 2023-10-10
 - Adds Portuguese translation. (Thanks to [Si0nk0b](https://www.nexusmods.com/users/142546813))
 - Refactors config related + GMCM.
