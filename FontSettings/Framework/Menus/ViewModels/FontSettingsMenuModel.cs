@@ -37,7 +37,6 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly IFontInfoRetriever _fontInfoRetriever;
         protected readonly IFontExporter _exporter;
         protected readonly IFontPresetManager _presetManager;
-        protected readonly Func<GameFontType, string> _i18nGameFontType;
         protected readonly Func<string> _i18nKeepOrig;
         protected readonly Func<string, string> _i18nValidationFontFileNotFound;
         protected readonly Func<string, string> _i18nFailedToReadFontFile;
@@ -55,18 +54,6 @@ namespace FontSettings.Framework.Menus.ViewModels
                 this.SetField(ref this._currentFontType, value);
                 this.RaisePropertyChanged(nameof(this.ExampleText));
             }
-        }
-
-        #endregion
-
-        #region Title Property
-
-        private string _title;
-
-        public string Title
-        {
-            get => this._title;
-            set => this.SetField(ref this._title, value);
         }
 
         #endregion
@@ -638,7 +625,6 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public FontSettingsMenuModel(ModConfig config, IMonitor monitor, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager,
             IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues,
-            Func<GameFontType, string> i18nGameFontType,
             Func<string> i18nKeepOrigFont,
             Func<string, string> i18nValidationFontFileNotFound,
             Func<string, string> i18nFailedToReadFontFile)
@@ -660,7 +646,6 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._exporter = exporter;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
-            this._i18nGameFontType = i18nGameFontType ?? (type => type.ToString());
             this._i18nKeepOrig = i18nKeepOrigFont ?? (() => "Keep Original");
             this._i18nValidationFontFileNotFound = i18nValidationFontFileNotFound ?? (filePath => $"Font file not found: {filePath}");
             this._i18nFailedToReadFontFile = i18nFailedToReadFontFile ?? (filePath => $"Failed to recognize font file: {filePath}");
@@ -937,9 +922,6 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private void OnFontTypeChanged(GameFontType newFontType)
         {
-            // 更新标题。
-            this.Title = this._i18nGameFontType(newFontType);
-
             // 更新默认字体。
             this.KeepOriginalFont = this.FontKeepOriginal();
 

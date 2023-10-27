@@ -514,7 +514,6 @@ namespace FontSettings
                             asyncFontInfoRetriever: new FontInfoRetriever(),
                             exporter: this._exporter,
                             stagedValues: this._menuContextModel,
-                            i18nGameFontType: fontType => fontType.LocalizedName(),
                             i18nKeepOrigFont: I18n.Ui_MainMenu_Font_KeepOrig,
                             i18nValidationFontFileNotFound: I18n.Ui_MainMenu_Validation_Font_FileNotFound,
                             i18nFailedToReadFontFile: I18n.Ui_MainMenu_FailedToRecognizeFontFile);
@@ -533,7 +532,6 @@ namespace FontSettings
                             fontInfoRetriever: new FontInfoRetriever(),
                             exporter: this._exporter,
                             stagedValues: this._menuContextModel,
-                            i18nGameFontType: fontType => fontType.LocalizedName(),
                             i18nKeepOrigFont: I18n.Ui_MainMenu_Font_KeepOrig,
                             i18nValidationFontFileNotFound: I18n.Ui_MainMenu_Validation_Font_FileNotFound,
                             i18nFailedToReadFontFile: I18n.Ui_MainMenu_FailedToRecognizeFontFile);

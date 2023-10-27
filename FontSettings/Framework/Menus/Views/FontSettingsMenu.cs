@@ -298,7 +298,7 @@ namespace FontSettings.Framework.Menus.Views
                                     fontTypeLabel.HorizontalAlignment = HorizontalAlignment.Center;
                                     fontTypeLabel.VerticalAlignment = VerticalAlignment.Center;
                                     fontTypeLabel.Margin = new Thickness(0, 0, borderWidth / 3, 0);
-                                    context.OneWayBinds(() => this._viewModel.Title, () => fontTypeLabel.Text);
+                                    context.OneWayBinds(() => this._viewModel.CurrentFontType, () => fontTypeLabel.Text, new ToStringConverter<GameFontType>(type => type.LocalizedName()));
                                     fontTypeGrid.Children.Add(fontTypeLabel);
                                     fontTypeGrid.SetColumn(fontTypeLabel, 1);
 
