@@ -95,6 +95,7 @@ namespace FontSettings.Framework.Menus.Views.Components
                 ScrollViewer view = new ScrollViewer();
                 view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
                 view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                view.ShowsBackground = false;
                 border.Child = view;
                 {
                     this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -132,6 +133,7 @@ namespace FontSettings.Framework.Menus.Views.Components
                     ScrollViewer view = new ScrollViewer();
                     view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
                     view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                    view.ShowsBackground = false;
                     vanillaBorder.Child = view;
                     {
                         this.VanillaFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -153,6 +155,7 @@ namespace FontSettings.Framework.Menus.Views.Components
                     ScrollViewer view = new ScrollViewer();
                     view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
                     view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                    view.ShowsBackground = false;
                     currentBorder.Child = view;
                     {
                         this.CurrentFontExample.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -176,6 +179,7 @@ namespace FontSettings.Framework.Menus.Views.Components
                 ScrollViewer view = new ScrollViewer();
                 view.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
                 view.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                view.ShowsBackground = false;
                 border.Child = view;
                 {
                     var examples = new MergedFontExampleLabels(this.VanillaFontExample, this.CurrentFontExample);

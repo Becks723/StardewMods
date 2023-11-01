@@ -217,55 +217,6 @@ namespace FontSettings.Framework.Menus.Views
                     {
                         var scrollViewer = new ScrollViewer();
                         scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-                        scrollViewer.Appearance = Appearance.ForControl<ScrollViewer>(ctx =>
-                        {
-                            var context = ctx;
-                            var scrollViewer = context.Target;
-
-                            Grid grid = new Grid();
-                            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
-                            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
-                            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                            {
-                                // added.
-                                var backgroundBorder = new TextureBoxBorder();
-                                backgroundBorder.Box = TextureBoxes.Default;
-                                backgroundBorder.DrawShadow = false;
-                                grid.Children.Add(backgroundBorder);
-                                grid.SetColumn(backgroundBorder, 0);
-                                grid.SetRow(backgroundBorder, 0);
-                                {
-                                    var contentPresenter = new ScrollContentPresenter();
-                                    context.DefinePart("PART_CONTENT", contentPresenter);
-                                    context.DefinePart("PART_ContentPresenter", contentPresenter);
-                                    backgroundBorder.Child = contentPresenter;
-                                }
-
-                                ScrollBar vertiScrollBar = new ScrollBar();
-                                vertiScrollBar.Orientation = Orientation.Vertical;
-                                context.OneWayBinds(() => scrollViewer.ActualVerticalScrollBarVisibility, () => vertiScrollBar.Visibility);
-                                context.OneWayBinds(() => scrollViewer.VerticalOffset, () => vertiScrollBar.Value);
-                                context.OneWayBinds(() => scrollViewer.ScrollableHeight, () => vertiScrollBar.Maximum);
-                                context.OneWayBinds(() => scrollViewer.ViewportHeight, () => vertiScrollBar.Viewport);
-                                context.DefinePart("PART_VSCROLLBAR", vertiScrollBar);
-                                grid.Children.Add(vertiScrollBar);
-                                grid.SetColumn(vertiScrollBar, 1);
-                                grid.SetRow(vertiScrollBar, 0);
-
-                                ScrollBar horizScrollBar = new ScrollBar();
-                                horizScrollBar.Orientation = Orientation.Horizontal;
-                                context.OneWayBinds(() => scrollViewer.ActualHorizontalScrollBarVisibility, () => horizScrollBar.Visibility);
-                                context.OneWayBinds(() => scrollViewer.HorizontalOffset, () => horizScrollBar.Value);
-                                context.OneWayBinds(() => scrollViewer.ScrollableWidth, () => horizScrollBar.Maximum);
-                                context.OneWayBinds(() => scrollViewer.ViewportWidth, () => horizScrollBar.Viewport);
-                                context.DefinePart("PART_HSCROLLBAR", horizScrollBar);
-                                grid.Children.Add(horizScrollBar);
-                                grid.SetColumn(horizScrollBar, 0);
-                                grid.SetRow(horizScrollBar, 1);
-                            }
-                            return grid;
-                        });
                         settingsGrid.Children.Add(scrollViewer);
                         settingsGrid.SetRow(scrollViewer, 0);
                         {
@@ -664,6 +615,7 @@ namespace FontSettings.Framework.Menus.Views
                                                 var titleView = new ScrollViewer();
                                                 titleView.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
                                                 titleView.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                titleView.ShowsBackground = false;
                                                 titleGrid.Children.Add(titleView);
                                                 titleGrid.SetRow(titleView, 0);
                                                 {
@@ -676,6 +628,7 @@ namespace FontSettings.Framework.Menus.Views
                                                 var subtitleView = new ScrollViewer();
                                                 subtitleView.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
                                                 subtitleView.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                                                subtitleView.ShowsBackground = false;
                                                 titleGrid.Children.Add(subtitleView);
                                                 titleGrid.SetRow(subtitleView, 1);
                                                 {
