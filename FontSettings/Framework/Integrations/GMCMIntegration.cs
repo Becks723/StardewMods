@@ -17,12 +17,8 @@ namespace FontSettings.Framework.Integrations
         protected override void IntegrateOverride(GenericModConfigMenuFluentHelper helper)
         {
             helper.Register()
-                .AddKeyBindList(
-                    name: I18n.Config_FontMenuKey,
-                    tooltip: I18n.Config_FontMenuKey_Description,
-                    get: () => this.Config.OpenFontSettingsMenu,
-                    set: val => this.Config.OpenFontSettingsMenu = val
-                )
+                // color & shadow section
+                .AddSectionTitle(I18n.Config_SectionColorAndShadow)
 
                 // diable font shadow
                 .AddCheckbox(
@@ -36,7 +32,7 @@ namespace FontSettings.Framework.Integrations
                 .AddColorPickerOrHexBox(
                     name: I18n.Config_TextColor,
                     description: I18n.Config_TextColor_Description,
-                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_TextColor_Description),
+                    descriptionHexBox: this.ColorFormatSuffix(I18n.Config_TextColor_Description),
                     get: () => this.Config.TextColor,
                     set: val => this.Config.TextColor = val
                 )
@@ -45,7 +41,7 @@ namespace FontSettings.Framework.Integrations
                 .AddColorPickerOrHexBox(
                     name: I18n.Config_TextColorDialogue,
                     description: I18n.Config_TextColorDialogue_Description,
-                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_TextColorDialogue_Description),
+                    descriptionHexBox: this.ColorFormatSuffix(I18n.Config_TextColorDialogue_Description),
                     get: () => this.Config.TextColorDialogue,
                     set: val => this.Config.TextColorDialogue = val
                 )
@@ -54,7 +50,7 @@ namespace FontSettings.Framework.Integrations
                 .AddColorPickerOrHexBox(
                     name: I18n.Config_ShadowColor,
                     description: I18n.Config_ShadowColor_Description,
-                    descriptionHexBox: this.HexFormatSuffix(I18n.Config_ShadowColor_Description),
+                    descriptionHexBox: this.ColorFormatSuffix(I18n.Config_ShadowColor_Description),
                     get: () => this.Config.ShadowColorGame1,
                     set: val =>
                     {
@@ -62,6 +58,9 @@ namespace FontSettings.Framework.Integrations
                         this.Config.ShadowColorUtility = val;
                     }
                 )
+
+                // compatibility section
+                .AddSectionTitle(I18n.Config_SectionCompatibility)
 
                 // enable latin dialogue font
                 .AddCheckbox(
@@ -92,6 +91,18 @@ namespace FontSettings.Framework.Integrations
                     interval: null
                 )
 
+                // ui section
+                .AddSectionTitle(I18n.Config_SectionUi)
+
+                // menu key
+                .AddKeyBindList(
+                    name: I18n.Config_FontMenuKey,
+                    tooltip: I18n.Config_FontMenuKey_Description,
+                    get: () => this.Config.OpenFontSettingsMenu,
+                    set: val => this.Config.OpenFontSettingsMenu = val
+                )
+
+                // sample text
                 .AddTextBox(
                     name: I18n.Config_ExampleText,
                     tooltip: I18n.Config_ExampleText_Description,
@@ -171,8 +182,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MinOffsetX_Description,
                     get: () => this.Config.MinCharOffsetX,
                     set: val => this.Config.MinCharOffsetX = val,
-                    max: -5,
-                    min: -25,
+                    max: -10,
+                    min: -200,
                     interval: 1
                 )
 
@@ -182,8 +193,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MaxOffsetX_Description,
                     get: () => this.Config.MaxCharOffsetX,
                     set: val => this.Config.MaxCharOffsetX = val,
-                    max: 25,
-                    min: 5,
+                    max: 200,
+                    min: 10,
                     interval: 1
                 )
 
@@ -193,8 +204,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MinOffsetY_Description,
                     get: () => this.Config.MinCharOffsetY,
                     set: val => this.Config.MinCharOffsetY = val,
-                    max: -5,
-                    min: -25,
+                    max: -10,
+                    min: -200,
                     interval: 1
                 )
 
@@ -204,8 +215,8 @@ namespace FontSettings.Framework.Integrations
                     tooltip: I18n.Config_MaxOffsetY_Description,
                     get: () => this.Config.MaxCharOffsetY,
                     set: val => this.Config.MaxCharOffsetY = val,
-                    max: 25,
-                    min: 5,
+                    max: 200,
+                    min: 10,
                     interval: 1
                 )
 
@@ -217,7 +228,7 @@ namespace FontSettings.Framework.Integrations
                     set: val => this.Config.MinPixelZoom = val,
                     max: 3,
                     min: 0.1f,
-                    interval: 0.1f
+                    interval: 0.05f
                 )
 
                 // max pixel zoom
@@ -228,7 +239,7 @@ namespace FontSettings.Framework.Integrations
                     set: val => this.Config.MaxPixelZoom = val,
                     max: 10,
                     min: 3,
-                    interval: 1
+                    interval: 0.05f
                 );
         }
 
@@ -248,9 +259,9 @@ namespace FontSettings.Framework.Integrations
             return value.Replace("\\n", "\n");
         }
 
-        private Func<string> HexFormatSuffix(Func<string> text)
+        private Func<string> ColorFormatSuffix(Func<string> text)
         {
-            return () => text() + I18n.Config_HexFormat();
+            return () => text() + I18n.Config_ColorFormat();
         }
     }
 }

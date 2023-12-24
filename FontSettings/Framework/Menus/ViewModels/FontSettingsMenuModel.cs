@@ -26,6 +26,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly FontSettingsMenuContextModel _stagedValues;
         protected readonly Dictionary<GameFontType, FontPresetViewModel> _presetViewModels = new();
         protected readonly ModConfig _config;
+        protected readonly IMonitor _monitor;
         protected readonly IVanillaFontProvider _vanillaFontProvider;
         protected readonly ISampleFontGenerator _sampleFontGenerator;
         protected readonly IFontConfigManager _fontConfigManager;
@@ -36,6 +37,9 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly IFontInfoRetriever _fontInfoRetriever;
         protected readonly IFontExporter _exporter;
         protected readonly IFontPresetManager _presetManager;
+        protected readonly Func<string> _i18nKeepOrig;
+        protected readonly Func<string, string> _i18nValidationFontFileNotFound;
+        protected readonly Func<string, string> _i18nFailedToReadFontFile;
 
 
         #region CurrentFontType Property
@@ -50,18 +54,6 @@ namespace FontSettings.Framework.Menus.ViewModels
                 this.SetField(ref this._currentFontType, value);
                 this.RaisePropertyChanged(nameof(this.ExampleText));
             }
-        }
-
-        #endregion
-
-        #region Title Property
-
-        private string _title;
-
-        public string Title
-        {
-            get => this._title;
-            set => this.SetField(ref this._title, value);
         }
 
         #endregion
@@ -631,14 +623,18 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public ICommand ResetFontCommand { get; }
 
-        public FontSettingsMenuModel(ModConfig config, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
+        public FontSettingsMenuModel(ModConfig config, IMonitor monitor, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager,
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues,
+            Func<string> i18nKeepOrigFont,
+            Func<string, string> i18nValidationFontFileNotFound,
+            Func<string, string> i18nFailedToReadFontFile)
         {
             // 订阅异步完成事件。
             _asyncIndicator.IsGeneratingFontChanged += (_, fontType) => this.IsGeneratingFont = _asyncIndicator.IsGeneratingFont(fontType);
             _asyncIndicator.IsRefreshingFontsChanged += (_, _) => this.IsRefreshingFonts = _asyncIndicator.IsRefreshingFonts;
 
             this._config = config;
+            this._monitor = monitor;
             this._vanillaFontProvider = vanillaFontProvider;
             this._sampleFontGenerator = sampleFontGenerator;
             this._fontConfigManager = fontConfigManager;
@@ -650,6 +646,9 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._exporter = exporter;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
+            this._i18nKeepOrig = i18nKeepOrigFont ?? (() => "Keep Original");
+            this._i18nValidationFontFileNotFound = i18nValidationFontFileNotFound ?? (filePath => $"Font file not found: {filePath}");
+            this._i18nFailedToReadFontFile = i18nFailedToReadFontFile ?? (filePath => $"Failed to recognize font file: {filePath}");
 
             // 初始化子ViewModel。
             foreach (var type in Enum.GetValues<GameFontType>())
@@ -855,7 +854,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
             catch (Exception ex)
             {
-                ILog.Trace($"Error in vanilla sample font: {ex.Message}\n{ex.StackTrace}");
+                this._monitor.Log($"Error in vanilla sample font: {ex.Message}\n{ex.StackTrace}");
                 this.ExampleVanillaFont = null;
             }
         }
@@ -871,7 +870,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             }
             catch (Exception ex)
             {
-                ILog.Trace($"Error in current sample font: {ex.Message}\n{ex.StackTrace}");
+                this._monitor.Log($"Error in current sample font: {ex.Message}\n{ex.StackTrace}");
                 this.ExampleCurrentFont = null;
             }
         }
@@ -902,16 +901,16 @@ namespace FontSettings.Framework.Menus.ViewModels
             try
             {
                 this.ExampleCurrentFont = await this._sampleFontGenerator.GenerateAsync(config, context, token);
-                ILog.Trace("Sample: Set");
+                this._monitor.VerboseLog("Sample: Set");
             }
             catch (OperationCanceledException)
             {
-                ILog.Trace("Sample: Cancelled");
+                this._monitor.VerboseLog("Sample: Cancelled");
                 this.ExampleCurrentFont = lastExampleCurrentFont;
             }
             catch (Exception ex)
             {
-                ILog.Trace($"Sample: {ex.Message}\n{ex.StackTrace}");
+                this._monitor.Log($"Sample: {ex.Message}\n{ex.StackTrace}");
                 this.ExampleCurrentFont = lastExampleCurrentFont;
             }
             finally
@@ -923,9 +922,6 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private void OnFontTypeChanged(GameFontType newFontType)
         {
-            // 更新标题。
-            this.Title = newFontType.LocalizedName();
-
             // 更新默认字体。
             this.KeepOriginalFont = this.FontKeepOriginal();
 
@@ -1056,7 +1052,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 vanillaFont = new FontViewModel(
                     fontFilePath: fontFilePath,
                     fontIndex: fontIndex,
-                    displayText: I18n.Ui_MainMenu_Font_KeepOrig());
+                    displayText: this._i18nKeepOrig());
             }
             yield return vanillaFont;
 
@@ -1070,8 +1066,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                             return result.GetData();
                         else
                         {
-                            ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
-                            ILog.Trace($"{result.GetError()}");
+                            this._monitor.Log(this._i18nFailedToReadFontFile(file), LogLevel.Warn);
+                            this._monitor.Log($"{result.GetError()}");
                             return Array.Empty<FontModel>();
                         }
                     })
@@ -1094,8 +1090,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                             return result.GetData();
                         else
                         {
-                            ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(file));
-                            ILog.Trace($"{result.GetError()}");
+                            this._monitor.Log(this._i18nFailedToReadFontFile(file), LogLevel.Warn);
+                            this._monitor.Log($"{result.GetError()}");
                             return Array.Empty<FontModel>();
                         }
                     })))
@@ -1166,7 +1162,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 vanillaFont = new FontViewModel(
                     fontFilePath: vanillaFontConfig.FontFilePath,
                     fontIndex: vanillaFontConfig.FontIndex,
-                    displayText: I18n.Ui_MainMenu_Font_KeepOrig());
+                    displayText: this._i18nKeepOrig());
             }
             return vanillaFont;
         }
@@ -1292,7 +1288,7 @@ namespace FontSettings.Framework.Menus.ViewModels
 
                 var fontFilePath = this.FontFilePath;
                 if (fontFilePath != null && !File.Exists(fontFilePath))
-                    errors.Add(I18n.Ui_MainMenu_Validation_Font_FileNotFound(fontFilePath));
+                    errors.Add(this._i18nValidationFontFileNotFound(fontFilePath));
 
                 return errors;
             }, nameof(this.CurrentFont));

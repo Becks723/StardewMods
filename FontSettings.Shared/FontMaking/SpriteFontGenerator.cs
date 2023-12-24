@@ -162,33 +162,41 @@ namespace FontSettings.Framework
                 var chars = new List<char>();
                 var kerning = new List<Vector3>();
 
-                stbtt_pack_context ctx = new stbtt_pack_context();
-                byte[] pixels = new byte[finalTexWidth * finalTexHeight];
-                fixed (byte* pxPtr = pixels)
+                stbtt_pack_context spc = new stbtt_pack_context();
+                byte[] pixels;
+                try
                 {
-                    stbtt_PackBegin(ctx, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, padding, null);
-
-                    foreach (CharacterRange range in characterRanges)
+                    pixels = new byte[finalTexWidth * finalTexHeight];
+                    fixed (byte* pxPtr = pixels)
                     {
-                        stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
-                        fixed (stbtt_packedchar* cPtr = arr)
-                            stbtt_PackFontRange(ctx, fontInfo.data, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
+                        stbtt_PackBegin(spc, pxPtr, finalTexWidth, finalTexHeight, finalTexWidth, padding, null);
 
-                        for (int i = 0; i < arr.Length; i++)
+                        foreach (CharacterRange range in characterRanges)
                         {
-                            var pc = arr[i];
+                            stbtt_packedchar[] arr = new stbtt_packedchar[range.End - range.Start + 1];
+                            fixed (stbtt_packedchar* cPtr = arr)
+                                stbtt_PackFontRange(spc, fontInfo.data, fontIndex, fontPixelHeight, range.Start, arr.Length, cPtr);
 
-                            float yOff = pc.yoff;
-                            yOff += ascent * scale;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                var pc = arr[i];
 
-                            int width = pc.x1 - pc.x0;
-                            int height = pc.y1 - pc.y0;
-                            chars.Add((char)(range.Start + i));
-                            bounds.Add(new Rectangle(pc.x0, pc.y0, width, height));
-                            cropping.Add(new Rectangle((int)Math.Round(charOffsetX), (int)Math.Round(yOff + charOffsetY), width, height));
-                            kerning.Add(new Vector3(pc.xoff, width, pc.xadvance - pc.xoff - width));
+                                float yOff = pc.yoff;
+                                yOff += ascent * scale;
+
+                                int width = pc.x1 - pc.x0;
+                                int height = pc.y1 - pc.y0;
+                                chars.Add((char)(range.Start + i));
+                                bounds.Add(new Rectangle(pc.x0, pc.y0, width, height));
+                                cropping.Add(new Rectangle((int)Math.Round(charOffsetX), (int)Math.Round(yOff + charOffsetY), width, height));
+                                kerning.Add(new Vector3(pc.xoff, width, pc.xadvance - pc.xoff - width));
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    stbtt_PackEnd(spc);
                 }
 
                 return new SpriteFontMetadata(

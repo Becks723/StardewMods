@@ -58,16 +58,16 @@ namespace FontSettings.Framework
 
         public int EditPriority { get; set; }
 
-        private readonly int DEFAULT_MinFontSize = 5;
-        private readonly int DEFAULT_MaxFontSize = 75;
+        private readonly int DEFAULT_MinFontSize = 1;
+        private readonly int DEFAULT_MaxFontSize = 100;
         private readonly int DEFAULT_MinSpacing = -10;
         private readonly int DEFAULT_MaxSpacing = 10;
-        private readonly int DEFAULT_MinLineSpacing = 5;
-        private readonly int DEFAULT_MaxLineSpacing = 75;
-        private readonly int DEFAULT_MinCharOffsetX = -10;
-        private readonly int DEFAULT_MaxCharOffsetX = 10;
-        private readonly int DEFAULT_MinCharOffsetY = -10;
-        private readonly int DEFAULT_MaxCharOffsetY = 10;
+        private readonly int DEFAULT_MinLineSpacing = 1;
+        private readonly int DEFAULT_MaxLineSpacing = 100;
+        private readonly int DEFAULT_MinCharOffsetX = -50;
+        private readonly int DEFAULT_MaxCharOffsetX = 50;
+        private readonly int DEFAULT_MinCharOffsetY = -50;
+        private readonly int DEFAULT_MaxCharOffsetY = 50;
         private readonly float DEFAULT_MinPixelZoom = 0.5f;
         private readonly float DEFAULT_MaxPixelZoom = 5f;
         private readonly bool DEFAULT_DisableTextShadow = false;
@@ -78,7 +78,7 @@ namespace FontSettings.Framework
         private readonly bool DEFAULT_EnableLatinDialogueFont = true;
         private readonly KeybindList DEFAULT_OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
         private readonly string[] DEFAULT_CustomFontFolders = GetDefaultCustomFontFolders().ToArray();
-        private readonly bool DEFAULT_EditMode = false;
+        private readonly bool DEFAULT_EditMode = true;
         private readonly int DEFAULT_EditPriority = 0;
 
         public ModConfig()

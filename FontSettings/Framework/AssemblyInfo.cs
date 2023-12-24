@@ -17,3 +17,4 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("7bf29fc3-1fe1-46cd-858a-057617cdc821")]
 [assembly: InternalsVisibleTo("FontSettings.Tests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

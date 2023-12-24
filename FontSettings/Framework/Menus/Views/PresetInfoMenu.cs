@@ -52,6 +52,7 @@ namespace FontSettings.Framework.Menus.Views
                     var scrollViewer = new ScrollViewer();
                     scrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Hidden;
                     scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                    scrollViewer.ShowsBackground = false;
                     grid.Children.Add(scrollViewer);
                     grid.SetRow(scrollViewer, 1);
                     {

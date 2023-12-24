@@ -85,30 +85,30 @@
 
 配合[模组配置菜单](https://www.nexusmods.com/stardewvalley/mods/5098)食用体验更佳！
 
-| 选项 | 英文名 | 简介 |
-| --- | --- | --- |
-| 字体菜单 | OpenFontSettingsMenu | 绑定打开字体菜单的按键，默认`LeftAlt + F`。 |
-| 禁用字体阴影 | DisableTextShadow | 是否禁用字体阴影，默认`false`。 |
-| 文本颜色 | TextColor | 设置默认文本颜色。 |
-| 文本颜色（对话） | TextColorDialogue | 设置对话字体默认文本颜色。 |
-| 阴影颜色1 | ShadowColorGame1 | 设置默认阴影颜色。 |
-| 阴影颜色2 | ShadowColorUtility | 设置默认阴影颜色。 |
-| 略 | EnableLatinDialogueFont | **（仅针对拉丁文语言，中文无视就好）** 是否允许设置对话字体，默认`true`。 |
-| 编辑模式 | EditMode | 勾选进入编辑（Edit）模式，否则加载（Load）模式。编辑模式能提高兼容性，尤其在多个模组同时修改字体的时候。 |
-| 编辑优先级 | EditPriority | 值越大，越晚编辑。晚的将覆盖早的编辑结果。<br>取值范围：[-2147483648, 2147483647]<br>默认值：0 |
-| 示例文本 | ExampleText | 设置自定义的文本。将覆盖内置文本，所以一般留空即可。 |
-| 最小字体大小 | MinFontSize | 字体的像素大小 最小值。默认`5`。 |
-| 最大字体大小 | MaxFontSize | 字体的像素大小 最大值。默认`75`。 |
-| 最小字间距 | MinSpacing | 字间距 最小值。默认`-10`。 |
-| 最大字间距 | MaxSpacing | 字间距 最大值。默认`10`。 |
-| 最小行间距 | MinLineSpacing | 行间距 最小值。默认`5`。 |
-| 最大行间距 | MaxLineSpacing | 行间距 最大值。默认`75`。 |
-| 最小横轴偏移量 | MinCharOffsetX | 字符在横轴上的偏移量 最小值。默认`-10`。 |
-| 最大横轴偏移量 | MaxCharOffsetX | 字符在横轴上的偏移量 最大值。默认`10`。 |
-| 最小横轴偏移量 | MinCharOffsetY | 字符在纵轴上的偏移量 最小值。默认`-10`。 |
-| 最大纵轴偏移量 | MaxCharOffsetY | 字符在纵轴上的偏移量 最大值。默认`10`。 |
-| 最小缩放比例 | MinPixelZoom | 字符的缩放比例 最小值（仅对话字体）。默认`0.5`。 |
-| 最大缩放比例 | MaxPixelZoom | 字符的缩放比例 最大值（仅对话字体）。默认`5`。 |
+| 选项 | 英文名 | 简介 | 备注 |
+| --- | --- | --- | --- |
+| 字体菜单 | OpenFontSettingsMenu | 绑定打开字体菜单的按键，默认`LeftAlt + F`。 | |
+| 禁用字体阴影 | DisableTextShadow | 是否禁用字体阴影，默认`false`。 | |
+| 文本颜色 | TextColor | 设置文本颜色，默认`R=34, G=17, B=34`。 | 兼容[GMCM Options](https://www.nexusmods.com/stardewvalley/mods/10505) |
+| 文本颜色（对话） | TextColorDialogue | 设置对话字体文本颜色，默认`R=86, G=22, B=12`。 | 见上 |
+| 阴影颜色1 | ShadowColorGame1 | 设置阴影颜色1，默认`R=206, G=156, B=95`。 | 见上 |
+| 阴影颜色2 | ShadowColorUtility | 设置阴影颜色2，默认`R=221, G=148, B=84`。 | 见上 |
+| 略 | EnableLatinDialogueFont | **（仅针对拉丁文语言，中文无视就好）** 是否允许设置对话字体，默认`true`。 | |
+| 编辑模式 | EditMode | 勾选进入编辑（Edit）模式，否则加载（Load）模式。编辑模式能提高兼容性，尤其在多个模组同时修改字体的时候。默认`true`。 | |
+| 编辑优先级 | EditPriority | 值越大，越晚编辑。晚的将覆盖早的编辑结果。<br>取值范围：[-2147483648, 2147483647]<br>默认`0`。 | |
+| 示例文本 | ExampleText | 设置自定义的文本。将覆盖内置文本，所以一般留空即可。 | |
+| UI最小字体大小 | MinFontSize | UI控件允许设置的最小字体大小。默认`1`。 | |
+| UI最大字体大小 | MaxFontSize | UI控件允许设置的最大字体大小。默认`100`。 | |
+| UI最小字间距 | MinSpacing | UI控件允许设置的最小字间距。默认`-10`。 | |
+| UI最大字间距 | MaxSpacing | UI控件允许设置的最大字间距。默认`10`。 | |
+| UI最小行间距 | MinLineSpacing | UI控件允许设置的最小行间距。默认`1`。 | |
+| UI最大行间距 | MaxLineSpacing | UI控件允许设置的最大行间距。默认`100`。 | |
+| UI最小X轴偏移量 | MinCharOffsetX | UI控件允许设置的最小X轴偏移量。默认`-50`。 | |
+| UI最大X轴偏移量 | MaxCharOffsetX | UI控件允许设置的最大X轴偏移量。默认`50`。 | |
+| UI最小Y轴偏移量 | MinCharOffsetY | UI控件允许设置的最小Y轴偏移量。默认`-50`。 | |
+| UI最大Y轴偏移量 | MaxCharOffsetY | UI控件允许设置的最大Y轴偏移量。默认`50`。 | |
+| UI最小缩放比例 | MinPixelZoom | UI控件允许设置的最小缩放比例。默认`0.5`。 | |
+| UI最大缩放比例 | MaxPixelZoom | UI控件允许设置的最大缩放比例。默认`5`。 | |
 
 ## 兼容性
 兼容Windows、MacOS、Linux系统。Android版本还在制作中~
@@ -156,6 +156,32 @@
 
 
 ## 更新日志
+#### 0.12.4 - 2023-10-11
+- 修复 无法新建预设 的问题。
+
+#### 0.12.3 - 2023-10-10
+- 添加葡语翻译（来自[Si0nk0b](https://www.nexusmods.com/users/142546813)）。
+- 优化配置相关+GMCM：
+  - 修改颜色设置规则，AABBGGRR (十六进制) -> R G B A (十进制)。
+  - 修改一些配置项的默认值、描述和取值范围。
+    <details>
+	  <summary>展开</summary>
+
+      - 编辑模式 默认 关 -> 开。
+      - UI最小字体大小 默认 `5` -> `1`。
+      - UI最大字体大小 默认 `75` -> `100`。
+      - UI最小行间距  默认 `5` -> `1`。
+      - UI最大行间距  默认 `75` -> `100`。
+      - UI最小X轴偏移量 默认 `-10` -> `-50`。
+      - UI最大X轴偏移量 默认 `10` -> `50`。
+      - UI最小Y轴偏移量 默认 `-10` -> `-50`。
+      - UI最大Y轴偏移量 默认 `10` -> `50`。
+      
+	</details>
+
+#### 0.12.2 - 2023-08-24
+- 修复 部分/全部字符缺失 的问题，在最坏的情况下会直接崩游戏。
+
 #### 0.12.1 - 2023-08-04
 - 修复 文字变成透明不可见 的问题。此问题**仅发生于0.12.0首次使用的用户**，修复步骤：
   1. 更新至0.12.1。

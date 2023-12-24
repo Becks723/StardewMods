@@ -91,32 +91,32 @@ In game there're mainly three font types: **Small**, **Medium**, **Dialogue** fo
 
 ## Configuration
 
-Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098)!
+Compatible with [Generic Mod Config Menu](https://www.nexusmods.com/stardewvalley/mods/5098) and [GMCM Options](https://www.nexusmods.com/stardewvalley/mods/10505)!
 
-| Field	| Description |
-| --- | --- |
-| OpenFontSettingsMenu | Keybind to open font menu, default `LeftAlt + F`. |
-| DisableTextShadow | Whether to close text shadow, default `false`. |
-| TextColor | Configues game most common text color. |
-| TextColorDialogue | Configues dialogue text color. |
-| ShadowColorGame1 | Configues game most common text shadow color 1. |
-| ShadowColorUtility | Configues game most common text shadow color 2. |
-| EnableLatinDialogueFont | Whether to enable custom dialogue font in latin languages, default `true`. **When there comes mod conflicts, turn it off for better compatibility.** |
-| EditMode | If checked, edit mode, or load mode. Edit mode enhances mod compatibility, avoids conflicts when multiple mods load same font. |
-| EditPriority | Priority to edit fonts. The large the value, the later fonts get edited.<br>Range: [-2147483648, 2147483647]<br>Default: 0 |
-| ExampleText | Text for font samples. Keep it empty and mod will use built-in text. Otherwise set your own. |
-| MinFontSize | Min reachable value of the font size option, default `5`. |
-| MaxFontSize | Max reachable value of the font size option, default `75`. |
-| MinSpacing | Min reachable value of the spacing option, default `-10`. |
-| MaxSpacing | Max reachable value of the spacing option, default `10`. |
-| MinLineSpacing | Min reachable value of the line spacing option, default `5`. |
-| MaxLineSpacing | Max reachable value of the line spacing option, default `75`. |
-| MinCharOffsetX | Min reachable value of the x-offset option, default `-10`. |
-| MaxCharOffsetX | Max reachable value of the x-offset option, default `10`. |
-| MinCharOffsetY | Min reachable value of the y-offset option, default `-10`. |
-| MaxCharOffsetY | Max reachable value of the y-offset option, default `10`. |
-| MinPixelZoom | Min reachable value of the pixel zoom option, default `0.5`. |
-| MaxPixelZoom | Max reachable value of the pixel zoom option, default `5`. |
+| Field	| Description | Notes |
+| --- | --- | --- |
+| OpenFontSettingsMenu | Keybind to open font menu, default `LeftAlt + F`. | |
+| DisableTextShadow | Whether to close text shadow, default `false`. | |
+| TextColor | Configues game most common text color, default `R=34, G=17, B=34`. | Install [GMCM Options](https://www.nexusmods.com/stardewvalley/mods/10505) for better color picker UI. |
+| TextColorDialogue | Configues dialogue text color, default `R=86, G=22, B=12`. | ^ |
+| ShadowColorGame1 | Configues game most common text shadow color 1, default `R=206, G=156, B=95`. | ^ |
+| ShadowColorUtility | Configues game most common text shadow color 2, default `R=221, G=148, B=84`. | ^ |
+| EnableLatinDialogueFont | Whether to enable custom dialogue font in latin languages, default `true`. **When there comes mod conflicts, turn it off for better compatibility.** | |
+| EditMode | If checked, edit mode, or load mode. Edit mode enhances mod compatibility, avoids conflicts when multiple mods load same font, default `true`. | |
+| EditPriority | Priority to edit fonts. The large the value, the later fonts get edited.<br>Range: [-2147483648, 2147483647]<br>Default `0`. | |
+| ExampleText | Text for font samples. Keep it empty and mod will use built-in text. Otherwise set your own. | |
+| MinFontSize | Min reachable value of the font size UI control, default `1`. | |
+| MaxFontSize | Max reachable value of the font size UI control, default `100`. | |
+| MinSpacing | Min reachable value of the spacing UI control, default `-10`. | |
+| MaxSpacing | Max reachable value of the spacing UI control, default `10`. | |
+| MinLineSpacing | Min reachable value of the line spacing UI control, default `1`. | |
+| MaxLineSpacing | Max reachable value of the line spacing UI control, default `100`. | |
+| MinCharOffsetX | Min reachable value of the x-offset UI control, default `-50`. | |
+| MaxCharOffsetX | Max reachable value of the x-offset UI control, default `50`. | |
+| MinCharOffsetY | Min reachable value of the y-offset UI control, default `-50`. | |
+| MaxCharOffsetY | Max reachable value of the y-offset UI control, default `50`. | |
+| MinPixelZoom | Min reachable value of the pixel zoom UI control, default `0.5`. | |
+| MaxPixelZoom | Max reachable value of the pixel zoom UI control, default `5`. | |
 
 ## Compatibility:
 Lastest version works with Windows, MacOS, Linux.
@@ -172,6 +172,32 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.12.4 - 2023-10-11
+- Fix a bug where you cannot Save as new preset.
+
+#### 0.12.3 - 2023-10-10
+- Adds Portuguese translation. (Thanks to [Si0nk0b](https://www.nexusmods.com/users/142546813))
+- Refactors config related + GMCM.
+  - Change color rule. AABBGGRR (hexadecimal) -> R G B A (decimal).
+  - Change some items default value, docs and range.
+    <details>
+	  <summary>Expand</summary>
+
+      - EditMode default `false` -> `true`。
+      - MinFontSize docs improved; default `5` -> `1`。
+      - MaxFontSize docs improved; default `75` -> `100`。
+      - MinLineSpacing docs improved; default `5` -> `1`。
+      - MaxLineSpacing docs improved; default `75` -> `100`。
+      - MinCharOffsetX docs improved; default `-10` -> `-50`。
+      - MaxCharOffsetX docs improved; default `10` -> `50`。
+      - MinCharOffsetY docs improved; default `-10` -> `-50`。
+      - MaxCharOffsetY docs improved; default `10` -> `50`。
+
+	 </details>
+
+#### 0.12.2 - 2023-08-24
+- Fix an issue where partof/all characters are missing from font bitmap, and in worst case violates memory and crashes game.
+
 #### 0.12.1 - 2023-08-04
 - Fix text becomes invisible after applied changes (**only happened to first-time users in 0.12**). Users encountered this bug may:
   1. Update to 0.12.1.

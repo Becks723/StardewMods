@@ -25,8 +25,8 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         private readonly IAsyncFontInfoRetriever _asyncFontInfoRetriever;
 
-        public FontSettingsMenuModelAsync(ModConfig config, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues)
-            : base(config, vanillaFontProvider, sampleFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, cpFontFileProviders, fontInfoRetriever, exporter, stagedValues)
+        public FontSettingsMenuModelAsync(ModConfig config, IMonitor monitor, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager, IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IAsyncFontInfoRetriever asyncFontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues, Func<string> i18nKeepOrigFont, Func<string, string> i18nValidationFontFileNotFound, Func<string, string> i18nFailedToReadFontFile)
+            : base(config, monitor, vanillaFontProvider, sampleFontGenerator, presetManager, fontConfigManager, vanillaFontConfigProvider, gameFontChanger, fontFileProvider, cpFontFileProviders, fontInfoRetriever, exporter, stagedValues, i18nKeepOrigFont, i18nValidationFontFileNotFound, i18nFailedToReadFontFile)
         {
             this._asyncFontInfoRetriever = asyncFontInfoRetriever;
 
@@ -35,7 +35,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 int length = commandName.Length - "Command".Length;
                 string name = commandName.Substring(0, length);
 
-                ILog.Error($"Error when {name}: {ex.Message}\n{ex.StackTrace}");
+                this._monitor.Log($"Error when {name}: {ex.Message}\n{ex.StackTrace}", LogLevel.Error);
             }
             this.RefreshFontsCommand = new AsyncDelegateCommand(this.RefreshAllFontsAsync, this.CanRefreshAllFonts, ex => LogAsyncException(nameof(this.RefreshFontsCommand), ex));
 
@@ -100,7 +100,7 @@ namespace FontSettings.Framework.Menus.ViewModels
                 _asyncIndicator.IsRefreshingFonts = true;
 
 #if DEBUG
-                await Task.Delay(2000);  // 延迟2秒，调试更明显
+                //await Task.Delay(2000);  // 延迟2秒，调试更明显
 
                 // throw new Exception("Test exception for 'async void'");  // 异常处理测试，确保不能崩游戏。
 #endif
@@ -157,8 +157,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                 return result.GetData();
             else
             {
-                ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace($"{result.GetError()}");
+                this._monitor.Log(this._i18nFailedToReadFontFile(fontFile), LogLevel.Warn);
+                this._monitor.Log($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }
@@ -170,8 +170,8 @@ namespace FontSettings.Framework.Menus.ViewModels
                 return result.GetData();
             else
             {
-                ILog.Warn(I18n.Ui_MainMenu_FailedToRecognizeFontFile(fontFile));
-                ILog.Trace($"{result.GetError()}");
+                this._monitor.Log(this._i18nFailedToReadFontFile(fontFile), LogLevel.Warn);
+                this._monitor.Log($"{result.GetError()}");
                 return Array.Empty<FontModel>();
             }
         }

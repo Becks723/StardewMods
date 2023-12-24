@@ -41,55 +41,7 @@ namespace FontSettings.Framework.Menus.Views
                 ScrollViewer scrollViewer = new ScrollViewer();
                 scrollViewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
                 scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-                scrollViewer.Appearance = Appearance.ForControl<ScrollViewer>(ctx =>
-                {
-                    var context = ctx;
-                    var scrollViewer = context.Target;
-
-                    Grid grid = new Grid();
-                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.FillRemaningSpace });
-                    grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                    grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.FillRemaningSpace });
-                    grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    {
-                        // added.
-                        var backgroundBorder = new TextureBoxBorder();
-                        backgroundBorder.Box = TextureBoxes.ThickBorder;
-                        backgroundBorder.DrawShadow = false;
-                        grid.Children.Add(backgroundBorder);
-                        grid.SetColumn(backgroundBorder, 0);
-                        grid.SetRow(backgroundBorder, 0);
-                        {
-                            var contentPresenter = new ScrollContentPresenter();
-                            context.DefinePart("PART_CONTENT", contentPresenter);
-                            context.DefinePart("PART_ContentPresenter", contentPresenter);
-                            backgroundBorder.Child = contentPresenter;
-                        }
-
-                        ScrollBar vertiScrollBar = new ScrollBar();
-                        vertiScrollBar.Orientation = Orientation.Vertical;
-                        context.OneWayBinds(() => scrollViewer.ActualVerticalScrollBarVisibility, () => vertiScrollBar.Visibility);
-                        context.OneWayBinds(() => scrollViewer.VerticalOffset, () => vertiScrollBar.Value);
-                        context.OneWayBinds(() => scrollViewer.ScrollableHeight, () => vertiScrollBar.Maximum);
-                        context.OneWayBinds(() => scrollViewer.ViewportHeight, () => vertiScrollBar.Viewport);
-                        context.DefinePart("PART_VSCROLLBAR", vertiScrollBar);
-                        grid.Children.Add(vertiScrollBar);
-                        grid.SetColumn(vertiScrollBar, 1);
-                        grid.SetRow(vertiScrollBar, 0);
-
-                        ScrollBar horizScrollBar = new ScrollBar();
-                        horizScrollBar.Orientation = Orientation.Horizontal;
-                        context.OneWayBinds(() => scrollViewer.ActualHorizontalScrollBarVisibility, () => horizScrollBar.Visibility);
-                        context.OneWayBinds(() => scrollViewer.HorizontalOffset, () => horizScrollBar.Value);
-                        context.OneWayBinds(() => scrollViewer.ScrollableWidth, () => horizScrollBar.Maximum);
-                        context.OneWayBinds(() => scrollViewer.ViewportWidth, () => horizScrollBar.Viewport);
-                        context.DefinePart("PART_HSCROLLBAR", horizScrollBar);
-                        grid.Children.Add(horizScrollBar);
-                        grid.SetColumn(horizScrollBar, 0);
-                        grid.SetRow(horizScrollBar, 1);
-                    }
-                    return grid;
-                });
+                scrollViewer.BackgroundBox = TextureBoxes.ThickBorder;
                 grid.Children.Add(scrollViewer);
                 grid.SetRow(scrollViewer, 0);
                 {
@@ -141,8 +93,9 @@ namespace FontSettings.Framework.Menus.Views
                     var okButton = new TextureButton(Game1.mouseCursors, new Rectangle(128, 256, 64, 64));
                     okButton.ClickSound = "money";
                     okButton.Margin = new Thickness(0, 0, borderWidth / 5, 0);
+                    okButton.CommandParameter = this;
                     context.OneWayBinds(() => this._viewModel.OkCommand, () => okButton.Command);
-                    context.OneWayBinds(() => this, () => okButton.CommandParameter);
+                    /*context.OneWayBinds(() => this, () => okButton.CommandParameter);*/
                     context.OneWayBinds(() => this._viewModel.CanOk, () => okButton.GreyedOut, new TrueFalseConverter());
                     buttonsGrid.Children.Add(okButton);
                     buttonsGrid.SetColumn(okButton, 1);
@@ -150,8 +103,9 @@ namespace FontSettings.Framework.Menus.Views
                     var cancelButton = new TextureButton(Game1.mouseCursors, new Rectangle(192, 256, 64, 64));
                     cancelButton.ClickSound = "bigDeSelect";
                     cancelButton.Margin = new Thickness(0, 0, 0, 0);
+                    cancelButton.CommandParameter = this;
                     context.OneWayBinds(() => this._viewModel.CancelCommand, () => cancelButton.Command);
-                    context.OneWayBinds(() => this, () => cancelButton.CommandParameter);
+                    /*context.OneWayBinds(() => this, () => cancelButton.CommandParameter);*/
                     buttonsGrid.Children.Add(cancelButton);
                     buttonsGrid.SetColumn(cancelButton, 2);
                 }

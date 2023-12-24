@@ -501,6 +501,7 @@ namespace FontSettings
                     if (async)
                         viewModel = new FontSettingsMenuModelAsync(
                             config: this._config,
+                            monitor: this.Monitor,
                             vanillaFontProvider: this._vanillaFontProvider,
                             sampleFontGenerator: sampleFontGenerator,
                             presetManager: this._fontConfigManager,
@@ -512,10 +513,14 @@ namespace FontSettings
                             fontInfoRetriever: new FontInfoRetriever(),
                             asyncFontInfoRetriever: new FontInfoRetriever(),
                             exporter: this._exporter,
-                            stagedValues: this._menuContextModel);
+                            stagedValues: this._menuContextModel,
+                            i18nKeepOrigFont: I18n.Ui_MainMenu_Font_KeepOrig,
+                            i18nValidationFontFileNotFound: I18n.Ui_MainMenu_Validation_Font_FileNotFound,
+                            i18nFailedToReadFontFile: I18n.Ui_MainMenu_FailedToRecognizeFontFile);
                     else
                         viewModel = new FontSettingsMenuModel(
                             config: this._config,
+                            monitor: this.Monitor,
                             vanillaFontProvider: this._vanillaFontProvider,
                             sampleFontGenerator: sampleFontGenerator,
                             presetManager: this._fontConfigManager,
@@ -526,7 +531,10 @@ namespace FontSettings
                             cpFontFileProviders: this._cpFontFileProviders,
                             fontInfoRetriever: new FontInfoRetriever(),
                             exporter: this._exporter,
-                            stagedValues: this._menuContextModel);
+                            stagedValues: this._menuContextModel,
+                            i18nKeepOrigFont: I18n.Ui_MainMenu_Font_KeepOrig,
+                            i18nValidationFontFileNotFound: I18n.Ui_MainMenu_Validation_Font_FileNotFound,
+                            i18nFailedToReadFontFile: I18n.Ui_MainMenu_FailedToRecognizeFontFile);
                 }
 
                 return new FontSettingsMenu(this._fontConfigManager, this.Helper.ModRegistry, this._config.EnableLatinDialogueFont, viewModel);
