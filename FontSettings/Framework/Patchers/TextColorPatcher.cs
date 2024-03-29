@@ -33,8 +33,8 @@ namespace FontSettings.Framework.Patchers
                 postfix: new HarmonyMethod(typeof(TextColorPatcher), nameof(Game1_CleanupReturningToTitle_Postfix))
             );
             harmony.Patch(
-                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getColorFromIndex)),
-                postfix: new HarmonyMethod(typeof(TextColorPatcher), nameof(SpriteText_getColorFromIndex_Postfix))
+                original: AccessTools.Method(typeof(SpriteText), $"get_{nameof(SpriteText.color_Default)}"),
+                postfix: new HarmonyMethod(typeof(TextColorPatcher), nameof(SpriteText_color_Default_Postfix))
             );
             Game1textColorAssigned += this.OnGame1textColorAssigned;
             _configWatcher.TextColorChanged += this.OnTextColorChanged;
@@ -45,9 +45,9 @@ namespace FontSettings.Framework.Patchers
             RaiseGame1textColorAssigned(EventArgs.Empty);
         }
 
-        private static void SpriteText_getColorFromIndex_Postfix(int index, ref Color __result)
+        private static void SpriteText_color_Default_Postfix(ref Color __result)
         {
-            if (index == -1 && (_config.EnableLatinDialogueFont || !LocalizedContentManager.CurrentLanguageLatin))
+            if (_config.EnableLatinDialogueFont || (!LocalizedContentManager.CurrentLanguageLatin && LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.ru))
                 __result = _config.TextColorDialogue;
         }
 
