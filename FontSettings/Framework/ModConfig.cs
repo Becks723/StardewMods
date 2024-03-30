@@ -74,7 +74,7 @@ namespace FontSettings.Framework
         private readonly Color DEFAULT_TextColor = new Color(34, 17, 34);  // from `Game1.textColor`
         private readonly Color DEFAULT_TextColorDialogue = new Color(86, 22, 12);  // from `SpriteText.getColorFromIndex`
         private readonly Color DEFAULT_ShadowColorGame1 = new Color(206, 156, 95);  // from `Game1.textShadowColor`
-        private readonly Color DEFAULT_ShadowColorUtility = new Color(221, 148, 84);  // from `Utility.drawTextWithShadow()`
+        private readonly Color DEFAULT_ShadowColorUtility = new Color(221, 148, 84);  // from `Game1.textShadowDarkerColor` (1.6) and `Utility.drawTextWithShadow()` (before 1.6)
         private readonly bool DEFAULT_EnableLatinDialogueFont = true;
         private readonly KeybindList DEFAULT_OpenFontSettingsMenu = KeybindList.Parse($"{nameof(SButton.LeftAlt)} + {nameof(SButton.F)}");
         private readonly string[] DEFAULT_CustomFontFolders = GetDefaultCustomFontFolders().ToArray();

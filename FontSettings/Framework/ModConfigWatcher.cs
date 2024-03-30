@@ -15,6 +15,7 @@ namespace FontSettings.Framework
 
         public event EventHandler TextShadowToggled;
         public event EventHandler ShadowColorGame1Changed;
+        public event EventHandler ShadowColorDarkerChanged;
         public event EventHandler TextColorChanged;
 
         public ModConfigWatcher(ModConfig config)
@@ -36,6 +37,11 @@ namespace FontSettings.Framework
                 ShadowColorGame1Changed?.Invoke(this, EventArgs.Empty);
             }
 
+            if (snapshot.ChangedIn(x => x.ShadowColorDarker, this._snapshot))
+            {
+                ShadowColorDarkerChanged?.Invoke(this, EventArgs.Empty);
+            }
+
             if (snapshot.ChangedIn(x => x.TextColor, this._snapshot))
             {
                 TextColorChanged?.Invoke(this, EventArgs.Empty);
@@ -50,6 +56,7 @@ namespace FontSettings.Framework
             {
                 DisableTextShadow = config.DisableTextShadow,
                 ShadowColorGame1 = config.ShadowColorGame1,
+                ShadowColorDarker = config.ShadowColorUtility,
                 TextColor = config.TextColor
             };
         }
@@ -58,6 +65,7 @@ namespace FontSettings.Framework
         {
             public bool DisableTextShadow;
             public Color ShadowColorGame1;
+            public Color ShadowColorDarker;
             public Color TextColor;
 
             public bool ChangedIn<TField>(Func<ModConfigSnapshot, TField> field, ModConfigSnapshot? contrast,

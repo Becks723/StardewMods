@@ -17,12 +17,14 @@ namespace FontSettings.Framework.Patchers
     internal class FontShadowPatcher
     {
         private static Func<Color> _textShadowColorOverride;
+        private static Func<Color> _textShadowDarkerColorOverride;
         private static Func<float> _shadowAlphaOverride;
 
         private static ModConfig _config;
         private static ModConfigWatcher _configWatcher;
 
         public static event EventHandler Game1textShadowColorAssigned;
+        public static event EventHandler Game1textShadowDarkerColorAssigned;
         public static event EventHandler SpriteTextshadowAlphaAssigned;
 
         public FontShadowPatcher(ModConfig config, ModConfigWatcher configWatcher)
@@ -35,8 +37,7 @@ namespace FontSettings.Framework.Patchers
         {
             harmony.Patch(
                 original: AccessTools.Method(typeof(Utility), nameof(Utility.drawTextWithShadow), new[] { typeof(SpriteBatch), typeof(string), typeof(SpriteFont), typeof(Vector2), typeof(Color), typeof(float), typeof(float), typeof(int), typeof(int), typeof(float), typeof(int) }),
-                prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithShadow_Prefix)),
-                transpiler: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithShadow_Transpiler))
+                prefix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Utility_drawTextWithShadow_Prefix))
             );
             harmony.Patch(
                 original: AccessTools.Method(typeof(Utility), nameof(Utility.drawTextWithShadow), new[] { typeof(SpriteBatch), typeof(StringBuilder), typeof(SpriteFont), typeof(Vector2), typeof(Color), typeof(float), typeof(float), typeof(int), typeof(int), typeof(float), typeof(int) }),
@@ -51,14 +52,21 @@ namespace FontSettings.Framework.Patchers
                 postfix: new HarmonyMethod(typeof(FontShadowPatcher), nameof(Game1_CleanupReturningToTitle_Postfix))
             );
             Game1textShadowColorAssigned += this.OnGame1textShadowColorAssigned;
+            Game1textShadowDarkerColorAssigned += this.OnGame1textShadowDarkerColorAssigned;
             SpriteTextshadowAlphaAssigned += this.OnSpriteTextshadowAlphaAssigned;
             _configWatcher.TextShadowToggled += this.OnTextShadowToggled;
             _configWatcher.ShadowColorGame1Changed += this.OnShadowColorGame1Changed;
+            _configWatcher.ShadowColorDarkerChanged += this.OnShadowColorDarkerChanged;
         }
 
         private void OnGame1textShadowColorAssigned(object sender, EventArgs e)
         {
             Game1.textShadowColor = _textShadowColorOverride();
+        }
+
+        private void OnGame1textShadowDarkerColorAssigned(object sender, EventArgs e)
+        {
+            Game1.textShadowDarkerColor = _textShadowDarkerColorOverride();
         }
 
         private void OnSpriteTextshadowAlphaAssigned(object sender, EventArgs e)
@@ -71,6 +79,9 @@ namespace FontSettings.Framework.Patchers
             this.SetOverrideTextShadowColor(_config.DisableTextShadow
                 ? Color.Transparent
                 : _config.ShadowColorGame1);
+            this.SetOverrideTextShadowDarkerColor(_config.DisableTextShadow
+                ? Color.Transparent
+                : _config.ShadowColorUtility);
             this.SetOverrideShadowAlpha(_config.DisableTextShadow
                 ? 0f
                 : 0.15f);
@@ -83,11 +94,25 @@ namespace FontSettings.Framework.Patchers
                 : _config.ShadowColorGame1);
         }
 
+        private void OnShadowColorDarkerChanged(object sender, EventArgs e)
+        {
+            this.SetOverrideTextShadowDarkerColor(_config.DisableTextShadow
+                ? Color.Transparent
+                : _config.ShadowColorUtility);
+        }
+
         public void SetOverrideTextShadowColor(Color textShadowColor)
         {
             _textShadowColorOverride = () => textShadowColor;
 
             RaiseGame1textShadowColorAssigned(EventArgs.Empty);
+        }
+
+        public void SetOverrideTextShadowDarkerColor(Color textShadowDarkerColor)
+        {
+            _textShadowDarkerColorOverride = () => textShadowDarkerColor;
+
+            RaiseGame1textShadowDarkerColorAssigned(EventArgs.Empty);
         }
 
         public void SetOverrideShadowAlpha(float shadowAlpha)
@@ -109,35 +134,6 @@ namespace FontSettings.Framework.Patchers
                 shadowColor = Color.Transparent;
         }
 
-        private static IEnumerable<CodeInstruction> Utility_drawTextWithShadow_Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var oldInstructions = instructions.ToArray();
-            int slide = 0;
-            for (int i = 0; i < oldInstructions.Length; i++)
-            {
-                if (oldInstructions[i + slide].opcode == OpCodes.Ldc_I4
-                    && oldInstructions[i + slide].operand is 221
-                    && oldInstructions[i + slide + 1].opcode == OpCodes.Ldc_I4
-                    && oldInstructions[i + slide + 1].operand is 148
-                    && oldInstructions[i + slide + 2].opcode == OpCodes.Ldc_I4_S
-                    && oldInstructions[i + slide + 2].operand is (sbyte)84  // 这里不是int，而是sbyte，很奇怪
-                    && oldInstructions[i + slide + 3].opcode == OpCodes.Newobj
-                    && oldInstructions[i + slide + 3].operand is ConstructorInfo { Name: ".ctor" })
-                {
-                    if (slide == 0)
-                        yield return new CodeInstruction(OpCodes.Call,
-                            AccessTools.Method(typeof(FontShadowPatcher), nameof(PatchedShadowColor)));
-
-                    --slide;
-                    if (slide == -4)
-                        slide = 0;
-                }
-
-                else
-                    yield return oldInstructions[i];
-            }
-        }
-
         private static Color PatchedShadowColor()
         {
             return _config.ShadowColorUtility;
@@ -146,16 +142,11 @@ namespace FontSettings.Framework.Patchers
         private static void Game1_CleanupReturningToTitle_Postfix()
         {
             RaiseGame1textShadowColorAssigned(EventArgs.Empty);
+            RaiseGame1textShadowDarkerColorAssigned(EventArgs.Empty);
         }
 
-        private static void RaiseGame1textShadowColorAssigned(EventArgs e)
-        {
-            Game1textShadowColorAssigned?.Invoke(null, e);
-        }
-
-        private static void RaiseSpriteTextshadowAlphaAssigned(EventArgs e)
-        {
-            SpriteTextshadowAlphaAssigned?.Invoke(null, e);
-        }
+        private static void RaiseGame1textShadowColorAssigned(EventArgs e) => Game1textShadowColorAssigned?.Invoke(null, e);
+        private static void RaiseGame1textShadowDarkerColorAssigned(EventArgs e) => Game1textShadowDarkerColorAssigned?.Invoke(null, e);
+        private static void RaiseSpriteTextshadowAlphaAssigned(EventArgs e) => SpriteTextshadowAlphaAssigned?.Invoke(null, e);
     }
 }

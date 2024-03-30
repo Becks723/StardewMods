@@ -7,7 +7,7 @@
 	<Import Project="..\_build\stbtruetype-sharp.targets" />
 
 	<PropertyGroup>
-		<Version>0.12.4</Version>
+		<Version>0.12.5-alpha3</Version>
 		<TargetFramework>net6.0</TargetFramework>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<AssemblyName>FontSettings</AssemblyName>
