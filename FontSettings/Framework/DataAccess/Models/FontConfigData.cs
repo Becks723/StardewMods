@@ -54,10 +54,10 @@ namespace FontSettings.Framework.DataAccess.Models
         /// <summary>默认值为'*'。</summary>
         public char? DefaultCharacter { get; set; } = '*';
 
-        internal bool IsSameContextWith(FontConfigData other)
+        internal bool IsSameContextWith(FontConfigData? other)
         {
-            if (other is null) 
-                throw new ArgumentNullException(nameof(other));
+            if (other is null)
+                return false;
 
             return this.Lang == other.Lang
                 && this.Locale == other.Locale

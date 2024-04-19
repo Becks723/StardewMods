@@ -27,12 +27,12 @@ namespace FontSettings.Framework.DataAccess
                 this.WriteAllConfigs(fonts);
             }
 
-            return fonts;
+            return fonts.Distinct();
         }
 
         public void WriteAllConfigs(FontConfigs configs)
         {
-            this._helper.Data.WriteGlobalData(this._globalFontDataKey, configs);
+            this._helper.Data.WriteGlobalData(this._globalFontDataKey, configs.Distinct());
         }
 
         public void ClearAllConfigs()

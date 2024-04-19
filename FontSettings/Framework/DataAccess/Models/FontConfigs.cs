@@ -54,5 +54,23 @@ namespace FontSettings.Framework.DataAccess.Models
                 return false;
             }
         }
+
+        /// <summary>Remove duplicated item of same <see cref="FontConfigData.Lang"/>, <see cref="FontConfigData.Locale"/> and <see cref="FontConfigData.InGameType"/>, then return the distincted collection.</summary>
+        public FontConfigs Distinct()
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                FontConfigData current = this[i];
+                for (int j = i + 1; j < this.Count; j++)
+                {
+                    if (current.IsSameContextWith(this[j]))
+                    {
+                        this.RemoveAt(j);
+                        --j;
+                    }
+                }
+            }
+            return this;
+        }
     }
 }
