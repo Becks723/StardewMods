@@ -172,6 +172,9 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.12.5 - 2024-04-19
+- Adapted to Stardew Valley 1.6.
+
 #### 0.12.4 - 2023-10-11
 - Fix a bug where you cannot Save as new preset.
 
