@@ -68,10 +68,15 @@ namespace FontSettings.Framework.Patchers
         private static void OverrideFontPixelZoom()
         {
             bool useBmFont = _config.EnableLatinDialogueFont || !LocalizedContentManager.CurrentLanguageLatin;
-            if (useBmFont && !IsPixelZoomFixed)
+            if (!IsPixelZoomFixed)
             {
-                if (_pixelZoomLookup.TryGetValue(FontHelpers.GetCurrentLanguage(), out float pixelZoom))
-                    SpriteText.fontPixelZoom = pixelZoom;
+                if (!useBmFont)
+                    SpriteText.fontPixelZoom = 3f;
+                else
+                {
+                    if (_pixelZoomLookup.TryGetValue(FontHelpers.GetCurrentLanguage(), out float pixelZoom))
+                        SpriteText.fontPixelZoom = pixelZoom;
+                }
             }
         }
 
