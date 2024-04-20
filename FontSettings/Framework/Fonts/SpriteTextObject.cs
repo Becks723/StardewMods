@@ -29,6 +29,8 @@ namespace FontSettings.Framework.Fonts
 
         public const int scrollStyle_darkMetal = 2;
 
+        public const int scrollStyle_blueMetal = 3;
+
         public const int maxCharacter = 999999;
 
         public const int maxHeight = 999999;
@@ -47,7 +49,7 @@ namespace FontSettings.Framework.Fonts
 
         public float shadowAlpha = 0.15f;
 
-        private readonly Dictionary<char, FontChar> _characterMap;
+        private readonly Dictionary<char, FontChar> characterMap;
 
         private readonly FontFile FontFile;
 
@@ -57,25 +59,64 @@ namespace FontSettings.Framework.Fonts
 
         private readonly Texture2D coloredTexture;
 
-        public const int color_Black = 0;
+        public const int color_index_Default = -1;
 
-        public const int color_Blue = 1;
+        public const int color_index_Black = 0;
 
-        public const int color_Red = 2;
+        public const int color_index_Blue = 1;
 
-        public const int color_Purple = 3;
+        public const int color_index_Red = 2;
 
-        public const int color_White = 4;
+        public const int color_index_Purple = 3;
 
-        public const int color_Orange = 5;
+        public const int color_index_White = 4;
 
-        public const int color_Green = 6;
+        public const int color_index_Orange = 5;
 
-        public const int color_Cyan = 7;
+        public const int color_index_Green = 6;
 
-        public const int color_Gray = 8;
+        public const int color_index_Cyan = 7;
+
+        public const int color_index_Gray = 8;
+
+        public const int color_index_JojaBlue = 9;
 
         public bool forceEnglishFont = false;
+
+        public Color color_Default
+        {
+            get
+            {
+                if (!this.CurrentLanguageLatinPatched() && this._language.Code != LocalizedContentManager.LanguageCode.ru)
+                {
+                    return new Color(86, 22, 12);
+                }
+
+                return Color.White;
+            }
+        }
+
+        public Color color_Black { get; } = Color.Black;
+
+
+        public Color color_Blue { get; } = Color.SkyBlue;
+
+
+        public Color color_Red { get; } = Color.Red;
+
+        public Color color_Purple { get; } = new Color(110, 43, 255);
+
+        public Color color_White { get; } = Color.White;
+
+        public Color color_Orange { get; } = Color.OrangeRed;
+
+        public Color color_Green { get; } = Color.LimeGreen;
+
+        public Color color_Cyan { get; } = Color.Cyan;
+
+        public Color color_Gray { get; } = new Color(60, 60, 60);
+
+        public Color color_JojaBlue { get; } = new Color(52, 50, 122);
 
         private readonly BmFontData _bmFont;
         private readonly LanguageInfo _language;
@@ -90,16 +131,17 @@ namespace FontSettings.Framework.Fonts
             {
                 this.FontFile = bmFont.FontFile;
                 this.fontPages = new(bmFont.Pages);
-                this._characterMap = bmFont.FontFile.Chars.ToDictionary(fontChar => (char)fontChar.ID);
+                this.characterMap = bmFont.FontFile.Chars.ToDictionary(fontChar => (char)fontChar.ID);
             }
             this.spriteTexture = Game1.content.Load<Texture2D>("LooseSprites/font_bold");
             this.coloredTexture = Game1.content.Load<Texture2D>("LooseSprites/font_colored");
             this.fontPixelZoom = pixelZoom;
         }
 
-        public void drawStringHorizontallyCenteredAt(SpriteBatch b, string s, int x, int y, int characterPosition = 999999, int width = -1, int height = 999999, float alpha = 1f, float layerDepth = 0.88f, bool junimoText = false, int color = -1, Color? customColor = null, int maxWidth = 99999)
+
+        public void drawStringHorizontallyCenteredAt(SpriteBatch b, string s, int x, int y, int characterPosition = 999999, int width = -1, int height = 999999, float alpha = 1f, float layerDepth = 0.88f, bool junimoText = false, Color? color = null, int maxWidth = 99999)
         {
-            this.drawString(b, s, x - this.getWidthOfString(s, maxWidth) / 2, y, characterPosition, width, height, alpha, layerDepth, junimoText, -1, "", color, customColor, ScrollTextAlignment.Left);
+            this.drawString(b, s, x - this.getWidthOfString(s, maxWidth) / 2, y, characterPosition, width, height, alpha, layerDepth, junimoText, -1, "", color);
         }
 
         public int getWidthOfString(string s, int widthConstraint = 999999)
@@ -108,34 +150,36 @@ namespace FontSettings.Framework.Fonts
             int num2 = 0;
             for (int i = 0; i < s.Length; i++)
             {
-                if (!this.CurrentLanguageLatinPatched() && !this.forceEnglishFont)
+                if (!this.CurrentLanguageLatinPatched() && this._language.Code != LocalizedContentManager.LanguageCode.ru && !this.forceEnglishFont)
                 {
-                    FontChar fontChar;
-                    if (this._characterMap.TryGetValue(s[i], out fontChar))
+                    if (this.characterMap.TryGetValue(s[i], out var value))
                     {
-                        num += fontChar.XAdvance;
+                        num += value.XAdvance;
                     }
+
                     num2 = Math.Max(num, num2);
                     if (s[i] == '^' || (float)num * this.fontPixelZoom > (float)widthConstraint)
                     {
                         num = 0;
                     }
+
+                    continue;
                 }
-                else
+
+                num += 8 + this.getWidthOffsetForChar(s[i]);
+                if (i > 0)
                 {
-                    num += 8 + this.getWidthOffsetForChar(s[i]);
-                    if (i > 0)
-                    {
-                        num += this.getWidthOffsetForChar(s[Math.Max(0, i - 1)]);
-                    }
-                    num2 = Math.Max(num, num2);
-                    float num3 = (float)this.positionOfNextSpace(s, i, (int)((float)num * this.fontPixelZoom), 0);
-                    if (s[i] == '^' || (float)num * this.fontPixelZoom >= (float)widthConstraint || num3 >= (float)widthConstraint)
-                    {
-                        num = 0;
-                    }
+                    num += this.getWidthOffsetForChar(s[Math.Max(0, i - 1)]);
+                }
+
+                num2 = Math.Max(num, num2);
+                float num3 = this.positionOfNextSpace(s, i, (int)((float)num * this.fontPixelZoom), 0);
+                if (s[i] == '^' || (float)num * this.fontPixelZoom >= (float)widthConstraint || num3 >= (float)widthConstraint)
+                {
+                    num = 0;
                 }
             }
+
             return (int)((float)num2 * this.fontPixelZoom);
         }
 
@@ -145,12 +189,13 @@ namespace FontSettings.Framework.Fonts
             {
                 for (int i = 0; i < text.Length; i++)
                 {
-                    if (!this._characterMap.ContainsKey(text[i]))
+                    if (!this.characterMap.ContainsKey(text[i]))
                     {
                         return true;
                     }
                 }
             }
+
             return false;
         }
 
@@ -160,11 +205,11 @@ namespace FontSettings.Framework.Fonts
             {
                 return 0;
             }
+
             Vector2 vector = default(Vector2);
             int num = 0;
             s = s.Replace(Environment.NewLine, "");
-
-            if (!this.CurrentLanguageLatinPatched() && !this.forceEnglishFont)
+            if (!this.CurrentLanguageLatinPatched() && this._language.Code != LocalizedContentManager.LanguageCode.ru && !this.forceEnglishFont)
             {
                 for (int i = 0; i < s.Length; i++)
                 {
@@ -172,24 +217,25 @@ namespace FontSettings.Framework.Fonts
                     {
                         vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
                         vector.X = 0f;
+                        continue;
                     }
-                    else
+
+                    if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= widthConstraint)
                     {
-                        if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= widthConstraint)
-                        {
-                            vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
-                            num = 0;
-                            vector.X = 0f;
-                        }
-                        FontChar fontChar;
-                        if (this._characterMap.TryGetValue(s[i], out fontChar))
-                        {
-                            vector.X += (float)fontChar.XAdvance * this.fontPixelZoom;
-                        }
+                        vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
+                        num = 0;
+                        vector.X = 0f;
+                    }
+
+                    if (this.characterMap.TryGetValue(s[i], out var value))
+                    {
+                        vector.X += (float)value.XAdvance * this.fontPixelZoom;
                     }
                 }
+
                 return (int)(vector.Y + (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom);
             }
+
             for (int j = 0; j < s.Length; j++)
             {
                 if (s[j] == '^')
@@ -197,54 +243,44 @@ namespace FontSettings.Framework.Fonts
                     vector.Y += 18f * this.fontPixelZoom;
                     vector.X = 0f;
                     num = 0;
+                    continue;
                 }
-                else
+
+                if (this.positionOfNextSpace(s, j, (int)vector.X, num) >= widthConstraint)
                 {
-                    if (this.positionOfNextSpace(s, j, (int)vector.X, num) >= widthConstraint)
-                    {
-                        vector.Y += 18f * this.fontPixelZoom;
-                        num = 0;
-                        vector.X = 0f;
-                    }
-                    vector.X += 8f * this.fontPixelZoom + (float)num + (float)this.getWidthOffsetForChar(s[j]) * this.fontPixelZoom;
-                    if (j > 0)
-                    {
-                        vector.X += (float)this.getWidthOffsetForChar(s[j - 1]) * this.fontPixelZoom;
-                    }
-                    num = (int)(0f * this.fontPixelZoom);
+                    vector.Y += 18f * this.fontPixelZoom;
+                    num = 0;
+                    vector.X = 0f;
                 }
+
+                vector.X += 8f * this.fontPixelZoom + (float)num + (float)this.getWidthOffsetForChar(s[j]) * this.fontPixelZoom;
+                if (j > 0)
+                {
+                    vector.X += (float)this.getWidthOffsetForChar(s[j - 1]) * this.fontPixelZoom;
+                }
+
+                num = (int)(0f * this.fontPixelZoom);
             }
+
             return (int)(vector.Y + 16f * this.fontPixelZoom);
         }
 
         public Color getColorFromIndex(int index)
         {
-            switch (index)
+            return index switch
             {
-                case -1:
-                    if (this.CurrentLanguageLatinPatched())
-                    {
-                        return Color.White;
-                    }
-                    return new Color(86, 22, 12);
-                case 1:
-                    return Color.SkyBlue;
-                case 2:
-                    return Color.Red;
-                case 3:
-                    return new Color(110, 43, 255);
-                case 4:
-                    return Color.White;
-                case 5:
-                    return Color.OrangeRed;
-                case 6:
-                    return Color.LimeGreen;
-                case 7:
-                    return Color.Cyan;
-                case 8:
-                    return new Color(60, 60, 60);
-            }
-            return Color.Black;
+                1 => this.color_Blue,
+                2 => this.color_Red,
+                3 => this.color_Purple,
+                -1 => this.color_Default,
+                4 => this.color_White,
+                5 => this.color_Orange,
+                6 => this.color_Green,
+                7 => this.color_Cyan,
+                8 => this.color_Gray,
+                9 => this.color_JojaBlue,
+                _ => Color.Black,
+            };
         }
 
         public string getSubstringBeyondHeight(string s, int width, int height)
@@ -252,8 +288,7 @@ namespace FontSettings.Framework.Fonts
             Vector2 vector = default(Vector2);
             int num = 0;
             s = s.Replace(Environment.NewLine, "");
-
-            if (!this.CurrentLanguageLatinPatched())
+            if (!this.CurrentLanguageLatinPatched() && this._language.Code != LocalizedContentManager.LanguageCode.ru)
             {
                 for (int i = 0; i < s.Length; i++)
                 {
@@ -262,31 +297,33 @@ namespace FontSettings.Framework.Fonts
                         vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
                         vector.X = 0f;
                         num = 0;
+                        continue;
                     }
-                    else
+
+                    if (this.characterMap.TryGetValue(s[i], out var value))
                     {
-                        FontChar fontChar;
-                        if (this._characterMap.TryGetValue(s[i], out fontChar))
+                        if (i > 0)
                         {
-                            if (i > 0)
-                            {
-                                vector.X += (float)fontChar.XAdvance * this.fontPixelZoom;
-                            }
-                            if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= width)
-                            {
-                                vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
-                                num = 0;
-                                vector.X = 0f;
-                            }
+                            vector.X += (float)value.XAdvance * this.fontPixelZoom;
                         }
-                        if (vector.Y >= (float)height - (float)this.FontFile.Common.LineHeight * this.fontPixelZoom * 2f)
+
+                        if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= width)
                         {
-                            return s.Substring(this.getLastSpace(s, i));
+                            vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
+                            num = 0;
+                            vector.X = 0f;
                         }
+                    }
+
+                    if (vector.Y >= (float)height - (float)this.FontFile.Common.LineHeight * this.fontPixelZoom * 2f)
+                    {
+                        return s.Substring(this.getLastSpace(s, i));
                     }
                 }
+
                 return "";
             }
+
             for (int j = 0; j < s.Length; j++)
             {
                 if (s[j] == '^')
@@ -294,26 +331,28 @@ namespace FontSettings.Framework.Fonts
                     vector.Y += 18f * this.fontPixelZoom;
                     vector.X = 0f;
                     num = 0;
+                    continue;
                 }
-                else
+
+                if (j > 0)
                 {
-                    if (j > 0)
-                    {
-                        vector.X += 8f * this.fontPixelZoom + (float)num + (float)(this.getWidthOffsetForChar(s[j]) + this.getWidthOffsetForChar(s[j - 1])) * this.fontPixelZoom;
-                    }
-                    num = (int)(0f * this.fontPixelZoom);
-                    if (this.positionOfNextSpace(s, j, (int)vector.X, num) >= width)
-                    {
-                        vector.Y += 18f * this.fontPixelZoom;
-                        num = 0;
-                        vector.X = 0f;
-                    }
-                    if (vector.Y >= (float)height - 16f * this.fontPixelZoom * 2f)
-                    {
-                        return s.Substring(this.getLastSpace(s, j));
-                    }
+                    vector.X += 8f * this.fontPixelZoom + (float)num + (float)(this.getWidthOffsetForChar(s[j]) + this.getWidthOffsetForChar(s[j - 1])) * this.fontPixelZoom;
+                }
+
+                num = (int)(0f * this.fontPixelZoom);
+                if (this.positionOfNextSpace(s, j, (int)vector.X, num) >= width)
+                {
+                    vector.Y += 18f * this.fontPixelZoom;
+                    num = 0;
+                    vector.X = 0f;
+                }
+
+                if (vector.Y >= (float)height - 16f * this.fontPixelZoom * 2f)
+                {
+                    return s.Substring(this.getLastSpace(s, j));
                 }
             }
+
             return "";
         }
 
@@ -322,7 +361,6 @@ namespace FontSettings.Framework.Fonts
             Vector2 vector = default(Vector2);
             int num = 0;
             s = s.Replace(Environment.NewLine, "");
-
             if (!this.CurrentLanguageLatinPatched())
             {
                 for (int i = 0; i < s.Length; i++)
@@ -332,31 +370,33 @@ namespace FontSettings.Framework.Fonts
                         vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
                         vector.X = 0f;
                         num = 0;
+                        continue;
                     }
-                    else
+
+                    if (this.characterMap.TryGetValue(s[i], out var value))
                     {
-                        FontChar fontChar;
-                        if (this._characterMap.TryGetValue(s[i], out fontChar))
+                        if (i > 0)
                         {
-                            if (i > 0)
-                            {
-                                vector.X += (float)fontChar.XAdvance * this.fontPixelZoom;
-                            }
-                            if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= width)
-                            {
-                                vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
-                                num = 0;
-                                vector.X = 0f;
-                            }
+                            vector.X += (float)value.XAdvance * this.fontPixelZoom;
                         }
-                        if (vector.Y >= (float)height - (float)this.FontFile.Common.LineHeight * this.fontPixelZoom * 2f)
+
+                        if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= width)
                         {
-                            return i - 1;
+                            vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
+                            num = 0;
+                            vector.X = 0f;
                         }
+                    }
+
+                    if (vector.Y >= (float)height - (float)this.FontFile.Common.LineHeight * this.fontPixelZoom * 2f)
+                    {
+                        return i - 1;
                     }
                 }
+
                 return s.Length - 1;
             }
+
             for (int j = 0; j < s.Length; j++)
             {
                 if (s[j] == '^')
@@ -364,26 +404,28 @@ namespace FontSettings.Framework.Fonts
                     vector.Y += 18f * this.fontPixelZoom;
                     vector.X = 0f;
                     num = 0;
+                    continue;
                 }
-                else
+
+                if (j > 0)
                 {
-                    if (j > 0)
-                    {
-                        vector.X += 8f * this.fontPixelZoom + (float)num + (float)(this.getWidthOffsetForChar(s[j]) + this.getWidthOffsetForChar(s[j - 1])) * this.fontPixelZoom;
-                    }
-                    num = (int)(0f * this.fontPixelZoom);
-                    if (this.positionOfNextSpace(s, j, (int)vector.X, num) >= width)
-                    {
-                        vector.Y += 18f * this.fontPixelZoom;
-                        num = 0;
-                        vector.X = 0f;
-                    }
-                    if (vector.Y >= (float)height - 16f * this.fontPixelZoom)
-                    {
-                        return j - 1;
-                    }
+                    vector.X += 8f * this.fontPixelZoom + (float)num + (float)(this.getWidthOffsetForChar(s[j]) + this.getWidthOffsetForChar(s[j - 1])) * this.fontPixelZoom;
+                }
+
+                num = (int)(0f * this.fontPixelZoom);
+                if (this.positionOfNextSpace(s, j, (int)vector.X, num) >= width)
+                {
+                    vector.Y += 18f * this.fontPixelZoom;
+                    num = 0;
+                    vector.X = 0f;
+                }
+
+                if (vector.Y >= (float)height - 16f * this.fontPixelZoom)
+                {
+                    return j - 1;
                 }
             }
+
             return s.Length - 1;
         }
 
@@ -397,9 +439,11 @@ namespace FontSettings.Framework.Fonts
                 {
                     break;
                 }
+
                 list.Add(stringPreviousToThisHeightCutoff);
-                s = s.Substring(list.Last<string>().Length);
+                s = s.Substring(list.Last().Length);
             }
+
             return list;
         }
 
@@ -414,101 +458,67 @@ namespace FontSettings.Framework.Fonts
             {
                 return startIndex;
             }
-            for (int i = startIndex; i >= 0; i--)
+
+            for (int num = startIndex; num >= 0; num--)
             {
-                if (s[i] == ' ')
+                if (s[num] == ' ')
                 {
-                    return i;
+                    return num;
                 }
             }
+
             return startIndex;
         }
 
         public int getWidthOffsetForChar(char c)
         {
-            if (c > '.')
+            switch (c)
             {
-                if (c <= 'l')
-                {
-                    if (c == '^')
-                    {
-                        return -8;
-                    }
-                    switch (c)
-                    {
-                        case 'i':
-                            break;
-                        case 'j':
-                        case 'l':
-                            return -1;
-                        case 'k':
-                            return 0;
-                        default:
-                            return 0;
-                    }
-                }
-                else
-                {
-                    if (c == '¡')
-                    {
-                        return -1;
-                    }
-                    switch (c)
-                    {
-                        case 'ì':
-                        case 'í':
-                        case 'î':
-                        case 'ï':
-                            break;
-                        default:
-                            if (c != 'ı')
-                            {
-                                return 0;
-                            }
-                            break;
-                    }
-                }
-                return -1;
-            }
-            if (c <= '$')
-            {
-                if (c != '!')
-                {
-                    if (c != '$')
-                    {
-                        return 0;
-                    }
+                case ',':
+                case '.':
+                    return -2;
+                case '!':
+                case 'j':
+                case 'l':
+                case '¡':
+                    return -1;
+                case 'i':
+                case 'ì':
+                case 'í':
+                case 'î':
+                case 'ï':
+                case 'ı':
+                    return -1;
+                case '^':
+                    return -8;
+                case '$':
                     return 1;
-                }
-            }
-            else
-            {
-                if (c != ',' && c != '.')
-                {
+                case 'ş':
+                    return -1;
+                default:
                     return 0;
-                }
-                return -2;
             }
-            return -1;
         }
 
-        public void drawStringWithScrollCenteredAt(SpriteBatch b, string s, int x, int y, int width, float alpha = 1f, int color = -1, Color? customColor = null, int scrollType = 0, float layerDepth = 0.88f, bool junimoText = false)
+        public void drawStringWithScrollCenteredAt(SpriteBatch b, string s, int x, int y, int width, float alpha = 1f, Color? color = null, int scrollType = 0, float layerDepth = 0.88f, bool junimoText = false)
         {
-            this.drawString(b, s, x - width / 2, y, 999999, width, 999999, alpha, layerDepth, junimoText, scrollType, "", color, customColor, ScrollTextAlignment.Center);
+            this.drawString(b, s, x - width / 2, y, 999999, width, 999999, alpha, layerDepth, junimoText, scrollType, "", color, ScrollTextAlignment.Center);
         }
 
-        public void drawStringWithScrollCenteredAt(SpriteBatch b, string s, int x, int y, string placeHolderWidthText = "", float alpha = 1f, int color = -1, Color? customColor = null, int scrollType = 0, float layerDepth = 0.88f, bool junimoText = false)
+        public void drawStringWithScrollCenteredAt(SpriteBatch b, string s, int x, int y, string placeHolderWidthText = "", float alpha = 1f, Color? color = null, int scrollType = 0, float layerDepth = 0.88f, bool junimoText = false)
         {
-            this.drawString(b, s, x - this.getWidthOfString((placeHolderWidthText.Length > 0) ? placeHolderWidthText : s, 999999) / 2, y, 999999, -1, 999999, alpha, layerDepth, junimoText, scrollType, placeHolderWidthText, color, customColor, ScrollTextAlignment.Center);
+            this.drawString(b, s, x - this.getWidthOfString((placeHolderWidthText.Length > 0) ? placeHolderWidthText : s) / 2, y, 999999, -1, 999999, alpha, layerDepth, junimoText, scrollType, placeHolderWidthText, color, ScrollTextAlignment.Center);
         }
 
-        public void drawStringWithScrollBackground(SpriteBatch b, string s, int x, int y, string placeHolderWidthText = "", float alpha = 1f, int color = -1, Color? customColor = null, ScrollTextAlignment scroll_text_alignment = ScrollTextAlignment.Left)
+        public void drawStringWithScrollBackground(SpriteBatch b, string s, int x, int y, string placeHolderWidthText = "", float alpha = 1f, Color? color = null, ScrollTextAlignment scroll_text_alignment = ScrollTextAlignment.Left)
         {
-            this.drawString(b, s, x, y, 999999, -1, 999999, alpha, 0.88f, false, 0, placeHolderWidthText, color, customColor, scroll_text_alignment);
+            this.drawString(b, s, x, y, 999999, -1, 999999, alpha, 0.88f, junimoText: false, 0, placeHolderWidthText, color, scroll_text_alignment);
         }
 
-        public void drawString(SpriteBatch b, string s, int x, int y, int characterPosition = 999999, int width = -1, int height = 999999, float alpha = 1f, float layerDepth = 0.88f, bool junimoText = false, int drawBGScroll = -1, string placeHolderScrollWidthText = "", int color = -1, Color? customColor = null, ScrollTextAlignment scroll_text_alignment = ScrollTextAlignment.Left)
+        public void drawString(SpriteBatch b, string s, int x, int y, int characterPosition = 999999, int width = -1, int height = 999999, float alpha = 1f, float layerDepth = 0.88f, bool junimoText = false, int drawBGScroll = -1, string placeHolderScrollWidthText = "", Color? color = null, ScrollTextAlignment scroll_text_alignment = ScrollTextAlignment.Left)
         {
+            bool hasValue = color.HasValue;
+            color ??= this.color_Default;
             bool flag = true;
             if (width == -1)
             {
@@ -516,337 +526,431 @@ namespace FontSettings.Framework.Fonts
                 width = Game1.graphics.GraphicsDevice.Viewport.Width - x;
                 if (drawBGScroll == 1)
                 {
-                    width = this.getWidthOfString(s, 999999) * 2;
+                    width = this.getWidthOfString(s) * 2;
                 }
             }
+
             if (this.fontPixelZoom < 4f && this._language.Code != LocalizedContentManager.LanguageCode.ko)
             {
                 y += (int)((4f - this.fontPixelZoom) * 4f);
             }
-            Vector2 vector = new Vector2((float)x, (float)y);
+
+            Vector2 vector = new Vector2(x, y);
             int num = 0;
             if (drawBGScroll != 1)
             {
                 if (vector.X + (float)width > (float)(Game1.graphics.GraphicsDevice.Viewport.Width - 4))
                 {
-                    vector.X = (float)(Game1.graphics.GraphicsDevice.Viewport.Width - width - 4);
+                    vector.X = Game1.graphics.GraphicsDevice.Viewport.Width - width - 4;
                 }
+
                 if (vector.X < 0f)
                 {
                     vector.X = 0f;
                 }
             }
-            if (drawBGScroll == 0 || drawBGScroll == 2)
+
+            switch (drawBGScroll)
             {
-                int num2 = this.getWidthOfString((placeHolderScrollWidthText.Length > 0) ? placeHolderScrollWidthText : s, 999999);
-                if (flag)
-                {
-                    num2 = width;
-                }
-                if (drawBGScroll == 0)
-                {
-                    b.Draw(Game1.mouseCursors, vector + new Vector2(-12f, -3f) * 4f, new Rectangle?(new Rectangle(325, 318, 12, 18)), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
-                    b.Draw(Game1.mouseCursors, vector + new Vector2(0f, -3f) * 4f, new Rectangle?(new Rectangle(337, 318, 1, 18)), Color.White * alpha, 0f, Vector2.Zero, new Vector2((float)num2, 4f), SpriteEffects.None, layerDepth - 0.001f);
-                    b.Draw(Game1.mouseCursors, vector + new Vector2((float)num2, -12f), new Rectangle?(new Rectangle(338, 318, 12, 18)), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
-                }
-                else if (drawBGScroll == 2)
-                {
-                    b.Draw(Game1.mouseCursors, vector + new Vector2(-3f, -3f) * 4f, new Rectangle?(new Rectangle(327, 281, 3, 17)), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
-                    b.Draw(Game1.mouseCursors, vector + new Vector2(0f, -3f) * 4f, new Rectangle?(new Rectangle(330, 281, 1, 17)), Color.White * alpha, 0f, Vector2.Zero, new Vector2((float)(num2 + 4), 4f), SpriteEffects.None, layerDepth - 0.001f);
-                    b.Draw(Game1.mouseCursors, vector + new Vector2((float)(num2 + 4), -12f), new Rectangle?(new Rectangle(333, 281, 3, 17)), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
-                }
-                if (scroll_text_alignment == ScrollTextAlignment.Center)
-                {
-                    x += (num2 - this.getWidthOfString(s, 999999)) / 2;
-                    vector.X = (float)x;
-                }
-                else if (scroll_text_alignment == ScrollTextAlignment.Right)
-                {
-                    x += num2 - this.getWidthOfString(s, 999999);
-                    vector.X = (float)x;
-                }
-                vector.Y += (4f - this.fontPixelZoom) * 4f;
+                case 0:
+                case 2:
+                case 3:
+                    {
+                        int num4 = this.getWidthOfString((placeHolderScrollWidthText.Length > 0) ? placeHolderScrollWidthText : s);
+                        if (flag)
+                        {
+                            num4 = width;
+                        }
+
+                        switch (drawBGScroll)
+                        {
+                            case 0:
+                                b.Draw(Game1.mouseCursors, vector + new Vector2(-12f, -3f) * 4f, new Rectangle(325, 318, 12, 18), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                                b.Draw(Game1.mouseCursors, vector + new Vector2(0f, -3f) * 4f, new Rectangle(337, 318, 1, 18), Color.White * alpha, 0f, Vector2.Zero, new Vector2(num4, 4f), SpriteEffects.None, layerDepth - 0.001f);
+                                b.Draw(Game1.mouseCursors, vector + new Vector2(num4, -12f), new Rectangle(338, 318, 12, 18), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                                break;
+                            case 2:
+                                b.Draw(Game1.mouseCursors, vector + new Vector2(-3f, -3f) * 4f, new Rectangle(327, 281, 3, 17), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                                b.Draw(Game1.mouseCursors, vector + new Vector2(0f, -3f) * 4f, new Rectangle(330, 281, 1, 17), Color.White * alpha, 0f, Vector2.Zero, new Vector2(num4 + 4, 4f), SpriteEffects.None, layerDepth - 0.001f);
+                                b.Draw(Game1.mouseCursors, vector + new Vector2(num4 + 4, -12f), new Rectangle(333, 281, 3, 17), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                                break;
+                            case 3:
+                                b.Draw(Game1.mouseCursors_1_6, vector + new Vector2(-3f, -3f) * 4f, new Rectangle(86, 145, 3, 17), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                                b.Draw(Game1.mouseCursors_1_6, vector + new Vector2(0f, -3f) * 4f, new Rectangle(89, 145, 1, 17), Color.White * alpha, 0f, Vector2.Zero, new Vector2(num4 + 4, 4f), SpriteEffects.None, layerDepth - 0.001f);
+                                b.Draw(Game1.mouseCursors_1_6, vector + new Vector2(num4 + 4, -12f), new Rectangle(92, 145, 3, 17), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                                break;
+                        }
+
+                        switch (scroll_text_alignment)
+                        {
+                            case ScrollTextAlignment.Center:
+                                x += (num4 - this.getWidthOfString(s)) / 2;
+                                vector.X = x;
+                                break;
+                            case ScrollTextAlignment.Right:
+                                x += num4 - this.getWidthOfString(s);
+                                vector.X = x;
+                                break;
+                        }
+
+                        vector.Y += (4f - this.fontPixelZoom) * 4f;
+                        break;
+                    }
+                case 1:
+                    {
+                        int widthOfString = this.getWidthOfString((placeHolderScrollWidthText.Length > 0) ? placeHolderScrollWidthText : s);
+                        Vector2 vector2 = vector;
+                        if (Game1.currentLocation?.map?.Layers[0] != null)
+                        {
+                            int num2 = -Game1.viewport.X + 28;
+                            int num3 = -Game1.viewport.X + Game1.currentLocation.map.Layers[0].LayerWidth * 64 - 28;
+                            if (vector.X < (float)num2)
+                            {
+                                vector.X = num2;
+                            }
+
+                            if (vector.X + (float)widthOfString > (float)num3)
+                            {
+                                vector.X = num3 - widthOfString;
+                            }
+
+                            vector2.X += widthOfString / 2;
+                            if (vector2.X < vector.X)
+                            {
+                                vector.X += vector2.X - vector.X;
+                            }
+
+                            if (vector2.X > vector.X + (float)widthOfString - 24f)
+                            {
+                                vector.X += vector2.X - (vector.X + (float)widthOfString - 24f);
+                            }
+
+                            vector2.X = Utility.Clamp(vector2.X, vector.X, vector.X + (float)widthOfString - 24f);
+                        }
+
+                        b.Draw(Game1.mouseCursors, vector + new Vector2(-7f, -3f) * 4f, new Rectangle(324, 299, 7, 17), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                        b.Draw(Game1.mouseCursors, vector + new Vector2(0f, -3f) * 4f, new Rectangle(331, 299, 1, 17), Color.White * alpha, 0f, Vector2.Zero, new Vector2(this.getWidthOfString((placeHolderScrollWidthText.Length > 0) ? placeHolderScrollWidthText : s), 4f), SpriteEffects.None, layerDepth - 0.001f);
+                        b.Draw(Game1.mouseCursors, vector + new Vector2(widthOfString, -12f), new Rectangle(332, 299, 7, 17), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
+                        b.Draw(Game1.mouseCursors, vector2 + new Vector2(0f, 52f), new Rectangle(341, 308, 6, 5), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.0001f);
+                        x = (int)vector.X;
+                        if (placeHolderScrollWidthText.Length > 0)
+                        {
+                            x += this.getWidthOfString(placeHolderScrollWidthText) / 2 - this.getWidthOfString(s) / 2;
+                            vector.X = x;
+                        }
+
+                        vector.Y += (4f - this.fontPixelZoom) * 4f;
+                        break;
+                    }
             }
-            else if (drawBGScroll == 1)
-            {
-                int widthOfString = this.getWidthOfString((placeHolderScrollWidthText.Length > 0) ? placeHolderScrollWidthText : s, 999999);
-                Vector2 vector2 = vector;
-                if (Game1.currentLocation != null && Game1.currentLocation.map != null && Game1.currentLocation.map.Layers[0] != null)
-                {
-                    int num3 = 0 - Game1.viewport.X + 28;
-                    int num4 = 0 - Game1.viewport.X + Game1.currentLocation.map.Layers[0].LayerWidth * 64 - 28;
-                    if (vector.X < (float)num3)
-                    {
-                        vector.X = (float)num3;
-                    }
-                    if (vector.X + (float)widthOfString > (float)num4)
-                    {
-                        vector.X = (float)(num4 - widthOfString);
-                    }
-                    vector2.X += (float)(widthOfString / 2);
-                    if (vector2.X < vector.X)
-                    {
-                        vector.X += vector2.X - vector.X;
-                    }
-                    if (vector2.X > vector.X + (float)widthOfString - 24f)
-                    {
-                        vector.X += vector2.X - (vector.X + (float)widthOfString - 24f);
-                    }
-                    vector2.X = Utility.Clamp(vector2.X, vector.X, vector.X + (float)widthOfString - 24f);
-                }
-                b.Draw(Game1.mouseCursors, vector + new Vector2(-7f, -3f) * 4f, new Rectangle?(new Rectangle(324, 299, 7, 17)), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
-                b.Draw(Game1.mouseCursors, vector + new Vector2(0f, -3f) * 4f, new Rectangle?(new Rectangle(331, 299, 1, 17)), Color.White * alpha, 0f, Vector2.Zero, new Vector2((float)this.getWidthOfString((placeHolderScrollWidthText.Length > 0) ? placeHolderScrollWidthText : s, 999999), 4f), SpriteEffects.None, layerDepth - 0.001f);
-                b.Draw(Game1.mouseCursors, vector + new Vector2((float)widthOfString, -12f), new Rectangle?(new Rectangle(332, 299, 7, 17)), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.001f);
-                b.Draw(Game1.mouseCursors, vector2 + new Vector2(0f, 52f), new Rectangle?(new Rectangle(341, 308, 6, 5)), Color.White * alpha, 0f, Vector2.Zero, 4f, SpriteEffects.None, layerDepth - 0.0001f);
-                x = (int)vector.X;
-                if (placeHolderScrollWidthText.Length > 0)
-                {
-                    x += this.getWidthOfString(placeHolderScrollWidthText, 999999) / 2 - this.getWidthOfString(s, 999999) / 2;
-                    vector.X = (float)x;
-                }
-                vector.Y += (4f - this.fontPixelZoom) * 4f;
-            }
+
             if (this._language.Code == LocalizedContentManager.LanguageCode.ko)
             {
                 vector.Y -= 8f;
             }
+
             s = s.Replace(Environment.NewLine, "");
             if (!junimoText && (this._language.Code == LocalizedContentManager.LanguageCode.ja || this._language.Code == LocalizedContentManager.LanguageCode.zh || this._language.Code == LocalizedContentManager.LanguageCode.th || (this._language.Code == LocalizedContentManager.LanguageCode.mod && LocalizedContentManager.CurrentModLanguage.FontApplyYOffset)))
             {
                 vector.Y -= (4f - this.fontPixelZoom) * 4f;
             }
+
             s = s.Replace('♡', '<');
             for (int i = 0; i < Math.Min(s.Length, characterPosition); i++)
             {
-                if (((this.CurrentLanguageLatinPatched() || this.IsSpecialCharacter(s[i])) | junimoText) || this.forceEnglishFont)
+                if (this.CurrentLanguageLatinPatched() || this._language.Code == LocalizedContentManager.LanguageCode.ru || this.IsSpecialCharacter(s[i]) || junimoText || this.forceEnglishFont)
                 {
                     float num5 = this.fontPixelZoom;
-                    if ((this.IsSpecialCharacter(s[i]) | junimoText) || this.forceEnglishFont)
+                    if (this.IsSpecialCharacter(s[i]) || junimoText || this.forceEnglishFont)
                     {
                         this.fontPixelZoom = 3f;
                     }
+
                     if (s[i] == '^')
                     {
                         vector.Y += 18f * this.fontPixelZoom;
-                        vector.X = (float)x;
+                        vector.X = x;
                         num = 0;
                         this.fontPixelZoom = num5;
+                        continue;
                     }
-                    else
+
+                    num = (int)(0f * this.fontPixelZoom);
+                    bool flag2 = char.IsUpper(s[i]) || s[i] == 'ß';
+                    Vector2 vector3 = new Vector2(0f, -1 + ((!junimoText && flag2) ? (-3) : 0));
+                    if (s[i] == 'Ç')
                     {
-                        num = (int)(0f * this.fontPixelZoom);
-                        bool flag2 = char.IsUpper(s[i]) || s[i] == 'ß';
-                        Vector2 value = new Vector2(0f, (float)(-1 + ((!junimoText & flag2) ? -3 : 0)));
-                        if (s[i] == 'Ç')
-                        {
-                            value.Y += 2f;
-                        }
-                        if (this.positionOfNextSpace(s, i, (int)vector.X - x, num) >= width)
-                        {
-                            vector.Y += 18f * this.fontPixelZoom;
-                            num = 0;
-                            vector.X = (float)x;
-                            if (s[i] == ' ')
-                            {
-                                this.fontPixelZoom = num5;
-                                goto IL_C96;
-                            }
-                        }
-                        b.Draw((color != -1) ? this.coloredTexture : this.spriteTexture, vector + value * this.fontPixelZoom, new Rectangle?(this.getSourceRectForChar(s[i], junimoText)), ((this.IsSpecialCharacter(s[i]) | junimoText) ? Color.White : customColor ?? this.getColorFromIndex(color)) * alpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
-                        if (i < s.Length - 1)
-                        {
-                            vector.X += 8f * this.fontPixelZoom + (float)num + (float)this.getWidthOffsetForChar(s[i + 1]) * this.fontPixelZoom;
-                        }
-                        if (s[i] != '^')
-                        {
-                            vector.X += (float)this.getWidthOffsetForChar(s[i]) * this.fontPixelZoom;
-                        }
-                        this.fontPixelZoom = num5;
+                        vector3.Y += 2f;
                     }
+
+                    if (this.positionOfNextSpace(s, i, (int)vector.X - x, num) >= width)
+                    {
+                        vector.Y += 18f * this.fontPixelZoom;
+                        num = 0;
+                        vector.X = x;
+                        if (s[i] == ' ')
+                        {
+                            this.fontPixelZoom = num5;
+                            continue;
+                        }
+                    }
+
+                    Rectangle sourceRectForChar = this.getSourceRectForChar(s[i], junimoText);
+                    b.Draw(hasValue ? this.coloredTexture : this.spriteTexture, vector + vector3 * this.fontPixelZoom, sourceRectForChar, ((this.IsSpecialCharacter(s[i]) || junimoText) ? Color.White : color.Value) * alpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
+                    if (i < s.Length - 1)
+                    {
+                        vector.X += 8f * this.fontPixelZoom + (float)num + (float)this.getWidthOffsetForChar(s[i + 1]) * this.fontPixelZoom;
+                    }
+
+                    if (s[i] != '^')
+                    {
+                        vector.X += (float)this.getWidthOffsetForChar(s[i]) * this.fontPixelZoom;
+                    }
+
+                    this.fontPixelZoom = num5;
+                    continue;
                 }
-                else if (s[i] == '^')
+
+                if (s[i] == '^')
                 {
                     vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
-                    vector.X = (float)x;
+                    vector.X = x;
                     num = 0;
+                    continue;
                 }
-                else
+
+                if (i > 0 && this.IsSpecialCharacter(s[i - 1]))
                 {
-                    if (i > 0 && this.IsSpecialCharacter(s[i - 1]))
-                    {
-                        vector.X += 24f;
-                    }
-                    FontChar fontChar;
-                    if (this._characterMap.TryGetValue(s[i], out fontChar))
-                    {
-                        Rectangle value2 = new Rectangle(fontChar.X, fontChar.Y, fontChar.Width, fontChar.Height);
-                        Texture2D texture = this.fontPages[fontChar.Page];
-                        if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= x + width - 4)
-                        {
-                            vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
-                            num = 0;
-                            vector.X = (float)x;
-                        }
-                        Vector2 vector3 = new Vector2(vector.X + (float)fontChar.XOffset * this.fontPixelZoom, vector.Y + (float)fontChar.YOffset * this.fontPixelZoom);
-                        if (drawBGScroll != -1 && this._language.Code == LocalizedContentManager.LanguageCode.ko)
-                        {
-                            vector3.Y -= 8f;
-                        }
-                        if (this._language.Code == LocalizedContentManager.LanguageCode.ru)
-                        {
-                            Vector2 vector4 = new Vector2(-1f, 1f) * this.fontPixelZoom;
-                            b.Draw(texture, vector3 + vector4, new Rectangle?(value2), (customColor ?? this.getColorFromIndex(color)) * alpha * this.shadowAlpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
-                            b.Draw(texture, vector3 + new Vector2(0f, vector4.Y), new Rectangle?(value2), (customColor ?? this.getColorFromIndex(color)) * alpha * this.shadowAlpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
-                            b.Draw(texture, vector3 + new Vector2(vector4.X, 0f), new Rectangle?(value2), (customColor ?? this.getColorFromIndex(color)) * alpha * this.shadowAlpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
-                        }
-                        b.Draw(texture, vector3, new Rectangle?(value2), (customColor ?? this.getColorFromIndex(color)) * alpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
-                        vector.X += (float)fontChar.XAdvance * this.fontPixelZoom;
-                    }
+                    vector.X += 24f;
                 }
-            IL_C96:;
+
+                if (this.characterMap.TryGetValue(s[i], out var value))
+                {
+                    Rectangle value2 = new Rectangle(value.X, value.Y, value.Width, value.Height);
+                    Texture2D texture = this.fontPages[value.Page];
+                    if (this.positionOfNextSpace(s, i, (int)vector.X, num) >= x + width - 4)
+                    {
+                        vector.Y += (float)(this.FontFile.Common.LineHeight + 2) * this.fontPixelZoom;
+                        num = 0;
+                        vector.X = x;
+                    }
+
+                    Vector2 vector4 = new Vector2(vector.X + (float)value.XOffset * this.fontPixelZoom, vector.Y + (float)value.YOffset * this.fontPixelZoom);
+                    if (drawBGScroll != -1 && this._language.Code == LocalizedContentManager.LanguageCode.ko)
+                    {
+                        vector4.Y -= 8f;
+                    }
+
+                    if (this._language.Code == LocalizedContentManager.LanguageCode.ru)
+                    {
+                        Vector2 vector5 = new Vector2(-1f, 1f) * this.fontPixelZoom;
+                        b.Draw(texture, vector4 + vector5, value2, color.Value * alpha * this.shadowAlpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
+                        b.Draw(texture, vector4 + new Vector2(0f, vector5.Y), value2, color.Value * alpha * this.shadowAlpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
+                        b.Draw(texture, vector4 + new Vector2(vector5.X, 0f), value2, color.Value * alpha * this.shadowAlpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
+                    }
+
+                    b.Draw(texture, vector4, value2, color.Value * alpha, 0f, Vector2.Zero, this.fontPixelZoom, SpriteEffects.None, layerDepth);
+                    vector.X += (float)value.XAdvance * this.fontPixelZoom;
+                }
             }
         }
 
         private bool IsSpecialCharacter(char c)
         {
-            return c.Equals('<') || c.Equals('=') || c.Equals('>') || c.Equals('@') || c.Equals('$') || c.Equals('`') || c.Equals('+');
+            if (!c.Equals('<') && !c.Equals('=') && !c.Equals('>') && !c.Equals('@') && !c.Equals('$') && !c.Equals('`'))
+            {
+                return c.Equals('+');
+            }
+
+            return true;
         }
 
         public int positionOfNextSpace(string s, int index, int currentXPosition, int accumulatedHorizontalSpaceBetweenCharacters)
         {
-            if (this._language.Code == LocalizedContentManager.LanguageCode.zh || this._language.Code == LocalizedContentManager.LanguageCode.th)
+            if (this._language.Code == LocalizedContentManager.LanguageCode.ja || this._language.Code == LocalizedContentManager.LanguageCode.zh || this._language.Code == LocalizedContentManager.LanguageCode.th)
             {
-                FontChar fontChar;
-                if (this._characterMap.TryGetValue(s[index], out fontChar))
+                float num = currentXPosition;
+                string value = Game1.asianSpacingRegex.Match(s, index).Value;
+                foreach (char key in value)
                 {
-                    return currentXPosition + (int)((float)fontChar.XAdvance * this.fontPixelZoom);
-                }
-                return currentXPosition + (int)((float)this.FontFile.Common.LineHeight * this.fontPixelZoom);
-            }
-            else
-            {
-                if (this._language.Code != LocalizedContentManager.LanguageCode.ja)
-                {
-                    for (int i = index; i < s.Length; i++)
+                    if (this.characterMap.TryGetValue(key, out var value2))
                     {
-                        if (!this.CurrentLanguageLatinPatched())
-                        {
-                            if (s[i] == ' ' || s[i] == '^')
-                            {
-                                return currentXPosition;
-                            }
-                            FontChar fontChar2;
-                            if (this._characterMap.TryGetValue(s[i], out fontChar2))
-                            {
-                                currentXPosition += (int)((float)fontChar2.XAdvance * this.fontPixelZoom);
-                            }
-                            else
-                            {
-                                currentXPosition += (int)((float)this.FontFile.Common.LineHeight * this.fontPixelZoom);
-                            }
-                        }
-                        else
-                        {
-                            if (s[i] == ' ' || s[i] == '^')
-                            {
-                                return currentXPosition;
-                            }
-                            currentXPosition += (int)(8f * this.fontPixelZoom + (float)accumulatedHorizontalSpaceBetweenCharacters + (float)(this.getWidthOffsetForChar(s[i]) + this.getWidthOffsetForChar(s[Math.Max(0, i - 1)])) * this.fontPixelZoom);
-                            accumulatedHorizontalSpaceBetweenCharacters = (int)(0f * this.fontPixelZoom);
-                        }
+                        num += (float)value2.XAdvance * this.fontPixelZoom;
                     }
+                }
+
+                return (int)num;
+            }
+
+            for (int j = index; j < s.Length; j++)
+            {
+                if (!this.CurrentLanguageLatinPatched() && this._language.Code != LocalizedContentManager.LanguageCode.ru)
+                {
+                    if (s[j] == ' ' || s[j] == '^')
+                    {
+                        return currentXPosition;
+                    }
+
+                    currentXPosition = ((!this.characterMap.TryGetValue(s[j], out var value3)) ? (currentXPosition + (int)((float)this.FontFile.Common.LineHeight * this.fontPixelZoom)) : (currentXPosition + (int)((float)value3.XAdvance * this.fontPixelZoom)));
+                    continue;
+                }
+
+                if (s[j] == ' ' || s[j] == '^')
+                {
                     return currentXPosition;
                 }
-                FontChar fontChar3;
-                if (this._characterMap.TryGetValue(s[index], out fontChar3))
-                {
-                    return currentXPosition + (int)((float)fontChar3.XAdvance * this.fontPixelZoom);
-                }
-                return currentXPosition + (int)((float)this.FontFile.Common.LineHeight * this.fontPixelZoom);
+
+                currentXPosition += (int)(8f * this.fontPixelZoom + (float)accumulatedHorizontalSpaceBetweenCharacters + (float)(this.getWidthOffsetForChar(s[j]) + this.getWidthOffsetForChar(s[Math.Max(0, j - 1)])) * this.fontPixelZoom);
+                accumulatedHorizontalSpaceBetweenCharacters = (int)(0f * this.fontPixelZoom);
             }
+
+            return currentXPosition;
         }
 
         private Rectangle getSourceRectForChar(char c, bool junimoText)
         {
-            int num = (int)(c - ' ');
-            if (c <= 'œ')
+            int num = c - 32;
+            switch (c)
             {
-                if (c <= 'ğ')
-                {
-                    if (c != 'Ğ')
-                    {
-                        if (c == 'ğ')
-                        {
-                            num = 103;
-                        }
-                    }
-                    else
-                    {
-                        num = 102;
-                    }
-                }
-                else if (c != 'İ')
-                {
-                    if (c != 'ı')
-                    {
-                        switch (c)
-                        {
-                            case 'Ő':
-                                num = 105;
-                                break;
-                            case 'ő':
-                                num = 106;
-                                break;
-                            case 'Œ':
-                                num = 96;
-                                break;
-                            case 'œ':
-                                num = 97;
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        num = 99;
-                    }
-                }
-                else
-                {
+                case 'Œ':
+                    num = 96;
+                    break;
+                case 'œ':
+                    num = 97;
+                    break;
+                case 'Ğ':
+                    num = 102;
+                    break;
+                case 'ğ':
+                    num = 103;
+                    break;
+                case 'İ':
                     num = 98;
-                }
-            }
-            else if (c <= 'ş')
-            {
-                if (c != 'Ş')
-                {
-                    if (c == 'ş')
-                    {
-                        num = 101;
-                    }
-                }
-                else
-                {
+                    break;
+                case 'ı':
+                    num = 99;
+                    break;
+                case 'Ş':
                     num = 100;
-                }
-            }
-            else if (c != 'Ű')
-            {
-                if (c != 'ű')
-                {
-                    if (c == '’')
-                    {
-                        num = 104;
-                    }
-                }
-                else
-                {
+                    break;
+                case 'ş':
+                    num = 101;
+                    break;
+                case '’':
+                    num = 104;
+                    break;
+                case 'Ő':
+                    num = 105;
+                    break;
+                case 'ő':
+                    num = 106;
+                    break;
+                case 'Ű':
+                    num = 107;
+                    break;
+                case 'ű':
                     num = 108;
-                }
+                    break;
+                case 'ё':
+                    num = 560;
+                    break;
+                case 'ґ':
+                    num = 561;
+                    break;
+                case 'є':
+                    num = 562;
+                    break;
+                case 'і':
+                    num = 563;
+                    break;
+                case 'ї':
+                    num = 564;
+                    break;
+                case 'Ё':
+                    num = 512;
+                    break;
+                case '–':
+                    num = 464;
+                    break;
+                case '—':
+                    num = 465;
+                    break;
+                case '№':
+                    num = 466;
+                    break;
+                case 'Ґ':
+                    num = 513;
+                    break;
+                case 'Є':
+                    num = 514;
+                    break;
+                case 'І':
+                    num = 515;
+                    break;
+                case 'Ї':
+                    num = 516;
+                    break;
+                case 'Ą':
+                    num = 576;
+                    break;
+                case 'ą':
+                    num = 578;
+                    break;
+                case 'Ć':
+                    num = 579;
+                    break;
+                case 'ć':
+                    num = 580;
+                    break;
+                case 'Ę':
+                    num = 581;
+                    break;
+                case 'ę':
+                    num = 582;
+                    break;
+                case 'Ł':
+                    num = 583;
+                    break;
+                case 'ł':
+                    num = 584;
+                    break;
+                case 'Ń':
+                    num = 585;
+                    break;
+                case 'ń':
+                    num = 586;
+                    break;
+                case 'Ź':
+                    num = 587;
+                    break;
+                case 'ź':
+                    num = 588;
+                    break;
+                case 'Ż':
+                    num = 589;
+                    break;
+                case 'ż':
+                    num = 590;
+                    break;
+                case 'Ś':
+                    num = 574;
+                    break;
+                case 'ś':
+                    num = 575;
+                    break;
+                default:
+                    if (num >= 1008 && num < 1040)
+                    {
+                        num -= 528;
+                    }
+                    else if (num >= 1040 && num < 1072)
+                    {
+                        num -= 512;
+                    }
+
+                    break;
             }
-            else
-            {
-                num = 107;
-            }
+
             return new Rectangle(num * 8 % this.spriteTexture.Width, num * 8 / this.spriteTexture.Width * 16 + (junimoText ? 224 : 0), 8, 16);
         }
 

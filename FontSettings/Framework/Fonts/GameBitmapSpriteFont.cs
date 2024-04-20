@@ -41,7 +41,7 @@ namespace FontSettings.Framework.Fonts
 
         public override void Draw(SpriteBatch b, string text, Vector2 position, Color color)
         {
-            this._spriteText.drawString(b, text, (int)position.X, (int)position.Y, customColor: color);
+            this._spriteText.drawString(b, text, (int)position.X, (int)position.Y, color: color);
         }
 
         public override void DrawBounds(SpriteBatch b, string text, Vector2 position, Color color)
