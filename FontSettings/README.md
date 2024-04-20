@@ -51,8 +51,12 @@ This mod:
 		<tr>
 			<td><em>vanilla font file for Chinese</em></td>
 			<td></td>
-			<td rowspan=3>These are font files game uses for each language. Download if you want to keep original font but with size/spacing/linespacing change.</td>
-			<td rowspan=3>Unzip and put into <strong>this mod's</strong> <em>assets/fonts</em> folder.</td>
+			<td rowspan=4>These are font files game uses for each language. Download if you want to keep original font but with size/spacing/linespacing change.</td>
+			<td rowspan=4>Unzip and put into <strong>this mod's</strong> <em>assets/fonts</em> folder, or simply install the ttf to your pc.</td>
+		</tr>
+		<tr>
+			<td><em>vanilla font file for Chinese (< 1.6.4)</em></td>
+			<td></td>
 		</tr>
 		<tr>
 			<td><em>vanilla font file for Japanese</em></td>
@@ -172,6 +176,9 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.13.0 - 2024-04-20
+- Adapted to Stardew Valley 1.6.4. Mainly Chinese font changes.
+
 #### 0.12.5 - 2024-04-19
 - Adapted to Stardew Valley 1.6.
 

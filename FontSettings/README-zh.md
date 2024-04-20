@@ -10,6 +10,7 @@
 - [配置](#配置)
 - [兼容性](#兼容性)
   - [和 SpriteMaster 的冲突](#和-spritemaster-冲突)
+  - [回退至1.6.4版本之前的中文字体](#回退至164版本之前的中文字体)
 - [给模组制作者看的](#给其他模组作者看的)
   - [编辑模组素材](#编辑模组素材)
   - [制作字体包](#制作字体包)
@@ -43,7 +44,11 @@
 			<td><em>vanilla font file for Chinese（中文）</em></td>
 			<td></td>
 			<td rowspan=3>这些是各个语言的原版字体。如果仅需调整字体大小、间距等而不变更字体，需要下载。</td>
-			<td rowspan=3>解压放入本模组下assets/fonts文件夹。</td>
+			<td rowspan=3>解压放入本模组下assets/fonts文件夹，或者双击ttf文件安装进系统。</td>
+		</tr>
+		<tr>
+			<td><em>vanilla font file for Chinese（中文 <strong>< 1.6.4版本</strong>）</em></td>
+			<td></td>
 		</tr>
 		<tr>
 			<td><em>vanilla font file for Japanese（日文）</em></td>
@@ -118,6 +123,18 @@
 冲突表现：调整参数示例文本不刷新、点击ok键无限加载、cpu爆高。<br/>
 解决方法：在配置菜单中，找到 SpriteMaster > Advanced Settings > Extras.OpenGL，取消勾选 `Enabled` 和 `OptimizeTexture2DSetData` 两项，重进游戏。<small>测试环境：FontSettings 0.9.0, SpriteMaster 0.15.0-beta.16.0</small>
 
+#### 回退至1.6.4版本之前的中文字体
+1. 下载可选文件*vanilla font file for Chinese (before 1.6.4)*，并按要求安装。
+2. 启动游戏，打开字体设置菜单，依次设置游戏内的三种字体类型，每次设置完需要点OK保存。下为各参数：
+
+|     | 小字体 | 中字体 | 对话字体 |
+| --- | ---  | ---  | --- |
+| 字体 | NotoSansCJKsc-Bold | NotoSansCJKsc-Bold | NotoSansCJKsc-Bold |
+| 大小 | 28 | 37 | 34 |
+| 字间距 | -1 | 0 | 0 |
+| 行间距 | 26 | 38 | 33 |
+| 缩放比例 | - | - | 1.5 |
+
 ## 给其他模组作者看的
 ### 编辑模组素材
 本模组的图片在`FontSettings/assets`文件夹内，可编辑
@@ -156,6 +173,10 @@
 
 
 ## 更新日志
+#### 0.13.0 - 2024-04-20
+- 兼容游戏1.6.4版本。
+  - 同步原版中文字体至最新版本。怀旧党可以自行下载可选字体文件。
+
 #### 0.12.5 - 2024-04-19
 - 兼容游戏1.6版本。
 
