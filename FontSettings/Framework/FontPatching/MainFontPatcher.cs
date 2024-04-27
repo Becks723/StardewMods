@@ -57,7 +57,16 @@ namespace FontSettings.Framework.FontPatching
 
             else
             {
-                if (e.NameWithoutLocale.IsEquivalentTo(FontHelpers.GetFontFileAssetName()))
+                // A bmfont patch cycle involves:
+                // 1. a main 'font file' patch (.fnt file, c# type: XmlSource)
+                // 2. one or more 'font pages' (.png file, c# type: Texture2D)
+
+                // The game/smapi requires (Chinese for intance):
+                //   Fonts/Chinese.zh-CN, 
+                //   Fonts/Cinese-international (only if loading Fonts/Chinese.zh-CN throws a ContentLoadException)
+                //   Fonts/Chinese              (only if loading Fonts/Cinese-international throws a ContentLoadException)
+                // Since the last one is most compatible, we use this to check.
+                if (e.Name.IsEquivalentTo(FontHelpers.GetFontFileAssetName()))
                 {
                     this.PatchBmFontFile(e);
                 }
@@ -162,7 +171,7 @@ namespace FontSettings.Framework.FontPatching
             catch (Exception ex)
             {
                 this._monitor.Log($"Error when invalidating font {context.Language},{context.FontType}. {ex}");
-                InvalidateFailed?.Invoke(this, 
+                InvalidateFailed?.Invoke(this,
                     new InvalidateFailedEventArgs(context, ex));
                 return;
             }

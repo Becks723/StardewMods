@@ -25,7 +25,6 @@ namespace FontSettings.Framework
         private const int DefaultSpacingVert = 1;
         private static readonly IEnumerable<CharacterRange> DefaultCharRanges = new[] { new CharacterRange(32, 126) };
         private static readonly string[] DefaultCharsFiles = Array.Empty<string>();
-        private static readonly string DefaultPageName = Guid.NewGuid().ToString().Substring(0, 8);
         private static readonly Color DefaultTextColorMask = Color.White;
 
         private static string _baseDir;
@@ -57,7 +56,7 @@ namespace FontSettings.Framework
             float finalOffsetY = charOffsetY;
             bool overrideLineHeight = lineHeightOverride != null;
             int finalLineHeight = lineHeightOverride ?? 0;
-            string finalPageName = pageName ?? DefaultPageName;
+            string finalPageName = pageName ?? Guid.NewGuid().ToString().Substring(0, 8);
             Color finalTextMask = textColorMask ?? DefaultTextColorMask;
 
             InternalGenerateIntoMemory(finalFontFile,
