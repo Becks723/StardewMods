@@ -27,12 +27,12 @@ namespace FontSettings.Framework.Integrations
                 texturePath: Textures.FontMenuIconKey,
                 sourceRect: null,
                 hoverText: "Font Settings");
-            api.ToolbarIconPressed += this.OnToolbarIconPressed;
+            api.Subscribe(this.OnToolbarIconPressed);
         }
 
-        private void OnToolbarIconPressed(object sender, string id)
+        private void OnToolbarIconPressed(IIconPressedEventArgs e)
         {
-            if (id == this._uniqueId)
+            if (e.Id == this._uniqueId)
                 this._openFontSettingsMenu();
         }
     }
