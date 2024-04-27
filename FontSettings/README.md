@@ -176,6 +176,12 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.14.0 - 2024-04-28
+- Adapted to Stardew Valley 1.6.6.
+- Add arrows to sliders for precise adjustment.
+- Fix under some languages dialogue font need to ok twice to apply changes.
+- Compat for latest Toolbar Icon interface.
+
 #### 0.13.0 - 2024-04-20
 - Adapted to Stardew Valley 1.6.4. Mainly Chinese font changes.
 
