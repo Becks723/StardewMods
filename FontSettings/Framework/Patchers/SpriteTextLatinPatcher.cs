@@ -70,23 +70,14 @@ namespace FontSettings.Framework.Patchers
                 original: AccessTools.Method(typeof(SpriteText), $"get_{nameof(SpriteText.color_Default)}"),
                 transpiler: this.HarmonyMethod(nameof(SpriteText_color_Default_Transpiler)));
             harmony.Patch(
-                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getWidthOfString)),
-                transpiler: this.HarmonyMethod(nameof(SpriteText_getWidthOfString_Transpiler)));
-            harmony.Patch(
-                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getHeightOfString)),
-                transpiler: this.HarmonyMethod(nameof(SpriteText_getHeightOfString_Transpiler)));
-            harmony.Patch(
-                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.positionOfNextSpace)),
-                transpiler: this.HarmonyMethod(nameof(SpriteText_positionOfNextSpace_Transpiler)));
-            harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.IsMissingCharacters)),
                 transpiler: this.HarmonyMethod(nameof(SpriteText_IsMissingCharacters_Transpiler)));
             harmony.Patch(
-                original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getSubstringBeyondHeight)),
-                transpiler: this.HarmonyMethod(nameof(SpriteText_getSubstringBeyondHeight_Transpiler)));
-            harmony.Patch(
                 original: AccessTools.Method(typeof(SpriteText), nameof(SpriteText.getIndexOfSubstringBeyondHeight)),
                 transpiler: this.HarmonyMethod(nameof(SpriteText_getIndexOfSubstringBeyondHeight_Transpiler)));
+            harmony.Patch(
+                original: AccessTools.Method(typeof(SpriteText), "isUsingNonSpriteSheetFont"),
+                postfix: this.HarmonyMethod(nameof(SpriteText_isUsingNonSpriteSheetFont_Postfix)));
         }
 
         private static void SpriteText_drawString_Finalizer(Exception __exception)
@@ -161,7 +152,7 @@ namespace FontSettings.Framework.Patchers
         /// Turn
         /// ```
         /// if (((LocalizedContentManager.CurrentLanguageLatin 
-        ///     || LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ru 
+        ///     || (LocalizedContentManager.CurrentLanguageCode == LocalizedContentManager.LanguageCode.ru && !Game1.options.useAlternateFont) 
         ///     || SpriteText.IsSpecialCharacter(s[i])) | junimoText) 
         /// || SpriteText.forceEnglishFont)
         /// ```
@@ -174,7 +165,7 @@ namespace FontSettings.Framework.Patchers
         /// ```
         /// </summary>
         private static IEnumerable<CodeInstruction> SpriteText_drawString_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
-        {//757
+        {//809
             var oldInstructions = codeInstructions.ToArray();
             int index = 0;
             bool ispatching = false;
@@ -184,10 +175,10 @@ namespace FontSettings.Framework.Patchers
 
                 if (instruction.opcode == OpCodes.Call
                     && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
-                    && oldInstructions[i + 7].opcode == OpCodes.Callvirt
-                    && oldInstructions[i + 7].operand is MethodInfo { Name: "get_Chars" }
-                    && oldInstructions[i + 8].opcode == OpCodes.Call
-                    && oldInstructions[i + 8].operand is MethodInfo { Name: "IsSpecialCharacter" })
+                    && oldInstructions[i + 10].opcode == OpCodes.Callvirt
+                    && oldInstructions[i + 10].operand is MethodInfo { Name: "get_Chars" }
+                    && oldInstructions[i + 11].opcode == OpCodes.Call
+                    && oldInstructions[i + 11].operand is MethodInfo { Name: "IsSpecialCharacter" })
                 {
                     ispatching = true;
                     index = i;
@@ -198,10 +189,13 @@ namespace FontSettings.Framework.Patchers
                     };
                 }
 
-                // skip russian check (total 3 ilcodes)
+                // skip russian check (total 6 ilcodes)
                 else if (ispatching && (i == index + 2 ||
                                         i == index + 3 ||
-                                        i == index + 4))
+                                        i == index + 4 ||
+                                        i == index + 5 ||
+                                        i == index + 6 ||
+                                        i == index + 7))
                 { }
 
                 else
@@ -213,7 +207,7 @@ namespace FontSettings.Framework.Patchers
         /// Turn
         /// ```
         /// if (!LocalizedContentManager.CurrentLanguageLatin 
-        ///     && LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.ru)
+        ///     && (LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.ru || Game1.options.useAlternateFont))
         /// ```
         /// 
         /// to
@@ -246,155 +240,13 @@ namespace FontSettings.Framework.Patchers
                     };
                 }
 
-                // skip russian check (total 3 ilcodes)
+                // skip russian check (total 6 ilcodes)
                 else if (ispatching && (i == index + 2 ||
                                         i == index + 3 ||
-                                        i == index + 4))
-                { }
-
-                else
-                    yield return instruction;
-            }
-        }
-
-        /// <summary>
-        /// Turn
-        /// ```
-        /// if (!LocalizedContentManager.CurrentLanguageLatin 
-        ///     && LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.ru 
-        ///     && !SpriteText.forceEnglishFont)
-        /// ```
-        /// 
-        /// to
-        /// ```
-        /// if (!CurrentLanguageLatinPatched()
-        ///     && !SpriteText.forceEnglishFont)
-        /// ```
-        /// </summary>
-        private static IEnumerable<CodeInstruction> SpriteText_getWidthOfString_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
-        {
-            var oldInstructions = codeInstructions.ToArray();
-            int index = 0;
-            bool ispatching = false;
-            for (int i = 0; i < oldInstructions.Length; i++)
-            {
-                var instruction = oldInstructions[i];
-
-                if (instruction.opcode == OpCodes.Call
-                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
-                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue_S
-                    && oldInstructions[i + 5].opcode == OpCodes.Ldsfld
-                    && oldInstructions[i + 5].operand is FieldInfo { Name: nameof(SpriteText.forceEnglishFont) })
-                {
-                    ispatching = true;
-                    index = i;
-                    yield return new CodeInstruction(instruction)
-                    {
-                        opcode = OpCodes.Call,
-                        operand = CurrentLanguageLatinPatched_Method.Value
-                    };
-                }
-
-                // skip russian check (total 3 ilcodes)
-                else if (ispatching && (i == index + 2 ||
-                                        i == index + 3 ||
-                                        i == index + 4))
-                { }
-
-                else
-                    yield return instruction;
-            }
-        }
-
-        /// <summary>
-        /// Turn
-        /// ```
-        /// if (!LocalizedContentManager.CurrentLanguageLatin 
-        ///     && LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.ru 
-        ///     && !SpriteText.forceEnglishFont)
-        /// ```
-        /// 
-        /// to
-        /// ```
-        /// if (!CurrentLanguageLatinPatched()
-        ///     && !SpriteText.forceEnglishFont)
-        /// ```
-        /// </summary>
-        private static IEnumerable<CodeInstruction> SpriteText_getHeightOfString_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
-        {
-            var oldInstructions = codeInstructions.ToArray();
-            int index = 0;
-            bool ispatching = false;
-            for (int i = 0; i < oldInstructions.Length; i++)
-            {
-                var instruction = oldInstructions[i];
-
-                if (instruction.opcode == OpCodes.Call
-                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
-                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue
-                    && oldInstructions[i + 5].opcode == OpCodes.Ldsfld
-                    && oldInstructions[i + 5].operand is FieldInfo { Name: nameof(SpriteText.forceEnglishFont) })
-                {
-                    ispatching = true;
-                    index = i;
-                    yield return new CodeInstruction(instruction)
-                    {
-                        opcode = OpCodes.Call,
-                        operand = CurrentLanguageLatinPatched_Method.Value
-                    };
-                }
-
-                // skip russian check (total 3 ilcodes)
-                else if (ispatching && (i == index + 2 ||
-                                        i == index + 3 ||
-                                        i == index + 4))
-                { }
-
-                else
-                    yield return instruction;
-            }
-        }
-
-        /// <summary>
-        /// Turn
-        /// ```
-        /// if (!LocalizedContentManager.CurrentLanguageLatin 
-        ///     && LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.ru)
-        /// ```
-        /// 
-        /// to
-        /// ```
-        /// if (!CurrentLanguageLatinPatched())
-        /// ```
-        /// </summary>
-        private static IEnumerable<CodeInstruction> SpriteText_positionOfNextSpace_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
-        {
-            var oldInstructions = codeInstructions.ToArray();
-            int index = 0;
-            bool ispatching = false;
-            for (int i = 0; i < oldInstructions.Length; i++)
-            {
-                var instruction = oldInstructions[i];
-
-                if (instruction.opcode == OpCodes.Call
-                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
-                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue_S
-                    && oldInstructions[i + 5].opcode == OpCodes.Ldarg_0
-                    && oldInstructions[i + 6].opcode == OpCodes.Ldloc_S)
-                {
-                    ispatching = true;
-                    index = i;
-                    yield return new CodeInstruction(instruction)
-                    {
-                        opcode = OpCodes.Call,
-                        operand = CurrentLanguageLatinPatched_Method.Value
-                    };
-                }
-
-                // skip russian check (total 3 ilcodes)
-                else if (ispatching && (i == index + 2 ||
-                                        i == index + 3 ||
-                                        i == index + 4))
+                                        i == index + 4 ||
+                                        i == index + 5 ||
+                                        i == index + 6 ||
+                                        i == index + 7))
                 { }
 
                 else
@@ -425,54 +277,6 @@ namespace FontSettings.Framework.Patchers
             }
         }
 
-        /// <summary>
-        /// Turn
-        /// ```
-        /// if (!LocalizedContentManager.CurrentLanguageLatin 
-        ///     && LocalizedContentManager.CurrentLanguageCode != LocalizedContentManager.LanguageCode.ru)
-        /// ```
-        /// 
-        /// to
-        /// ```
-        /// if (!CurrentLanguageLatinPatched())
-        /// ```
-        /// </summary>
-        private static IEnumerable<CodeInstruction> SpriteText_getSubstringBeyondHeight_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
-        {
-            var oldInstructions = codeInstructions.ToArray();
-            int index = 0;
-            bool ispatching = false;
-            for (int i = 0; i < oldInstructions.Length; i++)
-            {
-                var instruction = oldInstructions[i];
-
-                if (instruction.opcode == OpCodes.Call
-                    && instruction.operand is MethodInfo { Name: "get_CurrentLanguageLatin" }
-                    && oldInstructions[i + 1].opcode == OpCodes.Brtrue
-                    && oldInstructions[i + 2].opcode == OpCodes.Call
-                    && oldInstructions[i + 2].operand is MethodInfo { Name: "get_CurrentLanguageCode" }
-                    && oldInstructions[i + 3].opcode == OpCodes.Ldc_I4_2)
-                {
-                    ispatching = true;
-                    index = i;
-                    yield return new CodeInstruction(instruction)
-                    {
-                        opcode = OpCodes.Call,
-                        operand = CurrentLanguageLatinPatched_Method.Value
-                    };
-                }
-
-                // skip russian check (total 3 ilcodes)
-                else if (ispatching && (i == index + 2 ||
-                                        i == index + 3 ||
-                                        i == index + 4))
-                { }
-
-                else
-                    yield return instruction;
-            }
-        }
-
         private static IEnumerable<CodeInstruction> SpriteText_getIndexOfSubstringBeyondHeight_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
             var oldInstructions = codeInstructions.ToArray();
@@ -492,6 +296,11 @@ namespace FontSettings.Framework.Patchers
                 else
                     yield return instruction;
             }
+        }
+
+        private static void SpriteText_isUsingNonSpriteSheetFont_Postfix(ref bool __result)
+        {
+            __result = !CurrentLanguageLatinPatched();
         }
 
         private static bool _hasSubscribedOnLanguageChangeLatin;
