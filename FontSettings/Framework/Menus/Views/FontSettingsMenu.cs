@@ -280,12 +280,15 @@ namespace FontSettings.Framework.Menus.Views
                                     return border;
                                 }
 
-                                Label SliderValueLabel(Slider slider)
+                                Label SliderValueLabel(Slider slider, Func<float, string>? format = null)
                                 {
                                     Label valuelabel = new Label();
                                     valuelabel.Font = FontType.DialogueFont;
                                     valuelabel.MinWidth = FontHelper.MeasureString(FontType.DialogueFont, "999").X;
-                                    context.OneWayBinds(() => slider.Value, () => valuelabel.Text, new ToStringConverter<float>());
+                                    var converter = format == null
+                                        ? new ToStringConverter<float>()
+                                        : new ToStringConverter<float>(format);
+                                    context.OneWayBinds(() => slider.Value, () => valuelabel.Text, converter);
                                     return valuelabel;
                                 }
 
@@ -531,7 +534,7 @@ namespace FontSettings.Framework.Menus.Views
                                             context.OneWayBinds(() => this._viewModel.MinPixelZoom, () => slider.Minimum);
                                             context.OneWayBinds(() => this._viewModel.MaxPixelZoom, () => slider.Maximum);
 
-                                            Label valuelabel = SliderValueLabel(slider);
+                                            Label valuelabel = SliderValueLabel(slider, format: val => $"{val}x");
                                             valuelabel.Margin = new Thickness(borderWidth / 3, 0, 0, 0);
 
                                             var label = new Label();
