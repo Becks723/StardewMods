@@ -176,6 +176,11 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.14.1 - 2024-05-07
+- Fix dialogue font not changing under some latin languages.
+- Add a 'x' suffix to the integer value of 'pixel zoom' option, for better understanding.
+- Roll back vanilla Chinese font config.
+
 #### 0.14.0 - 2024-04-28
 - Adapted to Stardew Valley 1.6.6.
 - Add arrows to sliders for precise adjustment.
