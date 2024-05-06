@@ -40,7 +40,7 @@ namespace FontSettings.Framework.Patchers
                 .ToArray();
 
             var latinFontFile = latinFontFileNames
-                .Where(fontFile => e.NameWithoutLocale.IsEquivalentTo(fontFile))
+                .Where(fontFile => e.Name.IsEquivalentTo(fontFile))
                 .FirstOrDefault();
             if (latinFontFile != null)
             {
