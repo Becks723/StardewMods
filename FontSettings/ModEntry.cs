@@ -31,6 +31,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
+using StardewValley.BellsAndWhistles;
 using StardewValley.GameData;
 using StardewValley.Menus;
 
@@ -263,6 +264,15 @@ namespace FontSettings
         {
             if (this.IsTitleMenuInteractable())
                 this._titleFontButton?.Draw(e.SpriteBatch);
+
+            // DEBUG: show current PixelZoom at the right top corner screen.
+#if DEBUG
+            var font = Game1.smallFont;
+            string text = $"FontPixelZoom: {SpriteText.FontPixelZoom}f";
+            Vector2 textsize = font.MeasureString(text);
+            Vector2 pos = new Vector2(Game1.uiViewport.Width - textsize.X, 0);
+            e.SpriteBatch.DrawString(font, text, pos, Color.Blue);
+#endif
         }
 
         private void OnUpdateTicked(object sender, UpdateTickedEventArgs e)
