@@ -176,6 +176,10 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.14.2 - 2024-05-18
+- Update Portuguese translation. (Thanks to [Si0nk0b](https://www.nexusmods.com/users/142546813))
+- Fix incorrect dialogue pixel zoom after toggling smooth font in Chinese.
+
 #### 0.14.1 - 2024-05-07
 - Fix dialogue font not changing under some latin languages.
 - Add a 'x' suffix to the integer value of 'pixel zoom' option, for better understanding.
