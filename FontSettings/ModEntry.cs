@@ -155,6 +155,9 @@ namespace FontSettings
 
                 new SpriteTextLatinPatcher(this._config, this.ModManifest, helper)
                     .Patch(Harmony, this.Monitor);
+
+                new OptionsPatcher(this._config, this._mainFontPatcher, spriteTextPatcher.SetOverridePixelZoom)
+                    .Patch(Harmony, this.Monitor);
             }
 
             helper.Events.Content.AssetRequested += this.OnAssetRequestedEarly;
