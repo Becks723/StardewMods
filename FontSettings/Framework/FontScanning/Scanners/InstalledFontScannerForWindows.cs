@@ -19,7 +19,7 @@ namespace FontSettings.Framework.FontScanning.Scanners
                 .ToArray();
         }
 
-        public InstalledFontScannerForWindows(ScanSettings settings)
+        public InstalledFontScannerForWindows(ScanSettings? settings)
             : base(settings)
         {
         }

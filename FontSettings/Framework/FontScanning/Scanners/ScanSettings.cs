@@ -12,13 +12,16 @@ namespace FontSettings.Framework.FontScanning.Scanners
 
         public ISet<string> Extensions { get; } = new HashSet<string>(new[] { ".ttf", ".ttc", ".otf" });
 
-        public IEnumerable<string> IgnoredFiles { get; } = GetIgnoredFiles();
+        public ISet<string> IgnoredFiles { get; } = GetIgnoredFiles();
 
         public bool LogDetails { get; set; } = true;
 
-        private static IEnumerable<string> GetIgnoredFiles()
+        private static ISet<string> GetIgnoredFiles()
         {
-            yield return "mstmc.ttf";
+            return new HashSet<string>
+            {
+                "mstmc.ttf"
+            };
         }
     }
 }

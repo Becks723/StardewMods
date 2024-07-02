@@ -9,19 +9,19 @@ namespace FontSettings.Framework.FontScanning.Scanners
 {
     internal abstract class InstalledFontScannerBase : IFontFileScanner
     {
-        private readonly ScanSettings _settings;
+        public ScanSettings? ScanSettings { get; set; }
 
         protected abstract string[] FontInstallationDirectories { get; }
 
-        protected InstalledFontScannerBase(ScanSettings settings)
+        protected InstalledFontScannerBase(ScanSettings? settings)
         {
-            this._settings = settings;
+            this.ScanSettings = settings;
         }
 
         public virtual IEnumerable<string> ScanForFontFiles()
         {
             return this.SafeGetInstallationDirectories()
-                .Select(dir => new BasicFontFileScanner(dir, this._settings))
+                .Select(dir => new BasicFontFileScanner(dir, this.ScanSettings))
                 .SelectMany(scanner => scanner.ScanForFontFiles());
         }
 

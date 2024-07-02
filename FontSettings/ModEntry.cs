@@ -49,8 +49,9 @@ namespace FontSettings
         private ContentPackRepository _contentPackRepository;
 
         private MainFontConfigManager _fontConfigManager;
-        private IFontFileProvider _fontFileProvider;
+        private FontFileProvider _fontFileProvider;
         private readonly IDictionary<IContentPack, IFontFileProvider> _cpFontFileProviders = new Dictionary<IContentPack, IFontFileProvider>();
+        private SearchManager _searchManager;
 
         private readonly ISet<LanguageInfo> _languagesWhoseDataIsLoaded = new HashSet<LanguageInfo>();
 
@@ -109,8 +110,9 @@ namespace FontSettings
             }
 
             // init service objects.
-            this._fontFileProvider = new FontFileProvider(this.YieldFontScanners());
+            this._fontFileProvider = new FontFileProvider();
             this.ReloadCpFontFileProviders();
+            this._searchManager = new SearchManager(this._fontFileProvider.Scanners, helper.DirectoryPath, new SearchSettingsRepository(helper));
 
             // init repositories.
             this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor);
@@ -230,6 +232,9 @@ namespace FontSettings
 
             // load data for english.
             this.LoadDataForLanguage(FontHelpers.LanguageEn);
+
+            // apply search settings.
+            this._searchManager.ApplySearchSettings();
         }
 
         private void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)
@@ -526,6 +531,7 @@ namespace FontSettings
                             fontInfoRetriever: new FontInfoRetriever(),
                             asyncFontInfoRetriever: new FontInfoRetriever(),
                             exporter: this._exporter,
+                            searchManager: this._searchManager,
                             stagedValues: this._menuContextModel,
                             i18nKeepOrigFont: I18n.Ui_MainMenu_Font_KeepOrig,
                             i18nValidationFontFileNotFound: I18n.Ui_MainMenu_Validation_Font_FileNotFound,
@@ -544,13 +550,14 @@ namespace FontSettings
                             cpFontFileProviders: this._cpFontFileProviders,
                             fontInfoRetriever: new FontInfoRetriever(),
                             exporter: this._exporter,
+                            searchManager: this._searchManager,
                             stagedValues: this._menuContextModel,
                             i18nKeepOrigFont: I18n.Ui_MainMenu_Font_KeepOrig,
                             i18nValidationFontFileNotFound: I18n.Ui_MainMenu_Validation_Font_FileNotFound,
                             i18nFailedToReadFontFile: I18n.Ui_MainMenu_FailedToRecognizeFontFile);
                 }
 
-                return new FontSettingsMenu(this._fontConfigManager, this.Helper.ModRegistry, this._config.EnableLatinDialogueFont, viewModel);
+                return new FontSettingsMenu(this._fontConfigManager, this.Helper.ModRegistry, this._config.EnableLatinDialogueFont, this._searchManager, viewModel);
             }
             finally
             {

@@ -25,7 +25,7 @@ namespace FontSettings.Framework.FontScanning.Scanners
             }
         }
 
-        public InstalledFontScannerForMacOS(ScanSettings settings)
+        public InstalledFontScannerForMacOS(ScanSettings? settings)
             : base(settings)
         {
         }

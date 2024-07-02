@@ -44,6 +44,9 @@
 				目前只识别与主dll同一目录的依赖（见AssemblyLoader::GetReferencedLocalAssemblies），可能需要写一份PR。
 	- 添加加粗设置。
 	- 添加一个随机骰子
+	- 日志级别
+	- 字符集用户可自行添加/减少，需UI。
+	- 字体文件管理，需UI。
 
 Custom Dialogue font under latin language:
 Solution:

@@ -9,30 +9,36 @@ namespace FontSettings.Framework.FontScanning.Scanners
 {
     internal class BasicFontFileScanner : IFontFileScanner
     {
-        private readonly string _baseDirectory;
-        private readonly ScanSettings _scanSettings;
+        public string BaseDirectory { get; set; }
 
-        public BasicFontFileScanner(string baseDirectory, ScanSettings scanSettings)
+        public ScanSettings? ScanSettings { get; set; }
+
+        public BasicFontFileScanner(string baseDirectory, ScanSettings? scanSettings)
         {
-            this._baseDirectory = baseDirectory;
-            this._scanSettings = scanSettings;
+            this.BaseDirectory = baseDirectory;
+            this.ScanSettings = scanSettings;
         }
 
         public IEnumerable<string> ScanForFontFiles()
         {
-            bool log = this._scanSettings.LogDetails;
-            bool recursiveScan = this._scanSettings.RecursiveScan;
-            string[] extensions = this._scanSettings.Extensions.ToArray();
-            var ignoredFiles = this._scanSettings.IgnoredFiles;
+            var settings = this.ScanSettings ?? new ScanSettings();
 
-            if (log)
+            bool log = settings.LogDetails;
+            bool recursiveScan = settings.RecursiveScan;
+            string[] extensions = settings.Extensions.ToArray();
+            var ignoredFiles = settings.IgnoredFiles;
+
+            this.DebugIfLog($"Scanning fonts in '{this.BaseDirectory}'...", log);
+            this.Trace($"Scan settings: {this.GetScanSettingsForLog(settings)}");
+
+            if (!Directory.Exists(this.BaseDirectory))
             {
-                ILog.Debug($"Scanning fonts in {this._baseDirectory}...");
-                ILog.Trace($"Scan settings: {this.GetScanSettingsForLog(this._scanSettings)}");
+                this.DebugIfLog($"Could not find path '{this.BaseDirectory}'! Skipping...", log);
+                yield break;
             }
 
             var allFiles = Directory.EnumerateFiles(
-                path: this._baseDirectory,
+                path: this.BaseDirectory,
                 searchPattern: "*.*",
                 searchOption: recursiveScan ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
@@ -41,24 +47,40 @@ namespace FontSettings.Framework.FontScanning.Scanners
                 // wrong extension
                 if (!extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (log)
-                        ILog.Trace($"Skipped {file} (unknown format)");
+                    this.DebugIfLog($"Skipped '{file}' (unknown format)", log);
                     continue;
                 }
 
                 // ignored file
                 if (ignoredFiles.Any(ignore => file.EndsWith(ignore)))  // TODO: 大小写
                 {
-                    if (log)
-                        ILog.Trace($"Skipped {file} (ignored)");
+                    this.DebugIfLog($"Skipped '{file}' (ignored)", log);
                     continue;
                 }
 
                 // ok
-                if (log)
-                    ILog.Debug($"Loaded {file}");
+                this.DebugIfLog($"Loaded '{file}'", log);
                 yield return file;
             }
+        }
+
+        private void DebugIfLog(string message, bool log)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            if (log)
+                ILog.Debug(message);
+            else
+                ILog.Trace(message);
+        }
+
+        private void Trace(string message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            ILog.Trace(message);
         }
 
         private string GetScanSettingsForLog(ScanSettings scanSettings)

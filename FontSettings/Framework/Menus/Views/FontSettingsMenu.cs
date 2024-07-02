@@ -26,29 +26,25 @@ namespace FontSettings.Framework.Menus.Views
         private readonly IFontPresetManager _presetManager;
         private readonly IModRegistry _registry;
         private readonly bool _enableLatinDialogueFont;
+        private readonly SearchManager _searchManager;
         private readonly FontSettingsMenuModel _viewModel;
 
-        private readonly Texture2D _save;
-        private readonly Texture2D _delete;
-        private readonly Texture2D _sectionBox;
-        private readonly Texture2D _previewNormal;
-        private readonly Texture2D _previewCompare;
-        private readonly Texture2D _refresh;
+        private readonly Texture2D _save = Textures.Save;
+        private readonly Texture2D _delete = Textures.Delete;
+        private readonly Texture2D _sectionBox = Textures.SectionBox;
+        private readonly Texture2D _previewNormal = Textures.FontPreviewNormal;
+        private readonly Texture2D _previewCompare = Textures.FontPreviewCompare;
+        private readonly Texture2D _refresh = Textures.Refresh;
+        private readonly Texture2D _spanner = Textures.Spanner;
 
         private IClickableMenu _currentSubMenu;
 
-        public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, bool enableLatinDialogueFont, FontSettingsMenuModel viewModel)
+        public FontSettingsMenu(IFontPresetManager presetManager, IModRegistry registry, bool enableLatinDialogueFont, SearchManager searchManager, FontSettingsMenuModel viewModel)
         {
             this._presetManager = presetManager;
             this._registry = registry;
             this._enableLatinDialogueFont = enableLatinDialogueFont;
-
-            this._save = Textures.Save;
-            this._delete = Textures.Delete;
-            this._sectionBox = Textures.SectionBox;
-            this._previewNormal = Textures.FontPreviewNormal;
-            this._previewCompare = Textures.FontPreviewCompare;
-            this._refresh = Textures.Refresh;
+            this._searchManager = searchManager;
 
             this.ResetComponents();
 
@@ -349,12 +345,22 @@ namespace FontSettings.Framework.Menus.Views
                                             var refreshButton = new TextureButton(this._refresh, null, 2.5f);
                                             refreshButton.ClickSound = "trashcan";
                                             refreshButton.Margin = new Thickness(optionSpacing, 0, 0, 0);
+                                            refreshButton.VerticalAlignment = VerticalAlignment.Center;
                                             refreshButton.ToolTip = I18n.Ui_MainMenu_RefreshFonts();
                                             context.OneWayBinds(() => this._viewModel.RefreshFontsCommand, () => refreshButton.Command);
                                             context.OneWayBinds(() => this._viewModel.IsRefreshingFonts, () => refreshButton.GreyedOut);
 
+                                            var manageButton = new TextureButton(this._spanner, null, 4f);
+                                            manageButton.Margin = new Thickness(optionSpacing, 0, 0, 0);
+                                            manageButton.VerticalAlignment = VerticalAlignment.Center;
+                                            manageButton.ClickSound = "bigDeSelect";
+                                            manageButton.ToolTip = I18n.Ui_MainMenu_ManageFonts();
+                                            manageButton.CommandParameter = (Func<IOverlayMenu>)this.CreateFontManageMenu;
+                                            context.OneWayBinds(() => this._viewModel.ManageFontsCommand, () => manageButton.Command);
+
                                             fontOption.Children.Add(fontComboBox);
                                             fontOption.Children.Add(refreshButton);
+                                            fontOption.Children.Add(manageButton);
                                         }
 
                                         var fontSizeOption = new StackContainer();
@@ -878,6 +884,19 @@ namespace FontSettings.Framework.Menus.Views
                 disposable.Dispose();
 
             this._currentSubMenu = newSubMenu;
+        }
+
+        private FontManageMenu CreateFontManageMenu()
+        {
+            void OnMenuOpened(FontManageMenu menu) => this.ChangeSubMenu(menu);
+            void OnMenuClosed(FontManageMenu menu) => this.ChangeSubMenu(null);
+
+            var result = new FontManageMenu(
+                this._searchManager,
+                OnMenuOpened,
+                OnMenuClosed);
+
+            return result;
         }
 
         private NewPresetMenu CreateNewPresetMenu()

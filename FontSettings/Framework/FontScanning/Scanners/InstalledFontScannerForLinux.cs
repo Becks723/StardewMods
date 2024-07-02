@@ -22,7 +22,7 @@ namespace FontSettings.Framework.FontScanning.Scanners
             }
         }
 
-        public InstalledFontScannerForLinux(ScanSettings settings)
+        public InstalledFontScannerForLinux(ScanSettings? settings)
             : base(settings)
         {
         }

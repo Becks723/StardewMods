@@ -36,6 +36,7 @@ namespace FontSettings.Framework.Menus.ViewModels
         protected readonly IDictionary<IContentPack, IFontFileProvider> _cpFontFileProviders;
         protected readonly IFontInfoRetriever _fontInfoRetriever;
         protected readonly IFontExporter _exporter;
+        protected readonly SearchManager _searchManager;
         protected readonly IFontPresetManager _presetManager;
         protected readonly Func<string> _i18nKeepOrig;
         protected readonly Func<string, string> _i18nValidationFontFileNotFound;
@@ -621,10 +622,12 @@ namespace FontSettings.Framework.Menus.ViewModels
 
         public ICommand RefreshFontsCommand { get; protected init; }
 
+        public ICommand ManageFontsCommand { get; }
+
         public ICommand ResetFontCommand { get; }
 
         public FontSettingsMenuModel(ModConfig config, IMonitor monitor, IVanillaFontProvider vanillaFontProvider, ISampleFontGenerator sampleFontGenerator, IFontPresetManager presetManager,
-            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, FontSettingsMenuContextModel stagedValues,
+            IFontConfigManager fontConfigManager, IVanillaFontConfigProvider vanillaFontConfigProvider, IAsyncGameFontChanger gameFontChanger, IFontFileProvider fontFileProvider, IDictionary<IContentPack, IFontFileProvider> cpFontFileProviders, IFontInfoRetriever fontInfoRetriever, IFontExporter exporter, SearchManager searchManager, FontSettingsMenuContextModel stagedValues,
             Func<string> i18nKeepOrigFont,
             Func<string, string> i18nValidationFontFileNotFound,
             Func<string, string> i18nFailedToReadFontFile)
@@ -644,6 +647,7 @@ namespace FontSettings.Framework.Menus.ViewModels
             this._cpFontFileProviders = cpFontFileProviders;
             this._fontInfoRetriever = fontInfoRetriever;
             this._exporter = exporter;
+            this._searchManager = searchManager;
             this._presetManager = presetManager;
             this._stagedValues = stagedValues;
             this._i18nKeepOrig = i18nKeepOrigFont ?? (() => "Keep Original");
@@ -702,7 +706,11 @@ namespace FontSettings.Framework.Menus.ViewModels
             this.SaveCurrentAsNewPresetCommand = new DelegateCommand<Func<IOverlayMenu>>(this.SaveCurrentAsNewPreset);
             this.DeleteCurrentPresetCommand = new DelegateCommand(this._DeleteCurrentPreset);
             this.RefreshFontsCommand = new DelegateCommand(this.RefreshAllFonts);
+            this.ManageFontsCommand = new DelegateCommand<Func<IOverlayMenu>>(this.ManageFonts);
             this.ResetFontCommand = new DelegateCommand(this.ResetCurrentFont);
+
+            // 读取并应用搜索设置。
+            this._searchManager.ApplySearchSettings();
 
             this.KeepOriginalFont = this.FontKeepOriginal();
             this.InitAllFonts();
@@ -798,6 +806,25 @@ namespace FontSettings.Framework.Menus.ViewModels
 
             // 更新示例。
             this.UpdateExampleCurrent();
+        }
+
+        private void ManageFonts(Func<IOverlayMenu> createOverlay)
+        {
+            if (createOverlay == null) return;
+
+            var overlay = createOverlay();
+            if (overlay != null)
+            {
+                overlay.Open();
+                overlay.Closed += (s, e) =>
+                {
+                    ManageSettings settings = e.Parameter as ManageSettings;
+                    if (settings == null)
+                        return;
+
+                    this._searchManager.ApplySearchSettings(settings.Search);
+                };
+            }
         }
 
         private void ResetCurrentFont()

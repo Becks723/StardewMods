@@ -29,6 +29,7 @@ namespace FontSettings.Framework
         public static Texture2D SectionBox => LoadTextureAsAsset("section-box");
         public static Texture2D TitleFontButton => LoadTextureAsAsset("font-button");
         public static Texture2D Export => LoadTextureAsAsset("export");
+        public static Texture2D Spanner => LoadTextureAsAsset("spanner");
 
         private const string _fontMenuIconKey = "icon-for-toolbar-icons";
         public static string FontMenuIconKey
