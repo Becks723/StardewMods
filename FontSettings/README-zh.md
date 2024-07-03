@@ -93,7 +93,7 @@
 
 设置目标文件夹，用于搜索字体文件。完成后点刷新字体列表。
 
-<img src="./docs/manager-fonts-search.gif" width="50%"/>
+<img src="./docs/manage-fonts-search.gif" width="50%"/>
 
 ## 配置
 

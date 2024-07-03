@@ -95,10 +95,12 @@ In game there're mainly three font types: **Small**, **Medium**, **Dialogue** fo
 
 ### Manage Fonts
 Manage fonts by clicking the spanner next to font list UI.
+
 <img src="./docs/manager-fonts-spanner.png" width="50%"/>
 
 Users can add/remove folders containing font files for searching. Then refresh font list.
-<img src="./docs/manager-fonts-search.gif" width="50%"/>
+
+<img src="./docs/manage-fonts-search.gif" width="50%"/>
 
 ## Configuration
 
