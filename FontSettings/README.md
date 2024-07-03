@@ -15,6 +15,7 @@ This mod:
 - [Installation](#installation)
 - [Usage](#usage)
   - [Font Types in Game](#font-types-in-game)
+  - [Manage Fonts](#manage-fonts)
 - [Configuration](#configuration)
 - [Compatibility](#compatibility)
   - [Conflict with SpriteMaster](#conflict-with-spritemaster-mod)
@@ -92,6 +93,12 @@ In game there're mainly three font types: **Small**, **Medium**, **Dialogue** fo
 #### Some Notes
 * All the fonts available are from your computer. Current supported types are TrueType (.ttf, .ttc), OpenType (.otf, .otc, .ttf, .ttc).
 
+### Manage Fonts
+Manage fonts by clicking the spanner next to font list UI.
+<img src="./docs/manager-fonts-spanner.png" width="50%"/>
+
+Users can add/remove folders containing font files for searching. Then refresh font list.
+<img src="./docs/manager-fonts-search.gif" width="50%"/>
 
 ## Configuration
 
@@ -176,6 +183,10 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.15.0 - 2024-07-02
+- Add a [manage font](#manage-fonts) section.
+- Optimize dialogue font patching. 
+
 #### 0.14.2 - 2024-05-18
 - Update Portuguese translation. (Thanks to [Si0nk0b](https://www.nexusmods.com/users/142546813))
 - Fix incorrect dialogue pixel zoom after toggling smooth font in Chinese.
