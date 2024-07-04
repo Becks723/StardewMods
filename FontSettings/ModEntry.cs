@@ -113,6 +113,7 @@ namespace FontSettings
             this._fontFileProvider = new FontFileProvider();
             this.ReloadCpFontFileProviders();
             this._searchManager = new SearchManager(this._fontFileProvider.Scanners, helper.DirectoryPath, new SearchSettingsRepository(helper));
+            this._searchManager.ApplySearchSettings();
 
             // init repositories.
             this._vanillaFontDataRepository = new VanillaFontDataRepository(helper, this.Monitor);
@@ -232,9 +233,6 @@ namespace FontSettings
 
             // load data for english.
             this.LoadDataForLanguage(FontHelpers.LanguageEn);
-
-            // apply search settings.
-            this._searchManager.ApplySearchSettings();
         }
 
         private void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)

@@ -166,7 +166,7 @@ namespace FontSettings.Framework
 
             // if first time, need initialize.
             if (search.Folders.Count == 0)
-            {                
+            {
                 // mod folder.
                 search.Folders.Add(new SearchFolderSettings { Path = Path.Combine(this._modDirectory, Locations.ModFolder) });
 
@@ -195,6 +195,13 @@ namespace FontSettings.Framework
 
                 // then save.
                 this.SaveSearchSettings(search);
+            }
+
+            // if not first time, remove extra RESERVED slots.
+            else
+            {
+                for (int i = 10 - 1; i >= this.GetReservedCount(); i--)
+                    search.Folders.RemoveAt(i);
             }
 
             this.ApplySearchSettings(search);
