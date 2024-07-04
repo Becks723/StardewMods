@@ -185,6 +185,9 @@ And, **to use other mods' fonts**, you have these solutions:
 
 
 ## Release Notes
+#### 0.15.1 - 2024-07-03
+- Bugfixes.
+
 #### 0.15.0 - 2024-07-02
 - Add a [manage font](#manage-fonts) section.
 - Optimize dialogue font patching. 
